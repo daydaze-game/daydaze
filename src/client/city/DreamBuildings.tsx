@@ -3,25 +3,24 @@
 // all twenty-four meshes share textured stone, brass, foliage and lit glass.
 import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { InstancedMesh2, patchShader } from "@three.ez/instanced-mesh";
+import { patchShader } from "@three.ez/instanced-mesh";
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
-import {
-  DREAM_KINDS,
-  type DreamKind,
-  type DreamSpot,
-} from "../../game/city/dream.ts";
+import { DREAM_KINDS, type DreamSpot } from "../../game/city/dream.ts";
 import { createStore } from "../rooms/shared/store.ts";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
 import { useDaylight } from "./daylight.ts";
 import { boxMapped, groundMaps } from "./worldTexture.ts";
+import {
+  createDreamMesh,
+  placeDreamMeshes,
+  type FamilyMesh,
+} from "./dreamMeshes.ts";
 
 const URL = "/models/city-dream/architecture.glb";
 
 /** Updated with the city plan, after movement or a camera-detail change. */
 export const cityDream = createStore({ spots: [] as readonly DreamSpot[] });
-
-type FamilyMesh = { kind: DreamKind; far: boolean; mesh: InstancedMesh2 };
 
 /** Surface flags survive meshopt quantization; UV.y is unused. */
 function architectureMaterial(night: { value: number }) {
@@ -108,31 +107,6 @@ function prepared(node: THREE.Mesh) {
   return geometry;
 }
 
-const up = new THREE.Vector3(0, 1, 0);
-const tint = new THREE.Color();
-
-function place(meshes: readonly FamilyMesh[], spots: readonly DreamSpot[]) {
-  const groups = new Map<string, DreamSpot[]>();
-  for (const spot of spots) {
-    const key = `${spot.kind}|${spot.far}`;
-    const list = groups.get(key) ?? [];
-    list.push(spot);
-    groups.set(key, list);
-  }
-  for (const { kind, far, mesh } of meshes) {
-    const list = groups.get(`${kind}|${far}`) ?? [];
-    mesh.clearInstances();
-    mesh.addInstances(list.length, (object, i) => {
-      const spot = list[i];
-      if (!spot) return;
-      object.position.set(spot.x, spot.y, spot.z);
-      object.quaternion.setFromAxisAngle(up, spot.yaw);
-      object.scale.set(spot.sx, spot.sy, spot.sz);
-      object.color = tint.set(spot.color);
-    });
-  }
-}
-
 export function DreamBuildings() {
   const gltf = useGLTF(URL);
   const { spots } = cityDream.use();
@@ -151,9 +125,7 @@ export function DreamBuildings() {
         const node = gltf.scene.getObjectByName(name);
         if (!(node instanceof THREE.Mesh))
           throw new Error(`architecture.glb has no ${name}`);
-        const mesh = new InstancedMesh2(prepared(node), material, {
-          capacity: 64,
-        });
+        const mesh = createDreamMesh(prepared(node), material);
         mesh.name = `dream-${name}`;
         // The library grows buffers as needed and culls each building.
         return { kind, far, mesh };
@@ -180,7 +152,7 @@ export function DreamBuildings() {
   }, [day.neon, night, invalidate]);
 
   useEffect(() => {
-    place(meshes, spots);
+    placeDreamMeshes(meshes, spots);
     if (meshes.length > 0 && spots.length > 0) {
       canvas.dataset.architecture = "ready";
       const near = spots.filter((spot) => !spot.far);

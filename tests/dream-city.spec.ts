@@ -24,14 +24,16 @@ test("dream city: architecture loads across distinct streets and keeps venue doo
   });
   const canvas = page.getByRole("img", { name: "3D room view" });
   const views = [
-    { at: "8,12", time: "12:00" },
-    { at: "-300,-8", time: "12:00" },
-    { at: "280,9", time: "22:00" },
-    { at: "-12,263", time: "16:00" },
+    { at: "8,12", time: "12:00", cam: "0,24,63,0,4,20" },
+    { at: "-300,-8", time: "12:00", cam: "-309,8,-7,-275,10,-25" },
+    { at: "280,9", time: "22:00", cam: "263,9,5,306,13,-22" },
+    { at: "-12,263", time: "16:00", cam: "-45,9,262,20,11,240" },
   ];
   const signatures = new Set<string>();
-  for (const { at, time } of views) {
-    await page.goto(`/?room=city&quality=low&still=1&at=${at}&time=${time}`);
+  for (const { at, time, cam } of views) {
+    await page.goto(
+      `/?room=city&view=room&quality=low&still=1&at=${at}&time=${time}&cam=${cam}`,
+    );
     await expect(canvas).toHaveAttribute("data-architecture", "ready");
     await expect
       .poll(async () => Number(await canvas.getAttribute("data-frames")))
