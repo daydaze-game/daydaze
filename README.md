@@ -1,5 +1,9 @@
 # Daydaze
 
+[![ci](https://github.com/dpologdvinity/daydaze/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dpologdvinity/daydaze/actions/workflows/ci.yml)
+![Node 22.18+](https://img.shields.io/badge/node-%3E%3D22.18-339933?logo=node.js&logoColor=white)
+![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
+
 A multiplayer social hangout game for people who grew up on Club Penguin and
 Fantage. Dress up a doll avatar, hang out in neon lounges and clubs, drive the
 city, and play minigames with friends.
