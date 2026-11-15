@@ -41,6 +41,8 @@ import {
 import { CITY_FLEET, shipModel } from "../ships.ts";
 import { BAY_TRIANGLES, HOUSE_MODELS, type BayInstance } from "./nyc.ts";
 import { LOT_SPECS, type PlacedLot } from "./districts.ts";
+import type { DreamSpot } from "./dream.ts";
+import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
 import { ALL_GROWTH } from "./growth.ts";
 import {
   GROUND_RANGE,
@@ -545,6 +547,22 @@ export function worstViewLotTriangles(
   );
 }
 
+/** Dream meshes use the same per-instance frustum culling as the old bays.
+ * Count the most expensive view of their actual near/far geometry. */
+export function worstViewDreamTriangles(
+  dream: readonly DreamSpot[],
+  at: Vec2,
+): number {
+  return worstView(
+    dream.map((s) => ({
+      x: s.x,
+      z: s.z,
+      cost: DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
+    })),
+    at,
+  );
+}
+
 /** The most triangles of per-instance-culled `items` in any wedge of view. */
 function worstView(
   items: readonly { x: number; z: number; cost: number }[],
@@ -593,8 +611,8 @@ export function planView(
   );
 }
 
-/** The low tier's draw calls and triangles at `at`, plus what the plan
- * alone costs and how many bays it wears. */
+/** The low tier's draw calls and triangles at `at`, plus the unculled plan
+ * cost and legacy detail counts (now empty under dream architecture). */
 export function lowTierCost(
   at: Vec2,
   /** `false` prices the overview, where the plan drops the bays. */
@@ -605,7 +623,7 @@ export function lowTierCost(
   planTriangles: number;
   bays: number;
   lots: number;
-  /** Triangles by part (plan boxes, bays, lots, models by folder, ships,
+  /** Triangles by part (plan, dream architecture, bays, lots, models by folder, ships,
    * queues, live, seasons, traffic, kerb cars, the El), to see what to trim. */
   parts: Record<string, number>;
 } {
@@ -673,19 +691,31 @@ export function lowTierCost(
     (n, l) => n + (l.far ? LOT_SPECS[l.model].lo : LOT_SPECS[l.model].tris),
     0,
   );
+  const allDream = plan.dream.reduce(
+    (n, s) => n + DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
+    0,
+  );
+  // The overview camera can see architecture on every side of the player.
+  // Price all of it there, rather than a street camera's directional wedge.
+  const visibleDream = bays
+    ? worstViewDreamTriangles(plan.dream, at)
+    : allDream;
   const planTriangles = trianglesOf(plan);
-  // the bays are culled per instance: count only the worst view of them
+  // Architecture is culled per instance: count only its most expensive view.
   let triangles =
     planTriangles -
     allBays -
-    allLots +
+    allLots -
+    allDream +
+    visibleDream +
     worstViewBayTriangles(plan.bays, at) +
     worstViewLotTriangles(plan.lots, at) +
     EL_TRIANGLES +
     FAR_ROAD_TOTAL +
     WEAR_TOTAL;
   const parts: Record<string, number> = {
-    plan: planTriangles - allBays - allLots,
+    plan: planTriangles - allBays - allLots - allDream,
+    dream: visibleDream,
     bays: worstViewBayTriangles(plan.bays, at),
     lots: worstViewLotTriangles(plan.lots, at),
     el: EL_TRIANGLES,

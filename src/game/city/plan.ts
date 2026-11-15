@@ -2,20 +2,12 @@
 // InstancedMesh, so a plan is a handful of draw calls however many cells
 // are loaded. Pure: the client writes these instances into its meshes.
 import type { Vec2 } from "../walk.ts";
-import { motelBuilding } from "./motel.ts";
-import { roofLook } from "./roofs.ts";
 import { YARD_GROUND, YARD_TREES } from "./yards.ts";
-import {
-  FAR_BOX_TRIANGLES,
-  farWorthDrawing,
-  farBoxOf,
-  type FarBox,
-} from "./far.ts";
+import { FAR_BOX_TRIANGLES, type FarBox } from "./far.ts";
 import { VIEW_RADIUS } from "./tuning.ts";
 import { cellAt, type Cell } from "./cells.ts";
 import {
   BUILDINGS,
-  isInfill,
   CITY_SURFACES,
   PROPS,
   type Building,
@@ -24,34 +16,15 @@ import {
   type Surface,
 } from "./layout.ts";
 import {
-  isNyc,
-  nycBays,
   BAY_TRIANGLES,
   HOUSE_MODEL_TRIANGLES,
-  houseAt,
-  isHouse,
   type HouseSpot,
-  WALL_INSET,
   type BayInstance,
-  isMotel,
 } from "./nyc.ts";
-import {
-  dressBuilding,
-  facingOf,
-  frontOf,
-  lotSign,
-  signSpec,
-  FURNITURE,
-  STREET_DRESS,
-} from "./dressing.ts";
-import {
-  LOT_NEAR,
-  LOT_SPECS,
-  LOT_WALL_INSET,
-  isLotBlock,
-  lotRow,
-  type PlacedLot,
-} from "./districts.ts";
+import { facingOf, labelUv, FURNITURE, STREET_DRESS } from "./dressing.ts";
+import { LOT_SPECS, type PlacedLot } from "./districts.ts";
+import { dreamBuilding, type DreamSpot } from "./dream.ts";
+import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
 import { LAMP_RANGE, type FurnitureSpot } from "./furniture.ts";
 import {
   STREET_DRAW_CALLS,
@@ -154,23 +127,23 @@ export function isGardenAt(x: number, z: number): boolean {
 }
 
 export type CityPlan = {
+  /** All active architecture, including its distant sculpted silhouettes. */
+  dream: DreamSpot[];
   instances: Record<Kind, Instance[]>;
   /** The neon signs nearest the player, for the real point lights. */
   lights: Light[];
   trees: TreeSpot[];
   /** Street furniture models (lamps, hydrants, benches, ...), drawn by CityFurniture. */
   furniture: FurnitureSpot[];
-  /** New York bays for the buildings within `bayRange` of the player. */
+  /** Legacy bays; empty while dream architecture supplies the facades. */
   bays: BayInstance[];
-  /** District lots (Little Manila, Chinatown, Koreatown, Arts District,
-   * Uptown) for the blocks within `bayRange` of the player. */
+  /** Legacy district lots; retained for callers, empty in active plans. */
   lots: PlacedLot[];
-  /** Suburbia houses within reach of the player, drawn as models. */
+  /** Legacy house models; replaced by dream modules in active plans. */
   houses: HouseSpot[];
   /** Crosswalks, corner blocks, center lines and street props (StreetPieces.tsx). */
   street: StreetPiece[];
-  /** The buildings this plan does not draw (past the loaded cells, or infill
-   * past its range), as plain boxes: the far city (far.ts, FarCity.tsx). */
+  /** Legacy skyline boxes; dream's distant twins replace these. */
   far: FarBox[];
 };
 
@@ -238,22 +211,6 @@ const FACADE: Record<BuildingStyle, FacadeKind> = {
 
 export const facadeOf = (style: BuildingStyle): FacadeKind => FACADE[style];
 
-// Tints over each wall's photo: light enough that brick, plaster and steel
-// keep their own color and grain, with the city's violet night in them.
-const BODY_COLOR: Record<BuildingStyle, string> = {
-  tower: "#9aa2dc",
-  glass: "#a8bcf4",
-  billboard: "#a894d0",
-  storefront: "#e8c0bc",
-  deck: "#aeaccc",
-  brick: "#f4d0c6",
-  club: "#cc9ee6",
-  warehouse: "#b0acc0",
-  velvet: "#e088b8",
-  gate: "#a290d8",
-};
-
-const BAND_COLOR = "#6a5cff";
 /** Stone trim: floor-line cornices and rooflines on non-nightlife buildings. */
 export const CORNICE_COLOR = "#d8cfbf";
 
@@ -293,17 +250,6 @@ function boundsOf(poly: readonly Vec2[]): Box {
     z1: Math.max(...zs),
   };
 }
-
-/** District lots (a few hundred triangles a meter of wall more than a bay)
- * dress blocks within this share of the bay range; farther lot blocks stay
- * boxes with painted windows. */
-const LOT_RANGE = 0.85;
-/** Back walls wear bays within this fraction of the bay range. */
-const BACK_RANGE = 0.6;
-/** Fire escapes, the dearest bay, show within this share of the bay range. */
-const ESCAPE_RANGE = 0.6;
-/** Window sills show on blocks within this multiple of the bay range. */
-const SILL_RANGE = 1.2;
 
 /** How far a point is from a box (0 inside it). */
 function distanceToBox(p: Vec2, b: Box): number {
@@ -545,183 +491,45 @@ function streetMarks(
     pieces(lip, cells, out.ledge, { y: 0.11, sy: 0.22, color: CURB_COLOR });
 }
 
-/** Every instance a building contributes; its light, when it has a sign.
- * A building facing east or west is dressed as if it faced +z, then turned
- * into place about its center. */
-function buildingInstancesFresh(
+/** Entry-scale venue name, positioned at the existing door rather than on
+ * the roof. Sculpted bodies and roofs come entirely from dream models. */
+function dreamSign(
   b: Building,
   out: Record<Kind, Instance[]>,
   lights: Light[],
-  kit: boolean,
-  sills = true,
-  lots = false,
 ): void {
-  const { yaw, front } = facingOf(b);
-  if (yaw === 0) {
-    buildingInstancesFacing(b, out, lights, kit, sills, lots);
-    return;
-  }
-  const local = emptyInstances();
-  const localLights: Light[] = [];
-  buildingInstancesFacing(b, local, localLights, kit, sills, lots);
-  const cos = Math.cos(yaw);
-  const sin = Math.sin(yaw);
-  // three.js turns (x, z) about y as (x cos + z sin, -x sin + z cos)
-  const turn = (x: number, z: number): [number, number] => {
-    const dx = x - front.cx;
-    const dz = z - front.cz;
-    return [front.cx + dx * cos + dz * sin, front.cz - dx * sin + dz * cos];
+  if (!b.sign) return;
+  const { front: f, yaw: facingYaw } = facingOf(b);
+  const yaw = facingYaw + (f.out1 < 0 ? Math.PI : 0);
+  const sin = Math.sin(yaw),
+    cos = Math.cos(yaw);
+  const x = b.door?.position[0] ?? f.cx + (sin * (f.z1 - f.z0)) / 2;
+  const z = b.door?.position[1] ?? f.cz + (cos * (f.z1 - f.z0)) / 2;
+  const sx = Math.min(6, f.w * 0.82);
+  const sign = {
+    x: x + sin * 0.12,
+    y: 4.8,
+    z: z + cos * 0.12,
+    sx,
+    sy: 1.25,
+    sz: 0.18,
+    rot: [0, yaw, 0] as const,
   };
-  for (const kind of KINDS)
-    for (const item of local[kind]) {
-      const [x, z] = turn(item.x, item.z);
-      const [rx = 0, ry = 0, rz = 0] = item.rot ?? [];
-      out[kind].push({ ...item, x, z, rot: [rx, ry + yaw, rz] });
-    }
-  for (const light of localLights) {
-    const [x, z] = turn(light.x, light.z);
-    lights.push({ ...light, x, z });
-  }
-}
-
-/** What a building dresses to for one combination of bays, sills and lots
- * (kept: the dressing is static, so a plan reload reuses the very same
- * instance objects and allocates nothing for the buildings it already knew). */
-const dressed = new Map<
-  string,
-  { instances: Record<Kind, Instance[]>; lights: Light[] }
->();
-
-/** `buildingInstancesFresh`, remembered per building and flags. The instances
- * are shared between plans, so nothing may change them afterwards. */
-function buildingInstances(
-  b: Building,
-  out: Record<Kind, Instance[]>,
-  lights: Light[],
-  kit: boolean,
-  sills = true,
-  lots = false,
-): void {
-  const key = `${b.id}|${kit ? 1 : 0}${sills ? 1 : 0}${lots ? 1 : 0}`;
-  let hit = dressed.get(key);
-  if (!hit) {
-    hit = { instances: emptyInstances(), lights: [] };
-    buildingInstancesFresh(b, hit.instances, hit.lights, kit, sills, lots);
-    dressed.set(key, hit);
-  }
-  for (const kind of KINDS) {
-    const list = hit.instances[kind];
-    for (let i = 0; i < list.length; i++) out[kind].push(list[i] as Instance);
-  }
-  for (const light of hit.lights) lights.push(light);
-}
-
-/** A building's instances in its facing's frame (see facingOf). */
-function buildingInstancesFacing(
-  b: Building,
-  out: Record<Kind, Instance[]>,
-  lights: Light[],
-  kit: boolean,
-  sills: boolean,
-  lots: boolean,
-): void {
-  const f = frontOf(b);
-  const signColor = b.sign?.color;
-  // behind the kit's bays the wall steps back, so their trim stands proud
-  const inset = lots ? 2 * LOT_WALL_INSET : kit ? 2 * WALL_INSET : 0;
-
-  out[FACADE[b.style]].push({
-    x: f.cx,
-    y: f.h / 2,
-    z: f.cz,
-    sx: f.w - inset,
-    sy: f.h,
-    sz: f.z1 - f.z0 - inset,
-    color: b.color ?? BODY_COLOR[b.style],
+  out.sign.push({ ...sign, color: "#29364d" });
+  out.label.push({
+    ...sign,
+    x: x + sin * 0.23,
+    z: z + cos * 0.23,
+    sz: 1,
+    color: b.sign.color,
+    uv: labelUv(b.sign.text),
   });
-  // neon tubes up the four corners, on nightlife buildings only
-  const neon = wearsNeon(b.style);
-  const corners: [number, number][] = neon
-    ? [
-        [f.x0, f.z0],
-        [f.x1, f.z0],
-        [f.x1, f.z1],
-        [f.x0, f.z1],
-      ]
-    : [];
-  for (const [x, z] of corners) {
-    out.tube.push({
-      x,
-      y: f.h / 2,
-      z,
-      sx: 0.18,
-      sy: f.h,
-      sz: 0.18,
-      color: signColor ?? BAND_COLOR,
-    });
-  }
-  // lots keep their own parapets and rooftop AC units and pipes: the roof is
-  // a thin skin flush with the parapet top, not a slab that buries them. Each
-  // roof is tar paper, gravel or a membrane in its own color (roofs.ts)
-  const roof = roofLook(f.cx, f.cz);
-  out[roof.kind].push({
-    x: f.cx,
-    y: lots ? f.h - 0.04 : f.h + 0.25,
-    z: f.cz,
-    sx: lots ? f.w : f.w + 0.4,
-    sy: lots ? 0.08 : 0.5,
-    sz: lots ? f.z1 - f.z0 : f.z1 - f.z0 + 0.4,
-    color: roof.color,
+  lights.push({
+    x: x + sin * 1.2,
+    y: 4.8,
+    z: z + cos * 1.2,
+    color: b.sign.color,
   });
-  // neon bands at every floor on nightlife buildings; on everything else a
-  // stone belt course over the storefronts (lit by the sun and the street,
-  // not glowing) and a deeper cornice crowning the roofline, as on a NYC
-  // walk-up
-  for (let y = 3.6; y < f.h - 1 && !kit; y += 3.6) {
-    if (!neon && y > 3.6) break;
-    const band = {
-      x: f.cx,
-      y,
-      z: f.cz,
-      sx: f.w + 0.12,
-      sy: 0.35,
-      sz: f.z1 - f.z0 + 0.12,
-    };
-    if (neon) out.band.push({ ...band, color: BAND_COLOR });
-    else out.ledge.push({ ...band, sy: 0.22, color: CORNICE_COLOR });
-  }
-  if (!neon && !kit)
-    out.ledge.push({
-      x: f.cx,
-      y: f.h - 0.3,
-      z: f.cz,
-      sx: f.w + 0.5,
-      sy: 0.6,
-      sz: f.z1 - f.z0 + 0.5,
-      color: CORNICE_COLOR,
-    });
-  if (!kit)
-    out.glow.push({
-      x: f.cx,
-      y: 1.6,
-      z: f.faceZ + f.out1 * 0.06,
-      sx: f.w * 0.86,
-      sy: 2.6,
-      sz: 0.12,
-      // shopfronts glow warm; signed fronts stay dim so the neon carries the color
-      color: b.style === "storefront" ? "#f2b26b" : "#3a2452",
-    });
-
-  if (b.sign && !lots) {
-    const s = signSpec(b, f);
-    lights.push({
-      x: f.cx,
-      y: s.y,
-      z: f.faceZ + f.out1 * 1.2,
-      color: b.sign.color,
-    });
-  }
-  dressBuilding(b, out, kit, sills, lots);
 }
 
 function propInstances(
@@ -792,8 +600,8 @@ export function planCity(
   lightCount: number,
   from: Vec2,
   bayRange = 0,
-  /** Infill buildings (layout.ts) draw only within this many meters of `from`. */
-  infillRange = Infinity,
+  /** Legacy infill range; dream buildings use their own skyline distance. */
+  _infillRange = Infinity,
   /** The yards' ground (yards.ts) likewise. */
   groundRange = Infinity,
 ): CityPlan {
@@ -828,75 +636,20 @@ export function planCity(
   const lots: PlacedLot[] = [];
   const houses: HouseSpot[] = [];
   const far: FarBox[] = [];
-  // a building the plan leaves out is a far box, unless it is lost in the fog
-  const farBox = (b: Building, box: Box) => {
-    const size = Math.max(box.x1 - box.x0, box.z1 - box.z0, b.height);
-    if (farWorthDrawing(size, distanceToBox(from, box))) far.push(farBoxOf(b));
-  };
+  const dream: DreamSpot[] = [];
   for (const b of BUILDINGS) {
     const box = boundsOf(b.footprint);
-    if (!inView(box)) {
-      farBox(b, box);
-      continue;
-    }
-    // the infill is scenery that fills the blocks: drawn out to its own range
-    if (isInfill(b) && distanceToBox(from, box) > infillRange) {
-      farBox(b, box);
-      continue;
-    }
-    // a near Suburbia lot is a real house; far ones stay boxes
-    if (isHouse(b) && distanceToBox(from, box) < bayRange * 2) {
-      houses.push(houseAt(b));
-      continue;
-    }
-    if (isMotel(b)) {
-      // motels past the view radius (a loaded cell can reach in by a corner)
-      // are left out, and far ones are bare bodies, as far houses are boxes
-      const away = distanceToBox(from, box);
-      if (away <= VIEW_RADIUS) motelBuilding(b, instances, away < bayRange * 2);
-      else farBox(b, box);
-      continue;
-    }
-    // near New York blocks wear the kit's bays instead of box walls and
-    // painted windows; the rest of the city keeps the cheap boxes
-    const d = distanceToBox(from, box);
-    // the five districts wear finished buildings (districts.ts) instead
-    const lotBlock = isLotBlock(b);
-    const lotted = d < bayRange * LOT_RANGE && lotBlock ? lotRow(b) : [];
-    const dressed = !lotBlock && isNyc(b) && d < bayRange ? nycBays(b) : [];
-    const kit = dressed.length > 0 || lotted.length > 0;
-    // window sills (a 10-triangle box under every 2-triangle window, 0.14 m
-    // tall) are a detail of walls within SILL_RANGE bay ranges
-    buildingInstances(
-      b,
-      instances,
-      lights,
-      kit,
-      // (never on infill: scenery has painted windows and no sills)
-      !isInfill(b) && (bayRange === 0 || d < bayRange * SILL_RANGE),
-      lotted.length > 0,
-    );
-    for (const lot of lotted) {
-      if (lot.back && d >= bayRange * BACK_RANGE) continue;
-      lots.push({
-        ...lot,
-        far: Math.hypot(lot.x - from[0], lot.z - from[1]) >= LOT_NEAR,
-      });
-      lotSign(instances, lot);
-    }
-    // back walls dress only the nearest blocks, the street faces farther out
-    // fire escapes (366 triangles a storey) are add-ons to a wall bay, so each
-    // is judged by its own distance: a long block's far end is no nearer than
-    // any other far wall
-    bays.push(
-      ...dressed.filter(
-        (bay) =>
-          (!bay.back || d < bayRange * BACK_RANGE) &&
-          (bay.kind !== "fireEscape" ||
-            Math.hypot(bay.x - from[0], bay.z - from[1]) <
-              bayRange * ESCAPE_RANGE),
-      ),
-    );
+    const away = distanceToBox(from, box);
+    // Small garden cottages fade first; tall landmarks carry the skyline.
+    // Scenery past the streamed ground still uses the same sculpted family.
+    const horizon = Math.min(280, Math.max(120, b.height * 7));
+    if (away > horizon) continue;
+    const detailed = inView(box) && away <= VIEW_RADIUS;
+    // Overview still needs recognizable street facades at the arrival plaza.
+    // Camera zoom no longer strips all architecture to its skyline twin.
+    const detailRange = detailed ? (bayRange > 0 ? bayRange : 50) : 0;
+    dream.push(...dreamBuilding(b, from, detailRange));
+    if (detailed && away < 85) dreamSign(b, instances, lights);
   }
 
   const loaded = new Set(cells.map((c) => c.key));
@@ -932,6 +685,7 @@ export function planCity(
       ((b.x - from[0]) ** 2 + (b.z - from[1]) ** 2),
   );
   return {
+    dream,
     instances,
     lights: lights.slice(0, Math.max(0, lightCount)),
     trees,
@@ -962,7 +716,12 @@ export function trianglesOf(plan: CityPlan): number {
       0,
     ) +
     plan.street.reduce((sum, p) => sum + STREET_TRIANGLES[p.kind], 0) +
-    plan.far.length * FAR_BOX_TRIANGLES
+    plan.far.length * FAR_BOX_TRIANGLES +
+    plan.dream.reduce(
+      (sum, spot) =>
+        sum + DREAM_MODEL_COST[spot.kind][spot.far ? "lo" : "tris"],
+      0,
+    )
   );
 }
 
@@ -974,6 +733,7 @@ export function drawCallsOf(plan: CityPlan): number {
     new Set(plan.bays.map((bay) => bay.kind)).size +
     new Set(plan.lots.map((lot) => `${lot.model}${lot.far}`)).size +
     // the far city's buildings
-    (plan.far.length > 0 ? 1 : 0)
+    (plan.far.length > 0 ? 1 : 0) +
+    new Set(plan.dream.map((spot) => `${spot.kind}${spot.far}`)).size
   );
 }

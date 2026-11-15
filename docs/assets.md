@@ -13,7 +13,8 @@ Record adapted assets too; describe the adaptation in Used for.
 This ledger was seeded from the existing import scripts and shipped assets;
 future imported packs belong here when they enter the game.
 
-The dream city's twelve architectural families are original Daydaze scenery,
+The dream city's twelve architectural families combine original Daydaze scenery
+with adapted CC0 details from the two sources below,
 reproducible with `art/city/build_dream_city.py`. The search through the owner's
 Quaternius packs and free architecture libraries found useful ordinary-city
 modules but no matching celestial conservatories, sculptural theaters or
@@ -27,6 +28,8 @@ mesh; `src/game/city/dreamCosts.generated.ts` records their exported costs.
 
 | Title | Author | License | URL | Used for |
 | --- | --- | --- | --- | --- |
+| Classic Art Nouveau Window | Davide Tirindelli | CC0 1.0 | https://www.blendkit.com/asset-gallery-detail/55abafca-0ae2-431d-83e5-8d1eb71fadb0/ | Curved window framing and decorative ironwork, simplified and fitted to the dream city's conservatory and garden palace (art/city/build_dream_city.py). |
+| Medieval Village MegaKit | Quaternius | CC0 1.0 | https://quaternius.com/packs/medievalvillagemegakit.html | Curved tiled roofs, shutters, timber, balconies and vines adapted into the dream city's storybook, heritage and terrace architecture (art/city/build_dream_city.py). |
 | Meshy-generated models and art | Meshy | Per Meshy terms for paid plans | https://www.meshy.ai/terms-of-use | Generated for Daydaze: Filipino food, museum pieces, mangos, festival props, merch, paintings and posters. |
 | Animated Flying Fluttering Butterfly Loop | LasquetiSpice | CC-BY 4.0 | https://sketchfab.com/3d-models/none-80f8d9a6dadc411e89ca366cb0cfb0d9 | The park's, Larkspur Forest's and the garden's butterflies: frozen in the open-wing pose, decimated to 160 triangles, flapped in a shader (art/butterfly/build_butterfly.py). |
 | 90s Retro Vending Machine | MadeByYeshe | CC-BY 4.0 | https://sketchfab.com/3d-models/90s-retro-vending-machine-dfd9838c7475422099d8d435d08102fe | Snack vending machines on the avenue's sidewalks and in Skyline Supply, Player 2 and Boardwalk Arcade (art/vending/build_vending.py). |

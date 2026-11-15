@@ -1,7 +1,7 @@
 // A district lot's shop board hangs flush on the facade between the ground
 // floor's door and window heads and the first floor's sills, never over a door
-// or a window: the band the plan uses (districts.ts SIGN_BAND) is checked
-// against the shipped lots.glb's own geometry, and every board the plan places
+// or a window: the legacy lot helpers' band (districts.ts SIGN_BAND) is checked
+// against the shipped lots.glb's own geometry, and every board lotRow places
 // is checked to sit inside its model's band.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -16,7 +16,6 @@ import {
   signBoard,
   type LotModel,
 } from "./districts.ts";
-import { planView } from "./budget.ts";
 import { BUILDINGS } from "./layout.ts";
 import { KINDS, type Instance, type Kind } from "./plan.ts";
 import { isLotBlock, lotRow } from "./districts.ts";
@@ -111,16 +110,10 @@ test("each model's sign band clears its door and window heads and its first-floo
   }
 });
 
-test("every board the plan places sits inside its model's band, stretch included", () => {
+test("every legacy lot board sits inside its model's band, stretch included", () => {
   let boards = 0;
-  for (const at of [
-    [-300, -8],
-    [262, -8],
-    [372, -8],
-    [-96, -256],
-    [264, -256],
-  ] as const) {
-    for (const lot of planView([...at], "high").lots) {
+  for (const block of BUILDINGS.filter(isLotBlock)) {
+    for (const lot of lotRow(block)) {
       if (!lot.sign) continue;
       const { y, h } = signBoard(lot.model, lot.sy);
       const { lo, hi } = SIGN_BAND[lot.model];

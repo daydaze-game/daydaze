@@ -10,7 +10,6 @@ import { facesOf } from "./nyc.ts";
 import {
   DISTRICT_NAMES,
   LOOKS,
-  LOT_CAPACITY,
   LOT_MODELS,
   LOT_SPECS,
   PALETTES,
@@ -232,16 +231,19 @@ test("the lot specs match the shipped lots.glb, each with its far twin", () => {
   }
 });
 
-test("no model has more lots in any high-tier view than half its mesh holds", () => {
-  let most = 0;
-  for (let x = -432; x <= 432; x += 48)
-    for (let z = -320; z <= 368; z += 48) {
-      const counts = new Map<string, number>();
-      for (const lot of planView([x, z], "high").lots)
-        counts.set(lot.model, (counts.get(lot.model) ?? 0) + 1);
-      most = Math.max(most, ...counts.values());
-    }
-  assert.ok(most > 0 && most * 2 <= LOT_CAPACITY, `${most} of ${LOT_CAPACITY}`);
+test("every district's high-tier view uses dream architecture without duplicate lot walls", () => {
+  for (const district of DISTRICTS) {
+    const block = blocks.find((b) => districtOf(b) === district);
+    assert.ok(block, district);
+    const [at] = block.footprint;
+    assert.ok(at);
+    const plan = planView(at, "high");
+    assert.deepEqual(plan.lots, [], district);
+    assert.ok(
+      plan.dream.some((s) => s.id.startsWith(`${block.id}:`)),
+      district,
+    );
+  }
 });
 
 test("a lot block drops the old balconies, fire escapes and rooftop AC: the lots carry their own", async () => {

@@ -7,7 +7,6 @@ import { hasPool, motelBuilding, noVacancy } from "./motel.ts";
 import {
   BAY_CAPACITY,
   BAY_KINDS,
-  BAY_TRIANGLES,
   HOUSE_MODELS,
   houseAt,
   isBeachHouse,
@@ -17,7 +16,6 @@ import {
   isNyc,
   nycBays,
 } from "./nyc.ts";
-import { BAY_RANGE, VIEW_RADIUS } from "./tuning.ts";
 
 // the blocks that face a street; those inside a lot keep plain walls
 const nyc = BUILDINGS.filter((b) => isNyc(b) && nycBays(b).length > 0);
@@ -90,50 +88,16 @@ test("a face has one door and shops, a cornice and a post at every corner", () =
   );
 });
 
-test("the plan dresses only the blocks within range, and says what they cost", () => {
+test("legacy bays remain usable separately, but the city plan uses dream models", () => {
   const at: [number, number] = [-30, -6];
-  const cells = cellsWithin(at, 160);
-  const none = planCity(cells, 0, at, 0);
-  const near = planCity(cells, 0, at, 50);
-  assert.equal(none.bays.length, 0);
-  assert.ok(near.bays.length > 100);
-  // near blocks lose their painted windows and sills to the kit's own
-  assert.ok(near.instances.window.length < none.instances.window.length);
-  const cost = near.bays.reduce((n, bay) => n + BAY_TRIANGLES[bay.kind], 0);
-  assert.ok(trianglesOf(near) > cost);
-  // one facade box per building either way
-  const walls = (p: typeof near) =>
-    p.instances.brick.length +
-    p.instances.concrete.length +
-    p.instances.stucco.length +
-    p.instances.siding.length +
-    p.instances.curtain.length;
-  assert.equal(walls(near), walls(none));
+  const p = planCity(cellsWithin(at, 160), 0, at, 50);
+  assert.equal(p.bays.length, 0);
+  assert.ok(p.dream.some((s) => !s.far));
+  assert.ok(nyc.flatMap(nycBays).length > BAY_CAPACITY);
+  assert.ok(trianglesOf(p) > 0);
 });
 
-test("no view on the high tier holds more bays of one kind than its instanced mesh", () => {
-  let worst = 0;
-  for (let x = -432; x <= 432; x += 32)
-    for (let z = -320; z <= 368; z += 32) {
-      const at: [number, number] = [x, z];
-      const plan = planCity(
-        cellsWithin(at, VIEW_RADIUS),
-        0,
-        at,
-        BAY_RANGE.high,
-      );
-      const counts = new Map<string, number>();
-      for (const bay of plan.bays)
-        counts.set(bay.kind, (counts.get(bay.kind) ?? 0) + 1);
-      for (const n of counts.values()) worst = Math.max(worst, n);
-    }
-  assert.ok(worst > 0);
-  assert.ok(worst <= BAY_CAPACITY, `${worst} bays of one kind`);
-  // and the meshes aren't sized far past what any view needs
-  assert.ok(BAY_CAPACITY <= worst * 4, `${BAY_CAPACITY} for ${worst}`);
-});
-
-test("a near Suburbia lot is a house facing the street; far ones stay boxes", () => {
+test("legacy Suburbia houses face the street while active plans use dream modules", () => {
   const lots = BUILDINGS.filter(isSuburbHouse);
   assert.ok(lots.length >= 6);
   for (const b of lots) {
@@ -147,7 +111,8 @@ test("a near Suburbia lot is a house facing the street; far ones stay boxes", ()
   const at = lots.map((b) => houseAt(b))[0];
   const near = planCity(cellsWithin([at.x, at.z], 160), 0, [at.x, at.z], 40);
   const far = planCity(cellsWithin([at.x, at.z], 160), 0, [at.x, at.z], 0);
-  assert.ok(near.houses.length > 0);
+  assert.equal(near.houses.length, 0);
+  assert.ok(near.dream.length > 0);
   assert.equal(far.houses.length, 0);
 });
 

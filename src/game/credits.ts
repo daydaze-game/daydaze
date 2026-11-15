@@ -141,6 +141,22 @@ export const CREDITS: readonly {
     title: "3D models",
     entries: [
       {
+        title: "Classic Art Nouveau Window",
+        author: "Davide Tirindelli",
+        license: "CC0 1.0",
+        url: "https://www.blendkit.com/asset-gallery-detail/55abafca-0ae2-431d-83e5-8d1eb71fadb0/",
+        usedFor:
+          "Curved window framing and decorative ironwork, simplified and fitted to the dream city's conservatory and garden palace (art/city/build_dream_city.py).",
+      },
+      {
+        title: "Medieval Village MegaKit",
+        author: "Quaternius",
+        license: "CC0 1.0",
+        url: "https://quaternius.com/packs/medievalvillagemegakit.html",
+        usedFor:
+          "Curved tiled roofs, shutters, timber, balconies and vines adapted into the dream city's storybook, heritage and terrace architecture (art/city/build_dream_city.py).",
+      },
+      {
         title: "Meshy-generated models and art",
         author: "Meshy",
         license: "Per Meshy terms for paid plans",

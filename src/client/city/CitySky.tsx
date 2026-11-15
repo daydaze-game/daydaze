@@ -86,25 +86,42 @@ void main() {
     col = mix(col, cloud, cover * 0.6 * smoothstep(0.02, 0.22, up));
   }
 
-  // a skyline ring of towers along the horizon, with a few lit windows
+  // The far silhouette echoes the authored city: rotundas, slender spires,
+  // scalloped roofs and tiered garden palaces rather than apartment towers.
   float angle = atan(vDir.x, vDir.z);
-  float column = floor((angle + 3.14159) / 6.28318 * 90.0);
-  float tower = 0.02 + 0.12 * hash21(vec2(column, 3.0)) * hash21(vec2(column, 7.0)) + 0.05 * hash21(vec2(column, 11.0));
-  float edge = smoothstep(tower + 0.004, tower, up);
+  float sector = (angle + 3.14159) / 6.28318 * 64.0;
+  float column = floor(sector);
+  float across = abs(fract(sector) * 2.0 - 1.0);
+  float kind = hash21(vec2(column, 19.0));
+  float base = 0.018 + 0.055 * hash21(vec2(column, 3.0));
+  float crown = 0.035 + 0.075 * hash21(vec2(column, 7.0));
+  float profile = sqrt(max(0.0, 1.0 - across * across));
+  if (kind > 0.28 && kind < 0.55) profile = pow(1.0 - across, 1.8);
+  if (kind >= 0.55 && kind < 0.78) profile = floor((1.0 - across) * 3.0) / 3.0;
+  if (kind >= 0.78) profile = pow(max(0.0, cos(across * 4.712)), 0.7) * 0.7;
+  float tower = base + crown * profile;
+  float edge = 1.0 - smoothstep(tower, tower + 0.003, up);
   // no towers over the sea: from the shore south, the view out to the water
   // ends in open horizon (the city is behind, not across the waves)
   edge *= 1.0 - smoothstep(0.02, 0.2, vDir.z) * smoothstep(uShoreZ - 120.0, uShoreZ - 20.0, uCamZ);
   vec2 cell = vec2(angle * 140.0, up * 420.0);
   float lit = step(0.72, hash21(floor(cell))) * step(fract(cell.x), 0.55) * step(fract(cell.y), 0.5);
   vec3 nightCol = vec3(0.07, 0.04, 0.15) + uGlow * lit * 0.8;
-  // by day the ring is a hazy NYC skyline: stone, brick and glass, thinned into the sky
-  float kind = hash21(vec2(column, 19.0));
-  vec3 stone = mix(vec3(0.62, 0.62, 0.66), vec3(0.64, 0.5, 0.44), step(0.45, kind));
-  stone = mix(stone, vec3(0.5, 0.6, 0.7), step(0.8, kind));
+  // Sunlit ivory, old copper and rose stone dissolve into the atmosphere.
+  vec3 stone = mix(vec3(0.68, 0.61, 0.65), vec3(0.38, 0.57, 0.58), step(0.45, kind));
+  stone = mix(stone, vec3(0.76, 0.7, 0.59), step(0.8, kind));
   stone *= 0.85 + 0.3 * hash21(vec2(column, 23.0));
   vec3 dayCol = mix(stone, uHorizon, 0.5 + 0.3 * smoothstep(0.0, tower, up)) * (1.0 + 0.25 * lit);
   vec3 towerCol = mix(dayCol, nightCol, uNeon);
   col = mix(col, towerCol, edge);
+
+  // A pale crescent remains visible in the daytime, becoming luminous after
+  // dark. Directional sky math keeps it independent of the camera orbit.
+  vec3 moonDirection = normalize(vec3(-0.48, 0.42, -0.76));
+  float moon = 1.0 - smoothstep(0.026, 0.028, distance(vDir, moonDirection));
+  vec3 moonCut = normalize(moonDirection + vec3(0.013, 0.007, -0.004));
+  moon *= smoothstep(0.022, 0.024, distance(vDir, moonCut));
+  col = mix(col, mix(uHorizon * 0.8 + vec3(0.12), vec3(0.92, 0.84, 0.69), uNeon), moon * mix(0.6, 1.0, uNeon));
 
   // below the horizon: the horizon's own color, so the sea can fade into it
   if (up < 0.0) col = horizonColor(uHorizon, uGlow, vDir.z / max(length(vDir.xz), 0.0001));
