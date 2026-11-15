@@ -7,7 +7,7 @@ const PORT = Number(process.env.PORT ?? 5195);
 // timeouts are generous and only two browsers run at once.
 export default defineConfig({
   testDir: "tests",
-  testMatch: "client.spec.ts",
+  testMatch: ["client.spec.ts", "dream-city.spec.ts"],
   // tests are independent pages, so CI's shards can split the one file
   fullyParallel: true,
   workers: 2,

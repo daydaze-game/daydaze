@@ -45,11 +45,11 @@ const fleetReady = async (page: Page) => {
     { timeout: 300_000 },
   );
 };
-/** Waits for the New York bays and the furniture (NycFacades sets data-bays). */
+/** Waits for the authored architecture and street furniture. */
 const cityReady = async (page: Page) => {
   await furnitureReady(page);
   await page.waitForFunction(
-    () => document.querySelector("canvas")?.dataset.bays === "ready",
+    () => document.querySelector("canvas")?.dataset.architecture === "ready",
     null,
     { timeout: 300_000 },
   );
@@ -62,15 +62,12 @@ const streetReady = async (page: Page) => {
     { timeout: 300_000 },
   );
 };
-/** Waits for either the New York bays, the district lots or Suburbia's houses (a shot may see only one). */
+/** Waits for the architecture in any district, including skyline detail. */
 const blocksReady = async (page: Page) => {
   await streetReady(page);
   await page.waitForFunction(
     () => {
-      const d = document.querySelector("canvas")?.dataset;
-      return (
-        d?.bays === "ready" || d?.houses === "ready" || d?.lots === "ready"
-      );
+      return document.querySelector("canvas")?.dataset.architecture === "ready";
     },
     null,
     { timeout: 300_000 },
@@ -1468,6 +1465,24 @@ const SHOTS: {
   petShot("pet-home", "room=apartment", "shibainu", "Kiko"),
   petShot("pet-lab", "room=city&view=full&time=12:00", "labrador", "Maple"),
   { name: "city-street", query: "room=city&view=full&time=12:00&at=45,11" },
+  // Fixed, human-scale compositions for the dream-city architecture review.
+  ...[
+    ["arrival", "12:00", "8,12", "40,12,60,0,10,26"],
+    ["arrival-night", "22:00", "8,12", "40,12,60,0,10,26"],
+    ["avenue", "15:00", "-40,-8", "-45,8,-4,18,11,-22"],
+    ["nightlife", "22:00", "106,10", "78,9,22,130,12,-22"],
+    ["manila", "15:00", "-300,-8", "-309,8,-7,-275,10,-25"],
+    ["lanterns", "22:00", "280,9", "263,9,14,306,13,-22"],
+    ["arts", "12:00", "-96,-256", "-122,9,-249,-82,12,-278"],
+    ["uptown", "12:00", "264,-256", "237,10,-248,282,14,-278"],
+    ["coast", "16:00", "-12,263", "-45,9,277,20,11,242"],
+    ["storybook", "12:00", "-350,-256", "-380,8,-245,-340,9,-280"],
+    ["skyline", "17:00", "8,12", "-95,95,145,30,12,-60"],
+  ].map(([name, time, at, cam]) => ({
+    name: `dream-${name}`,
+    query: `room=city&quality=low&time=${time}&at=${at}&cam=${cam}`,
+    act: cityReady,
+  })),
   {
     name: "transit-city-street-before",
     query: "room=city&view=full&time=12:00&at=45,11",
@@ -1664,7 +1679,8 @@ const SHOTS: {
         await streetReady(page);
         // the lots themselves, not just the bays: without them a board hangs on bare brick
         await page.waitForFunction(
-          () => document.querySelector("canvas")?.dataset.lots === "ready",
+          () =>
+            document.querySelector("canvas")?.dataset.architecture === "ready",
           null,
           { timeout: 300_000 },
         );
@@ -1686,7 +1702,8 @@ const SHOTS: {
     act: async (page: Page) => {
       await streetReady(page);
       await page.waitForFunction(
-        () => document.querySelector("canvas")?.dataset.lots === "ready",
+        () =>
+          document.querySelector("canvas")?.dataset.architecture === "ready",
         null,
         { timeout: 300_000 },
       );
@@ -1714,7 +1731,8 @@ const SHOTS: {
       // Downtown has no district lots to wait for
       if (String(name).includes("manila"))
         await page.waitForFunction(
-          () => document.querySelector("canvas")?.dataset.lots === "ready",
+          () =>
+            document.querySelector("canvas")?.dataset.architecture === "ready",
           null,
           { timeout: 300_000 },
         );

@@ -1,5 +1,6 @@
+// Stream the city's ground, life and authored architecture around the player.
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { ALL_CELLS, neighborhoodAt } from "../../game/city/cells.ts";
 import {
@@ -55,9 +56,7 @@ import { DogPark } from "./DogPark.tsx";
 import { FarmersMarket } from "./FarmersMarket.tsx";
 import { BandShell } from "./BandShell.tsx";
 import { CityTrees, cityTrees } from "./CityTrees.tsx";
-import { NycFacades, cityBays } from "./NycFacades.tsx";
-import { CityHouses, cityHouses } from "./CityHouses.tsx";
-import { DistrictLots, cityLots } from "./DistrictLots.tsx";
+import { DreamBuildings, cityDream } from "./DreamBuildings.tsx";
 import { StreetPieces, cityStreet } from "./StreetPieces.tsx";
 import { ElLine, ElLineBoundary } from "./ElLine.tsx";
 import { ElRide } from "./ElRide.tsx";
@@ -68,47 +67,12 @@ import { ParkedCars } from "./ParkedCars.tsx";
 import { Traffic } from "./Traffic.tsx";
 import { PlayerCar } from "./PlayerCar.tsx";
 import { AvenueWear } from "./AvenueWear.tsx";
-import { cityFar, FarCity } from "./FarCity.tsx";
 import { GasStations } from "./GasStations.tsx";
 import type { ParkedCar } from "../../game/city/drive.ts";
 
 const CityHdri = lazy(() => import("./CityHdri.tsx"));
 
-/**
- * The district lots and Suburbia's houses: each mounts, and fetches its models
- * (220 KB and 450 KB), only once the plan has any in range, and stays. Each
- * has its own Suspense so a model still downloading never hides the city.
- * Downtown, where she spawns, has neither, so the first picture does not wait
- * for them.
- */
-function LazyBlocks() {
-  const { lots } = cityLots.use();
-  const { spots } = cityHouses.use();
-  const [lotsOn, setLotsOn] = useState(false);
-  const [housesOn, setHousesOn] = useState(false);
-  useEffect(() => {
-    if (lots.length > 0) setLotsOn(true);
-  }, [lots]);
-  useEffect(() => {
-    if (spots.length > 0) setHousesOn(true);
-  }, [spots]);
-  return (
-    <>
-      {lotsOn && (
-        <Suspense fallback={null}>
-          <DistrictLots />
-        </Suspense>
-      )}
-      {housesOn && (
-        <Suspense fallback={null}>
-          <CityHouses />
-        </Suspense>
-      )}
-    </>
-  );
-}
-
-/** `?bays=0` turns the New York bays off, to compare budgets. */
+/** `?bays=0` selects the skyline level of architectural detail. */
 const NO_BAYS = new URLSearchParams(location.search).get("bays") === "0";
 
 // Enough for the busiest view of the whole city, so meshes never reallocate.
@@ -259,11 +223,8 @@ export function CityScene({
         writeKind(meshes[kind], kind, plan.instances[kind]);
       cityTrees.set({ spots: plan.trees, at });
       cityFurniture.set({ spots: plan.furniture, at, overview: !bays });
-      cityBays.set({ bays: plan.bays });
-      cityLots.set({ lots: plan.lots });
-      cityHouses.set({ spots: plan.houses });
+      cityDream.set({ spots: plan.dream });
       cityStreet.set({ pieces: plan.street });
-      cityFar.set({ boxes: plan.far });
       lights.current.forEach((light, i) => {
         if (!light) return;
         const sign = plan.lights[i];
@@ -381,14 +342,14 @@ export function CityScene({
         <DogPark player={player} />
         <FarmersMarket player={player} />
         <BandShell player={player} />
-        <NycFacades />
-        <LazyBlocks />
         <StreetPieces />
         <ElLineBoundary>
           <ElLine />
         </ElLineBoundary>
       </Suspense>
-      <FarCity />
+      <Suspense fallback={null}>
+        <DreamBuildings />
+      </Suspense>
       <AvenueWear />
       <ElRide player={player} />
       <NightMarket player={player} />

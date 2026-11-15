@@ -1,0 +1,203 @@
+// The dream city's authored architecture, including its distant silhouettes.
+// Blender exports one colored mesh per family and LOD; the surface flags let
+// all twenty-four meshes share textured stone, brass, foliage and lit glass.
+import { useGLTF } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { InstancedMesh2, patchShader } from "@three.ez/instanced-mesh";
+import { useEffect, useMemo, useState } from "react";
+import * as THREE from "three";
+import {
+  DREAM_KINDS,
+  type DreamKind,
+  type DreamSpot,
+} from "../../game/city/dream.ts";
+import { createStore } from "../rooms/shared/store.ts";
+import { bakedGeometry } from "../world/bakedGeometry.ts";
+import { useDaylight } from "./daylight.ts";
+import { boxMapped, groundMaps } from "./worldTexture.ts";
+
+const URL = "/models/city-dream/architecture.glb";
+
+/** Updated with the city plan, after movement or a camera-detail change. */
+export const cityDream = createStore({ spots: [] as readonly DreamSpot[] });
+
+type FamilyMesh = { kind: DreamKind; far: boolean; mesh: InstancedMesh2 };
+
+/** Surface flags survive meshopt quantization; UV.y is unused. */
+function architectureMaterial(night: { value: number }) {
+  const maps = groundMaps("white_plaster_02");
+  const material = boxMapped(
+    new THREE.MeshStandardMaterial({
+      ...maps,
+      vertexColors: true,
+      roughness: 0.76,
+      normalScale: new THREE.Vector2(0.35, 0.35),
+      emissive: "#ffffff",
+      emissiveIntensity: 1,
+    }),
+    0.32,
+  );
+  const boxed = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    boxed.call(material, shader, renderer);
+    shader.uniforms.uDreamNight = night;
+    shader.vertexShader = shader.vertexShader.replace(
+      "void main() {",
+      "attribute float aSurface;\nvarying float vSurface;\nvoid main() {\nvSurface = aSurface;",
+    );
+    shader.vertexShader = patchShader(shader.vertexShader);
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "void main() {",
+        "varying float vSurface;\nuniform float uDreamNight;\nvoid main() {",
+      )
+      .replace(
+        "diffuseColor *= sampledDiffuseColor;",
+        [
+          // The plaster photo adds fine grain, never a second palette over
+          // the painted brass, foliage or glazing.
+          "float dreamStone = 1.0 - smoothstep(0.06, 0.14, vSurface);",
+          "float dreamGrain = dot(sampledDiffuseColor.rgb, vec3(0.299, 0.587, 0.114));",
+          "diffuseColor.rgb *= mix(1.0, mix(0.78, 1.12, dreamGrain), dreamStone);",
+          "float dreamFoot = smoothstep(0.0, 2.0, vBoxP.y);",
+          "diffuseColor.rgb *= mix(1.0, mix(0.79, 1.0, dreamFoot), dreamStone);",
+        ].join("\n"),
+      )
+      .replace(
+        "#include <roughnessmap_fragment>",
+        [
+          "#include <roughnessmap_fragment>",
+          "float dreamBrass = 1.0 - smoothstep(0.04, 0.1, abs(vSurface - 0.25));",
+          "float dreamGlass = 1.0 - smoothstep(0.04, 0.1, abs(vSurface - 0.5));",
+          "roughnessFactor = mix(roughnessFactor, 0.32, dreamBrass);",
+          "roughnessFactor = mix(roughnessFactor, 0.18, dreamGlass);",
+        ].join("\n"),
+      )
+      .replace(
+        "#include <metalnessmap_fragment>",
+        "#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.45, dreamBrass);",
+      )
+      .replace(
+        "#include <emissivemap_fragment>",
+        [
+          "#include <emissivemap_fragment>",
+          // Opaque glazing avoids hundreds of transparent layers. Its sky
+          // reflection by day gives way to warm interior light after dark.
+          "vec3 dreamSky = mix(vec3(0.16, 0.25, 0.32), vec3(0.46, 0.69, 0.75), clamp(normal.y * 0.5 + 0.5, 0.0, 1.0));",
+          "vec3 dreamLit = mix(vec3(1.0, 0.68, 0.34), vColor.rgb * 1.6, 0.3);",
+          "float dreamWindow = mix(0.7, 1.0, step(0.24, boxHash(floor(vBoxP.xz * 0.4) + floor(vBoxP.y * 0.3))));",
+          "totalEmissiveRadiance = dreamGlass * mix(dreamSky * 0.42, dreamLit * dreamWindow * 0.72, uDreamNight);",
+          "totalEmissiveRadiance += dreamBrass * vColor.rgb * 0.06;",
+          "totalEmissiveRadiance += step(0.9, vSurface) * vColor.rgb * mix(0.32, 1.25, uDreamNight);",
+        ].join("\n"),
+      );
+  };
+  material.customProgramCacheKey = () => "dream-architecture-v1";
+  return material;
+}
+
+/** Bake the glTF's dequantization transform before placing its instances. */
+function prepared(node: THREE.Mesh) {
+  const geometry = bakedGeometry(node);
+  const uv = geometry.getAttribute("uv");
+  if (!uv)
+    throw new Error(`Dream architecture ${node.name} has no surface flags`);
+  const flags = new Float32Array(uv.count);
+  for (let i = 0; i < uv.count; i++) flags[i] = uv.getX(i);
+  geometry.setAttribute("aSurface", new THREE.BufferAttribute(flags, 1));
+  return geometry;
+}
+
+const up = new THREE.Vector3(0, 1, 0);
+const tint = new THREE.Color();
+
+function place(meshes: readonly FamilyMesh[], spots: readonly DreamSpot[]) {
+  const groups = new Map<string, DreamSpot[]>();
+  for (const spot of spots) {
+    const key = `${spot.kind}|${spot.far}`;
+    const list = groups.get(key) ?? [];
+    list.push(spot);
+    groups.set(key, list);
+  }
+  for (const { kind, far, mesh } of meshes) {
+    const list = groups.get(`${kind}|${far}`) ?? [];
+    mesh.clearInstances();
+    mesh.addInstances(list.length, (object, i) => {
+      const spot = list[i];
+      if (!spot) return;
+      object.position.set(spot.x, spot.y, spot.z);
+      object.quaternion.setFromAxisAngle(up, spot.yaw);
+      object.scale.set(spot.sx, spot.sy, spot.sz);
+      object.color = tint.set(spot.color);
+    });
+  }
+}
+
+export function DreamBuildings() {
+  const gltf = useGLTF(URL);
+  const { spots } = cityDream.use();
+  const [meshes, setMeshes] = useState<readonly FamilyMesh[]>([]);
+  const night = useMemo(() => ({ value: 0 }), []);
+  const day = useDaylight();
+  const invalidate = useThree((state) => state.invalidate);
+  const canvas = useThree((state) => state.gl.domElement);
+
+  useEffect(() => {
+    gltf.scene.updateMatrixWorld(true);
+    const material = architectureMaterial(night);
+    const built = DREAM_KINDS.flatMap((kind) =>
+      [false, true].map((far) => {
+        const name = far ? `${kind}-lo` : kind;
+        const node = gltf.scene.getObjectByName(name);
+        if (!(node instanceof THREE.Mesh))
+          throw new Error(`architecture.glb has no ${name}`);
+        const mesh = new InstancedMesh2(prepared(node), material, {
+          capacity: 64,
+        });
+        mesh.name = `dream-${name}`;
+        // The library grows buffers as needed and culls each building.
+        return { kind, far, mesh };
+      }),
+    );
+    setMeshes(built);
+    return () => {
+      for (const { mesh } of built) {
+        mesh.geometry.dispose();
+        mesh.dispose();
+      }
+      material.map?.dispose();
+      material.normalMap?.dispose();
+      material.roughnessMap?.dispose();
+      material.dispose();
+      delete canvas.dataset.architecture;
+      delete canvas.dataset.architectureFamilies;
+    };
+  }, [gltf, night, canvas]);
+
+  useEffect(() => {
+    night.value = day.neon;
+    invalidate();
+  }, [day.neon, night, invalidate]);
+
+  useEffect(() => {
+    place(meshes, spots);
+    if (meshes.length > 0 && spots.length > 0) {
+      canvas.dataset.architecture = "ready";
+      const near = spots.filter((spot) => !spot.far);
+      canvas.dataset.architectureFamilies = [
+        ...new Set((near.length > 0 ? near : spots).map((s) => s.kind)),
+      ]
+        .sort()
+        .join(",");
+    }
+    invalidate();
+  }, [meshes, spots, canvas, invalidate]);
+
+  return (
+    <group name="dream-city-architecture">
+      {meshes.map(({ kind, far, mesh }) => (
+        <primitive key={`${kind}|${far}`} object={mesh} />
+      ))}
+    </group>
+  );
+}

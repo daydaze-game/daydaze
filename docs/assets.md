@@ -13,6 +13,15 @@ Record adapted assets too; describe the adaptation in Used for.
 This ledger was seeded from the existing import scripts and shipped assets;
 future imported packs belong here when they enter the game.
 
+The dream city's twelve architectural families are original Daydaze scenery,
+reproducible with `art/city/build_dream_city.py`. The search through the owner's
+Quaternius packs and free architecture libraries found useful ordinary-city
+modules but no matching celestial conservatories, sculptural theaters or
+shell-roof pavilions. These custom meshes use the already credited Poly Haven
+plaster textures and existing downloaded street vegetation. No paid generation
+service was used. Every family has a separate silhouette-preserving distant
+mesh; `src/game/city/dreamCosts.generated.ts` records their exported costs.
+
 
 ## 3D models
 
