@@ -1,7 +1,6 @@
 // The architectural replacement must actually load and render in every
 // region, without shader errors or losing the existing venue entrances.
 import { expect, test } from "@playwright/test";
-import { dockAction } from "./dock.ts";
 
 test("dream city: architecture loads across distinct streets and keeps venue doors", async ({
   page,
@@ -48,9 +47,11 @@ test("dream city: architecture loads across distinct streets and keeps venue doo
   }
   expect(signatures.size).toBeGreaterThan(1);
   // The new facade still leads into the existing playable club.
-  await page.goto("/?room=city&quality=low&debug=1&at=113,12.5&time=12:00");
+  await page.goto("/?room=city&view=full&quality=low&at=113,9&time=12:00");
   await expect(canvas).toHaveAttribute("data-architecture", "ready");
-  await (await dockAction(page, "Into Pulse")).click();
+  // Walking into the doorway triggers its portal; it is not a dock action.
+  await page.keyboard.down("KeyS");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pulse");
+  await page.keyboard.up("KeyS");
   expect(errors).toEqual([]);
 });
