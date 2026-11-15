@@ -24,13 +24,13 @@ export const cityDream = createStore({ spots: [] as readonly DreamSpot[] });
 
 /** Surface flags survive meshopt quantization; UV.y is unused. */
 function architectureMaterial(night: { value: number }) {
-  const maps = groundMaps("white_plaster_02");
+  const maps = groundMaps("stone_tile_wall", { full: true });
   const material = boxMapped(
     new THREE.MeshStandardMaterial({
       ...maps,
       vertexColors: true,
       roughness: 0.76,
-      normalScale: new THREE.Vector2(0.35, 0.35),
+      normalScale: new THREE.Vector2(0.55, 0.55),
       emissive: "#ffffff",
       emissiveIntensity: 1,
     }),
@@ -68,16 +68,23 @@ function architectureMaterial(night: { value: number }) {
         ].join("\n"),
       )
       .replace(
-        "diffuseColor *= sampledDiffuseColor;",
+        /#ifdef USE_MAP\nfloat bk =[\s\S]*?diffuseColor \*= sampledDiffuseColor;\n#endif/,
         [
-          // The plaster photo adds fine grain, never a second palette over
-          // the painted brass, foliage or glazing.
+          // Keep the stone courses aligned; randomly offset texture samples
+          // would break the mortar lines. Glass and metal retain their paint.
           "float dreamStone = 1.0 - smoothstep(0.06, 0.14, vSurface);",
-          "float dreamGrain = dot(sampledDiffuseColor.rgb, vec3(0.299, 0.587, 0.114));",
-          "diffuseColor.rgb *= mix(1.0, mix(0.78, 1.12, dreamGrain), dreamStone);",
+          "vec3 dreamMasonry = texture2D(map, vMapUv).rgb * 1.6 + 0.2;",
+          "diffuseColor.rgb *= mix(vec3(1.0), dreamMasonry, dreamStone);",
           "float dreamFoot = smoothstep(0.0, 2.0, vBoxP.y);",
           "diffuseColor.rgb *= mix(1.0, mix(0.79, 1.0, dreamFoot), dreamStone);",
         ].join("\n"),
+      )
+      .replace(
+        "#include <normal_fragment_maps>",
+        THREE.ShaderChunk.normal_fragment_maps.replace(
+          "mapN.xy *= normalScale;",
+          "mapN.xy *= normalScale * dreamStone;",
+        ),
       )
       .replace(
         "#include <roughnessmap_fragment>",
@@ -110,7 +117,7 @@ function architectureMaterial(night: { value: number }) {
         ].join("\n"),
       );
   };
-  material.customProgramCacheKey = () => "dream-architecture-v2";
+  material.customProgramCacheKey = () => "dream-architecture-v3";
   return material;
 }
 
