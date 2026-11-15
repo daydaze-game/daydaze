@@ -1467,8 +1467,8 @@ const SHOTS: {
   { name: "city-street", query: "room=city&view=full&time=12:00&at=45,11" },
   // Fixed, human-scale compositions for the dream-city architecture review.
   ...[
-    ["arrival", "12:00", "8,12", "0,24,63,0,4,20"],
-    ["arrival-night", "22:00", "8,12", "0,24,63,0,4,20"],
+    ["arrival", "12:00", "8,12", "-16,14,43,16,10,-25"],
+    ["arrival-night", "22:00", "8,12", "-16,14,43,16,10,-25"],
     ["avenue", "15:00", "-40,-8", "-45,8,-4,18,11,-22"],
     ["nightlife", "22:00", "106,10", "64,9,3,130,12,27"],
     ["manila", "15:00", "-300,-8", "-309,8,-7,-275,10,-25"],
