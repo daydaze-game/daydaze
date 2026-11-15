@@ -1,0 +1,43 @@
+# Bug report form: asks for the steps, the room and the browser, since most
+# Daydaze bugs depend on where you are and which render tier you're on.
+name: Bug report
+description: Something in the game is broken or wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the city with ?debug=1
+        2. Walk into ...
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Room or place
+      placeholder: e.g. The Skylark, the boardwalk, the closet
+  - type: input
+    id: browser
+    attributes:
+      label: Browser, OS and device
+      placeholder: e.g. Chrome 140 on Windows 11, laptop
+  - type: dropdown
+    id: online
+    attributes:
+      label: Online or offline
+      options:
+        - Offline (single player)
+        - Online (?online=1)
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or console errors

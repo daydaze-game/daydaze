@@ -1,0 +1,18 @@
+# Dependabot: weekly grouped updates for npm and the pinned GitHub Actions.
+# Security fixes arrive as soon as an advisory lands, outside this schedule.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies]
+    groups:
+      # One PR for every minor and patch bump keeps the queue short.
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, "area: ci"]

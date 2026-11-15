@@ -1,0 +1,22 @@
+# Feature request form: an idea for a place, game, outfit or system.
+name: Feature request
+description: A new place, game, outfit or system for Daydaze
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should exist, and what would you do with it?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it fits
+      description: The Club Penguin, Fantage or IMVU memory it brings back, or the problem it solves.
+  - type: textarea
+    id: refs
+    attributes:
+      label: References
+      description: Screenshots, links or free (CC0 or CC-BY) assets that could be used.
