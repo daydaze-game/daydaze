@@ -37,6 +37,7 @@ every push and pull request to `main` and fails fast.
 | Command | What it checks |
 | --- | --- |
 | `npm run lint` | ESLint: TypeScript and React hooks rules |
+| `npm run lint:deps` | dependency-cruiser: the layer rules in `.dependency-cruiser.cjs` (game is pure, no cycles) |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
 | `npm test` | unit tests (Node's test runner) |
