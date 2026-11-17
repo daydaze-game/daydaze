@@ -1,9 +1,9 @@
-// The fireworks over Beachside: a show over the sea every few minutes, a
+// The fireworks over Beachside: a show over the sea once an hour, a
 // shell every second or so, and a finale that fires them three at a time.
 // Pure and deterministic on the clock, so every player sees the same show.
 
 /** Seconds from one show's start to the next. */
-export const SHOW_EVERY = 240;
+export const SHOW_EVERY = 3600;
 export const SHOW_LENGTH = 70;
 /** The last seconds of a show, when shells go up in threes. */
 export const FINALE = 12;
