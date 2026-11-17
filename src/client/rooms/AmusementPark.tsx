@@ -241,6 +241,7 @@ export function AmusementPark({
       if (cabin.current) cabin.current.visible = false;
       return;
     }
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(at.x, at.y, at.z);
     player.seat.yaw = at.yaw;
