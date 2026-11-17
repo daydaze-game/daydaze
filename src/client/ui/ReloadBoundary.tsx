@@ -10,14 +10,14 @@ export class ReloadBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
 > {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch(error: Error) {
+  override componentDidCatch(error: Error) {
     console.error("Daydaze stopped: a part of the game failed", error);
   }
-  render() {
+  override render() {
     if (!this.state.failed) return this.props.children;
     return (
       <aside className="update-prompt" role="alert">

@@ -67,7 +67,7 @@ export class RateLimiter extends DurableObject<Env> {
   }
 
   /** Drops buckets that are full again; reschedules while any remain. */
-  async alarm(): Promise<void> {
+  override async alarm(): Promise<void> {
     const sql = this.ctx.storage.sql;
     sql.exec(
       "DELETE FROM buckets WHERE at < ?",
