@@ -10,7 +10,7 @@ const clamp01 = (x: number) =>
   Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0;
 
 /** Every meter, in a fixed order (ties go to the earlier one). */
-export const SUBSTANCES = ["high", "trip", "acid", "molly"] as const;
+export const SUBSTANCES = ["high", "trip", "acid", "molly", "cocaine"] as const;
 export type Substance = (typeof SUBSTANCES)[number];
 
 /** Where a dose is in its curve; `null` when it is over or not yet felt. */
@@ -78,6 +78,18 @@ export const DOSES = {
     peakEnd: 170,
     end: 300,
   },
+  // a line of cocaine (30-60 mg, a common dose), insufflated: felt in 3-10
+  // min, the rush peaks 7-16 min later and the main effect lasts 15-30 min
+  // (a line holds a while longer), 10-90 min in all. Redosing stacks (the
+  // redose urge), capped at 1.
+  line: {
+    substance: "cocaine",
+    strength: 0.6,
+    onset: 5,
+    peak: 15,
+    peakEnd: 40,
+    end: 75,
+  },
 } as const satisfies Record<string, Profile>;
 export type Dose = keyof typeof DOSES;
 
@@ -134,6 +146,7 @@ export const soberMeters = (): Meters => ({
   trip: { level: 0, phase: null },
   acid: { level: 0, phase: null },
   molly: { level: 0, phase: null },
+  cocaine: { level: 0, phase: null },
 });
 
 // scratch for readMeters: the most each meter's strongest dose is felt
@@ -142,6 +155,7 @@ const topFelt: Record<Substance, number> = {
   trip: 0,
   acid: 0,
   molly: 0,
+  cocaine: 0,
 };
 
 /** Fills `out` with every meter at play time `now`. Writes in place, since
@@ -285,6 +299,37 @@ export const BODY: Record<Substance, Record<Phase, Body>> = {
       rate: 0.9,
     },
   },
+  cocaine: {
+    // alert, confident, restless
+    comeup: {
+      loops: ["idle-shoulders", "idle-look-around"],
+      tics: ["talk-two-hands", "cocky"],
+      rate: 1.1,
+    },
+    // talkative, fast gestures, overconfident, fidgety, upright
+    peak: {
+      loops: [
+        "idle-shoulders",
+        "idle-fold-arms",
+        "idle-look-around",
+        "idle-phone",
+      ],
+      tics: [
+        "talk-two-hands",
+        "arm-gesture",
+        "excited",
+        "cocky",
+        "hands-forward",
+      ],
+      rate: 1.2,
+    },
+    // the fast crash: flat, anxious, irritable
+    comedown: {
+      loops: ["idle-bored", "idle-breathing", "idle-sweat"],
+      tics: ["sigh", "disappointed", "yawn"],
+      rate: 0.9,
+    },
+  },
 };
 
 /** Her body for a meter, or null when it doesn't show. */
@@ -327,7 +372,8 @@ export const BREATHE_HZ = 0.25;
  * weed is a faint glow and color lift (no hallucinations, which are a myth
  * at normal doses); a trip saturates, shifts colors and breathes; acid adds
  * radiant color, faint peripheral geometry and tracers; molly glows with
- * neon color, mild tracers and a wiggle, and no geometry (not a psychedelic). */
+ * neon color, mild tracers and a wiggle, and no geometry (not a psychedelic);
+ * cocaine changes nothing on screen (no distortion at normal doses). */
 export function highParams(
   meters: Readonly<Meters>,
   factor: number,

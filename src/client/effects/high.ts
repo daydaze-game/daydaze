@@ -1,5 +1,5 @@
 // The local player's doses (a joint, an edible, mushroom tea, an LSD tab, a
-// molly pill) and the meters they make, in memory like the buzz: a reload
+// molly pill, a line of cocaine) and the meters they make, in memory like the buzz: a reload
 // sobers the doll up. Drugs exist only on 18+ servers, so at 13+ a dose does
 // nothing. The curves and the body language are in
 // game/effects/substances.ts.
