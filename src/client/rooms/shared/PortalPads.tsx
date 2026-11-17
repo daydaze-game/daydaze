@@ -1,3 +1,5 @@
+// The breathing floor ring at every portal of a room, placed from the room's
+// portal data.
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type * as THREE from "three";

@@ -1,3 +1,5 @@
+// The Velvet Room's glass-tile dance floor: instanced tiles with a lit rim,
+// tinted per instance.
 import { useFrame } from "@react-three/fiber";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

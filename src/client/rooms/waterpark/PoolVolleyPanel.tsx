@@ -1,3 +1,5 @@
+// The pool volleyball panel: the shared volleyball game, labeled and paid out
+// as pool volleyball.
 import type { JSX } from "react";
 import { VolleyGame } from "../../city/VolleyStop.tsx";
 

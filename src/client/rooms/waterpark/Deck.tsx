@@ -1,3 +1,5 @@
+// The water park's deck: a sandstone tile atlas drawn on a canvas, and the
+// pool surround built on it.
 import { useMemo } from "react";
 import * as THREE from "three";
 import { POOL } from "../../../game/waterPark.ts";

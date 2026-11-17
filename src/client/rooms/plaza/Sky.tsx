@@ -1,3 +1,5 @@
+// The Plaza's night sky: a violet gradient dome with a pink city glow on the
+// horizon, and stars that hold still under reduced motion.
 import { Stars } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";

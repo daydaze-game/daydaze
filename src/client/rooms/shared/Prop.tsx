@@ -1,3 +1,5 @@
+// Loads generated prop models from `public/models/props/` and fits them to a
+// width, depth and height. Wrap users in Suspense with a placeholder fallback.
 import { useGLTF } from "@react-three/drei";
 import type { ThreeElements } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";

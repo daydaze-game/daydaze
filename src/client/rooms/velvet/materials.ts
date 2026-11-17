@@ -1,3 +1,5 @@
+// The Velvet Room's materials. Module-level so every piece that uses one
+// batches into a single mesh.
 import * as THREE from "three";
 import { hdr, neonMat } from "../shared/materials.ts";
 

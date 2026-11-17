@@ -1,3 +1,5 @@
+// The Plaza's ground: the sidewalk, curb and road, with the benches, planters
+// and neon curb strips along it. Positions come from `layout.ts`.
 import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";

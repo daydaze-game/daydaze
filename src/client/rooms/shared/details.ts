@@ -1,3 +1,5 @@
+// Small set dressing for every room (posters, plants, condiments), added to a
+// room's Batch so each material costs one draw call however many pieces.
 import * as THREE from "three";
 import { surface } from "../../city/worldTexture.ts";
 import type { Batch } from "./batch.ts";

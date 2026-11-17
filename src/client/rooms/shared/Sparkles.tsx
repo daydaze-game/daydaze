@@ -1,3 +1,5 @@
+// drei's Sparkles with the shader patched so the center pixel can't go to
+// infinity, which on the high tier blacks out the whole canvas through bloom.
 import { Sparkles as DreiSparkles } from "@react-three/drei";
 import { useLayoutEffect, useRef, type ComponentProps } from "react";
 import * as THREE from "three";

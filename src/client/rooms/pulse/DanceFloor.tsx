@@ -1,3 +1,5 @@
+// Pulse's room lights, with a point light that throbs on the beat unless the
+// player prefers reduced motion.
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type * as THREE from "three";

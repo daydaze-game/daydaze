@@ -1,3 +1,5 @@
+// The panel shared by the order stations (espresso bar, boba bar): read the
+// ticket, build the order from the station's ingredients, hand it over.
 import type { JSX } from "react";
 import { score, shiftOver, ticket, TICKETS } from "../../../game/orders.ts";
 import type { OrderSession } from "./orderSession.ts";

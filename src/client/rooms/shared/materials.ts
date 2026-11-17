@@ -1,3 +1,5 @@
+// Materials and helpers shared by every room, so pieces from different files
+// batch into the same draw call.
 import * as THREE from "three";
 import { makeCanvas } from "../../canvas.ts";
 

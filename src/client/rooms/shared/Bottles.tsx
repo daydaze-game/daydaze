@@ -1,3 +1,5 @@
+// The back bar's bottles, merged into four draw calls (glass, liquor, caps,
+// labels) with one BatchedMesh per material.
 import { useEffect, useState } from "react";
 import { byTier } from "../../../game/age.ts";
 import * as THREE from "three";

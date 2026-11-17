@@ -1,3 +1,5 @@
+// The Plaza's eight palms, drawn as batched parts instead of the shared
+// Palm's separate meshes.
 import * as THREE from "three";
 import { lathe, lumpy } from "../../avatar/dollGeometry.ts";
 import { gradientMap } from "../../avatar/toon.ts";

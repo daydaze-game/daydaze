@@ -1,3 +1,5 @@
+// The water park's tropical-noon sky: a blue gradient dome with warm haze at
+// the horizon.
 import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";

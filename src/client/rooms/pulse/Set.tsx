@@ -1,3 +1,5 @@
+// Pulse's set: walls, bar, DJ booth, podiums and dressing, built from the
+// measurements in `layout.ts`.
 import { Suspense, useMemo } from "react";
 import * as THREE from "three";
 import { surface } from "../../city/worldTexture.ts";

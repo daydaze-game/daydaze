@@ -1,3 +1,5 @@
+// Bar stools in one batch per part (seat, piping, post, ring), placed from a
+// list of positions so a long bar costs a few draw calls.
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";

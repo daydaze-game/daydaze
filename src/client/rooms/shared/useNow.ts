@@ -1,3 +1,5 @@
+// A hook for panels with live meters: performance.now() re-read each frame
+// while running, and still when not.
 import { useEffect, useState } from "react";
 
 /** performance.now(), re-read every animation frame while `running`, so a

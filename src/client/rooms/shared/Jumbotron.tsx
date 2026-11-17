@@ -1,3 +1,5 @@
+// A big screen with a title and up to three lines. The face texture is
+// redrawn only when the text changes.
 import { useEffect, useMemo, type ReactNode } from "react";
 import { canvasTex } from "./materials.ts";
 

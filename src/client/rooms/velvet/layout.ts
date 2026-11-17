@@ -1,3 +1,5 @@
+// The Velvet Room's measurements and the close-up camera pose for its back
+// bar, shared by the scene and the walkable area.
 import * as THREE from "three";
 
 /** Half the room's width: walls stand at x = ±ROOM and z = -ROOM. */

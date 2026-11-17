@@ -1,3 +1,5 @@
+// Bleachers and stands with their crowds, shared by the arenas: concrete
+// steps, rows of fans and the fan models they wear.
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";

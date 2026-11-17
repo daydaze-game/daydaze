@@ -1,3 +1,4 @@
+// Instanced glasses for the Velvet Room, so every glass shares one draw call.
 import { useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 import { lathe } from "../../avatar/dollGeometry.ts";
