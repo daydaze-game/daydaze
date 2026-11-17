@@ -6,6 +6,8 @@ worktree before starting another. The owner is actively working on main.
 
 ## Garden detail around distinct destinations
 
+Tracked in [GitHub issue #10](https://github.com/dpologdvinity/daydaze/issues/10).
+
 - Source: main checkout's `local-assets/downloads/game/curated-world/gardens/`.
 - Inspect the manifest and actual previews. Candidates: wisteria flower clusters,
   ivy pergola, rose arch, hanging planter and window flower boxes.
@@ -19,6 +21,8 @@ worktree before starting another. The owner is actively working on main.
 
 ## Richer architectural surfaces
 
+Tracked in [GitHub issue #12](https://github.com/dpologdvinity/daydaze/issues/12).
+
 - Source: `gardens/materials/Metal058B`, `Metal058C`, plus the `textures/` and
   `textures-pbr/` collections under the same curated-world directory.
 - The former are actual patinated copper textures; current authored roofs use
@@ -29,6 +33,8 @@ worktree before starting another. The owner is actively working on main.
   and compare arrival/day/night screenshots.
 
 ## Additional one-off architecture
+
+Tracked in [GitHub issue #11](https://github.com/dpologdvinity/daydaze/issues/11).
 
 - Source: `architecture/MANIFEST.md`, contact-sheet-2.png and contact-sheet-3.png.
 - Candidates: steampunk shopfront, Victorian greenhouse, rotunda, selected

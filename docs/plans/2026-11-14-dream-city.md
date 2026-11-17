@@ -92,12 +92,12 @@ scripts/screenshots.ts, docs/assets.md, docs/VISION.md.
   stone, use metallic trim, sky-colored glass and restrained night emission.
 - [x] Mount with an independent Suspense boundary. Stream updates from the
   city plan. Dispose owned geometries/materials and clear canvas readiness.
-- [ ] Capture arrival and representative streets, day/night, at low tier.
+- [x] Capture arrival and representative streets, day/night, at low tier.
   Inspect every frame and revise weak silhouettes or blocked views.
-- [ ] Run relevant browser tests, focused unit tests, lint/typecheck/format;
+- [x] Run relevant browser tests, focused unit tests, lint/typecheck/format;
   use GitHub verification for the full merge gate.
-- [ ] Integrate only the scenery files into the owner's checkout, preserving
-  existing edits; provide review screenshots and report verification limits.
+- [x] Prepare tested scenery-only merges, preserving the owner's edits; the
+  foundation is on main and the landmark batch is ready with review images.
 
 ## Visual review refinement: detailed one-off landmarks
 
@@ -110,9 +110,9 @@ Use verified CC-BY 4.0 sources, credit adaptations and retain source hashes.
 
 - [x] Verify one unique address per detailed model and suppress its fallback
   family, with tests that fail before the replacement is implemented.
-- [ ] Convert, inspect, validate and record exact near/far geometry costs.
-- [ ] Include replacement triangle and primitive costs in the existing budget.
-- [ ] Review arrival day/night and palace screenshots; browser checks must wait
+- [x] Convert, inspect, validate and record exact near/far geometry costs.
+- [x] Include replacement triangle and primitive costs in the existing budget.
+- [x] Review arrival day/night and palace screenshots; browser checks must wait
   for the expected landmarks to load before checking errors and render costs.
 
 ## Checkpoint: parked at the owner's request (2026-11-17)
@@ -129,3 +129,18 @@ checks, a fresh typecheck, in-game landmark screenshots, and review remain befor
 merging. The latest far palace is 4,849 triangles; use its generated cost rather
 than the earlier provisional 999-triangle estimate. Preserve the owner's
 independent avatar/UI work in the main checkout when resuming.
+
+## Resumed review and integration (2026-11-17)
+
+The owner authorized frequent commits/merges and one active worktree per task.
+The foundation was merged and pushed as `b32a0477`, and its landing worktree
+was removed. The three-landmark follow-up passed full verification on
+`ci/dream-city-landmarks-ready`, browser tests on
+`ci/dream-city-landmarks-review`, and all six final comparison screenshots
+were inspected. A roof-extrema regression and uniform-placement regression
+were each observed failing before the fixes, then passed.
+
+See `docs/plans/2026-11-17-dream-city-review.md` for images and verification
+links. Separate follow-ups are GitHub issues #10, #11 and #12, linked from
+`docs/plans/2026-11-17-collected-scenery-followups.md`. The previous parked
+checkpoint is historical; this batch has resumed and is ready to land.
