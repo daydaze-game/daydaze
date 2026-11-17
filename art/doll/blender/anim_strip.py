@@ -8,7 +8,6 @@ Writes /tmp/strip_0.png ... one per frame, evenly over the clip; montage
 them with ImageMagick. Reads .cache/out (the raw build), not public/.
 """
 
-import math
 import os
 import sys
 

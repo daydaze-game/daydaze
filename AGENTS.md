@@ -51,6 +51,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm test` | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts` |
 | `npm run test:coverage` | Same, with coverage into `coverage/` |
 | `npm run lint` | ESLint |
+| `ruff check .` | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed) |
 | `npm run typecheck` | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`) |
 | `npm run format` / `format:check` | Prettier |
 | `npm run verify` | lint, test, typecheck, format check, build, perf budget: the merge gate |

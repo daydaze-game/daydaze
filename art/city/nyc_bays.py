@@ -25,7 +25,7 @@ import sys
 
 import bmesh
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 KIT = os.environ.get("KIT", "/tmp/daydaze-city/megakit/Exports/glTF (Godot)")
 OUT = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else "/tmp/nyc-bays.glb"

@@ -52,6 +52,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Ruff (Python scripts in art/ and scripts/)
+        run: pipx run ruff==0.17.2 check .
       - name: Spelling (American English)
         run: npm run lint:spelling
       - name: Prettier

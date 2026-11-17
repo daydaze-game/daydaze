@@ -57,7 +57,6 @@ def scalp_hair(ctx, name, mat, extra, rise=0.0):
     hairline, pushed out a few millimetres) plus whatever `extra(bm, ctx)`
     adds to the bmesh. Added verts ride the nearest scalp vertex. `rise`
     lifts the hairline, for a cap whose edge hides under strand roots."""
-    eye_z = ctx.JB["lEye"][2]
     faces = []
     for f in ctx.FACES["body"]:
         pts = ctx.PB[f]
@@ -207,7 +206,6 @@ def afro(ctx, mat):
     """An afro puff: one rounded cloud with fine curl texture, cut back from
     the face and the nape so the hairline frames the face."""
     head = ctx.JB["head"]
-    eye_z = ctx.JB["lEye"][2]
 
     def extra(bm, ctx):
         top = _top(bm)
@@ -336,7 +334,6 @@ def cornrows(ctx, mat, rows=11):
     """Cornrows: raised ridges combed from the front hairline to the crown's
     back, converging toward the nape, then dropping as short plaits."""
     head = ctx.JB["head"]
-    eye_z = ctx.JB["lEye"][2]
 
     def extra(bm, ctx):
         scalp = [v.co.copy() for v in bm.verts]
@@ -567,7 +564,6 @@ def head_wrap(ctx, mat):
 
     def extra(bm, ctx):
         top = _head_box(bm, ctx)[4]
-        eye_z = ctx.JB["lEye"][2]
 
         def fold(t, a):
             # the cloth swells where it is wound over itself
@@ -675,7 +671,6 @@ def pigtails(ctx, strand_mat, cap_mat):
 
 
 def build(ctx):
-    import doll_outfits
 
     out = []
     only = [n for n in os.environ.get("HAIR_ONLY", "").split(",") if n]

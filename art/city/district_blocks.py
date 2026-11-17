@@ -26,7 +26,6 @@ import sys
 
 import bmesh
 import bpy
-from mathutils import Vector
 
 KIT = os.environ.get("KIT", "/tmp/db-kit/Ultimate Textured Building Pack - Dec 2019")
 FBX = os.path.join(KIT, "Textured Models", "Finished Textured Buildings", "FBX")
@@ -184,7 +183,6 @@ def place(obj):
     obj.scale = (METERS, METERS, METERS)
     bpy.ops.object.transform_apply(scale=True)
     xs = [v.co.x for v in obj.data.vertices]
-    ys = [v.co.y for v in obj.data.vertices]
     zs = [v.co.z for v in obj.data.vertices]
     # the pack faces -y (Blender's front); glTF's +z is Blender's -y, so the
     # body runs to +y, behind the wall plane
