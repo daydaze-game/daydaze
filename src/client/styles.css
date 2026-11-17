@@ -1469,6 +1469,13 @@ button:focus-visible {
   background: radial-gradient(circle at 50% 35%, #5a2a62, #20082a 75%);
 }
 
+.brow-options svg {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  background: #e7c8b7;
+}
+
 /* outfit tiles are full length */
 .tiles[data-tiles="outfit"] .tile img,
 .tiles[data-tiles="swim"] .tile img {

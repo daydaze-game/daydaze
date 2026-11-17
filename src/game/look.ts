@@ -160,6 +160,12 @@ export const BROWS = [
   { id: "brows-fox-snatched", label: "Fox" },
   { id: "brows-sculpted-espresso", label: "Sculpted" },
   { id: "brows-feathered-honey", label: "Feathered" },
+  { id: "brows-natural-straight", label: "Natural straight" },
+  { id: "brows-soft-arch", label: "Soft arch" },
+  { id: "brows-full-straight", label: "Full straight" },
+  { id: "brows-rounded", label: "Rounded" },
+  { id: "brows-high-arch", label: "High arch" },
+  { id: "brows-angled", label: "Angled" },
 ] as const;
 
 /** Each outfit is its own doll model, `outfit-<id>.glb`. */
