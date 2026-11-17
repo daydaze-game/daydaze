@@ -54,43 +54,43 @@ do not draw their apartment walls under the replacements.
 Files: art/city/build_dream_city.py, public/models/city-dream/architecture.glb,
 src/game/city/dreamCosts.generated.ts.
 
-- [ ] Build twelve distinct families: observatory, conservatory, palazzo,
+- [x] Build twelve distinct families: observatory, conservatory, palazzo,
   theater, ribbon, pagoda, heritage, shell, sail, storybook, lantern, terrace.
-- [ ] Model coordinates: x +/-10, z +/-8, ground y=0, body height 16;
+- [x] Model coordinates: x +/-10, z +/-8, ground y=0, body height 16;
   roof ornaments may reach y=26. Front faces +z. Ground-level center entry.
-- [ ] Single merged mesh per family, named family and family-lo; COLOR_0
+- [x] Single merged mesh per family, named family and family-lo; COLOR_0
   holds painted linear colors; TEXCOORD_0.x flags stone=0, metal=.25,
   glass=.5, foliage=.75, luminous=1. Preserve flags/names in optimization.
-- [ ] Near target 2k-7k triangles, far target 100-500. Generate exact cost map
+- [x] Near target 2k-7k triangles, far target 100-500. Generate exact cost map
   DREAM_MODEL_COST: Record<family, {tris:number;lo:number}> from exports.
-- [ ] Render a contact sheet and inspect the silhouettes before integration.
+- [x] Render a contact sheet and inspect the silhouettes before integration.
 
 ## Task 2: Pure city assignment and budget integration
 
 Files: src/game/city/dream.ts, dream.test.ts, plan.ts, budget.ts, relevant tests.
 
-- [ ] Tests first: complete building coverage, deterministic assignment,
+- [x] Tests first: complete building coverage, deterministic assignment,
   distinct district/street signatures, venue overrides, finite transforms,
   aligned bounds, no old residential bodies under dream meshes, real budgets.
-- [ ] Export DREAM_KINDS, DreamKind, DreamSpot and dreamBuilding(b, from,
+- [x] Export DREAM_KINDS, DreamKind, DreamSpot and dreamBuilding(b, from,
   detailRange). Spot contains id, kind, x,y,z,sx,sy,sz,yaw,color,far.
-- [ ] Select families coherently by district and location, curate spawn and
+- [x] Select families coherently by district and location, curate spawn and
   recognizable venue facades. Use deterministic variation between streets.
-- [ ] CityPlan.dream holds replacements. Keep visible shop names and sign
+- [x] CityPlan.dream holds replacements. Keep visible shop names and sign
   lights. Remove legacy building instances/bays/lots/houses/far from the
   active plan when replaced, retaining road/yard/street props.
-- [ ] trianglesOf/drawCallsOf include actual near/far architecture costs;
+- [x] trianglesOf/drawCallsOf include actual near/far architecture costs;
   adjust budget expectations only for intentional rendering changes.
-- [ ] Run focused planner, layout, budget tests and strict typecheck.
+- [x] Run focused planner, layout, budget tests and strict typecheck.
 
 ## Task 3: Renderer, visual review and handoff
 
 Files: src/client/city/DreamBuildings.tsx, CityScene.tsx,
 scripts/screenshots.ts, docs/assets.md, docs/VISION.md.
 
-- [ ] Instance each family/LOD with per-instance culling. Texture and weather
+- [x] Instance each family/LOD with per-instance culling. Texture and weather
   stone, use metallic trim, sky-colored glass and restrained night emission.
-- [ ] Mount with an independent Suspense boundary. Stream updates from the
+- [x] Mount with an independent Suspense boundary. Stream updates from the
   city plan. Dispose owned geometries/materials and clear canvas readiness.
 - [ ] Capture arrival and representative streets, day/night, at low tier.
   Inspect every frame and revise weak silhouettes or blocked views.
@@ -98,3 +98,34 @@ scripts/screenshots.ts, docs/assets.md, docs/VISION.md.
   use GitHub verification for the full merge gate.
 - [ ] Integrate only the scenery files into the owner's checkout, preserving
   existing edits; provide review screenshots and report verification limits.
+
+## Visual review refinement: detailed one-off landmarks
+
+The first runtime review established varied silhouettes but still showed overly
+smooth, simplified architecture. Add three textured landmarks from the owner's
+new curated collection: a Gothic manor at the arrival avenue, a crimson
+clocktower opposite it, and an ornate palace for Vesper Hotel. Preserve each
+model's authored PBR textures, individual identity and a separate distant mesh.
+Use verified CC-BY 4.0 sources, credit adaptations and retain source hashes.
+
+- [x] Verify one unique address per detailed model and suppress its fallback
+  family, with tests that fail before the replacement is implemented.
+- [ ] Convert, inspect, validate and record exact near/far geometry costs.
+- [ ] Include replacement triangle and primitive costs in the existing budget.
+- [ ] Review arrival day/night and palace screenshots; browser checks must wait
+  for the expected landmarks to load before checking errors and render costs.
+
+## Checkpoint: parked at the owner's request (2026-11-17)
+
+All city work is preserved on `feat/dream-city` in `.worktrees/dream-city`.
+The downloaded landmark source processing is also preserved separately on
+`feat/dream-assets` in `.worktrees/dream-assets`. No city patch has been applied
+to the main checkout, and no deployment or merge has been performed.
+
+The base city at `b83671f7` passed full verification and browser checks. The
+subsequent detailed-landmark integration is a work-in-progress checkpoint:
+final exported assets and their generated costs are included, but final budget
+checks, a fresh typecheck, in-game landmark screenshots, and review remain before
+merging. The latest far palace is 4,849 triangles; use its generated cost rather
+than the earlier provisional 999-triangle estimate. Preserve the owner's
+independent avatar/UI work in the main checkout when resuming.

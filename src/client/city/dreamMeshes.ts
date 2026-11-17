@@ -32,6 +32,7 @@ export function placeDreamMeshes(
 ) {
   const groups = new Map<string, DreamSpot[]>();
   for (const spot of spots) {
+    if (spot.landmark) continue;
     const key = `${spot.kind}|${spot.far}`;
     const list = groups.get(key) ?? [];
     list.push(spot);

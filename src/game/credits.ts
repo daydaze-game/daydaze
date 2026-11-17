@@ -141,6 +141,30 @@ export const CREDITS: readonly {
     title: "3D models",
     entries: [
       {
+        title: "Majestic Victorian Mansion [Rapid Assets]",
+        author: "RapidAssets",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/majestic-victorian-mansion-rapid-assets-cdd1a04e6c8b4a14b2681baf3c8fb66a",
+        usedFor:
+          "Vesper Hotel landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
+        title: "FREE Fairytale Gothic Manor House",
+        author: "Hamanzz",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/free-fairytale-gothic-manor-house-524cb97cc77541b99e225970efd8abe8",
+        usedFor:
+          "The arrival avenue's storybook manor, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
+        title: "Whimsical Crimson Clocktower",
+        author: "Mutasim",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/whimsical-crimson-clocktower-65e765a675eb4b3fab20e29a9c0fd02e",
+        usedFor:
+          "The arrival avenue's unique clocktower landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
         title: "Classic Art Nouveau Window",
         author: "Davide Tirindelli",
         license: "CC0 1.0",

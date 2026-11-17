@@ -24,7 +24,7 @@ import {
 import { facingOf, labelUv, FURNITURE, STREET_DRESS } from "./dressing.ts";
 import { LOT_SPECS, type PlacedLot } from "./districts.ts";
 import { dreamBuilding, type DreamSpot } from "./dream.ts";
-import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
+import { dreamTriangles, dreamDrawCalls } from "./dreamCosts.ts";
 import { LAMP_RANGE, type FurnitureSpot } from "./furniture.ts";
 import {
   STREET_DRAW_CALLS,
@@ -717,11 +717,7 @@ export function trianglesOf(plan: CityPlan): number {
     ) +
     plan.street.reduce((sum, p) => sum + STREET_TRIANGLES[p.kind], 0) +
     plan.far.length * FAR_BOX_TRIANGLES +
-    plan.dream.reduce(
-      (sum, spot) =>
-        sum + DREAM_MODEL_COST[spot.kind][spot.far ? "lo" : "tris"],
-      0,
-    )
+    plan.dream.reduce((sum, spot) => sum + dreamTriangles(spot), 0)
   );
 }
 
@@ -734,6 +730,6 @@ export function drawCallsOf(plan: CityPlan): number {
     new Set(plan.lots.map((lot) => `${lot.model}${lot.far}`)).size +
     // the far city's buildings
     (plan.far.length > 0 ? 1 : 0) +
-    new Set(plan.dream.map((spot) => `${spot.kind}${spot.far}`)).size
+    dreamDrawCalls(plan.dream)
   );
 }

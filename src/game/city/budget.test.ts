@@ -8,10 +8,13 @@ import { CHAT_GROUPS, nearestChatGroups } from "./chatGroups.ts";
 import { CHAT_DOLLS, CHAT_RADIUS } from "./tuning.ts";
 import { CITY_SPAWN } from "./layout.ts";
 import { HOUSE_MODELS, HOUSE_MODEL_TRIANGLES } from "./nyc.ts";
-import { DREAM_KINDS } from "./dream.ts";
+import { DREAM_KINDS, DREAM_LANDMARKS, type DreamSpot } from "./dream.ts";
+import { DREAM_LANDMARK_COST } from "./dreamLandmarkCosts.generated.ts";
 import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
+import { dreamTriangles } from "./dreamCosts.ts";
 import { QUEUE_LOOKS, QUEUE_PERSON_TRIS } from "./queues.ts";
 import {
+  worstViewDreamTriangles,
   BAYS_CAMERA,
   baysWanted,
   liveCost,
@@ -146,10 +149,7 @@ test("the low tier's cost counts its dream architecture", () => {
 test("overview prices all architecture around the player for its distant camera", () => {
   const at = CITY_SPAWN.position;
   const plan = planView(at, "low", false);
-  const all = plan.dream.reduce(
-    (n, s) => n + DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
-    0,
-  );
+  const all = plan.dream.reduce((n, s) => n + dreamTriangles(s), 0);
   assert.equal(lowTierCost(at, false).parts.dream, all);
 });
 
@@ -267,4 +267,39 @@ test("the sidewalk chat dolls are priced at the spawn, and none stand near the d
     [228, -292],
   ] as const)
     assert.deepEqual(nearestChatGroups(at, CHAT_RADIUS.low, 5), [], `${at}`);
+});
+
+test("textured landmarks are priced from their shipped near and far meshes", () => {
+  for (const kind of DREAM_LANDMARKS)
+    for (const far of [false, true]) {
+      const cost = DREAM_LANDMARK_COST[kind];
+      const actual = glbCost(`city-dream/${kind}${far ? "-lo" : ""}`);
+      assert.deepEqual(
+        actual,
+        {
+          tris: far ? cost.lo : cost.tris,
+          parts: far ? cost.loParts : cost.parts,
+        },
+        kind,
+      );
+    }
+  // A one-off model replaces its base family, rather than adding both costs.
+  const spot: DreamSpot = {
+    id: "test",
+    kind: "palazzo",
+    landmark: "palace",
+    far: false,
+    x: 0,
+    y: 0,
+    z: 0,
+    sx: 1,
+    sy: 1,
+    sz: 1,
+    yaw: 0,
+    color: "#ffffff",
+  };
+  assert.equal(
+    worstViewDreamTriangles([spot], [0, 0]),
+    DREAM_LANDMARK_COST.palace.tris,
+  );
 });

@@ -49,7 +49,18 @@ const fleetReady = async (page: Page) => {
 const cityReady = async (page: Page) => {
   await furnitureReady(page);
   await page.waitForFunction(
-    () => document.querySelector("canvas")?.dataset.architecture === "ready",
+    () => {
+      const canvas = document.querySelector("canvas");
+      return (
+        canvas?.dataset.architecture === "ready" &&
+        (canvas.dataset.landmarkExpected ?? "")
+          .split(",")
+          .filter(Boolean)
+          .every(
+            (name) => canvas.getAttribute(`data-landmark-${name}`) === "ready",
+          )
+      );
+    },
     null,
     { timeout: 300_000 },
   );
@@ -1478,6 +1489,7 @@ const SHOTS: {
     ["coast", "16:00", "-12,263", "-45,9,262,20,11,240"],
     ["storybook", "12:00", "-350,-256", "-380,8,-256,-340,9,-280"],
     ["skyline", "17:00", "8,12", "-95,95,145,30,12,-60"],
+    ["palace", "15:00", "31,38", "-10,10,30,32,18,72"],
   ].map(([name, time, at, cam]) => ({
     name: `dream-${name}`,
     query: `room=city&quality=low&time=${time}&at=${at}&cam=${cam}`,

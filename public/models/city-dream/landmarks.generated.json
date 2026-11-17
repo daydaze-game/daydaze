@@ -1,0 +1,251 @@
+{
+  "palace": {
+    "folder": "majestic-victorian-mansion-rapid-assets-cdd1a0",
+    "title": "Majestic Victorian Mansion [Rapid Assets]",
+    "author": "RapidAssets",
+    "uid": "cdd1a04e6c8b4a14b2681baf3c8fb66a",
+    "yaw": 270,
+    "height": 20,
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/cdd1a04e6c8b4a14b2681baf3c8fb66a",
+    "normalization": {
+      "sourceBoundsBlender": [
+        [
+          -0.3974151015281677,
+          -0.5,
+          -0.30037179589271545
+        ],
+        [
+          0.3974151015281677,
+          0.5,
+          0.30037179589271545
+        ]
+      ],
+      "scale": [
+        25.162606960700074,
+        16.0,
+        33.292073812321995
+      ],
+      "yawDegreesBlender": 270
+    },
+    "near": {
+      "tris": 18000,
+      "parts": 1,
+      "bounds": {
+        "min": [
+          -9.980517387390137,
+          0.008014954626560211,
+          -7.989264011383057
+        ],
+        "max": [
+          9.991949081420898,
+          19.99873924255371,
+          7.980562210083008
+        ]
+      },
+      "file": "/models/city-dream/palace.glb",
+      "bytes": 568528,
+      "sha256": "ed590855e209ac2e20e0faac4eb6b6b5628d30ef13383799a81bd59243d01649",
+      "textureSize": 1024,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "far": {
+      "tris": 4849,
+      "parts": 1,
+      "bounds": {
+        "min": [
+          -9.668052673339844,
+          0.016384035348892212,
+          -6.605654239654541
+        ],
+        "max": [
+          9.34895133972168,
+          19.838159561157227,
+          7.811273574829102
+        ]
+      },
+      "file": "/models/city-dream/palace-lo.glb",
+      "bytes": 208980,
+      "sha256": "e13ddbce06eff364dea6c3e3dd4e4a02cc5c60abedc2f85723b31e223510d2a2",
+      "textureSize": 512,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "sourceHashes": {
+      "license.txt": "b92bdc70cbd6ba9762e18722986a7a7160dd9cb3e46c290018240d40e6dad411",
+      "meta.json": "08539d344262ea00e8da334c898d1673188c19a2372e9c269f128a73f3c2a94f",
+      "scene.bin": "425da85001b24940cf9a43ef0a67d8590b7584c67d6785f8179e4b2937b26177",
+      "scene.gltf": "71e66079ecc99c65d54c672bc734f5ee70e3f3913a54badf6c1baabe937296b4",
+      "textures/tripo_material_22088a89-79af-461e-b7e3-6e7ec2bfe43b_baseColor.jpeg": "bf3cef97d02dcbebd1e42abd0ad903c31e4a44835c7bde9fb351b5606e75a09d",
+      "textures/tripo_material_22088a89-79af-461e-b7e3-6e7ec2bfe43b_metallicRoughness.png": "18ae9aee367649013e9f5b625a6e6e2a0b3b70c9540f20df5893a9049b1860ad",
+      "textures/tripo_material_22088a89-79af-461e-b7e3-6e7ec2bfe43b_normal.jpeg": "12c4cea491b9263da0e01ef9280322ef2b4ae8d8d19ac1f32a58604f9e9c6493"
+    }
+  },
+  "manor": {
+    "folder": "free-fairytale-gothic-manor-house-524cb9",
+    "title": "FREE Fairytale Gothic Manor House",
+    "author": "Hamanzz",
+    "uid": "524cb97cc77541b99e225970efd8abe8",
+    "yaw": 0,
+    "height": 26,
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/524cb97cc77541b99e225970efd8abe8",
+    "normalization": {
+      "sourceBoundsBlender": [
+        [
+          -0.2897443473339081,
+          -0.48951125144958496,
+          -0.5046470165252686
+        ],
+        [
+          0.29337331652641296,
+          0.4889456629753113,
+          0.4780985116958618
+        ]
+      ],
+      "scale": [
+        34.29839505734946,
+        16.352278535845656,
+        26.456492808532694
+      ],
+      "yawDegreesBlender": 0
+    },
+    "near": {
+      "tris": 16381,
+      "parts": 1,
+      "bounds": {
+        "min": [
+          -10.0,
+          0.0,
+          -8.0
+        ],
+        "max": [
+          10.0,
+          26.0,
+          8.0
+        ]
+      },
+      "file": "/models/city-dream/manor.glb",
+      "bytes": 477012,
+      "sha256": "304a7375c60efd46e0b3a14ede857d7c9956d8b1adce14b63af9a9a205df4657",
+      "textureSize": 1024,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "far": {
+      "tris": 1941,
+      "parts": 1,
+      "bounds": {
+        "min": [
+          -9.822796821594238,
+          0.0684119462966919,
+          -7.988913536071777
+        ],
+        "max": [
+          9.978418350219727,
+          21.072242736816406,
+          7.913640975952148
+        ]
+      },
+      "file": "/models/city-dream/manor-lo.glb",
+      "bytes": 143888,
+      "sha256": "90c7308ae0520e74ab13904ddde1a41d8d155d2448179999524798ca4844b99a",
+      "textureSize": 512,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "sourceHashes": {
+      "license.txt": "b829eb14c1ef48f5bb11a1da05885ccaf03a26c9644ccfbb4cb8ce7ebd5bcabc",
+      "meta.json": "a0e9304d6914d73f5ebd484261889f13eabacf8b196ddd1d2f0f45e97a02d722",
+      "scene.bin": "5207f85dd1b14a06d7e418710132f394275bc0d3af1d3b66cda43b8495fc4a63",
+      "scene.gltf": "511677e00f80df4819e9f767a326f45b0554b36025192f861dcf59e3b51fd471",
+      "textures/tripo_material_44c8058c-c54e-4c62-a21c-6b9a517febea_baseColor.jpeg": "6a6b54f0efb8f71faa9df1164c9a14887c572dbe54a5b302155d9cc6059b349c",
+      "textures/tripo_material_44c8058c-c54e-4c62-a21c-6b9a517febea_metallicRoughness.png": "1b1770485851ef74cd410a19071fbf929cb2b727d43fdce3c03fa9437e4f4a2a",
+      "textures/tripo_material_44c8058c-c54e-4c62-a21c-6b9a517febea_normal.jpeg": "dfca43cd7a3ece0b8fd125565677fe55aa3d877f1504665c896893f7d262873c"
+    }
+  },
+  "clocktower": {
+    "folder": "whimsical-crimson-clocktower-65e765",
+    "title": "Whimsical Crimson Clocktower",
+    "author": "Mutasim",
+    "uid": "65e765a675eb4b3fab20e29a9c0fd02e",
+    "yaw": 0,
+    "height": 26,
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/65e765a675eb4b3fab20e29a9c0fd02e",
+    "normalization": {
+      "sourceBoundsBlender": [
+        [
+          -0.2740826904773712,
+          -0.2767190933227539,
+          8.940696716308594e-08
+        ],
+        [
+          0.2740826904773712,
+          0.27671921253204346,
+          1.0000008344650269
+        ]
+      ],
+      "scale": [
+        36.48533945205715,
+        28.91017811874741,
+        25.99998062850488
+      ],
+      "yawDegreesBlender": 0
+    },
+    "near": {
+      "tris": 18000,
+      "parts": 1,
+      "bounds": {
+        "min": [
+          -10.004475593566895,
+          -0.000212420491152443,
+          -8.00926399230957
+        ],
+        "max": [
+          9.998725891113281,
+          25.998546600341797,
+          8.00075912475586
+        ]
+      },
+      "file": "/models/city-dream/clocktower.glb",
+      "bytes": 433736,
+      "sha256": "88f7b105422cd4b63d411df5d8ed5b154242362562057704f88ac8ef79c895c5",
+      "textureSize": 1024,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "far": {
+      "tris": 1049,
+      "parts": 1,
+      "bounds": {
+        "min": [
+          -8.022387504577637,
+          0.029733024537563324,
+          -7.4438700675964355
+        ],
+        "max": [
+          9.94709300994873,
+          23.550661087036133,
+          7.940550327301025
+        ]
+      },
+      "file": "/models/city-dream/clocktower-lo.glb",
+      "bytes": 120348,
+      "sha256": "0fa9545cba3491109e7dcb7fcd355d557340c775b610c5fbc54182b09bfe29f7",
+      "textureSize": 512,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "sourceHashes": {
+      "license.txt": "6fba8e15d247417cee6b8a89e7c357d9459724f0036f8d553d66060d2e59ce5a",
+      "meta.json": "c7a3d587d72d63aae9dcac6f8d60c5d1e0e6aca82af3794ffc2fa46cd0c83ea1",
+      "scene.bin": "321cf7bf6ac5513a9fe96f137981ebe7563abce28cf00fec7b52e0d88acc111b",
+      "scene.gltf": "a1984b262fc36fa2bbf1c5b4cd67d7ec046f48ab509dfde639afa8421466ed35",
+      "textures/tripo_material_627cfa3b-f177-4e33-897f-c6a2a566012f_baseColor.jpeg": "c90510b08be7f754df2de9bfdaeffcc37a6b13b02b3fea915e4cddf6e75c1ab9",
+      "textures/tripo_material_627cfa3b-f177-4e33-897f-c6a2a566012f_metallicRoughness.png": "49dc1f5dea2cbaf7d8e007be14ef97a3d2d952000de8bda08618ef1ff52e01ab",
+      "textures/tripo_material_627cfa3b-f177-4e33-897f-c6a2a566012f_normal.png": "2429f0e629f5094d0937178e89964535118c688664ca324fa8fccd37c566c9b4"
+    }
+  }
+}

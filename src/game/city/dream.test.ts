@@ -139,3 +139,22 @@ test("detail depends on distance to the body, so long frontages do not pop out n
   assert.ok(a.some((s) => s.far));
   assert.ok(dreamBuilding(b, [-45, 9], 0).every((s) => s.far));
 });
+
+test("detailed landmarks replace one central module each without repeating on wings", () => {
+  const expected = new Map([
+    ["bus-shelter-block", "manor"],
+    ["mural-wall", "clocktower"],
+    ["vesper-hotel", "palace"],
+  ]);
+  const all = BUILDINGS.flatMap((b) => {
+    const modules = spots(b);
+    const detailed = modules.filter((s) => s.landmark !== undefined);
+    if (expected.has(b.id)) {
+      assert.equal(detailed.length, 1, b.id);
+      assert.equal(detailed[0]?.landmark, expected.get(b.id));
+    } else assert.equal(detailed.length, 0, b.id);
+    return detailed;
+  });
+  assert.equal(all.length, expected.size);
+  assert.equal(new Set(all.map((s) => s.landmark)).size, expected.size);
+});
