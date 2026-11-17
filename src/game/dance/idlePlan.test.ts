@@ -2,8 +2,10 @@
 // then rotates idles, sober dolls skip wired loops, and temperaments differ.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { clipOf } from "./clips.ts";
+import { clipOf, pickClip } from "./clips.ts";
+import { BODY, type Body } from "../effects/substances.ts";
 import {
+  bodyIdle,
   CALM_IDLES,
   FIDGET_IDLES,
   GESTURE_IDLES,
@@ -140,4 +142,39 @@ test("a speaking NPC's gestures are baked social clips, varied by seed and line"
   assert.ok(used.size >= 5);
   // two lines in a row keep her manner; the next pair may change it
   assert.equal(talkClipFor(4, 0), talkClipFor(4, 1));
+});
+
+test("under a substance: a tic once at a slot's start, then its loops", () => {
+  const body = BODY.trip.comeup;
+  const ready = (id: string) => clipOf(id)?.period ?? 0;
+  let tics = 0;
+  for (let slot = 0; slot < 200; slot++) {
+    const first = bodyIdle(body, 4, slot, 0, ready);
+    const late = bodyIdle(body, 4, slot, IDLE_SLOT_SECONDS - 0.1, ready);
+    // late in a slot she is always on a loop, never repeating a tic
+    assert.ok(body.loops.includes(late), late);
+    if (body.tics.includes(first)) tics += 1;
+    else assert.equal(first, late);
+    // with the tic's pack not loaded she just plays the loop
+    assert.ok(body.loops.includes(bodyIdle(body, 4, slot, 0, () => 0)));
+  }
+  assert.ok(tics > 60 && tics < 140, `${tics} of 200`);
+  const doll = (b: Body | null) =>
+    pickClip({
+      loaded: true,
+      own: true,
+      slot: 3,
+      into: 9,
+      speed: 0,
+      walk: undefined,
+      mood: "idle",
+      hold: undefined,
+      dance: "",
+      couple: undefined,
+      seed: 4,
+      body: b,
+    });
+  assert.equal(doll(body)?.rate, body.rate);
+  assert.ok(body.loops.includes(doll(body)?.id ?? ""));
+  assert.equal(doll(null)?.rate, 1);
 });

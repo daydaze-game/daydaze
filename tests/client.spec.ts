@@ -338,12 +338,12 @@ test("the 18+ lounge stays shut without the age check", async ({ page }) => {
   await expect(roomTitle(page)).toHaveText("Downtown", { timeout: 150_000 });
 });
 
-test("Green Haze (18+, dev flag): a joint and shroom tea raise the high and the trip", async ({
+test("Green Haze (18+, dev flag): a joint and shroom tea land after their onset and show in her body", async ({
   page,
 }) => {
   test.setTimeout(330_000);
   const errors = collectErrors(page);
-  await page.goto(`${STILL}&room=green-haze&adult=1`);
+  await page.goto(`${STILL}&room=green-haze&adult=1&debug=1`);
   await expect(roomTitle(page)).toHaveText("Green Haze", { timeout: 150_000 });
   const canvas = canvasOf(page);
   await expect
@@ -354,12 +354,19 @@ test("Green Haze (18+, dev flag): a joint and shroom tea raise the high and the 
   expect(Number(await canvas.getAttribute("data-calls"))).toBeLessThan(250);
   await page.getByRole("button", { name: "Light a joint" }).click();
   await page.getByRole("button", { name: "Sip shroom tea" }).click();
+  await expect(canvas).toHaveAttribute("data-doses", "2");
+  // nothing yet: both take minutes to come on (game/effects/substances.ts)
+  await expect(canvas).toHaveAttribute("data-under", "");
+  // four minutes on, the tea is at its peak and the joint past its own
+  const later = page.getByRole("button", { name: "Debug: doses a minute on" });
+  for (let i = 0; i < 4; i++) await later.click();
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-high")))
     .toBeGreaterThan(0.2);
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-trip")))
     .toBeGreaterThan(0.3);
+  await expect(canvas).toHaveAttribute("data-under", "trip");
   expect(errors).toEqual([]);
 });
 

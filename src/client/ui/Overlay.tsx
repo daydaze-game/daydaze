@@ -94,7 +94,7 @@ import {
 import { wearable, type PurchaseResult, type ShopId } from "../../game/shop.ts";
 import { drink, relieve } from "../effects/drunk.ts";
 import { PRICES } from "../../game/market.ts";
-import { sipTea, takeHit } from "../effects/high.ts";
+import { take } from "../effects/high.ts";
 import type { MinigameId } from "../../game/hotspots.ts";
 import { VIEWS, type View } from "../world/CameraRig.tsx";
 import { clearCityMapRequest, useCityMapRequest } from "./cityMapRequest.ts";
@@ -1123,18 +1123,22 @@ export function Overlay({
                 <button
                   type="button"
                   className="drink"
-                  onClick={() => takeHit("joint")}
+                  onClick={() => take("joint")}
                 >
                   Light a joint
                 </button>
                 <button
                   type="button"
                   className="drink"
-                  onClick={() => takeHit("edible")}
+                  onClick={() => take("edible")}
                 >
                   Eat an edible
                 </button>
-                <button type="button" className="drink" onClick={sipTea}>
+                <button
+                  type="button"
+                  className="drink"
+                  onClick={() => take("tea")}
+                >
                   Sip shroom tea
                 </button>
               </>

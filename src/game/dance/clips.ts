@@ -9,7 +9,8 @@
 import type { CoupleRole } from "./couple.ts";
 import { MOCAP_CLIPS } from "./mocap.ts";
 import type { MocapClip, MocapPack } from "./mocapTypes.ts";
-import { idlePlan, seatPlan } from "./idlePlan.ts";
+import { bodyIdle, idlePlan, seatPlan } from "./idlePlan.ts";
+import type { Body } from "../effects/substances.ts";
 import { RUN_CLIP, needsRun, runRate, walkRate } from "./stride.ts";
 import type { Mood } from "../look.ts";
 
@@ -71,6 +72,11 @@ export type DollState = {
   own?: boolean;
   /** Which idle slot she is in (idlePlan.ts); 0 when standing has just begun. */
   slot?: number;
+  /** Seconds into that slot. */
+  into?: number;
+  /** How a substance has her stand (effects/substances.ts), or null sober:
+   * it swaps her standing idles for its loops and tics. */
+  body?: Body | null;
   /** Ground speed, m/s; above a crawl she walks. */
   speed: number;
   /** Her gait's walk clip (gaits.ts). */
@@ -168,6 +174,18 @@ export function pickClip(s: DollState): Play | null {
       return play(move.id, 1, s.couple === "follow" ? move.period / 2 : 0);
     }
     default:
+      if (s.body)
+        return play(
+          bodyIdle(s.body, s.seed, s.slot ?? 0, s.into ?? 0, (id) => {
+            const c = clipOf(id);
+            return c && (c.pack === "core" || s.packs?.has(c.pack))
+              ? c.period
+              : 0;
+          }),
+          s.body.rate,
+          0,
+          "idle-breathing",
+        );
       return play(
         idlePlan(s.seed, s.slot ?? 0, s.own === true, !!s.packs?.has("social")),
         1,

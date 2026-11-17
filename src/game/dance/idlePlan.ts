@@ -6,6 +6,7 @@
 // drawn twice in a row simply keeps playing. Pure and deterministic: the same
 // (seed, slot) always gives the same clip, which keeps the tests honest.
 
+import type { Body } from "../effects/substances.ts";
 import type { MocapPack } from "./mocapTypes.ts";
 
 /** Seconds a standing doll holds one idle before she may change it. */
@@ -129,6 +130,26 @@ export function idlePlan(
   if (roll < calm + fidget) return pickFrom(FIDGET_IDLES, h);
   if (roll < calm + fidget + phone) return pickFrom(PHONE_IDLES, h);
   return gestures ? pickFrom(GESTURE_IDLES, h) : pickFrom(FIDGET_IDLES, h);
+}
+
+/** The clip she plays `into` seconds of idle `slot` while a substance shows
+ * in her body (effects/substances.ts BODY): about half the slots open with
+ * one tic (a yawn, a laugh) played once, then she settles into one of the
+ * substance's loops. `ready(id)` gives a clip's length in seconds, or 0 while
+ * its pack hasn't loaded (then the tic is skipped). */
+export function bodyIdle(
+  body: Body,
+  seed: number,
+  slot: number,
+  into: number,
+  ready: (id: string) => number,
+): string {
+  const h = mix(seed, slot + 211);
+  if (h % 100 < 50) {
+    const tic = pickFrom(body.tics, h);
+    if (into < ready(tic) / body.rate) return tic;
+  }
+  return pickFrom(body.loops, mix(seed, slot + 307));
 }
 
 /** The slot a doll is in: `seconds` of standing (the player) or of the
