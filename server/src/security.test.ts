@@ -11,7 +11,7 @@ const allowed = parseAllowedOrigins(
 );
 const self = "https://api.daydaze.example";
 
-test("the allowlist keeps only valid origins, normalised", () => {
+test("the allowlist keeps only valid origins, normalized", () => {
   assert.deepEqual([...allowed].sort(), [
     "http://127.0.0.1:5173",
     "http://localhost:5173",

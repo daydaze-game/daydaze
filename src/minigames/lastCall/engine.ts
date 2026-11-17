@@ -372,7 +372,7 @@ export type Tip = {
   total: number;
 };
 
-/** Itemised tip. A drink with the wrong pour is sent back and tips nothing. */
+/** Itemized tip. A drink with the wrong pour is sent back and tips nothing. */
 export function tipFor(
   recipe: Recipe,
   verdict: Verdict,
