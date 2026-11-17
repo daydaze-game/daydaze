@@ -82,7 +82,7 @@ function Float({ k }: { k: number }) {
 
 /**
  * The Pride parade on the Beachside boardwalk: four floats under rainbow
- * arches roll east from one end to the other every few minutes, with
+ * arches roll east from one end to the other every hour and a half, with
  * dancers aboard. Floats out of the parade, and dancers far from the
  * camera, are hidden. Under reduced motion the floats stand still where
  * they are.

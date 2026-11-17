@@ -53,7 +53,7 @@ function starTexture() {
 }
 
 /**
- * The fireworks show over the sea off Beachside: every few minutes, shells
+ * The fireworks show over the sea off Beachside: once an hour, shells
  * climb from the water and burst into peonies, rings and drooping willows,
  * with a finale three at a time. One points draw, additive, no lights.
  * Booms reach the shore, fading with distance. Off under reduced motion.
