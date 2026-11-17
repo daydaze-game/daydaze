@@ -4,7 +4,13 @@
 // deliberate house style would otherwise produce hundreds of churn-only edits.
 {
   "globs": ["*.md", "docs/**/*.md", ".github/**/*.md"],
-  "ignores": ["docs/agents/investigations/**", "node_modules/**"],
+  // docs/assets.md is read by src/game/credits.test.ts, which matches each
+  // table row to its in-game credit exactly; bracketing its URLs breaks that
+  "ignores": [
+    "docs/agents/investigations/**",
+    "node_modules/**",
+    "docs/assets.md",
+  ],
   "gitignore": true,
   "config": {
     "default": true,
