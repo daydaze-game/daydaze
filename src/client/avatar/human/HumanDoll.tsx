@@ -108,7 +108,7 @@ const MODELS = "/models/doll";
 const REST_LID = 0.12;
 // how far a full molly lifts the upper lid off its rest (wide eyes); cocaine
 // is the intense stare, 70% as wide
-const MOLLY_LID = 0.08;
+const WIDE_LID = 0.08;
 const COCAINE_STARE = 0.7;
 
 // the baked clips come in their own file (a big one), fetched once the first
@@ -1346,7 +1346,7 @@ export function HumanDoll({
           Math.round(meters.cocaine.level * COCAINE_STARE * 50) / 50,
         )
       : 0;
-    const lid = closed ? 1 : REST_LID - wide * MOLLY_LID;
+    const lid = closed ? 1 : REST_LID - wide * WIDE_LID;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;

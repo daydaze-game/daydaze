@@ -80,7 +80,7 @@ export const DOSES = {
   },
   // a line of cocaine (30-60 mg, a common dose), insufflated: felt in 3-10
   // min, the rush peaks 7-16 min later and the main effect lasts 15-30 min
-  // (a line holds a while longer), 10-90 min in all. Redosing stacks (the
+  // (held a bit longer here for play), 10-90 min in all. Redosing stacks (the
   // redose urge), capped at 1.
   line: {
     substance: "cocaine",
