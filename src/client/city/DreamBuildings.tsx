@@ -36,8 +36,6 @@ function architectureMaterial(night: { value: number }) {
     return texture;
   });
   const [copperColor, copperNormal, copperSurface] = copper;
-  // These textures belong to this material, including under StrictMode remounts.
-
   const material = boxMapped(
     new THREE.MeshStandardMaterial({
       ...maps,
@@ -49,6 +47,7 @@ function architectureMaterial(night: { value: number }) {
     }),
     0.32,
   );
+  // These textures belong to this material, including under StrictMode remounts.
   material.addEventListener("dispose", () => {
     for (const texture of copper) texture.dispose();
   });
@@ -117,6 +116,12 @@ function architectureMaterial(night: { value: number }) {
           .replace(
             "mapN.xy *= normalScale;",
             "mapN.xy *= normalScale * (dreamStone + dreamBrass * 0.65);",
+          )
+          // The copper projection rotates with each building. Derive its
+          // own frame so normal detail follows the same UVs as its patina.
+          .replace(
+            "normal = normalize( tbn * mapN );",
+            "mat3 dreamCopperFrame = getTangentFrame(-vViewPosition, normal, dreamCopperUv);\nnormal = normalize(mix(tbn * mapN, dreamCopperFrame * mapN, dreamBrass));",
           ),
       )
       .replace(
@@ -144,7 +149,6 @@ function architectureMaterial(night: { value: number }) {
           "float dreamWindow = mix(0.7, 1.0, step(0.24, boxHash(floor(vBoxP.xz * 0.4) + floor(vBoxP.y * 0.3))));",
           "totalEmissiveRadiance = dreamGlass * mix(dreamSky * 0.2, dreamLit * dreamWindow * 0.16, uDreamNight);",
           "totalEmissiveRadiance += dreamDistantWindow * mix(vec3(0.025, 0.065, 0.075), vec3(0.32, 0.18, 0.07), uDreamNight);",
-
           "totalEmissiveRadiance += step(0.9, vSurface) * vColor.rgb * mix(0.32, 1.25, uDreamNight);",
         ].join("\n"),
       );
