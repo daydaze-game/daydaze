@@ -1,3 +1,5 @@
+// The crime record: offence count, store bans and the "stolen" tags, saved so
+// they survive a reload.
 import type { Penalty } from "./shoplift.ts";
 
 // Offence count and store bans, saved so a ban and a repeat offence survive a reload.

@@ -1,3 +1,5 @@
+// A tiny module-level store: `get` for frame loops, `use` for components, so
+// the 3D scene and the overlay read the same state without a provider.
 import { useSyncExternalStore } from "react";
 
 /** A module-level state the 3D scene and the overlay both read: `get` for

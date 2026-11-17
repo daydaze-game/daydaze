@@ -1,3 +1,5 @@
+// Touch and keyboard driving controls: on-screen pedals and steering, plus
+// the key map. Left steers positive, as the car model expects.
 import {
   useEffect,
   useState,

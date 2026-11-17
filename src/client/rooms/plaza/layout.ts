@@ -1,3 +1,5 @@
+// The Plaza's measurements and shopfront list, shared by the scene and the
+// shop pieces so doors, glass and the curb line up with `ROOMS.plaza`.
 import { ROOMS } from "../../../game/rooms.ts";
 
 // Plaza coordinates match ROOMS.plaza.walkable: the sidewalk runs x -12..12

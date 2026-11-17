@@ -1,3 +1,5 @@
+// The Velvet Room's two paintings, drawn into one canvas atlas (a sunburst and
+// a moon) so they share a material.
 import { useMemo } from "react";
 import * as THREE from "three";
 import { Batch } from "../shared/batch.ts";

@@ -1,3 +1,5 @@
+// A potted palm in a gold planter. Costs about a dozen draw calls, so rooms
+// with many palms use a batched version instead.
 import { useMemo } from "react";
 import * as THREE from "three";
 import { lathe, lumpy } from "../../avatar/dollGeometry.ts";

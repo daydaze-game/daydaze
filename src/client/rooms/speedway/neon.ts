@@ -1,3 +1,5 @@
+// The Speedway's neon colors, linear RGB above 1 so they clear the bloom
+// threshold on the high tier.
 import * as THREE from "three";
 
 // Linear RGB above 1 so the glow passes the bloom threshold on the high tier.

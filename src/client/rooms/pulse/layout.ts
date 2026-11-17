@@ -1,3 +1,5 @@
+// Pulse's measurements: walls, DJ booth, bar, dance floor and podiums, shared
+// by the set, the crowd and the walkable area.
 import * as THREE from "three";
 
 /** Walls: the side walls at x = ±WALL_X and the back at z = BACK_Z. The street side is open. */

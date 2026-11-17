@@ -1,3 +1,5 @@
+// The high tier's post stack. Its own chunk, so low-tier players never
+// download postprocessing.
 import {
   Bloom,
   EffectComposer,

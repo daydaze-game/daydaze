@@ -1,3 +1,5 @@
+// The glowing floor ring that opens a minigame when tapped. The hotspot comes
+// from the room's data in `src/game/`.
 import type { ThreeEvent } from "@react-three/fiber";
 import type { Hotspot, MinigameId } from "../../../game/hotspots.ts";
 import { hdr } from "./materials.ts";

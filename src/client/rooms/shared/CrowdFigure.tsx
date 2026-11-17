@@ -1,3 +1,5 @@
+// A background doll for club crowds, dancing or idling. It uses the same doll
+// as the player, which drops to its low-poly body at a distance.
 import type { DanceMoveId } from "../../../game/dance/moves.ts";
 import type { Look } from "../../../game/look.ts";
 import type { RoomId } from "../../../game/rooms.ts";

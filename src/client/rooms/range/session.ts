@@ -1,3 +1,5 @@
+// The driving range's client session: the swing phases (power, strike, ball
+// flight) over the pure bucket rules in `src/game/`, read by the panel and scene.
 import {
   addShot,
   bucketEmpty,

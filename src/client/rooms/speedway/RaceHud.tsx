@@ -1,3 +1,5 @@
+// The race HUD: speed, lap and lap clock, read ten times a second and shown
+// only while the player is driving.
 import { useEffect, useState, type JSX } from "react";
 import { hudOf, type Hud } from "../../../game/speedway/session.ts";
 import { SPEEDWAY_SPOTS } from "../../../game/speedway/spots.ts";

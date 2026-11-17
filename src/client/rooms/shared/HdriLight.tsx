@@ -1,3 +1,5 @@
+// Image-based lighting from a Poly Haven HDRI, high tier only. The low tier
+// renders nothing here and never downloads the file.
 import { Environment } from "@react-three/drei";
 import { Suspense } from "react";
 import { useQuality } from "../../world/quality.ts";

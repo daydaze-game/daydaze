@@ -1,3 +1,5 @@
+// The dance picker shown while the Dance mood is on: styles, the moves of the
+// chosen style, and social emotes. Keyboard: Tab, then Space or Enter.
 import { useState } from "react";
 import {
   DANCE_GROUPS,

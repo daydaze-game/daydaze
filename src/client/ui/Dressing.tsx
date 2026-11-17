@@ -1,3 +1,5 @@
+// The dressing room drawer: slides in from the right (a bottom sheet on
+// phones), Esc closes it, and focus returns to the toggle.
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { CloseIcon, MirrorIcon } from "./icons.tsx";
 

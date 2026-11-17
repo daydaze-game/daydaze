@@ -1,3 +1,5 @@
+// The neon "DANCE-OFF" sign over Pulse's floor. It reads the shared dance-off
+// clock each frame, so every client shows the same flash.
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type * as THREE from "three";

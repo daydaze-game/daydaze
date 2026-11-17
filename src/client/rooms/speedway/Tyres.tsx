@@ -1,3 +1,5 @@
+// Tyres lying flat, in one instanced draw call. The ring is baked flat, so
+// each instance carries only a position and a heading.
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Vec2 } from "../../../game/walk.ts";

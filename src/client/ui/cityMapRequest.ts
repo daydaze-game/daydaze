@@ -1,3 +1,5 @@
+// A one-bit request from the world (the bus stop's map board) for the city
+// map. The overlay opens it and clears the request.
 import { useSyncExternalStore } from "react";
 
 /** Something in the world (the bus stop's map board) asked for the city

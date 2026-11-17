@@ -1,3 +1,5 @@
+// The Speedway's car, built from the roster's body, wheels and mods, with
+// materials shared between cars that wear the same mod.
 import { useGLTF } from "@react-three/drei";
 import { useEffect, useMemo, type Ref } from "react";
 import {

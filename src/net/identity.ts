@@ -1,3 +1,4 @@
+// Who a session belongs to, as the server reports it.
 import { isValidDisplayName } from "../game/save.ts";
 import { isNetworkId } from "./networkProtocol.ts";
 

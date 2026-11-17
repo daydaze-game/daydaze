@@ -1,3 +1,5 @@
+// Maps keyboard codes to a move direction. Keys and the touch stick feed the
+// same move action, so a new device only adds a source.
 import type { Vec2 } from "./walk.ts";
 
 // Keyboard codes that mean "move", as [right, forward]. Keys and the touch

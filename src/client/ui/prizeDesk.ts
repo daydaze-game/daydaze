@@ -1,3 +1,5 @@
+// Where finished games hand in their score. The app grades it against the
+// saved best and pays out, and the prize card and confetti read the result.
 import type { Bests, Prize, PrizeGame } from "../../game/prizes.ts";
 import { createStore } from "../rooms/shared/store.ts";
 

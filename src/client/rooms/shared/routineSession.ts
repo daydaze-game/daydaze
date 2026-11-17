@@ -1,3 +1,5 @@
+// The client session for a judged routine on a clock (the gym's floor routine,
+// the rink's ice show), shared by the rooms that run one.
 import {
   closeOut,
   judgesScore,

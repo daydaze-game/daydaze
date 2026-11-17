@@ -1,3 +1,5 @@
+// The sushi conveyor: plates instanced along the counter's belt, moving with
+// the round's clock.
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useRef, type JSX } from "react";
 import { useFitted } from "../shared/Prop.tsx";

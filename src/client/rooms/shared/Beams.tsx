@@ -1,3 +1,5 @@
+// Club light beams: additive shader cones that fake volumetric light, since
+// real lights are the main per-pixel cost in forward shading.
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";

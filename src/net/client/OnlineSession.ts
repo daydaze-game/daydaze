@@ -1,3 +1,5 @@
+// The browser's online session: joins a room copy, sends movement at 12 Hz,
+// interpolates remote players 100 ms in the past and reports its status.
 import { validateLook, type Look } from "../../game/look.ts";
 import { ROOMS, type RoomId } from "../../game/rooms.ts";
 import type { Identity } from "../identity.ts";

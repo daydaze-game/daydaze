@@ -1,3 +1,5 @@
+// The Violet Hour's decor: damask walls over a walnut wainscot, the bar, the
+// pool table and the corner table, laid out from `layout.ts`.
 import { Suspense, useMemo } from "react";
 import { Prop } from "../shared/Prop.tsx";
 import * as THREE from "three";

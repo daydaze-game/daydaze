@@ -1,3 +1,5 @@
+// Every dance move as data: looped clips of joint angles on the doll rig,
+// eased between keys and wrapped at the end, plus the style groups.
 import { MOCAP_CLIPS, MOCAP_DANCE_IDS, MOCAP_EMOTE_IDS } from "./mocap.ts";
 import type { MocapClip } from "./mocapTypes.ts";
 // Dance moves are data: looped clips of joint angles on the doll rig. The

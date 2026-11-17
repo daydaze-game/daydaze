@@ -1,3 +1,5 @@
+// The fictional car roster (names, bodies, stats) and the banned-brand list a
+// test checks every name and note against.
 import type { CarSpec } from "./car.ts";
 
 /** Real car brands that must never appear in names or notes. Lower case, matched as whole words. */

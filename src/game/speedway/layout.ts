@@ -1,3 +1,4 @@
+// Where the Speedway's bumper arena and race tracks sit in the room.
 import type { Vec2 } from "../walk.ts";
 
 /** Where the bumper arena sits in the Speedway room. */

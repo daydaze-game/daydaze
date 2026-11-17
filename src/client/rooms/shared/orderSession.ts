@@ -1,3 +1,5 @@
+// The client session for an order station's shift: one ticket at a time, a
+// timer on each for the tip, and a prize at the end.
 import {
   dump,
   newShift,

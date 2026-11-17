@@ -1,3 +1,5 @@
+// The floor spots where the player taps to start a race or ride the bumper
+// cars.
 import type { Vec2 } from "../walk.ts";
 
 /** Where the player taps to start a race or ride the bumper cars. */

@@ -1,3 +1,5 @@
+// Where skates can go on (the streets, the rink, the skatepark) and how much
+// faster she rolls than she walks.
 import type { RoomId } from "../../game/rooms.ts";
 import { createStore } from "../rooms/shared/store.ts";
 

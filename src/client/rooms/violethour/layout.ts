@@ -1,3 +1,5 @@
+// The Violet Hour's measurements: walls, bar counter and tables, shared by
+// the decor and the walkable area.
 import * as THREE from "three";
 
 /** Walls: the side walls at x = ±WALL_X and the back at z = BACK_Z. The front is open to the street. */

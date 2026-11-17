@@ -1,3 +1,5 @@
+// Jail sentences and bail, saved as an end time on the wall clock so the
+// countdown survives a reload.
 import { spend } from "../wallet.ts";
 
 // Sentences run on the wall clock and are saved as an end time, so the
