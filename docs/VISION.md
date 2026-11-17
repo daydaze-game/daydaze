@@ -1,16 +1,27 @@
 # Daydaze: Vision and Decisions
 
-Daydaze is a multiplayer social hangout game that brings back the feeling of Club Penguin and Fantage for the people who grew up playing them, now in their late teens and early twenties. The game is rated for 13 and older, with separate 18+ servers for adult content.
+Daydaze is a multiplayer open-city game for adults: a GTA-style city to drive, explore and get into trouble in, full of glam places to dress up and hang out with people. It is made to entertain grown-ups, not to recreate the kids' games its players grew up on (that nostalgia framing was dropped on 2026-11-17). The game is rated for 13 and older, with separate 18+ servers for adult content.
 
 The name is a mix of daydream, a buzzed daze, and "the good old days".
 
 ## The one-line pitch
 
-GTA meets IMVU meets Fantage: an open city you drive, explore and get into trouble in (GTA), where you dress up and hang out with people in glam 3D spaces (IMVU), with the dress-up, minigames, pets and cosy nostalgia of the games you grew up on (Fantage).
+GTA meets IMVU: an open city you drive, explore and get into trouble in (GTA), where you dress up and hang out with people in glam 3D spaces (IMVU). GTA leads.
+
+## The GTA feel
+
+The city is the game, not a hallway between rooms. It should feel alive, a little dangerous and unpredictable:
+
+- Things happen without you: city-wide events like heists in progress, police chases, blackouts and storms, at different times and places, so every visit can turn into a story.
+- Driving is central: your own car, traffic, street races, cruising the strip at night.
+- Trouble has consequences: police, getting caught, City Jail.
+- Secrets reward exploring: hidden spots, after-hours parties you have to track down.
+- Guns only in game zones and in your own home.
+- Repeating scheduled shows (fireworks, the Pride parade) stay rare so they don't wear out; variety beats frequency.
 
 ## Who it is for
 
-- Players who grew up on Club Penguin and Fantage, now in their late teens and twenties; open to everyone 13 and older.
+- Adults, and older teens on the 13+ servers, who want an open city to mess around in with friends and strangers.
 - Not for children under 13 (no accounts under 13, so no COPPA data from children).
 
 ## What it feels like
@@ -18,7 +29,7 @@ GTA meets IMVU meets Fantage: an open city you drive, explore and get into troub
 - An adult social nightlife hangout in the spirit of IMVU and Habbo: lounges, clubs, bars, VIP rooms, dressed-up avatars, neon interiors, people posing and chatting.
 - Maximalist: dense, layered scenes, rich color, ornament, glow and constant small ambient motion.
 - Avatars are glam fashion dolls: oversized head, huge lined eyes, big glossy lips, slim long-limbed body, platform shoes. Never use the name or logo of the doll brand that inspired them (it is a trademark of MGA Entertainment).
-- Places to hang out plus a variety of minigames.
+- Places to hang out plus a variety of minigames, with the open city tying them together.
 - Pet lions and a subtle lion theme are optional and low priority.
 - Subtle mango references wherever they fit.
 - No AI-generated dialogue.
