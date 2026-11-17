@@ -103,6 +103,25 @@ function countLights(scene: THREE.Scene): number {
   return n;
 }
 
+/**
+ * The world-space box of what a ray hit. An instanced hit gets the box of
+ * that one instance, not the whole batch (a city block would cover the city).
+ */
+function pickBox(hit: THREE.Intersection, out: THREE.Box3): void {
+  const o = hit.object;
+  if (o instanceof THREE.InstancedMesh && hit.instanceId !== undefined) {
+    if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+    const local = o.geometry.boundingBox;
+    if (local) {
+      const m = new THREE.Matrix4();
+      o.getMatrixAt(hit.instanceId, m);
+      out.copy(local).applyMatrix4(m.premultiply(o.matrixWorld));
+      return;
+    }
+  }
+  out.setFromObject(o);
+}
+
 /** Inside the Canvas: samples gl.info twice a second, applies the toggles. */
 export function DevProbe() {
   const scene = useThree((s) => s.scene);
@@ -177,8 +196,12 @@ export function DevProbe() {
       hook.dispatchEvent(new CustomEvent("observe", { detail: scene }));
       hook.dispatchEvent(new CustomEvent("observe", { detail: gl }));
     }
-    // shift+click logs what is under the cursor and keeps it as __dd.pick
+    // shift+click logs what is under the cursor, keeps it as __dd.pick and
+    // outlines it; shift+click on empty sky clears the outline
     const el = gl.domElement;
+    const box = new THREE.Box3Helper(new THREE.Box3(), 0xffff00);
+    for (const m of [box.material].flat()) m.depthTest = false;
+    box.renderOrder = 999;
     const onDown = (e: PointerEvent) => {
       if (!e.shiftKey) return;
       const { camera, raycaster } = get();
@@ -188,22 +211,35 @@ export function DevProbe() {
         -((e.clientY - r.top) / r.height) * 2 + 1,
       );
       raycaster.setFromCamera(ndc, camera);
-      const hit = raycaster.intersectObjects(scene.children, true)[0];
-      if (!hit) return;
+      const hit = raycaster
+        .intersectObjects(scene.children, true)
+        .find((h) => h.object !== box);
+      if (!hit) {
+        box.removeFromParent();
+        return;
+      }
       dd.pick = hit.object;
+      pickBox(hit, box.box);
+      scene.add(box);
       const path: string[] = [];
       for (let o: THREE.Object3D | null = hit.object; o; o = o.parent) {
         path.unshift(o.name || o.type);
       }
+      const size = box.box.getSize(new THREE.Vector3());
       console.log(
         "[dev pick]",
         path.join(" > "),
-        hit.point.toArray(),
+        hit.instanceId === undefined ? "" : `instance ${hit.instanceId}`,
+        { point: hit.point.toArray(), size: size.toArray() },
         hit.object,
       );
     };
     el.addEventListener("pointerdown", onDown);
-    return () => el.removeEventListener("pointerdown", onDown);
+    return () => {
+      el.removeEventListener("pointerdown", onDown);
+      box.removeFromParent();
+      box.dispose();
+    };
   }, [scene, gl, get]);
   const freeCam = useFreeCam();
   return freeCam ? <OrbitControls makeDefault /> : null;
