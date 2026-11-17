@@ -26,6 +26,7 @@ import { CLUB_NIGHTS } from "../../../game/events.ts";
 import { MINIGAME_IDS, type MinigameId } from "../../../game/hotspots.ts";
 import { ROOMS, isRoomId, type RoomId } from "../../../game/rooms.ts";
 import { Inspector } from "./Inspector.tsx";
+import { RenderSection } from "./RenderSection.tsx";
 import { SceneTree } from "./SceneTree.tsx";
 import { actions, devState, patch, useDev } from "./store.ts";
 import { Pick, Section, Toggle, formatHour } from "./widgets.tsx";
@@ -246,6 +247,7 @@ export function DevPanel({
         <Toggle name="halfRes" label="half res" />
         <Toggle name="paused" label="pause" />
       </Section>
+      <RenderSection />
       <SceneTree />
       <Inspector />
       <NetLog />
