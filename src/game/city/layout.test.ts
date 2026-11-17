@@ -1,3 +1,5 @@
+// The city layout: every door targets a registered room and lands on walkable
+// ground, roads connect, and no footprint overlaps a road or another building.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { areaOf, clampToArea, isBlocked, stepInArea } from "../area.ts";

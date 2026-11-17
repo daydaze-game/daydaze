@@ -1,3 +1,5 @@
+// City chat groups: a dozen or more on sidewalks, spaced apart, the nearest first
+// and capped by the doll budget, and none placed beside a lamp or inside a wall.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { pointInPolygon } from "../walk.ts";

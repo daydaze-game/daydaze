@@ -1,3 +1,5 @@
+// Posture transitions: moving beats mood, sitting needs the Sit mood or a
+// wheelchair, and sit and stand each have a baked one-shot.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { MOVING, clipOf } from "./clips.ts";

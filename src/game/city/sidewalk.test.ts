@@ -1,3 +1,4 @@
+// Sidewalk strips: their geometry and how they line the roads.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { onSidewalk } from "./sidewalk.ts";

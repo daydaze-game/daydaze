@@ -1,3 +1,5 @@
+// The night market: stalls and lanterns keep clear of doors, stalls are solid with
+// a walkable lane, and every market person is a valid look.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { isBlocked, stepInArea } from "../area.ts";

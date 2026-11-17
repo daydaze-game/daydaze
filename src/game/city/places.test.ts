@@ -1,3 +1,5 @@
+// City places: each neighborhood has a fast-travel spot, and outdoor map spots
+// stand on open ground inside their neighborhood.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { clampToArea, isBlocked } from "../area.ts";

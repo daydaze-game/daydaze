@@ -1,3 +1,5 @@
+// The elevated train: a repeating timetable, smooth motion, doors open at stations,
+// trips board the right way, and the trestle clears the cross streets.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,5 @@
+// Conversation gestures: clips are baked emotes, a group is deterministic, one
+// member speaks at a time, and listeners react at moments of their own.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { clipOf } from "./clips.ts";

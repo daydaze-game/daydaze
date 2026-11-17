@@ -1,3 +1,5 @@
+// The speedway layout: the race tracks and the bumper arena occupy separate space
+// in the room.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Vec2 } from "../walk.ts";

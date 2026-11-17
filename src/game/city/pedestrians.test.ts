@@ -1,3 +1,5 @@
+// City pedestrians: valid looks on the sidewalks, walking back and forth on
+// walkable ground, nearest drawn first, men in menswear, and gait clips.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { naturalPace } from "../dance/clips.ts";

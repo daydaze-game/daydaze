@@ -1,3 +1,5 @@
+// Seated emotes map to baked seated loops, and a seated emote beats her pose,
+// which beats the seat.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { clipOf } from "./clips.ts";

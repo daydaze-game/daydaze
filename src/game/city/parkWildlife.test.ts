@@ -1,3 +1,5 @@
+// Park wildlife: every animal has a model and a pen off the paths and pond, only
+// appears near the park, and the low tier draws fewer species.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";

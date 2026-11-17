@@ -1,3 +1,5 @@
+// Race sessions: countdown then racing, stepping keeps the previous race for
+// interpolation, the HUD fields, and a bumper session with six cars.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carById } from "../driving/roster.ts";

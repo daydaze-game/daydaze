@@ -1,3 +1,5 @@
+// Car physics: full throttle reaches top speed and no more, braking stops in time,
+// steering turns yaw at speed, and walls keep the car out.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pointInPolygon, type Vec2 } from "../walk.ts";

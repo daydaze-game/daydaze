@@ -1,3 +1,5 @@
+// The farmers market: weekend hours with a ?market override, stall layout and
+// vendors, finding a stall from the lane, and buying produce for coins.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { CROPS, createDefaultFarm, sellProduce, type CropId } from "../farm.ts";

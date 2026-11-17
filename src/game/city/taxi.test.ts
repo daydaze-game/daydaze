@@ -1,3 +1,5 @@
+// Taxis: fares are base plus per stretch under a cap, routes follow the road
+// graph, every district reaches every other, and poses walk the route.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ROAD_EDGES, ROAD_NODES } from "./layout.ts";

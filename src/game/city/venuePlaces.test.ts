@@ -1,3 +1,4 @@
+// Venue places on the city map line up with the venues and their storefronts.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isBlocked } from "../area.ts";

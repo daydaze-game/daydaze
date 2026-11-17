@@ -1,3 +1,5 @@
+// Daylight: noon is full day, midnight is night with neon, evening glows gold,
+// light changes smoothly and wraps, and the hour comes from the clock or ?time.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

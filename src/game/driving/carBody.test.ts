@@ -1,3 +1,5 @@
+// Car bodies: the profile lofts into a body that fills the car, curves toward
+// the roof, nose and tail, and a finer loft has more triangles.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { loftBody, profileSpan, type Pt } from "./carBody.ts";

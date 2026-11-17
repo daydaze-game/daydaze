@@ -1,3 +1,5 @@
+// Walking pace: a style strolls at its clip, short trips stroll and long ones
+// hurry, held keys start a stroll, and the pace ramps without jumping.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { WALK_SPEED } from "../walk.ts";

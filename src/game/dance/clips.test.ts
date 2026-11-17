@@ -1,3 +1,5 @@
+// The clip catalog: unique ids, real loops and walk speeds, every named clip is
+// baked, nothing plays before its file loads, and walk and jog switching.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { GAIT_LIST } from "../gaits.ts";

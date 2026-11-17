@@ -1,3 +1,5 @@
+// City traffic: lights never both go green, cars stay on asphalt and keep their
+// distance, jeepneys look and start right, and traffic keeps moving.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { neighborhoodAt } from "./cells.ts";

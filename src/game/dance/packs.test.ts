@@ -1,3 +1,5 @@
+// Animation packs: every pack is well formed and the always-loaded core stays
+// under its size budget.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
