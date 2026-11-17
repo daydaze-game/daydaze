@@ -771,6 +771,23 @@ const SHOTS: {
     12,
     8,
   ),
+  // molly at its peak: neon glow, faint tracers, a wide smile
+  actionStrip(
+    "molly-peak",
+    "quality=high&room=green-haze&adult=1&debug=1",
+    async (page) => {
+      await page
+        .getByRole("button", { name: "Pop a molly" })
+        .click({ timeout: 150_000 });
+      const later = page.getByRole("button", { name: "Debug: a minute later" });
+      for (let i = 0; i < 4; i++) await later.click();
+    },
+    async (page) => {
+      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+    },
+    12,
+    8,
+  ),
   // the room actions: the ladder climb and the Hot Shots throw
   actionStrip(
     "move-climb",
