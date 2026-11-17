@@ -31,11 +31,11 @@ test("the two partners face each other", () => {
     // each partner's forward vector points at the other
     const fwd = (yaw: number) => [Math.sin(yaw), Math.cos(yaw)];
     const toFollow = [follow.at[0] - lead.at[0], follow.at[1] - lead.at[1]];
-    const toLead = [-toFollow[0]!, -toFollow[1]!];
+    const toLead = [-toFollow[0], -toFollow[1]];
     const [lx, lz] = fwd(lead.yaw);
     const [fx, fz] = fwd(follow.yaw);
-    assert.ok(Math.abs(lx! * toFollow[0]! + lz! * toFollow[1]!) > 0.999);
-    assert.ok(Math.abs(fx! * toLead[0]! + fz! * toLead[1]!) > 0.999);
+    assert.ok(Math.abs(lx * toFollow[0] + lz * toFollow[1]) > 0.999);
+    assert.ok(Math.abs(fx * toLead[0] + fz * toLead[1]) > 0.999);
   }
 });
 

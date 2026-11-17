@@ -600,7 +600,7 @@ const SUBURB_BUILDINGS: readonly Building[] = SUBURB_FRONT.map(
       height: b.h,
       style: b.style,
       color: b.color,
-      sign: b.sign,
+      ...(b.sign ? { sign: b.sign } : {}),
       ...(b.door ? { door: b.door } : {}),
     };
   },
@@ -1512,7 +1512,7 @@ const ARTS_BUILDINGS: readonly Building[] = ARTS_FRONT.map(
     height: b.h,
     style: b.style,
     color: b.color,
-    sign: b.sign,
+    ...(b.sign ? { sign: b.sign } : {}),
     ...(b.door ? { door: b.door } : {}),
   }),
 );
@@ -1915,7 +1915,7 @@ const UPTOWN_BUILDINGS: readonly Building[] = UPTOWN_FRONT.map(
     height: b.h,
     style: b.style,
     color: b.color,
-    sign: b.sign,
+    ...(b.sign ? { sign: b.sign } : {}),
   }),
 );
 
@@ -2007,7 +2007,7 @@ const BEACH_BUILDINGS: readonly Building[] = [
     height: b.h,
     style: b.style ?? "deck",
     color: b.color,
-    sign: b.sign,
+    ...(b.sign ? { sign: b.sign } : {}),
     ...(b.door ? { door: b.door } : {}),
   })),
   // each motel is a two-story strip at the back of its lot (a stair on one

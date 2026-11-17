@@ -416,7 +416,8 @@ function Warmup() {
     // compileAsync starts every compile now, then resolves as they finish
     const pending = gl.compileAsync(scene, camera);
     scene.visible = false;
-    pending
+    // fire-and-forget: the warm-up never blocks, and compile errors are ignored
+    void pending
       .catch(() => undefined)
       .then(() => {
         if (!live) return;

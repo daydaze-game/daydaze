@@ -309,6 +309,7 @@ function Fishing({ player }: { player: Player }) {
       return;
     }
     // stand her at the end of the dock, facing out to sea
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(FISH_SPOT[0], 0.02, FISH_SPOT[1]);
     player.seat.yaw = Math.PI;

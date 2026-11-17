@@ -158,7 +158,11 @@ test("every clip it can play is baked, in the pack it names", () => {
     const x = createLoco();
     run(x, 1, {});
     for (const p of run(x, 1, input)) ids.add(p.id);
-    for (const p of run(x, 1, { speed: 0, man: input.man })) ids.add(p.id);
+    for (const p of run(x, 1, {
+      speed: 0,
+      ...(input.man !== undefined && { man: input.man }),
+    }))
+      ids.add(p.id);
   }
   for (const yaw of [1, -1]) {
     const x = createLoco();

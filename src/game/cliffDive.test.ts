@@ -85,6 +85,6 @@ test("a worse entry finishes off the vertical; a flop lands flat", () => {
 
 test("splash size grows with a worse entry", () => {
   const sizes = (["rip", "clean", "splash", "flop"] as const).map(splashSize);
-  for (let i = 1; i < sizes.length; i++) assert.ok(sizes[i]! > sizes[i - 1]!);
-  assert.ok(sizes[0]! > 0 && sizes[3]! <= 2);
+  for (let i = 1; i < sizes.length; i++) assert.ok(sizes[i] > sizes[i - 1]);
+  assert.ok(sizes[0] > 0 && sizes[3] <= 2);
 });

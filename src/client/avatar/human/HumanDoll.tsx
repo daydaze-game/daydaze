@@ -106,8 +106,10 @@ import { HearingAids } from "./HearingAids.tsx";
 
 const MODELS = "/models/doll";
 const REST_LID = 0.12;
-// how far a full molly lifts the upper lid off its rest (wide eyes)
-const MOLLY_LID = 0.08;
+// how far a full molly lifts the upper lid off its rest (wide eyes); cocaine
+// is the intense stare, 70% as wide
+const WIDE_LID = 0.08;
+const COCAINE_STARE = 0.7;
 
 // the baked clips come in their own file (a big one), fetched once the first
 // room shows, so they don't share the bandwidth it loads over; dolls wear
@@ -213,22 +215,22 @@ export type WalkState = {
 
 type Props = {
   /** Closet body sliders, 0 to 100 each. */
-  body?: BodyShape;
+  body?: BodyShape | undefined;
   look: Look;
-  swim?: SwimLook | null;
+  swim?: SwimLook | null | undefined;
   mood: Mood;
-  dance?: DanceMoveId;
-  couple?: CoupleRole;
+  dance?: DanceMoveId | undefined;
+  couple?: CoupleRole | undefined;
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
-  hold?: string;
-  buzzed?: boolean;
-  walk?: { current: WalkState };
-  seed?: number;
+  hold?: string | undefined;
+  buzzed?: boolean | undefined;
+  walk?: { current: WalkState } | undefined;
+  seed?: number | undefined;
   /** The player's own doll: full detail at any distance on the low tier. */
-  own?: boolean;
+  own?: boolean | undefined;
   /** False where sitting down or standing up must not play a clip (a ride
    * that carries her seated). */
-  joins?: boolean;
+  joins?: boolean | undefined;
 } & Omit<ThreeElements["group"], "children">;
 
 /** The part files a look wears, by kind. */
@@ -293,7 +295,7 @@ const WHEEL_RADIUS = 0.32;
 /** The wheelchair a seated gait rolls in (art/doll/blender/wheelchair.py,
  * CC-BY by Loic): feet on the floor, the seat under the doll's hips; its rear
  * wheels turn with the ground speed. */
-function Wheelchair({ walk }: { walk?: { current: WalkState } }) {
+function Wheelchair({ walk }: { walk?: { current: WalkState } | undefined }) {
   const { scene } = useGLTF(`${MODELS}/wheelchair.glb`);
   const chair = useMemo(() => scene.clone(true), [scene]);
   const wheels = useMemo(
@@ -1333,10 +1335,18 @@ export function HumanDoll({
     // open eyes rest with the upper lid a little lowered, not wide and staring
     // only when it changes (or new meshes mount): a dictionary lookup per
     // worn mesh per doll per frame adds up in a crowd
-    // molly (her own doll only; peers: issue #8) opens the eyes wide, in
-    // fiftieths so the morphs change a few times a second, not every frame
-    const molly = own ? Math.round(getMeters().molly.level * 50) / 50 : 0;
-    const lid = closed ? 1 : REST_LID - molly * MOLLY_LID;
+    // molly and cocaine (her own doll only; peers: issue #8) open the eyes
+    // wide, in fiftieths so the morphs change a few times a second, not every
+    // frame; only molly smiles
+    const meters = own ? getMeters() : null;
+    const molly = meters ? Math.round(meters.molly.level * 50) / 50 : 0;
+    const wide = meters
+      ? Math.max(
+          molly,
+          Math.round(meters.cocaine.level * COCAINE_STARE * 50) / 50,
+        )
+      : 0;
+    const lid = closed ? 1 : REST_LID - wide * WIDE_LID;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;

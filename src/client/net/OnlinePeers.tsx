@@ -77,7 +77,10 @@ function PeerDoll({
   player: Player;
 }) {
   const group = useRef<THREE.Group>(null);
-  const walk = useMemo(() => ({ current: { speed: 0 } as WalkState }), []);
+  const walk = useMemo<{ current: WalkState }>(
+    () => ({ current: { speed: 0 } }),
+    [],
+  );
   const last = useRef<{ x: number; z: number } | null>(null);
   const [doing, setDoing] = useState<Doing>({
     mood: "idle",

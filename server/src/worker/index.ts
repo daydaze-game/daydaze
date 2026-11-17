@@ -60,7 +60,7 @@ const MAX_JSON_BYTES = 4096;
 type Session = Identity & { tokenHash: string };
 
 function json(body: unknown, status = 200, headers?: HeadersInit): Response {
-  return Response.json(body, { status, headers });
+  return Response.json(body, { status, ...(headers && { headers }) });
 }
 /** Error bodies are fixed codes only: never request input or internals. */
 function error(status: number, code: string, headers?: HeadersInit): Response {
