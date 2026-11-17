@@ -3,7 +3,15 @@
 // arrests and jail, minigame and prize payouts, and the online panels behind
 // ?online=1. Everything else gets state and setters through props.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { recordCaught } from "../game/crime/record.ts";
 import { penaltyFor, type Penalty } from "../game/crime/shoplift.ts";
 import { tagStolen } from "../game/crime/lift.ts";
@@ -87,7 +95,6 @@ import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
 import { floristDesk } from "./rooms/florist/session.ts";
 import { gardenDesk } from "./rooms/garden/gardenSession.ts";
-import { DevPanel } from "./world/DevTools.tsx";
 import { World } from "./world/World.tsx";
 
 const FADE_MS = 300;
@@ -115,6 +122,13 @@ type Visit = { room: RoomId; arrival: Spawn };
 function visit(room: RoomId, spawn: Spawn): Visit {
   return { room, arrival: arrive(ROOMS[room], spawn) };
 }
+
+/** The dev panel (press `), loaded only in development; production drops it. */
+const DevPanel = import.meta.env.DEV
+  ? lazy(() =>
+      import("./world/DevTools.tsx").then((m) => ({ default: m.DevPanel })),
+    )
+  : null;
 
 /**
  * The whole game: the 3D World, the overlay UI and the panels around it. Travel
@@ -635,13 +649,15 @@ export function App() {
             onlineSession()?.sendChat(text);
           }}
         />
-        {import.meta.env.DEV && (
-          <DevPanel
-            onGo={(room) => travel(room, ROOMS[room].spawn)}
-            onGame={setGame}
-            save={save}
-            onCoins={(n) => setSave((s) => ({ ...s, coins: s.coins + n }))}
-          />
+        {DevPanel && (
+          <Suspense fallback={null}>
+            <DevPanel
+              onGo={(room) => travel(room, ROOMS[room].spawn)}
+              onGame={setGame}
+              save={save}
+              onCoins={(n) => setSave((s) => ({ ...s, coins: s.coins + n }))}
+            />
+          </Suspense>
         )}
         {flags.debug && (
           <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />

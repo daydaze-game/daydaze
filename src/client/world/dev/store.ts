@@ -94,7 +94,11 @@ function loadPrefs(): DevPrefs {
   }
 }
 
-let state: DevState = {
+// made on first read, not at import, so a production build (which keeps only
+// useFreeCam) does no work and touches no storage when the module loads
+let state: DevState | null = null;
+
+const initialState = (): DevState => ({
   ...loadPrefs(),
   paused: false,
   selection: null,
@@ -106,17 +110,17 @@ let state: DevState = {
   textures: 0,
   lights: 0,
   objects: 0,
-};
+});
 const listeners = new Set<() => void>();
 
 /** The current state, read outside React (in useFrame, handlers). */
-export const devState = (): DevState => state;
+export const devState = (): DevState => (state ??= initialState());
 
 const PREF_KEYS: ReadonlySet<string> = new Set(Object.keys(DEFAULT_PREFS));
 
 /** Merges `next` in, saves prefs if any changed and wakes subscribers. */
 export function patch(next: Partial<DevState>): void {
-  state = { ...state, ...next };
+  state = { ...devState(), ...next };
   // the stats tick (twice a second) touches no prefs, so it never writes
   if (Object.keys(next).some((k) => PREF_KEYS.has(k))) {
     const { open, wireframe, freeCam, helpers, halfRes, closed, at } = state;
@@ -152,7 +156,7 @@ export function useDev(): DevState {
 
 /** Whether the free camera is on, so World can pause its own camera rig. */
 export function useFreeCam(): boolean {
-  return useSyncExternalStore(subscribe, () => state.freeCam);
+  return useSyncExternalStore(subscribe, () => devState().freeCam);
 }
 
 /** The live scene and renderer, registered by the probe for the panel. */

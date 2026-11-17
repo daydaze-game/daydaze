@@ -38,7 +38,7 @@ import { DrunkState } from "../effects/DrunkState.tsx";
 import type { MinigameId } from "../../game/hotspots.ts";
 import type { PickHandler } from "../rooms/shared/Floor.tsx";
 import { CameraRig, type View } from "./CameraRig.tsx";
-import { DevProbe, useFreeCam } from "./DevTools.tsx";
+import { useFreeCam } from "./dev/store.ts";
 import { NeonClamp } from "./NeonClamp.tsx";
 import { WATER } from "./water.ts";
 import { mayDive } from "../../game/dive.ts";
@@ -621,6 +621,11 @@ export type WorldProps = {
   pet: PetSave | null;
 };
 
+/** The dev panel's probe, loaded only in development; production drops it. */
+const DevProbe = import.meta.env.DEV
+  ? lazy(() => import("./DevTools.tsx").then((m) => ({ default: m.DevProbe })))
+  : null;
+
 export function World({
   room,
   arrival,
@@ -790,7 +795,12 @@ export function World({
               onPortal(portal);
             }}
           />
-          {import.meta.env.DEV && <DevProbe player={player} area={area} />}
+          {DevProbe && (
+            // its own boundary: loading it never holds up the room
+            <Suspense fallback={null}>
+              <DevProbe player={player} area={area} />
+            </Suspense>
+          )}
           {!freeCam && (
             <CameraRig
               player={player}
