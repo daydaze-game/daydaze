@@ -1,4 +1,4 @@
-// Photos: what the camera accepts and how a shot is checked and stored.
+// A photo's saved file name (place, day, time) and its caption (place, date).
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { photoCaption, photoFileName } from "./photo.ts";
