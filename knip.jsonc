@@ -26,23 +26,6 @@
   ],
   // a constant exported for tests' sake but used in its own file is fine
   "ignoreExportsUsedInFile": true,
-  "ignore": [
-    // Parked components with no importer yet; ARCHITECTURE.md describes the
-    // first two, and the far city and house passes are unfinished work. Owner
-    // decides whether to delete or wire them.
-    "src/client/city/CityHouses.tsx",
-    "src/client/city/FarCity.tsx",
-    // Exported components nothing imports, documented in ARCHITECTURE.md.
-    "src/client/city/DistrictLots.tsx",
-    "src/client/city/NycFacades.tsx",
-  ],
-  "ignoreDependencies": [
-    // documented as available for walking, cars and camera raycasts
-    "three-mesh-bvh",
-    // owner scripts (asset and Cloudflare tooling) run by hand
-    "cloudflare",
-    "gltfjsx",
-  ],
   // system tool called by scripts/gen-sounds.mjs
   "ignoreBinaries": ["ffmpeg"],
   "ignoreIssues": {
