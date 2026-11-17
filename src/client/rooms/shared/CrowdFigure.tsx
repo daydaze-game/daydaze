@@ -20,12 +20,12 @@ export function CrowdFigure({
   seed = 0,
 }: {
   look: Look;
-  dance?: boolean;
+  dance?: boolean | undefined;
   /** The move to loop (a dance or an emote such as "clap"); it dances when set. */
-  move?: DanceMoveId;
+  move?: DanceMoveId | undefined;
   /** The venue whose floor she dances on: with no `move`, she follows its style. */
-  floor?: RoomId;
-  seed?: number;
+  floor?: RoomId | undefined;
+  seed?: number | undefined;
 }) {
   const own = useCrowdMove(dance ? floor : undefined, seed);
   const shown = move ?? own;

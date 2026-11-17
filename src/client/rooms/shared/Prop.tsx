@@ -127,16 +127,16 @@ export function Prop({
   ...rest
 }: {
   model: string;
-  yaw?: number;
-  dir?: string;
+  yaw?: number | undefined;
+  dir?: string | undefined;
   /** A color every material is multiplied by (dust, dim, a neon wash). */
-  shade?: THREE.ColorRepresentation;
+  shade?: THREE.ColorRepresentation | undefined;
   /** A color every material is set to, keeping its maps (before `shade`). */
-  paint?: THREE.ColorRepresentation;
+  paint?: THREE.ColorRepresentation | undefined;
   /** A furniture look (game/home/palette.ts); 0 keeps the model's colors. */
-  tint?: number;
+  tint?: number | undefined;
   /** A picture for the model's "screen" material (a TV showing something). */
-  screen?: THREE.Texture;
+  screen?: THREE.Texture | undefined;
 } & Fit &
   Omit<ThreeElements["group"], "children">) {
   const fitted0 = useFittedParts(model, { width, depth, height }, dir);
