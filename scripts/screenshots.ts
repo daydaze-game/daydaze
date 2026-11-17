@@ -763,8 +763,12 @@ const SHOTS: {
       const later = page.getByRole("button", { name: "Debug: a minute later" });
       for (let i = 0; i < 5; i++) await later.click();
     },
-    async () => {},
-    20,
+    // a minute on in the peak: the click repaints the page, which starts the
+    // screencast frames
+    async (page) => {
+      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+    },
+    12,
     8,
   ),
   // the room actions: the ladder climb and the Hot Shots throw
