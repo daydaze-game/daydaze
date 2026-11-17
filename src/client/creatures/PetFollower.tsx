@@ -83,6 +83,9 @@ export function PetFollower({
     if (inYard !== desk.inYard) parkDesk.set({ inYard });
     if (desk.offLeash && !inYard) parkDesk.set({ offLeash: false });
     if (inYard && desk.offLeash) {
+      // written the moment it changes, not on the 20-frame tick: at the
+      // 1-2 fps of a software renderer that tick can take 20 s
+      if (!free.current) canvas.dataset.petFree = "1";
       const d = (free.current ??= newDog(pet.kind, f.x, f.z));
       stepDog(d, Math.min(dt, 0.1), parkWorld, Math.random);
       f.x = d.x;
@@ -98,6 +101,7 @@ export function PetFollower({
     if (free.current) {
       // leashed up again: beside you if you have left the yard, else where it stands
       free.current = null;
+      canvas.dataset.petFree = "0";
       pose.y = 0;
       if (!inYard) state.current = placeBeside(you);
     }
