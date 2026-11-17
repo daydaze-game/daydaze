@@ -335,3 +335,21 @@ From a linked worktree, find the source root from Git's common directory:
 `git rev-parse --git-common-dir` identifies the main checkout's `.git` folder;
 its parent contains `local-assets/downloads/game/curated-world/`. Source packs
 are local data; only runtime derivatives, scripts and credits belong in Git.
+
+## Curated collections added by the asset agents (2026-11-17)
+
+The expanded collection is in
+`local-assets/downloads/game/curated-world/`. Its folders include architecture,
+gardens, landmarks, textures and textures-pbr, furniture-decor, supplies-street,
+store-commerce, food-drinks, beach-pool-maritime, minigames-leisure,
+instruments-sound, vehicles, people, and creatures-and-decor. Consult each
+collection's manifest and preview sheets, then verify the individual license
+before importing a source. The `local-assets/work-*` folders contain the
+collectors' preparation scripts and render outputs.
+
+The city pass uses the Gothic manor (Hamanzz), crimson clocktower (Mutasim),
+and Victorian mansion (RapidAssets), with author credits in both asset ledgers.
+Further useful candidates already previewed include the Victorian greenhouse,
+steampunk shopfront, the rotunda, wisteria clusters, ivy pergola, flower boxes,
+and the CC0 verdigris copper textures. Several scans have open backs or ragged
+edges; collection alone does not establish that a model can ship unchanged.

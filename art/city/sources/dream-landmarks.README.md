@@ -30,5 +30,10 @@ orientation and footprint, bake the clocktower's static pose, simplify near/far
 meshes, resize textures to 1024/512 pixels and compress WebP/meshopt. Source hashes
 and exact normalization, bounds, export counts, output hashes and sizes are in
 `public/models/city-dream/landmarks.generated.json`. Entry facades face game +Z.
-Each uses one material primitive. Parent integration owns the matching public
+Detailed models use one material primitive. Distant models keep the original
+upper roof faces as a second primitive, preventing finials and spires from
+disappearing during simplification. The lower bodies retain enough geometry
+to preserve windows and balconies within the measured city budget. Runtime
+placement uses a uniform scale so the downloaded architecture is not stretched.
+Parent integration owns the matching public
 credits in `docs/assets.md` and `src/game/credits.ts`.
