@@ -36,13 +36,14 @@ every push and pull request to `main` and fails fast.
 
 | Command | What it checks |
 | --- | --- |
-| `npm run lint` | ESLint: TypeScript and React hooks rules |
+| `npm run lint` | ESLint: TypeScript, React hooks, and no `new` inside `useFrame` |
+| `npm run lint:headers` | every code file starts with a header comment |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
 | `npm test` | unit tests (Node's test runner) |
 | `npm run test:coverage` | the same, with a coverage report in `coverage/` |
 | `npm run build` | the production bundle in `dist/` |
-| `npm run verify` | lint, tests, types, format, build and the perf budget together |
+| `npm run verify` | lint, headers, tests, types, format, build and the perf budget together |
 
 Browser and server suites are slower; run the parts you touched:
 
@@ -65,6 +66,14 @@ Browser and server suites are slower; run the parts you touched:
   with a failing test that reproduces it.
 - **Strict types.** No `any`, no `as` where a type guard or `as const`
   works, no `@ts-ignore` or lint disables to get green: fix the cause.
+- **Header comment on every code file.** `npm run lint:headers` fails on a
+  tracked `.ts`, `.tsx`, `.mjs` or `.js` file under `src/`, `server/src/`,
+  `scripts/` or `tests/` that doesn't start with `//` or `/*` (after an
+  optional shebang).
+- **No `new` inside `useFrame`.** ESLint (`no-restricted-syntax`) flags it;
+  hoist the object to a module constant or `useMemo`/`useRef`. A one-off
+  branch (run once on sit-down, say) may use an
+  `eslint-disable-next-line ... -- reason`.
 - **Validate untrusted input** (network messages, `localStorage`, saves)
   before using it.
 - **Comments.** Every file starts with a comment saying what it's for;

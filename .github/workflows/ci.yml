@@ -52,6 +52,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: File headers
+        run: npm run lint:headers
       - name: Prettier
         run: npm run format:check
       - name: TypeScript (client, game and Worker)
