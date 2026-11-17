@@ -1,3 +1,4 @@
+// World sounds stay silent and never throw when Web Audio is unavailable.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resetSharedAudioBusForTests } from "./audioBus.ts";

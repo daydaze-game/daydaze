@@ -1,3 +1,5 @@
+// Tennis: swings grade by closeness to the ball, rallies quicken but cap, a
+// perfect late swing wins the point, and the match is seven points.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

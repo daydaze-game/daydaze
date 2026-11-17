@@ -1,3 +1,4 @@
+// Pride night runs for a while each cycle, the same for everyone.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

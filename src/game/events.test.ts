@@ -1,3 +1,5 @@
+// Club nights: their weekly UTC schedule, no two sharing a club at once,
+// countdowns to each night and its end, and a club playing its night.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

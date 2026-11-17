@@ -1,3 +1,5 @@
+// What counts as sidewalk: a strip's middle does; the road beside it and
+// the sea don't.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { onSidewalk } from "./sidewalk.ts";

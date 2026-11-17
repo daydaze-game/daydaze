@@ -1,3 +1,5 @@
+// Speedway bots: a medium bot laps every track three times without leaving the
+// road, and a hard bot is faster.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { nearestPointOnPolygon } from "../walk.ts";

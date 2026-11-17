@@ -1,3 +1,5 @@
+// The record crate: saved crates keep real tracks once each, and buying takes the
+// price and adds a record once.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buyRecord, cleanRecords, RECORD_PRICE } from "./records.ts";

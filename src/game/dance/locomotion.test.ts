@@ -1,3 +1,5 @@
+// Locomotion clips: a start clip plays once when setting off, a quick re-click
+// plays none, and a stop clip plays as the body brakes after a real walk.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { MOVING, clipOf } from "./clips.ts";

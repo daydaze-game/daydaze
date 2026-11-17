@@ -1,3 +1,5 @@
+// The park band's event feed: dueEvents hands over the next slice of a tune once,
+// skips what is already past, and stops at the end.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { BandEvent } from "../game/city/bandTunes.ts";

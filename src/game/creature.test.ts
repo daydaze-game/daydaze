@@ -1,3 +1,5 @@
+// Creature behavior: alert near a visitor, settling to idle, idle turning to walk
+// or meal, short-way turning, and a missing clip falling back to idle.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

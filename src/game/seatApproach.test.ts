@@ -1,3 +1,5 @@
+// Approaching a seat: the open front wins, a blocked front is approached from a
+// side, roomier sides are preferred, and it works for any facing.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { openApproach } from "./seatApproach.ts";

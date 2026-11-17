@@ -1,3 +1,5 @@
+// The ref-counted cache: holders of a key share one value, idle values linger and
+// revive without a rebuild, the oldest idle one is disposed, held ones never are.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { RefCache } from "./refCache.ts";

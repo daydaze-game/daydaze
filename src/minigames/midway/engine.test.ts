@@ -1,3 +1,5 @@
+// The midway engine: whack-a-mole schedules replay exactly and get harder, a mole
+// is hit once while up, and the gallery wraps, pops targets and restocks.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,5 @@
+// Peer actions on the wire: dances carry their move, seated players their
+// height, drivers their car and paint, and unknown input comes back safe.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

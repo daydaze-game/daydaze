@@ -1,3 +1,5 @@
+// Fireworks: shows run for their length then go dark, shells match for every
+// player over the sea, the finale fires in threes, and the countdown.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

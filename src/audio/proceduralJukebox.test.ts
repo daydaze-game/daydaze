@@ -1,3 +1,5 @@
+// The procedural jukebox: the track list and its metadata, safe fallback without
+// an AudioContext, and play/stop state on the controller.
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

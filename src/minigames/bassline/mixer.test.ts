@@ -1,3 +1,5 @@
+// The Bassline DJ mixer: default state, and BPM, filter cutoff and crossfader
+// values clamp to their ranges.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { DJMixerEngine, DEFAULT_DJ_STATE, SCALE_FREQUENCIES } from "./mixer.ts";

@@ -1,3 +1,5 @@
+// The shader compile gate: nothing new means no compile, new objects trigger one
+// compile then wait, compiles are spaced by an interval, and departed objects reset.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { CompileGate } from "./compileGate.ts";

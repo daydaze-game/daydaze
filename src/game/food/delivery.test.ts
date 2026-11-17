@@ -1,3 +1,5 @@
+// Food delivery: an order needs a real menu item, a courier arrives after the
+// timer, and progress stays in 0 to 1.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,5 @@
+// The after-room-ready queue: work runs once when the room shows, at once if it
+// already shows, and after a fallback wait on pages with no room.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { afterSceneReady, setSceneReady } from "./ready.ts";

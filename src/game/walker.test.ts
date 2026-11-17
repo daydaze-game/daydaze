@@ -1,3 +1,5 @@
+// The walker: step length scales with speed, targets are reached then forgotten,
+// yaw eases toward travel, blocked edges stop it, and a portal fires once per visit.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { roomArea } from "./area.ts";

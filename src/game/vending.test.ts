@@ -1,3 +1,5 @@
+// Vending machines: they stand against walls with room to use, are near within
+// reach, charge no more than the wallet holds, and use made-up brands.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as MARKET from "./market.ts";

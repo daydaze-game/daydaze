@@ -1,3 +1,5 @@
+// Emotes together: each has its own move kept out of the solo picker, piggyback
+// roles play their own moves, and the follower faces the leader.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { decodeAction, encodeAction } from "../peerAction.ts";

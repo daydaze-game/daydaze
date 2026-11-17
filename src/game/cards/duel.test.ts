@@ -1,3 +1,5 @@
+// Card duel messages round-trip and anything off is dropped; both players see the
+// same duel.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { deal, playable } from "./crazyEights.ts";

@@ -1,3 +1,5 @@
+// Parties: messages round-trip through the relay codec, and a party is a leader
+// with up to seven friends.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { encodeParty, MAX_PARTY, parsePartyMessage } from "./party.ts";

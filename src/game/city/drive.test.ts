@@ -1,3 +1,5 @@
+// City driving: the home parking spot, moving along the avenue, curbs and traffic
+// stopping the car, and stepping out of it.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { CarInput, CarState } from "../driving/car.ts";

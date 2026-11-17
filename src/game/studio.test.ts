@@ -1,3 +1,4 @@
+// Studio instruments are played from open floor and found from there.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { areaOf, isBlocked } from "./area.ts";

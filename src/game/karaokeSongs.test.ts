@@ -1,3 +1,5 @@
+// The songbook: melodies parse into notes and rests, 80+ public-domain songs in
+// 15+ genres with unique ids, and each song sings on the band.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { LANES, LEAD_IN } from "./karaokeGame.ts";

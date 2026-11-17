@@ -1,3 +1,5 @@
+// The dealership: showpieces stand in the showroom clear of turntables and the
+// desk, with a model and a made-up placard name, not a real marque.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";

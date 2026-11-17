@@ -1,3 +1,5 @@
+// Race flow: a countdown that ignores input, standings by lap and position, the
+// finish after the last lap, and the player's car coasting while bots drive on.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carById } from "../driving/roster.ts";

@@ -1,3 +1,5 @@
+// The blacklight shader patch lands after the emissive map and declares its
+// uniform; a shader with no emissive chunk is left alone.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { injectBlacklight } from "./blacklight.ts";

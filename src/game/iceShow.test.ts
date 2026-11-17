@@ -1,3 +1,5 @@
+// The ice show: its elements come in order inside the program's length, and
+// it's judged like a floor routine (stuck elements add their difficulty).
 import assert from "node:assert/strict";
 import test from "node:test";
 import { closeOut, judgesScore, newRoutine, press } from "./gymnastics.ts";

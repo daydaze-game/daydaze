@@ -1,3 +1,5 @@
+// The Star Siege engine: the ship slides within the edges, one shot flies at a
+// time, bombs cost a ship, clearing a wave pays, and the game ends on landing.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

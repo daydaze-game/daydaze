@@ -1,3 +1,5 @@
+// Stride matching: a walk clip plays at ground speed within the clamp, and one
+// that cannot keep up hands over to the jog.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { WALK_SPEED } from "../walk.ts";

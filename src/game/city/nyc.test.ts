@@ -1,3 +1,5 @@
+// New York block dressing: which blocks get bays, storeys under a cornice, one door
+// and shops per face, range-limited plans, and instanced-mesh bay limits.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cellsWithin } from "./cells.ts";

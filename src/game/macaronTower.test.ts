@@ -1,3 +1,5 @@
+// Macaron tower: a centered drop scores perfect, an off-center drop trims the
+// overhang, a miss ends it, and the slider sweeps edge to edge.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

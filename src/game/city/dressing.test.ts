@@ -1,3 +1,5 @@
+// Street dressing: signs stand on frontages, parked cars sit at the curb in a mix
+// of bodies, furniture stays off the asphalt, and gates raise their arches.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

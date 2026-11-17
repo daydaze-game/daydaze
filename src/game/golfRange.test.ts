@@ -1,3 +1,5 @@
+// The golf range: every target can be hit with the right power, a mishit goes
+// short and bends, and a bucket is ten balls.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

@@ -1,3 +1,4 @@
+// Mutes: a stored list keeps only player ids once each, and muting twice unmutes.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { cleanMutes, toggleMute } from "./mutes.ts";

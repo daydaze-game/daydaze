@@ -1,3 +1,5 @@
+// The dog park: the yard sits on the lawn, the fence is closed but for the gate,
+// gear fits, and dogs stay in the fence, fetch, and drink from the bowl.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { seededRng } from "../dialogue/pick.ts";

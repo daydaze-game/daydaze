@@ -1,3 +1,5 @@
+// Couple dancing: partners stand a gap apart facing each other, the lead is listed
+// first, and the follow runs half a loop behind with mirrored arms.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { coupleSpots, couplePoseAt } from "./couple.ts";

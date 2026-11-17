@@ -1,3 +1,5 @@
+// URL flags: the boot quality tier (flag, then saved setting), and ?join=<room>.<copy>
+// parsing, including ignoring bad or out-of-range values and building invite links.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { bootTier, inviteLink, readFlags } from "./flags.ts";

@@ -1,3 +1,5 @@
+// Surfing: chasing the pocket rides the wave and scores, standing still wipes
+// out, tricks need a full charge, and a finished ride stays finished.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

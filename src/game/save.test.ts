@@ -1,3 +1,5 @@
+// Saves: the key is versioned, defaults are fresh and unshared, saves round-trip,
+// and older saves missing newer fields still load.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK, DEFAULT_SWIM, type Look } from "./look.ts";

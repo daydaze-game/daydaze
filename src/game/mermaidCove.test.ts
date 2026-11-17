@@ -1,3 +1,5 @@
+// Mermaid cove: swimmers stay on their loops in the lagoon clear of the rocks,
+// swimPose fills the object it is given, and the singer sits by the shells.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

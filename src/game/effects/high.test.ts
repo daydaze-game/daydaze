@@ -1,3 +1,5 @@
+// The high meters: hits and tea raise them up to 1, both fade and never go
+// negative, and the trip cycles color (reduced motion keeps only color).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

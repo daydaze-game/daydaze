@@ -1,3 +1,5 @@
+// Ground types by place: boardwalk is wood, beach sand, lawn grass, the rest
+// pavement.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { groundAt } from "./ground.ts";

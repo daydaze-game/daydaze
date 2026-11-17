@@ -1,3 +1,5 @@
+// The city cell grid: its size and districts, point-to-cell mapping clamped at the
+// edge, and the cells loaded within a radius of the player.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

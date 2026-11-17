@@ -1,3 +1,5 @@
+// Karaoke duets: partners trade lines, each singer has their own part, and duet
+// messages round-trip with bad ones dropped.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { NOTES, type Song } from "./karaokeGame.ts";

@@ -1,3 +1,5 @@
+// The buzz meter: drinks add to it up to a cap, bad levels read as sober, and it
+// fades with a time constant and never grows.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

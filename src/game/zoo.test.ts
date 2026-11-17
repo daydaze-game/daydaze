@@ -1,3 +1,5 @@
+// The zoo: animals walk loops inside their habitats, visitors stay on the paths,
+// fences line every habitat, and every photo-hunt species has an animal.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { areaOf, isBlocked } from "./area.ts";

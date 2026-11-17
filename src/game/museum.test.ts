@@ -1,3 +1,4 @@
+// Museum exhibits stand in the hall with a clear spot to look from.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { areaOf, isBlocked } from "./area.ts";

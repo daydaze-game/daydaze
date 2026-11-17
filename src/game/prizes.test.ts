@@ -1,3 +1,5 @@
+// Prizes: scores grade S to C per game, mini golf counts lower as better, first
+// scores and new bests pay a bonus, and stored bests keep known games only.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

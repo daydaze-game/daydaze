@@ -1,3 +1,5 @@
+// The forest trail: a walkable path to the lookout, the creek crossed only on the
+// bridge, trees off the path, and animals, hikers and models in place.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";

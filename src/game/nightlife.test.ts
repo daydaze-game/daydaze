@@ -1,3 +1,5 @@
+// Nightlife venues: each is registered with a way back to the street, has one city
+// door with a forecourt, a spawn on its floor, and hotspots on the floor.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CITY_SURFACES, BUILDINGS } from "./city/layout.ts";

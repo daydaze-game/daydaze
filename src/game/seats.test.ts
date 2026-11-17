@@ -1,3 +1,5 @@
+// Seats: each faces its table or bar half a meter back, sofas give two seats and
+// beds one lying spot, and regulars' chairs are never offered to the player.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { isRoomId, ROOMS } from "./rooms.ts";

@@ -1,3 +1,5 @@
+// The Gem Glam engine: boards deal full and seeded with a move available, illegal
+// swaps cost nothing, legal swaps score, and four in a row makes a sparkle gem.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

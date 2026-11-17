@@ -1,3 +1,5 @@
+// Geometry batching merges pieces into one mesh per material and leaves the shared
+// source geometry untouched.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as THREE from "three";

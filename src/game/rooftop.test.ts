@@ -1,3 +1,5 @@
+// Rooftop lounge armchairs stand on the deck, block it alone, and can be walked
+// up to.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pointInPolygon, type Vec2 } from "./walk.ts";

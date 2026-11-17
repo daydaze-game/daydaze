@@ -1,3 +1,5 @@
+// Body sliders: defaults sit mid-range, values clamp to whole steps of 0 to 100,
+// saved bodies keep valid traits, and the scale stays in a doll-sized range.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

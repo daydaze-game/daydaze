@@ -1,3 +1,5 @@
+// Dialogue banks: every role has a bank with the required situations and enough
+// lines, known placeholders only, and no banned brands, slurs or drug words.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pickLine } from "./pick.ts";

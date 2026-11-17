@@ -1,3 +1,5 @@
+// Tracks: two with unique ids, closed centerlines without self-intersection,
+// grid slots clear of barriers, and checkpoints that span the road.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { nearestPointOnPolygon, pointInPolygon, type Vec2 } from "../walk.ts";

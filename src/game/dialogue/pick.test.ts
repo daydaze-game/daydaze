@@ -1,3 +1,5 @@
+// Line picking: a seed gives the same sequence, recent lines do not repeat,
+// weights and conditions decide eligibility.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";

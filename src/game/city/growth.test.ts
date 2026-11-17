@@ -1,3 +1,5 @@
+// City growth: lawns, tree pits and dunes grow things, dune grass stays on the
+// sand, and the whole city is planted within budget.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DECK } from "./boardwalk.ts";

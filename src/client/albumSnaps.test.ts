@@ -1,3 +1,5 @@
+// Album snapshots: new ones go first, the album keeps only the latest, and stored
+// entries are validated (jpeg or png data and a place).
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { addSnap, parseSnaps, SNAP_LIMIT } from "./albumSnaps.ts";

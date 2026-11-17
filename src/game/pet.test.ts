@@ -1,3 +1,5 @@
+// The pet: adoption needs a valid name, storage is checked field by field, hunger
+// grows and treats fill it, and the pet follows, stands and sits with you.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,5 @@
+// Home palettes: variant 0 keeps the model, each look takes its hue and keeps dark
+// darker than light, and an unknown look leaves the color alone.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TINT_COUNT, tintHsl } from "./palette.ts";

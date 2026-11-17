@@ -1,3 +1,5 @@
+// The WebSocket transport: it connects and relays text, reconnects with growing
+// backoff, treats full, banned, kicked and invalid closes as final, and closes once.
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { FakeSocket, FakeTimers } from "./fakes.ts";

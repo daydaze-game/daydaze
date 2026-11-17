@@ -1,3 +1,5 @@
+// The fixed-step loop: one step per whole tick with the leftover fraction, and
+// huge, negative or NaN frame gaps are capped.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MAX_TICKS_PER_FRAME, TICK_HZ, advance } from "./fixedStep.ts";

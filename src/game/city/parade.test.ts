@@ -1,3 +1,5 @@
+// The parade: it fits its slot, floats roll east one after another, and the
+// countdown reads 0 during the parade.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

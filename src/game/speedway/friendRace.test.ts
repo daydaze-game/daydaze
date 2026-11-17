@@ -1,3 +1,5 @@
+// Friend races: a shared countdown tolerates wrong clocks, it is the two of you
+// with no bots, race messages round-trip, and the faster time wins.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { carById } from "../driving/roster.ts";

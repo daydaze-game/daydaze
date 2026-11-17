@@ -1,3 +1,5 @@
+// Camera zoom: it targets the chest far away and the face up close, clamps at the
+// nearest and farthest distance, and narrows the lens for close-up portraits.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

@@ -1,3 +1,5 @@
+// Bumper cars: a head-on hit bounces both apart and counts a hit each, six bots
+// stay in the arena, and wall-pinned cars pass their push on.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BUMPER_CAR } from "../driving/roster.ts";

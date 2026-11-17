@@ -1,3 +1,5 @@
+// The online session: start uses the existing session or becomes a guest, an
+// unreachable server goes offline, joining picks a copy, and full or banned closes end the join.
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK } from "../../game/look.ts";

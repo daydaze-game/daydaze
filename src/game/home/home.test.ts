@@ -1,3 +1,5 @@
+// The apartment: the door starts locked, toggling keeps furniture, and saves with
+// missing or malformed fields load with safe defaults.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_HOME, toggleLock, validateHome } from "./home.ts";

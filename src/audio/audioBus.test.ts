@@ -1,3 +1,5 @@
+// The audio bus: master volume clamps and ignores bad input, mute zeroes the gain
+// and restores, music and SFX mute independently, and with no AudioContext it is inert but safe.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createAudioBus } from "./audioBus.ts";

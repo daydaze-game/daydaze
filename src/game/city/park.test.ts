@@ -1,3 +1,5 @@
+// The park: lawns, paths, lodge and pond tile without overlap, trees and lamps
+// stay on the lawn, and ducks and the boat stay on the water.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

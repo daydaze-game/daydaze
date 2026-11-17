@@ -1,3 +1,5 @@
+// Butterflies: flocks stay inside their places (fewer on the low tier), each one
+// stays in its flock, flies facing its heading at a gentle pace, and appears by day.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

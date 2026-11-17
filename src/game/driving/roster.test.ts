@@ -1,3 +1,5 @@
+// The car roster: unique ids, cheap to expensive across classes, no real brand
+// names, sane specs, and at least ten road cars.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,5 @@
+// Fishing: casts land between the shortest and longest throw, bites come after
+// the bobber lands, cast length limits the fish, and strike timing decides the catch.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

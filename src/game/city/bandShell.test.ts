@@ -1,3 +1,5 @@
+// The band shell schedule: programs fit the half hour and use real songbook tunes,
+// the band plays at the top and half hour, and the hint reads the next set.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

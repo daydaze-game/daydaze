@@ -1,3 +1,5 @@
+// Walkable-area clamping over several surfaces and blockers: a body stays clear of
+// blockers, slides along their faces, and a bad step stays put.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

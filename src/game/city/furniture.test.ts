@@ -1,3 +1,5 @@
+// Street furniture draw distances: small props vanish sooner than lamps, and
+// sooner still on the low tier.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

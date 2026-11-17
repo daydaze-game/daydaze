@@ -1,3 +1,5 @@
+// The cook-off: the ghost cook, highest score wins, relay messages round-trip, and
+// two cooks take different stoves.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { encodeCook, ghostScore, outcome, parseCook } from "./cookOff.ts";

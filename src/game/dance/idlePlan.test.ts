@@ -1,3 +1,5 @@
+// Idle plans: every clip is baked, the hash is deterministic, the player breathes
+// then rotates idles, sober dolls skip wired loops, and temperaments differ.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { clipOf } from "./clips.ts";

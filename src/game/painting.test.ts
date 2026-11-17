@@ -1,3 +1,4 @@
+// Painting storage: a PNG data URL is kept and anything else is dropped.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { cleanPainting } from "./painting.ts";

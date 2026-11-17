@@ -1,3 +1,5 @@
+// The wallet: better grades pay more, earning stops at the cap, spending returns
+// a balance only when covered, and only whole in-range amounts are coins.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MAX_COINS, earn, isCoins, payoutFor, spend } from "./wallet.ts";

@@ -1,3 +1,5 @@
+// Shooting-game opponents: every clip is carried by the clip file, they aim and
+// fire in the open, crouch behind cover, jog to peeks, and go down when tagged.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

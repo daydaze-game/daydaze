@@ -1,3 +1,5 @@
+// Cloud save sync: bursts upload once after a quiet spell, flush sends at once,
+// and saves go up only for an account whose cloud save has loaded.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createSaveSync, mayPush, stillReady } from "./saveSync.ts";

@@ -1,3 +1,5 @@
+// Lap counting: a forward pass through every checkpoint completes a lap, skipped
+// checkpoints and backward crossings do not, and the best lap is the fastest.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Vec2 } from "../walk.ts";

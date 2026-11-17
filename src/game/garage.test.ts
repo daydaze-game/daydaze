@@ -1,3 +1,5 @@
+// The garage: it always has the starter car, only real road cars once each, and
+// buying takes the dealership price and adds a car once.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ROAD_CARS } from "./driving/roster.ts";

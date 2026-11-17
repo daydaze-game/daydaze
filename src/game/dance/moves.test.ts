@@ -1,3 +1,5 @@
+// Dance moves: every picker move has an id, label and clip, clips loop cleanly,
+// name only rig joints, and sample finite poses that repeat each period.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { clipOf } from "./clips.ts";

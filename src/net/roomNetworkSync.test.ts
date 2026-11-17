@@ -1,3 +1,5 @@
+// Room network sync: joining sends the occupants a snapshot (not including the
+// joiner), deltas reach others but not self, and leaving removes the entity.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

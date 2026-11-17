@@ -1,3 +1,5 @@
+// Daily challenges: three games a day, the same for everyone, each paying once at
+// its target, and stored challenges keep only known games.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

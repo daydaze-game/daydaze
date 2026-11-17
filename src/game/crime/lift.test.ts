@@ -1,3 +1,5 @@
+// Shoplifting stock: counters have stealth profiles, lifted stock is tagged and
+// known to its shop, and stolen tags survive a save.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DEFAULT_LOOK } from "../look.ts";
