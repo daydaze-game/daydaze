@@ -5,6 +5,7 @@
 import { DANCE_OFF_EVERY } from "../../../game/danceOff.ts";
 import {
   heldClock,
+  toNextStart,
   wallSeconds,
   type EventClock,
 } from "../../../game/clock.ts";
@@ -16,9 +17,17 @@ const clock: EventClock | null = Number.isFinite(PREVIEW)
   ? heldClock(DANCE_OFF_EVERY, PREVIEW)
   : null;
 
+/** A dev panel skip, seconds (0 outside development). */
+let skew = 0;
+
 /** The dance-off clock, seconds. */
 export function danceOffClock(): number {
-  return clock ? clock.read() : wallSeconds();
+  return (clock ? clock.read() : wallSeconds()) + skew;
+}
+
+/** Dev panel: skip to the start of the next dance-off. */
+export function devStartDanceOff(): void {
+  skew += toNextStart(danceOffClock(), DANCE_OFF_EVERY);
 }
 
 /** The player started dancing: a held preview clock runs on from here. */

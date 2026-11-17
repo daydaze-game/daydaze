@@ -6,15 +6,21 @@
 import { useEffect, useState } from "react";
 import { nightsAt, type ClubNight } from "../../game/events.ts";
 import type { RoomId } from "../../game/rooms.ts";
-import { nightClock } from "../city/eventClocks.ts";
+import { nightClock, onNightSkip } from "../city/eventClocks.ts";
 
 /** The night on in `room` right now, or null. */
 export function useNight(room: RoomId): ClubNight | null {
   // the tick only makes the caller draw again, which reads the clock again
   const [, setTick] = useState(0);
   useEffect(() => {
-    const id = window.setInterval(() => setTick((t) => t + 1), 30_000);
-    return () => window.clearInterval(id);
+    const tick = () => setTick((t) => t + 1);
+    const id = window.setInterval(tick, 30_000);
+    // a dev panel skip shows at once rather than at the next half minute
+    const stop = onNightSkip(tick);
+    return () => {
+      window.clearInterval(id);
+      stop();
+    };
   }, []);
   return nightsAt(room, nightClock())[0] ?? null;
 }

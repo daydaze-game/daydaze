@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { heldClock, shiftedClock } from "./clock.ts";
+import { heldClock, shiftedClock, toNextStart } from "./clock.ts";
 
 /** A fake wall clock in seconds the test moves by hand. */
 function fakeNow(start: number) {
@@ -40,4 +40,11 @@ test("a shifted clock lands `into` seconds into an event, then advances", () => 
   assert.equal(((first % 300) + 300) % 300, 280);
   wall.t += 3;
   assert.equal(clock.read(), first + 3);
+});
+
+test("toNextStart moves a clock to the start of an event's next run", () => {
+  assert.equal(toNextStart(1_000, 240), 200); // 1000 % 240 = 40 in
+  assert.equal((1_000 + toNextStart(1_000, 240)) % 240, 0);
+  assert.equal(toNextStart(960, 240), 0); // a run starting right now
+  assert.equal(toNextStart(-10, 240), 10); // negative times wrap the same way
 });

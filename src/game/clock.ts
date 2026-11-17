@@ -52,3 +52,13 @@ export function shiftedClock(
     release: () => {},
   };
 }
+
+/**
+ * Seconds to add to clock time `t` so it stands at the start of the next run
+ * of an event that comes round every `every` seconds (0 if one starts now).
+ * The dev panel uses it to set an event off on demand.
+ */
+export function toNextStart(t: number, every: number): number {
+  const into = ((t % every) + every) % every;
+  return into === 0 ? 0 : every - into;
+}

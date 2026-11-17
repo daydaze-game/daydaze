@@ -9,6 +9,12 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
 import { cityHour, setDevHour } from "../city/daylight.ts";
+import {
+  DEV_EVENTS,
+  devStartEvent,
+  devStartNight,
+} from "../city/eventClocks.ts";
+import { devStartDanceOff } from "../rooms/pulse/danceOffClock.ts";
 import { clampToArea, type WalkArea } from "../../game/area.ts";
 import { CLUB_NIGHTS } from "../../game/events.ts";
 import { MINIGAME_IDS, type MinigameId } from "../../game/hotspots.ts";
@@ -281,13 +287,6 @@ function formatHour(h: number): string {
   return `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
-/** The night is read once at start, so changing it reloads the page. */
-function reloadWith(key: string, value: string): void {
-  const url = new URL(window.location.href);
-  url.searchParams.set(key, value);
-  window.location.assign(url);
-}
-
 /** A dropdown that fires on choosing, then resets to its label. */
 function Pick({
   label,
@@ -380,7 +379,16 @@ export function DevPanel({
         <Pick
           label="event night"
           options={CLUB_NIGHTS.map((n) => n.id)}
-          onPick={(v) => reloadWith("night", v)}
+          onPick={devStartNight}
+        />
+        <Pick
+          label="start event"
+          options={[...DEV_EVENTS, "dance-off"]}
+          onPick={(v) => {
+            if (v === "dance-off") devStartDanceOff();
+            const e = DEV_EVENTS.find((id) => id === v);
+            if (e) devStartEvent(e);
+          }}
         />
       </div>
       <div>
