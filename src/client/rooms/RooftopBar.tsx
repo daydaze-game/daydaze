@@ -1,3 +1,5 @@
+// The Rooftop Bar room: a bar, DJ booth, lounge seating and fire pit under
+// the night sky. Drinks go through the buzz (18+ only).
 import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef, type ReactNode } from "react";

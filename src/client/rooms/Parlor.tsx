@@ -1,3 +1,5 @@
+// The Parlor room: a salon with walnut cases, leather chairs and neon, run by
+// a talking NPC.
 import { useFrame } from "@react-three/fiber";
 import { useRef, type JSX } from "react";
 import { useMemo } from "react";

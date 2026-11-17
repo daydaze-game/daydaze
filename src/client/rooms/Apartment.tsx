@@ -1,3 +1,5 @@
+// A player's apartment: the room shell plus the furniture, art and pottery
+// they placed, drawn from the home save.
 import { useThree } from "@react-three/fiber";
 import { pottery } from "./pottery/session.ts";
 import { PotMesh } from "./pottery/PotMesh.tsx";

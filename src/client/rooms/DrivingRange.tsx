@@ -1,3 +1,5 @@
+// The Driving Range room: tee bays, a target field and ringed greens, with
+// the shots handled in `range/session.ts`.
 import { Stars } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";

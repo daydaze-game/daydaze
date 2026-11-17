@@ -1,3 +1,5 @@
+// The Plaza room: the starting square with its street, storefronts, palms,
+// string lights and the gate to the Amusement Park.
 import { Environment, Lightformer } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";

@@ -1,3 +1,5 @@
+// The marina's fishing session: cast, wait for a bite, hook it in the window,
+// tally the trip by `game/fishing.ts`.
 import {
   addCatch,
   biteDelay,

@@ -1,3 +1,5 @@
+// The Haunted House room: a gloomy parlor with drifting ghosts and the
+// escape-room set.
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";

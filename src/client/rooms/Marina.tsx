@@ -1,3 +1,5 @@
+// The Marina room: docks, yachts, a bar, fishing and the jet ski launch, with
+// a fleet of boats on the water.
 import { Stars, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";

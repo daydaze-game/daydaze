@@ -1,3 +1,4 @@
+// The Runway Walk session: a timed cue routine built on `routineSession`.
 import { PROGRAM, PROGRAM_SECONDS } from "../../../game/catwalk.ts";
 import { createRoutineSession } from "../shared/routineSession.ts";
 

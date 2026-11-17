@@ -1,3 +1,4 @@
+// The museum tour's shared state: which exhibit the camera is on.
 import { createStore } from "../shared/store.ts";
 
 /** Which exhibit the visitor is looking at (an index into EXHIBITS), or

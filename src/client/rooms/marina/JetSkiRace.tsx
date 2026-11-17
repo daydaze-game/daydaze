@@ -1,3 +1,5 @@
+// The Harbor Run in the 3D scene: drives the player's jet ski with the shared
+// fixed-step physics, runs the rivals, and pays out at the finish.
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

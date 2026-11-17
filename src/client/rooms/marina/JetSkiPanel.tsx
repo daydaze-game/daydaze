@@ -1,3 +1,5 @@
+// The jet-ski rental overlay: starts the Harbor Run, then shows the race HUD
+// and the drive controls.
 import type { JSX } from "react";
 import { driving } from "../../world/driving.ts";
 import { DriveControls } from "../speedway/DriveControls.tsx";

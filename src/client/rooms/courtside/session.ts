@@ -1,3 +1,5 @@
+// The courtside tennis session: a seven-point match against the club pro,
+// graded on swing timing by `game/tennis.ts`.
 import {
   ballSeconds,
   gradeSwing,

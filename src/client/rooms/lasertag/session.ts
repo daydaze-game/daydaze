@@ -1,3 +1,5 @@
+// The laser tag and paintball session: a timed round on either field, with
+// shots stepped by `game/laserTag.ts` and tickets paid at the prize desk.
 import {
   LASER_FIELD,
   newRound,

@@ -1,3 +1,4 @@
+// The seal show's overlay: the shared routine card with the show's wording.
 import type { JSX } from "react";
 import { RoutineCard } from "../gym/RoutinePanel.tsx";
 import { sealShow } from "./session.ts";

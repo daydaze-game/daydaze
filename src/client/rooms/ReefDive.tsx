@@ -1,3 +1,5 @@
+// The Reef Dive room: an underwater reef and wreck with air that runs down,
+// following the dive rules in `game/dive.ts`.
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

@@ -1,3 +1,4 @@
+// The Plaza's carnival gate to the Amusement Park: an `Arch` with its sign.
 import { Arch } from "../shared/Arch.tsx";
 
 /** The carnival arch on the Plaza curb that leads to the Amusement Park. */

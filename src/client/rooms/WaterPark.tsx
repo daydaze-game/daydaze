@@ -1,3 +1,5 @@
+// The Water Park room: composes the wave pool, slide tower, deck, dive scene
+// and water guns, each in `waterpark/`.
 import { Environment, Lightformer } from "@react-three/drei";
 import { Suspense } from "react";
 import { useQuality } from "../world/quality.ts";

@@ -1,3 +1,5 @@
+// The patisserie's macaron tower overlay: the intro, the press-to-drop keys
+// and the score.
 import type { JSX } from "react";
 import { height, towerScore } from "../../../game/macaronTower.ts";
 import { usePressKeys } from "../shared/useNow.ts";

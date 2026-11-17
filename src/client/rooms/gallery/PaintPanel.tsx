@@ -1,3 +1,5 @@
+// The gallery easel overlay: a small paint canvas (mouse or touch) whose
+// picture can be hung on the open wall.
 import {
   useEffect,
   useRef,

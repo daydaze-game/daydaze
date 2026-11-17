@@ -1,3 +1,5 @@
+// The Aquarium room: tanks of swimming fish, a touch pool, caustics and the
+// seal show.
 import { SealShow } from "./aquarium/SealShow.tsx";
 import { Caustics, HallLight, LightShafts } from "./aquarium/Glow.tsx";
 import { SwimmingCreature } from "../creatures/Swimmer.tsx";

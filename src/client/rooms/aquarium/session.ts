@@ -1,3 +1,4 @@
+// The seal show's session: a timed cue routine built on `routineSession`.
 import { SHOW, SHOW_SECONDS } from "../../../game/sealShow.ts";
 import { createRoutineSession } from "../shared/routineSession.ts";
 

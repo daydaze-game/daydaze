@@ -1,3 +1,4 @@
+// The ice show session: a timed cue routine built on `routineSession`.
 import { PROGRAM, PROGRAM_SECONDS } from "../../../game/iceShow.ts";
 import { createRoutineSession } from "../shared/routineSession.ts";
 

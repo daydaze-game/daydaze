@@ -1,3 +1,5 @@
+// The Gym room: vault, bars, beam and trampoline with judges and a crowd,
+// scored by `game/gymnastics.ts`.
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

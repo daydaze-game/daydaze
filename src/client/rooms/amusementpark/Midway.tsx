@@ -1,3 +1,5 @@
+// The park's midway: game booths with neon signs, poles and the bulb strings
+// hung between them.
 import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";

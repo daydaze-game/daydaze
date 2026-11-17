@@ -1,3 +1,5 @@
+// The ice rink's curling session: aim, weight and sweep phases over the pure
+// rules in `game/curling.ts`, six stones to an end.
 import {
   aimAt,
   endOver,

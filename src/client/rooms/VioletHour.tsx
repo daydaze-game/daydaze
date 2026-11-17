@@ -1,3 +1,5 @@
+// The Violet Hour room: a neighborhood bar with an LED dance floor, pool
+// table, regulars' corner and NPCs. Drinks go through the buzz (18+ only).
 import type { Look } from "../../game/look.ts";
 import { ROOMS } from "../../game/rooms.ts";
 import { Couple } from "../avatar/Couple.tsx";
