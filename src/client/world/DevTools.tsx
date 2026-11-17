@@ -83,11 +83,22 @@ function countObjects(scene: THREE.Scene): number {
   return n;
 }
 
-/** Real lights in the scene; the low tier allows at most 4. */
+/**
+ * Real (direct) lights in the scene; the low tier allows at most 4. Ambient
+ * and hemisphere fills are cheap and don't count, but a direct light at
+ * intensity 0 still costs shader work, so it does.
+ */
 function countLights(scene: THREE.Scene): number {
   let n = 0;
   scene.traverse((o) => {
-    if (o instanceof THREE.Light && !(o instanceof THREE.AmbientLight)) n++;
+    if (
+      o instanceof THREE.DirectionalLight ||
+      o instanceof THREE.PointLight ||
+      o instanceof THREE.SpotLight ||
+      o instanceof THREE.RectAreaLight
+    ) {
+      n++;
+    }
   });
   return n;
 }
@@ -131,6 +142,11 @@ export function DevProbe() {
     if (!helpers) return;
     const grid = new THREE.GridHelper(100, 100);
     const axes = new THREE.AxesHelper(5);
+    // drawn over everything: the ground sits at y 0 and would hide them
+    for (const helper of [grid, axes]) {
+      for (const m of [helper.material].flat()) m.depthTest = false;
+      helper.renderOrder = 999;
+    }
     scene.add(grid, axes);
     return () => {
       scene.remove(grid, axes);
@@ -253,8 +269,10 @@ export function DevPanel({
     <div
       style={{
         position: "fixed",
+        // top center: the game's HUD owns the corners
         top: 8,
-        left: 8,
+        left: "50%",
+        transform: "translateX(-50%)",
         zIndex: 9999,
         padding: "6px 10px",
         font: "12px monospace",
