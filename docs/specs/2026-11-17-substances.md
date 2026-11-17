@@ -58,7 +58,7 @@ substances; research it so it's accurate"). Research with sources:
 | # | Worktree | What |
 | --- | --- | --- |
 | 1 | `substance-model` | The model above; weed (joint, edible) and mushroom tea retuned to the research; the drugs gate |
-| 2 | `alcohol-research` | Buzz checked against BAC stages: sway only from about 0.08, nystagmus-style choppy look, slurring; hangover. Drunk idle/walk clips need Mixamo (owner) |
+| 2 | `alcohol` | Done: the buzz is blood alcohol (`game/effects/buzz.ts`). A drink absorbs over 35-50 real minutes (a fizzy cocktail fastest, a neat shot slowest, slower and lower after food). The liver clears a steady 0.015% an hour, and water doesn't speed it up. Each effect starts at its researched BAC: warm colors at once, the view's sway (nystagmus) from 0.06, body sway from 0.08, slurred chat from 0.10, double vision from 0.12. The body goes tipsy, then drunk, then sloppy, and a hangover (glare, yawns) follows a night past 0.08; water eases it. Alcohol's clock is linear (the liver works by the hour), matched to the shared curve at 90 minutes (×18). Drunk idle/walk clips need Mixamo (owner). |
 | 3 | `acid` | LSD tab: come-up yawns, then energetic and exploring; sharper, faster geometry and trails than mushrooms; 15.5 min |
 | 4 | `molly` | MDMA: gurning (jaw morph), dancing and swaying, rubbing arms, sweating and thirst; glowing neons, big pupils; comedown low |
 | 5 | `cocaine` | A bump: sniffing and nose-rubbing, fidgeting, upright, fast talk; no visual distortion beyond pupils; crash and craving |
