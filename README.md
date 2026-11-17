@@ -92,6 +92,7 @@ GitHub Actions, in `.github/workflows/`:
 | `browser-test.yml` | by hand, `-f grep="<title>"` | the Playwright tests whose titles match |
 | `screenshots.yml` | by hand, `-f shots="<names>"` | screenshots as a downloadable artifact |
 | `profile.yml` | push to `perf/smooth`, by hand | a performance profile |
+| `codeql.yml` | push and pull request to `main`, weekly | CodeQL security scanning of the TypeScript and the workflows; findings in the Security tab |
 | `deploy.yml` | by hand, owner-approved | the Cloudflare deploy |
 
 ## Develop

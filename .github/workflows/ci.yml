@@ -54,6 +54,8 @@ jobs:
         run: npm run lint
       - name: Markdownlint (docs)
         run: npm run lint:md
+      - name: File headers
+        run: npm run lint:headers
       - name: Layer rules (dependency-cruiser)
         run: npm run lint:deps
       - name: Spelling (American English)

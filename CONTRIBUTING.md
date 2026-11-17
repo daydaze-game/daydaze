@@ -38,6 +38,7 @@ every push and pull request to `main` and fails fast.
 | --- | --- |
 | `npm run lint` | ESLint; the rules, and why each is on, are in `eslint.config.mjs` |
 | `npm run lint:md` | markdownlint-cli2 on the Markdown docs (rules in `.markdownlint-cli2.jsonc`) |
+| `npm run lint:headers` | every code file starts with a header comment |
 | `npm run lint:deps` | dependency-cruiser: the layer rules in `.dependency-cruiser.cjs` (game is pure, no cycles) |
 | `npm run lint:spelling` | cspell, American English only; add a legitimate word (a name, a Tagalog dish) to `cspell-words.txt`, one per line in sorted order, and fix real typos and British spellings instead |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
@@ -78,6 +79,14 @@ Browser and server suites are slower; run the parts you touched:
   with a failing test that reproduces it.
 - **Strict types.** No `any`, no `as` where a type guard or `as const`
   works, no `@ts-ignore` or lint disables to get green: fix the cause.
+- **Header comment on every code file.** `npm run lint:headers` fails on a
+  tracked `.ts`, `.tsx`, `.mjs` or `.js` file under `src/`, `server/src/`,
+  `scripts/` or `tests/` that doesn't start with `//` or `/*` (after an
+  optional shebang).
+- **No `new` inside `useFrame`.** ESLint (`no-restricted-syntax`) flags it;
+  hoist the object to a module constant or `useMemo`/`useRef`. A one-off
+  branch (run once on sit-down, say) may use an
+  `eslint-disable-next-line ... -- reason`.
 - **Validate untrusted input** (network messages, `localStorage`, saves)
   before using it.
 - **Comments.** Every file starts with a comment saying what it's for;
