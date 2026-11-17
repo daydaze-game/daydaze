@@ -73,9 +73,9 @@ export function StarDome({
   floor,
 }: {
   low: boolean;
-  radius?: number;
+  radius?: number | undefined;
   /** The lowest a star may sit, as the sine of its elevation. */
-  floor?: number;
+  floor?: number | undefined;
 }) {
   const calm = useReducedMotion();
   const px = useThree((s) => s.gl.getPixelRatio());

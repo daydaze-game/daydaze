@@ -15,8 +15,8 @@ export type Posture = "stand" | "sit" | "move";
 export function postureOf(s: {
   speed: number;
   mood: Mood;
-  seated?: boolean;
-  afloat?: boolean;
+  seated?: boolean | undefined;
+  afloat?: boolean | undefined;
 }): Posture {
   if (s.afloat) return "stand";
   if (s.seated) return "sit";

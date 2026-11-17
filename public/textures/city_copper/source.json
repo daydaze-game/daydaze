@@ -1,0 +1,13 @@
+{
+  "source": "https://ambientcg.com/view?id=Metal058B",
+  "author": "ambientCG",
+  "license": "CC0 1.0",
+  "size": 512,
+  "channels": "surface: G roughness, B metalness",
+  "sha256": {
+    "Metal058B_1K-JPG_Color.jpg": "2f0b30abe8c38f497bbc5b287e5c4c5dec15bb905eb737c88dd6757893dd8f3d",
+    "Metal058B_1K-JPG_NormalGL.jpg": "6de604e9236b550a145e540866496bd4433b5d620511bb0a9eb8522c2aadb26f",
+    "Metal058B_1K-JPG_Roughness.jpg": "8c7166699ed1d652259df065f8bc2357bbfec7903a109b214b6951f174b24ccf",
+    "Metal058B_1K-JPG_Metalness.jpg": "40548c1a6a1729907853594c20f03b704587a5cf12ad8eec654b50f458fe9c89"
+  }
+}

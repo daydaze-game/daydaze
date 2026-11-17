@@ -44,7 +44,7 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
   // what the canvas attributes last showed: each meter at two decimals
   const shownHigh = useRef({
-    levels: { high: -1, trip: -1, acid: -1 } satisfies Record<
+    levels: { high: -1, trip: -1, acid: -1, molly: -1 } satisfies Record<
       Substance,
       number
     >,
@@ -72,6 +72,7 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
     liveHigh.radiance = lifted.radiance;
     liveHigh.geometry = lifted.geometry;
     liveHigh.tracer = lifted.tracer;
+    liveHigh.wiggle = lifted.wiggle;
     // read by tests: two decimals, so the canvas attributes change a few
     // times a second; `under` is the substance her body shows ("" sober)
     const was = shownHigh.current;

@@ -22,7 +22,7 @@ function setup(capacity?: number, roomId = "plaza") {
   const clock = { t: 0 };
   const room = new RoomCore({
     roomId,
-    capacity,
+    ...(capacity !== undefined && { capacity }),
     now: () => clock.t,
   });
   function join(id: string, overrides: Partial<RoomPlayer> = {}) {

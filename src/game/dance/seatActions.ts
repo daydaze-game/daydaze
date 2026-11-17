@@ -30,7 +30,7 @@ export function seatedHold(s: {
   mood: string;
   dance: string;
   picked: string;
-  seatHold?: string;
+  seatHold?: string | undefined;
 }): string {
   if (s.mood === "dance") {
     const emote = SEATED_EMOTE[s.dance];
