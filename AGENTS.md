@@ -118,6 +118,9 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Browser tests: `gh workflow run browser-test.yml --ref <branch> -f grep="<test title>"`.
   - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<names>"`,
     then `gh run download <id> -n screenshots`. Look at every screenshot.
+    PRs that change room, city, avatar or HUD code get the matching shots
+    automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
+    comment linking the artifact, kept 7 days.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
