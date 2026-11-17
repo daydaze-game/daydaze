@@ -37,20 +37,20 @@ export function Floor({
   width: number;
   depth: number;
   /** Center of the floor on the XZ plane. */
-  center?: [number, number];
+  center?: [number, number] | undefined;
   color: string;
-  map?: THREE.Texture;
+  map?: THREE.Texture | undefined;
   /** A Poly Haven CC0 set (public/textures/<id>), `scale` repeats a meter;
    * `color` tints it. With `map` too, `map` stays the color and the set
    * adds its relief (normal and roughness). */
-  texture?: { id: string; scale: number };
-  mirror?: number;
-  mixStrength?: number;
-  roughness?: number;
+  texture?: { id: string; scale: number } | undefined;
+  mirror?: number | undefined;
+  mixStrength?: number | undefined;
+  roughness?: number | undefined;
   /** How strongly the room's environment map shows in the glossy surface. */
-  envMapIntensity?: number;
+  envMapIntensity?: number | undefined;
   /** Low quality has no mirror; a big glossy plane can flood with specular. */
-  low?: { metalness: number; roughness: number };
+  low?: { metalness: number; roughness: number } | undefined;
   onPick: PickHandler;
 }) {
   const quality = useQuality();
@@ -75,7 +75,7 @@ export function Floor({
       {quality === "low" ? (
         <meshStandardMaterial
           color={color}
-          map={maps.map}
+          map={maps.map ?? null}
           normalMap={maps.normalMap}
           roughnessMap={maps.roughnessMap}
           metalness={low.metalness}
@@ -94,7 +94,7 @@ export function Floor({
           minDepthThreshold={0.4}
           maxDepthThreshold={1.3}
           color={color}
-          map={maps.map}
+          map={maps.map ?? null}
           normalMap={maps.normalMap}
           roughnessMap={maps.roughnessMap}
           metalness={texture ? 0.1 : 0.6}

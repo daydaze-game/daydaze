@@ -12,7 +12,7 @@ const SAND: BurstSpec = { speed: 1.6, lifetime: 0.8, up: 0.15, gravity: 6 };
 export function Splash({ ref }: { ref?: Ref<BurstHandle> }) {
   return (
     <ParticleBurst
-      ref={ref}
+      ref={ref ?? null}
       count={36}
       spec={WATER}
       color="#dff6ff"
@@ -26,7 +26,7 @@ export function Splash({ ref }: { ref?: Ref<BurstHandle> }) {
 export function SandPuff({ ref }: { ref?: Ref<BurstHandle> }) {
   return (
     <ParticleBurst
-      ref={ref}
+      ref={ref ?? null}
       count={20}
       spec={SAND}
       color="#e9cf98"

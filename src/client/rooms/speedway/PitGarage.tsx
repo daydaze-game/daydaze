@@ -26,7 +26,6 @@ const SHELL: Box[] = [
     length: 6,
     height: 4,
     depth: 0.25,
-    color: undefined,
   },
   {
     x: -2.875,
@@ -36,7 +35,6 @@ const SHELL: Box[] = [
     length: 0.25,
     height: 4,
     depth: 5,
-    color: undefined,
   },
   {
     x: 2.875,
@@ -46,7 +44,6 @@ const SHELL: Box[] = [
     length: 0.25,
     height: 4,
     depth: 5,
-    color: undefined,
   },
   {
     x: 0,
@@ -56,7 +53,6 @@ const SHELL: Box[] = [
     length: 6,
     height: 0.3,
     depth: 5,
-    color: undefined,
   },
   // the rolled-up door housing above the opening
   {
