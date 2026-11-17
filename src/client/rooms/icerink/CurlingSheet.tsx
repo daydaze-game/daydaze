@@ -88,6 +88,7 @@ export function CurlingSheet({ player }: { player: Player }): JSX.Element {
     // at the hack to throw; then sweeping along just behind the stone
     const px = live && !live.stopped ? live.x - 0.9 : HACK_X - 0.3;
     const pz = live ? live.z + 0.35 : 0;
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(px, ICE_Y, pz);
     player.seat.yaw = FACE_X;
