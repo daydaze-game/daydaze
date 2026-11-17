@@ -74,7 +74,7 @@ test("track metadata matches design spec (title, bpm)", () => {
 });
 
 test("createJukeboxController falls back safely when AudioContext is null", () => {
-  const controller = createJukeboxController(null as unknown as AudioContext);
+  const controller = createJukeboxController(null);
   assert.equal(controller.getCurrentTrack(), null);
   assert.equal(controller.isPlaying(), false);
   assert.equal(controller.playTrack("savanna-nightclub"), false);
@@ -482,7 +482,7 @@ test("melody notes climb with the lane and follow Sugar Rush's chords", () => {
       const [low, mid, high] = [0, 1, 2].map((lane) =>
         melodyFrequency(track, beat, lane),
       );
-      assert.ok(low! < mid! && mid! < high!, `${track} beat ${beat}`);
+      assert.ok(low < mid && mid < high, `${track} beat ${beat}`);
     }
   // bar 3 of Sugar Rush (beats 8-11) is the minor chord on 92.5 Hz
   assert.ok(

@@ -43,6 +43,12 @@ export function PeerCard(): JSX.Element | null {
   if (!open) return null;
   const session = onlineSession();
   const close = () => peerCard.set({ open: null });
+  // click handlers can't await: a rejected call shows the same note as a refused one
+  const run = (job: () => Promise<void>): void => {
+    void job().catch(() =>
+      setNote("That didn't go through. Try again in a moment."),
+    );
+  };
   const muted = mutes.includes(open.id);
   const pronouns = session?.remotePlayers.get(open.id)?.look?.pronouns;
   return (
@@ -54,15 +60,19 @@ export function PeerCard(): JSX.Element | null {
       {pronouns && <p className="pronouns">{pronouns}</p>}
       <FriendButton
         status={friendship(list, open.id)}
-        onFriend={async () => {
-          const ok = await session?.friend(open.id);
-          if (!ok) setNote("That didn't go through. Try again in a moment.");
-          await refreshFriends();
-        }}
-        onUnfriend={async () => {
-          await session?.unfriend(open.id);
-          await refreshFriends();
-        }}
+        onFriend={() =>
+          run(async () => {
+            const ok = await session?.friend(open.id);
+            if (!ok) setNote("That didn't go through. Try again in a moment.");
+            await refreshFriends();
+          })
+        }
+        onUnfriend={() =>
+          run(async () => {
+            await session?.unfriend(open.id);
+            await refreshFriends();
+          })
+        }
       />
       {friendship(list, open.id) === "friend" && (
         <button
@@ -164,15 +174,17 @@ export function PeerCard(): JSX.Element | null {
         <div className="game-row">
           <button
             type="button"
-            onClick={async () => {
-              const ok = await session?.block(open.id);
-              setNote(
-                ok
-                  ? `You blocked ${open.name}. You won't see each other.`
-                  : "That didn't go through. Try again in a moment.",
-              );
-              setBlocking(false);
-            }}
+            onClick={() =>
+              run(async () => {
+                const ok = await session?.block(open.id);
+                setNote(
+                  ok
+                    ? `You blocked ${open.name}. You won't see each other.`
+                    : "That didn't go through. Try again in a moment.",
+                );
+                setBlocking(false);
+              })
+            }
           >
             Yes, block
           </button>
@@ -191,15 +203,17 @@ export function PeerCard(): JSX.Element | null {
             <button
               key={r}
               type="button"
-              onClick={async () => {
-                const ok = await session?.report(open.id, r);
-                setNote(
-                  ok
-                    ? "Thanks for telling us. A moderator will look."
-                    : "That didn't go through. Try again in a moment.",
-                );
-                setReporting(false);
-              }}
+              onClick={() =>
+                run(async () => {
+                  const ok = await session?.report(open.id, r);
+                  setNote(
+                    ok
+                      ? "Thanks for telling us. A moderator will look."
+                      : "That didn't go through. Try again in a moment.",
+                  );
+                  setReporting(false);
+                })
+              }
             >
               {r}
             </button>
@@ -217,15 +231,17 @@ export function PeerCard(): JSX.Element | null {
               <button
                 key={r}
                 type="button"
-                onClick={async () => {
-                  const ok = await session.ban(open.id, r);
-                  setNote(
-                    ok
-                      ? `${open.name} is banned and signed out.`
-                      : "The ban didn't go through.",
-                  );
-                  setBanning(false);
-                }}
+                onClick={() =>
+                  run(async () => {
+                    const ok = await session.ban(open.id, r);
+                    setNote(
+                      ok
+                        ? `${open.name} is banned and signed out.`
+                        : "The ban didn't go through.",
+                    );
+                    setBanning(false);
+                  })
+                }
               >
                 Ban: {r}
               </button>

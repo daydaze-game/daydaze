@@ -385,7 +385,7 @@ export function Beams({ game, player }: { game: TagGame; player: Player }) {
     const mine =
       shot && round.t - shot.t < BEAM_SECONDS && shot.result !== "recharging";
     const theirs = round.t - hitAt.current < BEAM_SECONDS;
-    l.visible = Boolean(mine || theirs);
+    l.visible = mine || theirs;
     if (!l.visible) return;
     const who = mine && shot ? shot.rival : hitBy.current;
     const r = rivalAt(round, who);

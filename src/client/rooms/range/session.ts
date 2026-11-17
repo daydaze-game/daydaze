@@ -5,7 +5,6 @@ import {
   bucketEmpty,
   hit,
   NEW_BUCKET,
-  type Bucket,
   type Shot,
 } from "../../../game/golfRange.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -17,7 +16,7 @@ export type Phase = "off" | "power" | "strike" | "flying" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  bucket: NEW_BUCKET as Bucket,
+  bucket: NEW_BUCKET,
   since: 0,
   power: 0,
   shot: null as Shot | null,
