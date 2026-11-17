@@ -1,3 +1,5 @@
+// Creates the one `OnlineSession` and keeps it joined to the player's current
+// room; everything else in `net/` reaches the server through it.
 import { useEffect, useRef } from "react";
 import { refreshAccount } from "./account.ts";
 import type { Look } from "../../game/look.ts";

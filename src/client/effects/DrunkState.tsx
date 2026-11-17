@@ -1,3 +1,5 @@
+// The per-frame driver for buzz and high: decays them, publishes the look the
+// doll and `DrunkPost` read, and mirrors it onto canvas data attributes.
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import {

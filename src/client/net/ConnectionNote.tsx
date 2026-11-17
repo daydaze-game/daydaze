@@ -1,3 +1,5 @@
+// The HUD line that says why the game is offline or reconnecting, driven by
+// the online session's status and close code.
 import { useEffect, useState, type JSX } from "react";
 import { connectionNote } from "../../net/client/connectionNote.ts";
 import { onlineSession } from "./online.ts";

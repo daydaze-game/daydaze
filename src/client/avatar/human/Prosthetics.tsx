@@ -1,3 +1,5 @@
+// Leg prostheses for the human doll: swaps a shin's skin for a pylon and ankle
+// adapter fitted between the knee and ankle bones.
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";

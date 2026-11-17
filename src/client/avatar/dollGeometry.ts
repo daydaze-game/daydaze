@@ -1,3 +1,5 @@
+// Doll geometry helpers: the sculpted head outline, lathe and lumpy-blob
+// builders, and hair shapes, all merged into few meshes to keep draw calls low.
 import * as THREE from "three";
 import {
   mergeGeometries,

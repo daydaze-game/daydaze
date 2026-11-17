@@ -1,3 +1,5 @@
+// The RateLimiter Durable Object: token buckets from `authLimits.ts` kept in
+// SQLite storage, with the pruning of idle buckets scheduled by alarm.
 import { DurableObject } from "cloudflare:workers";
 import {
   BUCKET_PRUNE_AFTER_MS,

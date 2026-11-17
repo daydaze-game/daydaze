@@ -1,3 +1,5 @@
+// The hook that syncs a signed-in player's save with their account: pull on
+// start, then push changes after a short delay.
 import { useEffect, useMemo } from "react";
 import type { SaveV1 } from "../../game/save.ts";
 import { createSaveSync, mayPush } from "../../net/client/saveSync.ts";

@@ -1,3 +1,5 @@
+// The doll's toon look: the shared 4-step gradient map, the hair sway clock and
+// the toon material with a fresnel rim.
 import * as THREE from "three";
 
 // 4-step ramp; the darkest step stays fairly high so skin never goes muddy

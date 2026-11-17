@@ -1,3 +1,5 @@
+// The buzz and high post-processing pass: one custom `Effect` that sways the
+// screen, tints it and breathes the colors from the live drunk and high looks.
 import { useFrame } from "@react-three/fiber";
 import { Effect } from "postprocessing";
 import { useMemo } from "react";

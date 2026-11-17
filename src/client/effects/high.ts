@@ -1,3 +1,5 @@
+// The local player's high and trip levels with change listeners; the rules are
+// in `game/effects/high.ts`.
 import {
   addHit,
   addTea,

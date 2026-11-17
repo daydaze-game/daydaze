@@ -1,3 +1,5 @@
+// The 3D human doll: loads the skinned glTF body, then drives its clips, face
+// makeup, shoes, piercings and prosthetics from a `Look` and the current mood.
 import { useGLTF } from "@react-three/drei";
 import { afterSceneReady } from "../../world/ready.ts";
 import { useFrame, useThree, type ThreeElements } from "@react-three/fiber";

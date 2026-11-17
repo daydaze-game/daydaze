@@ -1,3 +1,5 @@
+// The stylized doll's shared body parts (hand, nails, torso profile) and their
+// toon materials, built once and reused by every doll.
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { makeCanvas } from "../canvas.ts";

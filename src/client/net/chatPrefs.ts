@@ -1,3 +1,5 @@
+// The player's chat filter setting and the one function that applies it to
+// other players' lines.
 import { filterChat } from "../../../server/src/chatFilter.ts";
 import { createStore } from "../rooms/shared/store.ts";
 

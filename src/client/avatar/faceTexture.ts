@@ -1,3 +1,5 @@
+// Paints a doll's face onto a canvas texture from the PNG feature art (eyes,
+// nose, lips), tinted to the look's skin and lip colors.
 import * as THREE from "three";
 import { makeCanvas } from "../canvas.ts";
 import { LIPS } from "../../game/look.ts";

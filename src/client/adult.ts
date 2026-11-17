@@ -1,3 +1,5 @@
+// The client's age-tier switch: `ADULT_OK` gates every 18+ venue and effect.
+// It must be the first import in main.tsx.
 import { activeTier, allows, contentTier, setActiveTier } from "../game/age.ts";
 import { readFlags } from "./flags.ts";
 

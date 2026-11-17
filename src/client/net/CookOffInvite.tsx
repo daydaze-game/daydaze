@@ -1,3 +1,5 @@
+// The popup for a cook-off challenge from another player; accepting sends you
+// to the match at Kamayan Hall.
 import { useEffect, type JSX } from "react";
 import {
   answerCook,
