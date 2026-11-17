@@ -1,8 +1,9 @@
 /**
  * The world's sounds, all synthesized: footsteps, a whoosh through doors, a
- * soft UI tick, a bank alarm bell and police sirens, and looping ambience beds (city hum, surf, aquarium bubbles,
- * haunted wind, rink air). Routes through the shared audio bus SFX channel
- * so the global mute reaches it. Nothing here throws when audio is missing.
+ * soft UI tick, a bank alarm bell and police sirens, and looping ambience
+ * beds (city hum, surf, aquarium bubbles, haunted wind, rink air). Routes
+ * through the shared audio bus SFX channel so the global mute reaches it.
+ * Nothing here throws when audio is missing.
  */
 
 import { playCachedSound } from "./soundFiles.ts";
