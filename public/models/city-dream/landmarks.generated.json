@@ -31,15 +31,15 @@
       "geometryCodec": "meshopt"
     },
     "far": {
-      "tris": 7345,
+      "tris": 11314,
       "parts": 2,
       "bounds": {
-        "min": [-9.668052673339844, 0.016384035348892212, -6.605654239654541],
-        "max": [9.34895133972168, 20.0, 7.811273574829102]
+        "min": [-9.978281021118164, 0.0028835725970566273, -7.989264011383057],
+        "max": [9.956689834594727, 20.0, 8.00428581237793]
       },
       "file": "/models/city-dream/palace-lo.glb",
-      "bytes": 236196,
-      "sha256": "572c898717cc246bb095dbd789099ca7ace3e2af9eafc10ee14d554885ecb5d0",
+      "bytes": 306212,
+      "sha256": "e9a02d366dc726c415f6eaa5c935bdb19253633f9b812ccfce87b97a27fc0cb2",
       "textureSize": 512,
       "textureCodec": "WebP",
       "geometryCodec": "meshopt"
@@ -86,15 +86,15 @@
       "geometryCodec": "meshopt"
     },
     "far": {
-      "tris": 2117,
+      "tris": 8169,
       "parts": 2,
       "bounds": {
-        "min": [-9.822796821594238, 0.0684119462966919, -7.988913536071777],
-        "max": [9.978418350219727, 26.0, 7.913640975952148]
+        "min": [-10.004886627197266, 0.0, -7.988913536071777],
+        "max": [9.978418350219727, 26.0, 8.010185241699219]
       },
       "file": "/models/city-dream/manor-lo.glb",
-      "bytes": 148172,
-      "sha256": "574994bf704fcc20b89e4ce97fd130ae4886b84a1d463b0c97b8bc9c416b6673",
+      "bytes": 221148,
+      "sha256": "3b136ac3067c797012902013c4f7c057ea17231894afbe4e20def24fe1536950",
       "textureSize": 512,
       "textureCodec": "WebP",
       "geometryCodec": "meshopt"
@@ -141,15 +141,15 @@
       "geometryCodec": "meshopt"
     },
     "far": {
-      "tris": 1764,
+      "tris": 8738,
       "parts": 2,
       "bounds": {
-        "min": [-8.022387504577637, 0.029733024537563324, -7.4438700675964355],
-        "max": [9.94709300994873, 26.0, 7.940550327301025]
+        "min": [-9.996452331542969, 0.0017335045849904418, -8.003228187561035],
+        "max": [10.001110076904297, 26.0, 7.994470596313477]
       },
       "file": "/models/city-dream/clocktower-lo.glb",
-      "bytes": 129412,
-      "sha256": "9ee45351199274dfb4fd23310133fa5ce084845e675c49048a886d8fd8d9706f",
+      "bytes": 214176,
+      "sha256": "962eef31926d9060e53be4a1e385f23b906944791b8c5b6d38ef7a32590830f3",
       "textureSize": 512,
       "textureCodec": "WebP",
       "geometryCodec": "meshopt"

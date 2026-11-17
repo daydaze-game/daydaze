@@ -3,19 +3,19 @@ export const DREAM_LANDMARK_COST = {
   palace: {
     tris: 18000,
     parts: 1,
-    lo: 7345,
+    lo: 11314,
     loParts: 2,
   },
   manor: {
     tris: 16381,
     parts: 1,
-    lo: 2117,
+    lo: 8169,
     loParts: 2,
   },
   clocktower: {
     tris: 18000,
     parts: 1,
-    lo: 1764,
+    lo: 8738,
     loParts: 2,
   },
 } as const;

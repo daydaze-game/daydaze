@@ -241,7 +241,7 @@ def main():
             far = [copy_mesh(obj,key+"-lo") for obj in originals]
             reduce(near,18000)
             roofs = retain_roofs(far)
-            reduce(far,1000)
+            reduce(far,8000)
             far.extend(roofs)
             near_cost = export(near,OUTPUT/(key+".glb"))
             far_cost = export(far,OUTPUT/(key+"-lo.glb"))
