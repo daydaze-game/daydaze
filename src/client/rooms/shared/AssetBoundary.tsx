@@ -9,14 +9,14 @@ export class AssetBoundary extends Component<
   { children: ReactNode; fallback?: ReactNode },
   { failed: boolean }
 > {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch(error: Error) {
+  override componentDidCatch(error: Error) {
     console.warn("an asset could not be loaded", error);
   }
-  render() {
+  override render() {
     return this.state.failed
       ? (this.props.fallback ?? null)
       : this.props.children;
