@@ -1,0 +1,76 @@
+// Knip: finds unused files, exports and dependencies (`npm run lint:dead`).
+// Vite entries come from the html pages (Knip does not follow their root-
+// absolute script src, so the .tsx files they load are listed too).
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "index.html",
+    "minigames.html",
+    "src/client/avatar/lineup.tsx",
+    "src/client/rooms/shared/game3d/kit.tsx",
+    "server/src/worker/index.ts",
+    "scripts/*.{ts,mjs}",
+    "server/scripts/*.mjs",
+    "tests/*.ts",
+    "playwright*.config.ts",
+    "**/*.test.ts",
+  ],
+  // art/, docs/, public/ and prototypes/ are outside this list on purpose.
+  "project": [
+    "src/**",
+    "server/src/**",
+    "server/scripts/**",
+    "scripts/**",
+    "tests/**",
+    "*.ts",
+  ],
+  // a constant exported for tests' sake but used in its own file is fine
+  "ignoreExportsUsedInFile": true,
+  "ignore": [
+    // Parked components with no importer yet; ARCHITECTURE.md describes the
+    // first two, and the far city and house passes are unfinished work. Owner
+    // decides whether to delete or wire them.
+    "src/client/city/CityHouses.tsx",
+    "src/client/city/FarCity.tsx",
+    // Exported components nothing imports, documented in ARCHITECTURE.md.
+    "src/client/city/DistrictLots.tsx",
+    "src/client/city/NycFacades.tsx",
+  ],
+  "ignoreDependencies": [
+    // documented as available for walking, cars and camera raycasts
+    "three-mesh-bvh",
+    // owner scripts (asset and Cloudflare tooling) run by hand
+    "cloudflare",
+    "gltfjsx",
+  ],
+  // system tool called by scripts/gen-sounds.mjs
+  "ignoreBinaries": ["ffmpeg"],
+  "ignoreIssues": {
+    // Dead constants and helpers: exported but imported nowhere. Un-exporting
+    // them trips no-unused-vars, so deleting them is a separate cleanup.
+    "src/audio/audioBus.ts": ["exports", "types"],
+    "src/client/avatar/dollGeometry.ts": ["exports", "types"],
+    "src/client/rooms/plaza/layout.ts": ["exports", "types"],
+    "src/client/rooms/velvet/layout.ts": ["exports", "types"],
+    "src/client/rooms/velvet/materials.ts": ["exports", "types"],
+    "src/game/city/bandShell.ts": ["exports", "types"],
+    "src/game/city/districts.ts": ["exports", "types"],
+    "src/game/city/el.ts": ["exports", "types"],
+    "src/game/city/farmersMarket.ts": ["exports", "types"],
+    "src/game/city/nyc.ts": ["exports", "types"],
+    "src/game/city/plan.ts": ["exports", "types"],
+    "src/game/city/taxi.ts": ["exports", "types"],
+    "src/game/dive.ts": ["exports", "types"],
+    "src/game/effects/high.ts": ["exports", "types"],
+    "src/game/espressoLab.ts": ["exports", "types"],
+    "src/game/farm.ts": ["exports", "types"],
+    "src/game/food/interiors.ts": ["exports", "types"],
+    "src/game/kamayanHall.ts": ["exports", "types"],
+    "src/game/laNoche.ts": ["exports", "types"],
+    "src/game/lune.ts": ["exports", "types"],
+    "src/game/openWater.ts": ["exports", "types"],
+    // intentional aliases of one value
+    "src/game/gaits.ts": ["duplicates"],
+    "src/game/skate.ts": ["duplicates"],
+  },
+}
