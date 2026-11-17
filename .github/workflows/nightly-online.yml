@@ -1,0 +1,47 @@
+# The two-player multiplayer suite (npm run test:e2e:online) against a local
+# Worker. It takes about 7 minutes, too slow for every push, so it runs nightly
+# on main and by hand. A failure opens (or comments on) an issue so it is seen.
+name: nightly-online
+on:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+concurrency:
+  group: nightly-online
+  cancel-in-progress: false
+permissions:
+  contents: read
+  issues: write
+jobs:
+  online:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:online
+      - uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: playwright-report-online
+          path: test-results/
+          retention-days: 14
+      - name: Report the failure as an issue
+        if: ${{ failure() && github.event_name == 'schedule' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="ci: nightly online e2e is failing"
+          n=$(gh issue list --state open --search "\"$title\" in:title" --json number -q '.[0].number')
+          body="The nightly two-player suite failed: $RUN_URL"
+          if [ -n "$n" ]; then
+            gh issue comment "$n" --body "$body"
+          else
+            gh issue create --title "$title" --label bug --label "area: net" --label "area: ci" --body "$body"
+          fi
