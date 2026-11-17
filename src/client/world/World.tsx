@@ -38,6 +38,7 @@ import { DrunkState } from "../effects/DrunkState.tsx";
 import type { MinigameId } from "../../game/hotspots.ts";
 import type { PickHandler } from "../rooms/shared/Floor.tsx";
 import { CameraRig, type View } from "./CameraRig.tsx";
+import { DevProbe, useFreeCam } from "./DevTools.tsx";
 import { NeonClamp } from "./NeonClamp.tsx";
 import { WATER } from "./water.ts";
 import { mayDive } from "../../game/dive.ts";
@@ -645,6 +646,8 @@ export function World({
   onPark,
   pet,
 }: WorldProps) {
+  // dev free camera (always false in production, where nothing sets it)
+  const freeCam = useFreeCam();
   const [auto, setAuto] = useState<QualityTier>("high");
   // a struggling machine first gives up the extra resolution, then the
   // high tier's effects: two steps down instead of one big one
@@ -787,12 +790,15 @@ export function World({
               onPortal(portal);
             }}
           />
-          <CameraRig
-            player={player}
-            view={view}
-            room={room}
-            body={bodyOf(look)}
-          />
+          {import.meta.env.DEV && <DevProbe />}
+          {!freeCam && (
+            <CameraRig
+              player={player}
+              view={view}
+              room={room}
+              body={bodyOf(look)}
+            />
+          )}
           <CreatorFrame />
           <Confetti />
           {tier === "high" ? <Effects /> : <NeonClamp key={`clamp-${room}`} />}

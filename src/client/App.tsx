@@ -87,6 +87,7 @@ import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
 import { floristDesk } from "./rooms/florist/session.ts";
 import { gardenDesk } from "./rooms/garden/gardenSession.ts";
+import { DevPanel } from "./world/DevTools.tsx";
 import { World } from "./world/World.tsx";
 
 const FADE_MS = 300;
@@ -634,6 +635,7 @@ export function App() {
             onlineSession()?.sendChat(text);
           }}
         />
+        {import.meta.env.DEV && <DevPanel />}
         {flags.debug && (
           <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
         )}
