@@ -1,23 +1,39 @@
-// The local player's buzz level (drinks add, time decays) with change
-// listeners; the rules are in `game/effects/buzz.ts`.
+// The local player's drinking (blood alcohol, drinks still absorbing, food in
+// her stomach, any hangover) with change listeners; the rules are in
+// `game/effects/buzz.ts`. It lives in memory, so a reload sobers the doll up.
 import {
-  addDrink,
-  decayBuzz,
+  buzzLevel,
+  drinkUp,
+  eat,
+  sipWater,
+  soberBar,
+  stepBar,
   type Drink,
   type DrunkLook,
 } from "../../game/effects/buzz.ts";
 import { activeTier, allows } from "../../game/age.ts";
-import { relieveBuzz } from "../../game/food/consume.ts";
 
-// The local player's buzz. It lives in memory, so a reload sobers the doll up.
-let level = 0;
+const bar = soberBar();
 const listeners = new Set<() => void>();
 
 /** The current drunk visuals, rewritten each frame by DrunkState. */
-export const liveDrunk: DrunkLook = { sway: 0, wobble: 0, warm: 0, edge: 0 };
+export const liveDrunk: DrunkLook = {
+  sway: 0,
+  wobble: 0,
+  warm: 0,
+  edge: 0,
+  ghost: 0,
+  glare: 0,
+};
 
+/** The 0..1 buzz meter (BAC / 0.25). */
 export function getBuzz(): number {
-  return level;
+  return buzzLevel(bar);
+}
+
+/** How bad the hangover is, 0..1. */
+export function getHangover(): number {
+  return bar.hangover;
 }
 
 let softDrinkListener: (() => void) | null = null;
@@ -33,19 +49,27 @@ export function drink(kind: Drink): void {
     softDrinkListener?.();
     return;
   }
-  level = addDrink(level, kind);
+  drinkUp(bar, kind);
   for (const listen of listeners) listen();
 }
 
-/** Eating or sipping a soft drink takes the edge off the buzz. */
+/** Eating slows the next drinks; water or a soft drink eases a hangover.
+ * Neither sobers her up: only time does. */
 export function relieve(kind: "food" | "drink"): void {
-  level = relieveBuzz(level, kind);
+  if (kind === "food") eat(bar);
+  else sipWater(bar);
   for (const listen of listeners) listen();
 }
 
-/** Fades the buzz by `seconds` of play. Called once a frame. */
+/** Dev only: moves the drinking on `seconds` at once, and redraws. */
+export function passTime(seconds: number): void {
+  stepBar(bar, seconds);
+  for (const listen of listeners) listen();
+}
+
+/** Moves the drinking on by `seconds` of play. Called once a frame. */
 export function ageBuzz(seconds: number): void {
-  level = decayBuzz(level, seconds);
+  stepBar(bar, seconds);
 }
 
 /** Lets the canvas redraw when the buzz changes while the scene is idle. */
