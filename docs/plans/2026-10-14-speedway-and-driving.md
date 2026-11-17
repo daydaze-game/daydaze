@@ -7,6 +7,7 @@
 **Goal:** Build a shared arcade car model, and the Speedway venue on top of it. The Speedway has a race track (solo time trial against bots) and a bumper car arena. Phase 3 of the open city later reuses the same car model for street driving.
 
 **Architecture:**
+
 - Car physics, track data, laps, bots and bumper collisions live in pure, Node-tested modules under `src/game/driving/` and `src/game/speedway/`. They step on a fixed 50 Hz tick.
 - The client in `src/client/rooms/Speedway.tsx` and `src/client/rooms/speedway/` interpolates between ticks for rendering. It reads input through the shared action layer.
 - The Speedway is a gated venue room (`"speedway"`), entered from the Plaza for now and from the city later.
@@ -14,6 +15,7 @@
 **Tech Stack:** TypeScript strict, React 19, React Three Fiber 9, drei 10, three 0.186, Node test runner, and Playwright.
 
 **Specs:**
+
 - `docs/specs/2026-10-14-world-content-design.md`: Cars, Speedway, Games roster (Bumper cars; Race track), Non-player characters, Rides.
 - `docs/specs/2026-10-14-open-city-design.md`: Moving around (car model, chase camera, reduced motion) and Build phases.
 
@@ -41,10 +43,12 @@
 ### Task 1: Fixed-step clock
 
 **Files:**
+
 - Create: `src/game/driving/fixedStep.ts`
 - Test: `src/game/driving/fixedStep.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `export const TICK_HZ = 50`
   - `export type StepClock = { accumulator: number }`
@@ -62,12 +66,14 @@
 ### Task 2: Car model and roster
 
 **Files:**
+
 - Create: `src/game/driving/car.ts`
 - Create: `src/game/driving/roster.ts`
 - Test: `src/game/driving/car.test.ts`
 - Test: `src/game/driving/roster.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Vec2` from `src/game/walk.ts`, and `TICK_HZ` from Task 1.
 - Produces:
   - `export type CarClass = "beater" | "everyday" | "y2k" | "luxury" | "exotic" | "kart" | "bumper"`
@@ -104,12 +110,14 @@
 ### Task 3: Track data and lap timing
 
 **Files:**
+
 - Create: `src/game/speedway/track.ts`
 - Create: `src/game/speedway/laps.ts`
 - Test: `src/game/speedway/track.test.ts`
 - Test: `src/game/speedway/laps.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Vec2`.
 - Produces:
   - `export type Track = { id: string; name: string; centerline: readonly Vec2[]; width: number; checkpoints: readonly { a: Vec2; b: Vec2 }[]; grid: readonly { position: Vec2; yaw: number }[] }`. Checkpoint 0 is the start and finish line. `grid` holds at least 6 slots.
@@ -134,12 +142,14 @@
 ### Task 4: Race bots and race flow
 
 **Files:**
+
 - Create: `src/game/speedway/bots.ts`
 - Create: `src/game/speedway/race.ts`
 - Test: `src/game/speedway/bots.test.ts`
 - Test: `src/game/speedway/race.test.ts`
 
 **Interfaces:**
+
 - Consumes: `stepCar`, `CarSpec`, `CarState`, `CarInput`, `Track`, `trackWalls`, `LapState` and `updateLap`.
 - Produces:
   - `export type BotSkill = "easy" | "medium" | "hard"`
@@ -163,10 +173,12 @@
 ### Task 5: Bumper car arena
 
 **Files:**
+
 - Create: `src/game/speedway/bumper.ts`
 - Test: `src/game/speedway/bumper.test.ts`
 
 **Interfaces:**
+
 - Consumes: `stepCar`, `BUMPER_CAR` and `CarState`.
 - Produces:
   - `export const ARENA: { walls: readonly (readonly Vec2[])[]; size: Vec2 }`. A 24 m × 16 m rounded rectangle.
@@ -184,10 +196,12 @@
 ### Task 6: Speedway room data and portal
 
 **Files:**
+
 - Modify: `src/game/rooms.ts`. Add `"speedway"` to `RoomId`, add a `ROOMS.speedway` entry, and add a Plaza portal `to-speedway`. If `feat/city-core` has merged by then, add a city door or gate instead.
 - Test: `src/game/rooms.test.ts`. Add a case.
 
 **Interfaces:**
+
 - Produces:
   - `ROOMS.speedway`: walkable grandstand, pit lane and arena entrance.
   - Interaction spots, as data in `src/game/speedway/spots.ts`: `export const SPEEDWAY_SPOTS: readonly { id: "race-oval" | "race-boardwalk" | "bumper-cars"; position: Vec2; radius: number; label: string }[]`.
@@ -204,6 +218,7 @@
 ### Task 7: Speedway scene, driving UI and camera
 
 **Files:**
+
 - Create: `src/client/rooms/Speedway.tsx`. Lazy-load it with `React.lazy`.
 - Create: `src/client/rooms/speedway/`. Files: `Track.tsx` (instanced barriers and kerbs, lit by emissive strips), `Grandstand.tsx`, `PitGarage.tsx`, `BumperArena.tsx`, `CarMesh.tsx` (one low-poly body per `CarClass`, tinted per car), `ChaseCamera.tsx`, `DriveControls.tsx` (keys and on-screen pedals and steering), `RaceHud.tsx` (lap, position, time, best time).
 - Modify: the room switch in `src/client/world/World.tsx`, with one additive case.
@@ -211,6 +226,7 @@
 - Test: `tests/client.spec.ts`. Add a Speedway case.
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 1–6.
 - Consumes: input actions from the city action layer if it exists. Otherwise map keys locally: W/↑ is throttle, S/↓ is brake and reverse, A/D or ←/→ is steer.
 - `ChaseCamera`: 6 m behind and 2.5 m above, with damping of 0.1. Under `prefers-reduced-motion` it is 9 m behind and 5 m above, with damping of 0.05 and no shake. A "Side view" toggle is always available.
@@ -228,17 +244,19 @@
   - `docs/screenshots/speedway-racing.png`
   - `docs/screenshots/speedway-bumper.png`
   - `docs/screenshots/speedway-mobile.png` (390×844)
-  Look at each one, and fix anything blank or dark.
+    Look at each one, and fix anything blank or dark.
 - [ ] **Step 6:** Commit `feat(client): add the Speedway scene, driving controls and race HUD`.
 
 ### Task 8: Pit crew and Speedway NPCs
 
 **Files:**
+
 - Create: `src/client/rooms/speedway/Locals.tsx`
 - Modify: `src/game/dialogue/` banks. Only add `event-ride-ended` and race-specific lines to the `pit-crew` and `ride-operator` roles if the bank is thin.
 - Test: the existing dialogue bank tests cover the new lines.
 
 **Interfaces:**
+
 - Consumes: the dialogue picker from `src/game/dialogue/pick.ts` and the doll from `src/client/avatar/Doll.tsx`.
 
 - [ ] **Step 1:** Add a test case to the dialogue tests: `pit-crew` has at least 10 `event-ride-ended` lines.

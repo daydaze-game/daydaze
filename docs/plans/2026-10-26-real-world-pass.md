@@ -105,7 +105,7 @@ menu; the asset list with sources and licenses kept in `docs/assets.md`.
   prebuilt buildings. Optimize what we use with gltf-transform before it
   enters `public/`.
 - Also downloaded by the owner (CC0, Quaternius, Standard): `Stylized Nature
-  MegaKit[Standard].zip` (68 glTF trees, bushes, grass, flowers, rocks;
+MegaKit[Standard].zip` (68 glTF trees, bushes, grass, flowers, rocks;
   unpacked to `/tmp/daydaze-city/Stylized_Nature_MegaKit_Standard__zip/`) and
   `Universal Animation Library[Standard].zip` (unpacked to
   `/tmp/daydaze-city/Universal_Animation_Library_Standard__zi/`), both in
@@ -131,25 +131,25 @@ gltf-transform. Every model gets the house look: our palette, the box-mapped
 tiling breakup and weathering (`boxMapped` with `weather`), day/night dimming,
 merged and instanced per kind. Record each in `docs/assets.md`.
 
-| Pack | Where it goes |
-|---|---|
-| Downtown City MegaKit (153 glTF) | NYC blocks in Downtown, Uptown and the Arts District: brick and stone walk-ups, cornices, fire escapes, storefronts with awnings, doors and stoops; replaces the box buildings there |
-| Ultimate Textured Building Pack, Buildings Packs 2017/2019 | variety elsewhere: Suburbia houses, Little Manila and Chinatown shophouses, Beachside pastel motels (Ocean City) |
-| Street Pack, Kenney City Kit Roads | street furniture everywhere: lamps, hydrants, benches, bins, traffic lights, signs, bus stops, mailboxes |
-| Stylized Nature MegaKit, Ultimate Stylized Nature, Ultimate Nature, Textured Stylized Trees | street trees on every block, the park (lawns, paths, pond, flower beds), beach palms and dune grass, planters |
-| Nature Crops | a community garden and the farmers market; Skyline Supply produce |
-| Public Transport, Realistic Car Pack | traffic variety (buses, taxis, vans, sedans) next to our lofted cars |
-| Train Pack | an elevated train (the "El") with stations, as a ride and fast travel |
-| Ships | the Marina and harbor boats, the Mermaid Cove boat |
-| Furniture Packs, Ultimate House Interior | the apartment furniture catalog; café, bookshop, bar and lounge interiors |
-| Ultimate Food, Junk Food | boardwalk food stands (fries, taffy, pizza, corn dogs), dishes in hand from Plate Rush, restaurant tables, grocery shelves |
-| Sushi Restaurant Kit (117 glTF) | rebuild Belt Sushi Yard and the ramen shop |
-| Animated Fish, Cute Fish | the Aquarium tanks, Mermaid Cove, fishing at the Marina |
-| Ultimate Animated Animals | the Zoo's animals; dogs being walked, pigeons and squirrels in the park |
-| Universal Base Characters | its 20 rigged hairstyles as new closet hair (refit to our head); body reference |
-| Universal Animation Library 1 and 2 | more clips baked onto our Mixamo skeleton (idles, sits, emotes, sports) |
-| Sci-Fi Essentials | Photon Zone (laser tag) and Player 2 (arcade bar) props |
-| Kenney Coaster Kit, City Kits Commercial/Suburban | the Fairground's coaster and rides; filler props |
+| Pack                                                                                        | Where it goes                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Downtown City MegaKit (153 glTF)                                                            | NYC blocks in Downtown, Uptown and the Arts District: brick and stone walk-ups, cornices, fire escapes, storefronts with awnings, doors and stoops; replaces the box buildings there |
+| Ultimate Textured Building Pack, Buildings Packs 2017/2019                                  | variety elsewhere: Suburbia houses, Little Manila and Chinatown shophouses, Beachside pastel motels (Ocean City)                                                                     |
+| Street Pack, Kenney City Kit Roads                                                          | street furniture everywhere: lamps, hydrants, benches, bins, traffic lights, signs, bus stops, mailboxes                                                                             |
+| Stylized Nature MegaKit, Ultimate Stylized Nature, Ultimate Nature, Textured Stylized Trees | street trees on every block, the park (lawns, paths, pond, flower beds), beach palms and dune grass, planters                                                                        |
+| Nature Crops                                                                                | a community garden and the farmers market; Skyline Supply produce                                                                                                                    |
+| Public Transport, Realistic Car Pack                                                        | traffic variety (buses, taxis, vans, sedans) next to our lofted cars                                                                                                                 |
+| Train Pack                                                                                  | an elevated train (the "El") with stations, as a ride and fast travel                                                                                                                |
+| Ships                                                                                       | the Marina and harbor boats, the Mermaid Cove boat                                                                                                                                   |
+| Furniture Packs, Ultimate House Interior                                                    | the apartment furniture catalog; café, bookshop, bar and lounge interiors                                                                                                            |
+| Ultimate Food, Junk Food                                                                    | boardwalk food stands (fries, taffy, pizza, corn dogs), dishes in hand from Plate Rush, restaurant tables, grocery shelves                                                           |
+| Sushi Restaurant Kit (117 glTF)                                                             | rebuild Belt Sushi Yard and the ramen shop                                                                                                                                           |
+| Animated Fish, Cute Fish                                                                    | the Aquarium tanks, Mermaid Cove, fishing at the Marina                                                                                                                              |
+| Ultimate Animated Animals                                                                   | the Zoo's animals; dogs being walked, pigeons and squirrels in the park                                                                                                              |
+| Universal Base Characters                                                                   | its 20 rigged hairstyles as new closet hair (refit to our head); body reference                                                                                                      |
+| Universal Animation Library 1 and 2                                                         | more clips baked onto our Mixamo skeleton (idles, sits, emotes, sports)                                                                                                              |
+| Sci-Fi Essentials                                                                           | Photon Zone (laser tag) and Player 2 (arcade bar) props                                                                                                                              |
+| Kenney Coaster Kit, City Kits Commercial/Suburban                                           | the Fairground's coaster and rides; filler props                                                                                                                                     |
 
 ## New ideas (to build as this pass goes, or next)
 
@@ -169,21 +169,21 @@ merged and instanced per kind. Record each in `docs/assets.md`.
 
 Each builds on what exists where it can; packs from the asset map above.
 
-| Idea | Builds on | Packs |
-|---|---|---|
-| Fishing | Starboard Marina's fishing game | Animated Fish, Cute Fish, Ships |
-| Oceans and beaches with fish and animals | Beachside, the Ocean, Mermaid Cove | Cute Fish, Animated Animals (crabs, gulls, dolphins if present) |
-| Swimming in the ocean with the fish | the water park's swim state, the Ocean | Cute Fish, Animated Fish |
-| Scuba diving | Mermaid Cove, the Aquarium's reef | fish packs, Ultimate Nature (corals/rocks) |
-| Pets | new: adopt at the Zoo or a shelter, follows you, lives at home | Ultimate Animated Animals |
-| Zoos | the Daydaze Zoo (swap procedural animals for animated ones) | Ultimate Animated Animals |
-| Parks and forests | new: a central park and a forest trail at the city's edge | Stylized Nature MegaKit, Ultimate Nature, Textured Stylized Trees |
-| Sci-fi places | Photon Zone, Player 2; new: a space-station club or museum | Sci-Fi Essentials |
-| Ships, boats, yachts | the Marina; new: rentable boats, a yacht party venue | Ships |
-| Public transportation | new: buses and stops, taxis | Public Transport |
-| Trains | new: the El across the city, a boardwalk train | Train Pack |
-| NASCAR race tracks | the Speedway (add a stock-car oval, pit crew, grandstand crowd) | Realistic Car Pack |
-| Farms | new: a farm at the city's edge (crops, animals, farm stand), feeding the farmers market | Nature Crops, Animated Animals |
+| Idea                                     | Builds on                                                                               | Packs                                                             |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Fishing                                  | Starboard Marina's fishing game                                                         | Animated Fish, Cute Fish, Ships                                   |
+| Oceans and beaches with fish and animals | Beachside, the Ocean, Mermaid Cove                                                      | Cute Fish, Animated Animals (crabs, gulls, dolphins if present)   |
+| Swimming in the ocean with the fish      | the water park's swim state, the Ocean                                                  | Cute Fish, Animated Fish                                          |
+| Scuba diving                             | Mermaid Cove, the Aquarium's reef                                                       | fish packs, Ultimate Nature (corals/rocks)                        |
+| Pets                                     | new: adopt at the Zoo or a shelter, follows you, lives at home                          | Ultimate Animated Animals                                         |
+| Zoos                                     | the Daydaze Zoo (swap procedural animals for animated ones)                             | Ultimate Animated Animals                                         |
+| Parks and forests                        | new: a central park and a forest trail at the city's edge                               | Stylized Nature MegaKit, Ultimate Nature, Textured Stylized Trees |
+| Sci-fi places                            | Photon Zone, Player 2; new: a space-station club or museum                              | Sci-Fi Essentials                                                 |
+| Ships, boats, yachts                     | the Marina; new: rentable boats, a yacht party venue                                    | Ships                                                             |
+| Public transportation                    | new: buses and stops, taxis                                                             | Public Transport                                                  |
+| Trains                                   | new: the El across the city, a boardwalk train                                          | Train Pack                                                        |
+| NASCAR race tracks                       | the Speedway (add a stock-car oval, pit crew, grandstand crowd)                         | Realistic Car Pack                                                |
+| Farms                                    | new: a farm at the city's edge (crops, animals, farm stand), feeding the farmers market | Nature Crops, Animated Animals                                    |
 
 ## Handoff (2026-10-26, before a context compaction)
 
@@ -217,6 +217,7 @@ Each builds on what exists where it can; packs from the asset map above.
 Merged tonight (all on main, pushed): street trees; full Mixamo rig with natural per-sex walks; zoo (animated farm, Sketchfab giraffe/elephant/lion/penguin, zebra) and aquarium sea life; pets; credits screen; street furniture, daytime paint and skyline, traffic lights; the park; NYC facades (Downtown, Uptown, Arts District, Little Manila, Chinatown/Koreatown, Suburbia houses, fire escapes); Seaside Swim and the scuba reef; Sunny Acres Farm; the stock-car oval; bus rides and taxis; the marina's boats and fish; two sound passes (ElevenLabs + Freesound); the 13+ gate (alcohol only on 18+ servers); fixes from a full code review. The repo is public (CI runs free).
 
 Open branches in `.worktrees/` (each has a WIP or finished commit; rebase onto main, verify, run its Playwright tests, then merge):
+
 - `feat/street`: boardwalk visual pass (planks, counters, animated Ferris wheel) in progress; then joggers (owner added `mixamo/running/Jogging.fbx`).
 - `feat/nyc`: the El elevated train; must fix its review findings (stuck ride after tab throttling, store reset on unmount, get-off teleport, per-frame alloc, online position, error boundary).
 - `feat/oval`: pit crew fixed and build cache untracked; verify green, Speedway tests were running.
@@ -227,6 +228,7 @@ Open branches in `.worktrees/` (each has a WIP or finished commit; rebase onto m
 - `feat/transit` (Codex): bus-shelter riders follow-up, committed, not browser-tested.
 
 Owner notes: Mixamo clips in `mixamo/` are named `Name_Description` with dashes for spaces; check there before asking for downloads. Don't spend Meshy credits yet (owner is looking for animals). Chrome GPU play-testing is postponed. `.env` has no VITE_ keys.
+
 - `feat/nyc` second review (d66e6308..4a959cdf), new Important items beyond the first list: NycFacades disposes memoized InstancedMesh2 in cleanup (StrictMode remount reuses disposed meshes: build them in the effect); verify the patchShader + instance-color tint with one screenshot and guard `color` with `#ifdef USE_COLOR` (bayMaterial is shared with meshes.ts:482); wrap planTrip in try/catch inside useFrame; the El request branch must skip when driving, sliding or mid-portal (same guards as PlayerController L206/L311); the waiting "Get off" label should read "Cancel". Minors: `as` casts in ElLine/elStore/NycFacades, unused `_trainX`, ElPanel stale `now`, gate `?elspeed`/`?elat` on DEV, el.ts header and declaration order, budget El gaps and VIEW_WEDGE margin.
 
 ## Handoff 3 (2026-11-05 evening)
@@ -234,6 +236,7 @@ Owner notes: Mixamo clips in `mixamo/` are named `Name_Description` with dashes 
 Merged since Handoff 2 (all on main): oval polish, the El train, transit riders, sci-fi rooms (laser-tag test fixed), owner animals (tigers, bear, elk, Labrador), zoo Scatter quantization fix + habitat plants + blue whale + park wildlife, Fairground downloads, wonder-pass Tasks 36-41 (textured hair, short cuts, plus-size, hijab/wrap/turban/bindi/hearing aids, vitiligo/birthmarks/monolid, wheelchair + prosthetic legs), the boardwalk (planks, counters, shops on the deck, crowd, joggers, world-mapped texture fix), apartment furniture catalog + color looks + wall pieces, sushi/ramen interiors, grocery + plated food.
 
 Open branches (rebase onto main, `npm run verify`, the feature's Playwright tests with a unique PORT via `flock -w 7200 /tmp/daydaze-pw.lock`, look at screenshots, then `git merge --no-ff` only if `git merge-base --is-ancestor main <branch>`):
+
 - `feat/animals`: MERGED (5e24f728) — one `bakedGeometry()` helper for every baked GLB.
 - `fix/review-2` (.worktrees/fixes, head b3711a5b): static city pieces merged into one mesh per reload (17.5k -> 800 instances), the zoom test uses 6 large wheel flicks; 28/29 city tests passed; open: "the city map takes the player to Beachside" timed out once (check branch vs main). Then merge.
 - `feat/orbit`: MERGED — Orbit 9 space-station club (follow-up: the bartender's head pokes through the bar counter in docs/screenshots/orbit.png).
@@ -254,6 +257,7 @@ Lessons: subagent code reviews report to the lead; agents must check for conflic
 Merged since Handoff 3: plus2, Orbit 9 (+ bartender aisle fix), the wonder43 flake sweep (3 green GitHub Actions runs). Wonder pass Tasks 36-41 and 43 are done; Task 42 (browser suite on push/PR) is committed on `feat/taxi`.
 
 Paused branches (each agent committed WIP; resume by giving each branch a fresh agent with its task, then rebase, verify, its Playwright test, screenshots, merge):
+
 - `feat/cove`: mermaids lounge/swim/sing fix committed; tests + screenshot pending.
 - `feat/home2` (TV picture, wall pieces, pink velvet; verify green) and `feat/motels` (pastel motels, VACANCY signs, Suburbia variety).
 - `fix/review-2`: static city merge (perf); checking the Beachside map test vs main.

@@ -29,19 +29,20 @@ seen in a screenshot.
 
 **Games and what "in-world" means for each:**
 
-| Game | Where | Doll | Room reacts | Sound |
-|---|---|---|---|---|
-| Karaoke | Karaoke Loft stage | walks to the mic, sings pose loop, sways on the beat | lyric-free note lanes on the big screen, stage lights pulse per hit, booth NPCs cheer on streaks | backing track whose beat drives the chart (BPM from the jukebox); each hit plays the melody note |
-| Beach volleyball | city beach net | dig and spike clips | a ball arcs over the net (physics-lite parabola), two NPC opponents move and dig, sand puffs | thump on contact, crowd on a kill, surf bed |
-| Pool volleyball | Water Park pool | waist-deep in the water | same as beach, with splashes | splash on contact |
-| Cliff dive | Water Park tower | climbs, performs the trick (rotation keyed to the trick), enters the water | splash size follows the entry grade, a judge NPC holds up a score card | wind whoosh, entry splash scaled by grade |
-| Speed slide | Water Park slides | rides the slide (existing `startRide`) with a tuck pose at bends | a rival NPC rides the twin slide; bend markers flash on time | rush loop, whoosh per tuck, splash finish |
-| Water-gun battle | Water Park pool | holds a water gun, aims | floaties bob on the pool; hit floaties spin and splash | squirt and splash sounds |
-| Cook-off | Kamayan Hall kitchen | stands at the stove, chops/stirs per ingredient | ingredients appear in the wok/plate as added, steam, a rival cook at the next stove (or the online rival's doll) | sizzle, chop, a gong for the result |
-| Target range | Photon Zone range lanes | holds a light pistol or rifle | glowing targets slide on lanes, hits burst into light | zap, hit chime |
-| Haunted escape | Haunted House | walks room to room | each depth is a different room set; wrong doors trigger an in-world scare (a doll head turns, candles out, a sheet slides) | creaks, a stinger on scares |
+| Game             | Where                   | Doll                                                                       | Room reacts                                                                                                                | Sound                                                                                            |
+| ---------------- | ----------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Karaoke          | Karaoke Loft stage      | walks to the mic, sings pose loop, sways on the beat                       | lyric-free note lanes on the big screen, stage lights pulse per hit, booth NPCs cheer on streaks                           | backing track whose beat drives the chart (BPM from the jukebox); each hit plays the melody note |
+| Beach volleyball | city beach net          | dig and spike clips                                                        | a ball arcs over the net (physics-lite parabola), two NPC opponents move and dig, sand puffs                               | thump on contact, crowd on a kill, surf bed                                                      |
+| Pool volleyball  | Water Park pool         | waist-deep in the water                                                    | same as beach, with splashes                                                                                               | splash on contact                                                                                |
+| Cliff dive       | Water Park tower        | climbs, performs the trick (rotation keyed to the trick), enters the water | splash size follows the entry grade, a judge NPC holds up a score card                                                     | wind whoosh, entry splash scaled by grade                                                        |
+| Speed slide      | Water Park slides       | rides the slide (existing `startRide`) with a tuck pose at bends           | a rival NPC rides the twin slide; bend markers flash on time                                                               | rush loop, whoosh per tuck, splash finish                                                        |
+| Water-gun battle | Water Park pool         | holds a water gun, aims                                                    | floaties bob on the pool; hit floaties spin and splash                                                                     | squirt and splash sounds                                                                         |
+| Cook-off         | Kamayan Hall kitchen    | stands at the stove, chops/stirs per ingredient                            | ingredients appear in the wok/plate as added, steam, a rival cook at the next stove (or the online rival's doll)           | sizzle, chop, a gong for the result                                                              |
+| Target range     | Photon Zone range lanes | holds a light pistol or rifle                                              | glowing targets slide on lanes, hits burst into light                                                                      | zap, hit chime                                                                                   |
+| Haunted escape   | Haunted House           | walks room to room                                                         | each depth is a different room set; wrong doors trigger an in-world scare (a doll head turns, candles out, a sheet slides) | creaks, a stinger on scares                                                                      |
 
 **Requirements.**
+
 - New doll animations (Mixamo first, `mocap.py` retarget; hand-keyed poses
   in `moves.ts` where no clip fits): dig, spike, dive (pencil, swan,
   backflip, twist), tuck, sing, stir/chop, aim pistol, aim rifle.
@@ -67,6 +68,7 @@ billing, the D2 age-gate design, the D1 deploy approval, a domain,
 Cloudflare secrets.
 
 **Requirements.**
+
 - **Age gate (D2):** birthdate at signup, stored and locked server-side;
   under 16 can't sign up; 18+ unlocks automatically; guests never see 18+
   rooms. Server checks every 18+ room join.
@@ -94,6 +96,7 @@ the 18+ area is unreachable for anyone under 18.
 return visit within 2 s.
 
 **Requirements.**
+
 - **Interactive lobby:** while the world streams, the player is already in a
   lightweight scene (the Plaza at low detail, or a 2D lobby) with chat and
   the closet working.
@@ -117,6 +120,7 @@ in three runs, and CI fails if the budgets regress.
 ## Track 4. Reasons to come back
 
 **Requirements.**
+
 - **Event calendar:** a weekly schedule of club nights (Pride night, Y2K
   night, Latin night, chiptune night) and city events, visible on the city
   map with countdowns; events change music, lights and NPC lines.
@@ -138,6 +142,7 @@ unfinished set).
 ## Track 5. Deeper social play
 
 **Requirements.**
+
 - **Multiplayer games over the relay:** karaoke duet (alternating lines,
   combined score), beach volleyball 2v2 (two players per side, the server
   relays hits; host-authoritative rally), races against friends (shared seed
@@ -158,6 +163,7 @@ verified by the online Playwright spec.
 ## Track 6. Doll diversity (B7)
 
 **Requirements.**
+
 - **Hair:** locs, box braids (strand), cornrows, bantu knots, twist-out,
   puffs, buzz cut, shaved sides, bald, edges/baby hair.
 - **Bodies:** a wider body range, including plus-size, that every outfit
@@ -177,6 +183,7 @@ every outfit, and the lineup page shows them all.
 ## Track 7. Faster, sturdier tests
 
 **Requirements.**
+
 - **Cloud CI** runs the browser suite on every PR once billing is fixed
   (sharded, with retries only for known-flaky first loads).
 - **Deterministic clocks** for timed tests (dance-off, events) so a slow
