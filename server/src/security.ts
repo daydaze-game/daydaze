@@ -1,4 +1,4 @@
-/** Normalised origins from a comma-separated ALLOWED_ORIGINS value. */
+/** Normalized origins from a comma-separated ALLOWED_ORIGINS value. */
 export function parseAllowedOrigins(
   value: string | undefined,
 ): ReadonlySet<string> {
