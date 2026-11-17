@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 /** True when `text` begins with a `//` or `/*` comment (after a shebang line). */
 export function hasHeader(text: string): boolean {
-  const body = text.replace(/^﻿/, "").replace(/^#!.*\r?\n/, "");
+  const body = text.replace(/^\uFEFF/, "").replace(/^#!.*\r?\n/, "");
   return /^\s*(\/\/|\/\*)/.test(body);
 }
 
