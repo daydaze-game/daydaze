@@ -790,7 +790,7 @@ export function World({
               onPortal(portal);
             }}
           />
-          {import.meta.env.DEV && <DevProbe />}
+          {import.meta.env.DEV && <DevProbe player={player} area={area} />}
           {!freeCam && (
             <CameraRig
               player={player}

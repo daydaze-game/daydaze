@@ -1,5 +1,6 @@
 // Dev-only render tools: a live FPS / draw-call / triangle readout, a wireframe
-// switch and a free camera. Press ` (backquote) to show or hide the panel.
+// switch, a free camera and a teleport. Press ` (backquote) to show or hide
+// the panel.
 // Everything is gated on import.meta.env.DEV at the call sites, so production
 // builds drop it. Dependency-free: gl.info already has the numbers, and a
 // module store carries them from the Canvas (its own React root) to the DOM.
@@ -7,9 +8,11 @@ import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import * as THREE from "three";
+import { clampToArea, type WalkArea } from "../../game/area.ts";
 import { CLUB_NIGHTS } from "../../game/events.ts";
 import { MINIGAME_IDS, type MinigameId } from "../../game/hotspots.ts";
 import { ROOMS, isRoomId, type RoomId } from "../../game/rooms.ts";
+import { placePlayer, type Player } from "./PlayerController.tsx";
 
 type DevState = {
   open: boolean;
@@ -55,6 +58,9 @@ function subscribe(fn: () => void): () => void {
   listeners.add(fn);
   return () => listeners.delete(fn);
 }
+
+/** Panel buttons that act inside the Canvas; the probe fills them in. */
+const actions: { teleport: (() => void) | null } = { teleport: null };
 
 /** Whether the free camera is on, so World can pause its own camera rig. */
 export function useFreeCam(): boolean {
@@ -123,7 +129,7 @@ function pickBox(hit: THREE.Intersection, out: THREE.Box3): void {
 }
 
 /** Inside the Canvas: samples gl.info twice a second, applies the toggles. */
-export function DevProbe() {
+export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
   const scene = useThree((s) => s.scene);
   const wire = useSyncExternalStore(subscribe, () => state.wireframe);
   const tick = useRef({ frames: 0, since: performance.now() });
@@ -188,7 +194,14 @@ export function DevProbe() {
   const gl = useThree((s) => s.gl);
   const get = useThree((s) => s.get);
   useEffect(() => {
-    const dd = { THREE, scene, gl, get, pick: null as THREE.Object3D | null };
+    const dd = {
+      THREE,
+      scene,
+      gl,
+      get,
+      player,
+      pick: null as THREE.Object3D | null,
+    };
     Object.assign(window, { __dd: dd });
     // the extension's hook is an EventTarget on window; it takes the object
     const hook = Reflect.get(window, "__THREE_DEVTOOLS__");
@@ -240,7 +253,23 @@ export function DevProbe() {
       box.removeFromParent();
       box.dispose();
     };
-  }, [scene, gl, get]);
+  }, [scene, gl, get, player]);
+  // teleport: put the doll where the middle of the view meets the floor
+  // (y 0), clamped to the room's walkable area; not while seated or riding
+  useEffect(() => {
+    actions.teleport = () => {
+      if (player.seat || player.ride) return;
+      const { camera, raycaster } = get();
+      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+      const floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const p = raycaster.ray.intersectPlane(floor, new THREE.Vector3());
+      if (!p) return;
+      placePlayer(player, ...clampToArea(area, [p.x, p.z]));
+    };
+    return () => {
+      actions.teleport = null;
+    };
+  }, [player, area, get]);
   const freeCam = useFreeCam();
   return freeCam ? <OrbitControls makeDefault /> : null;
 }
@@ -355,6 +384,13 @@ export function DevPanel({
           />
         </label>
       </div>
+      <button
+        type="button"
+        onClick={() => actions.teleport?.()}
+        style={{ marginRight: 8 }}
+      >
+        teleport here
+      </button>
       {TOGGLES.map(([key, label]) => (
         <label key={key} style={{ marginRight: 8 }}>
           <input
