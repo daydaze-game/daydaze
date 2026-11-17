@@ -11,6 +11,8 @@ export default defineConfig({
   // tests are independent pages, so CI's shards can split the one file
   fullyParallel: true,
   workers: 2,
+  // CI retries a failed test once; a pass on the retry is reported as flaky, not green
+  retries: process.env.CI ? 1 : 0,
   timeout: 180_000,
   expect: { timeout: 60_000 },
   reporter: "list",

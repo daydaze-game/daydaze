@@ -115,6 +115,7 @@ read early and the short window passed.
 test), a new pure helper in `src/game/clock.ts` (+ test).
 
 **Steps.**
+
 1. Write `src/game/clock.test.ts`: a `heldClock(every, intoSeconds)` stays
    at the same value however much real time passes; a `shiftedClock`
    (current behavior) advances. RED.
@@ -141,6 +142,7 @@ tuck, sing, stir, chop, and aim a pistol and a rifle.
 `src/game/dance/moves.ts` (hand-keyed poses), `src/game/dance/moves.test.ts`.
 
 **Steps.**
+
 1. In `./mixamo`, pick the best clip for each action (see Working notes);
    add each to `MIXAMO_CLIPS` with kind `emote` (not in the dance picker).
 2. Rerun the retarget in Blender batch mode; check the generated ids.
@@ -168,6 +170,7 @@ player's doll for a game.
 `ScoreCard.tsx`, `useGameShot.ts`, `useGameClip.ts`).
 
 **Steps.**
+
 1. Tests first: `ballAt(launch, t)` follows a parabola and lands at the
    predicted spot; `bounce` keeps energy below 1; particle bursts are
    seeded and finish in their lifetime.
@@ -191,6 +194,7 @@ and burst; budgets unchanged.
 `src/game/dialogue/pick.test.ts`, the app start (prefetch at idle).
 
 **Steps.**
+
 1. Test: before `loadDialogue()` resolves, `pickLine` returns `"..."`;
    after, real lines. RED.
 2. Implement `loadDialogue()` with a dynamic `import("./index.ts")` (the
@@ -221,6 +225,7 @@ play the melody; NPCs cheer on streaks.
 track's BPM and start time); `src/client/rooms/Karaoke.tsx`.
 
 **Steps.**
+
 1. Test: `chart(seed, bpm, startAt)` puts every note on a beat of that tempo
    (within 1 ms). RED, then implement (replace the fixed 0.6 s beat).
 2. Jukebox: expose `currentTempo()` (BPM and the AudioContext time the
@@ -250,6 +255,7 @@ opponents move to it, your doll digs and spikes, sand puffs on landings.
 from Task 3, `src/client/city/VolleyStop.tsx` (panel shows score only).
 
 **Steps.**
+
 1. Test: each rally step produces a ball launch (from, to, apex) that lands
    on the right side of the net; opponents' positions follow the ball.
 2. Scene: render the ball with the kit, opponents as NPC dolls with dig and
@@ -511,6 +517,7 @@ every outfit and both body extremes, has a low-poly twin, keeps budgets, and
 shows in a lineup screenshot (`/src/client/avatar/lineup.html?human=1`).
 Unit-test any new `Look` field in `look.test.ts` (and `validateLook`'s
 16-key wire limit in `isLookShape`: today a full look uses 15).
+
 ### Task 37: Short hair (buzz cut, shaved sides, bald, edges)
 
 **Acceptance.** Each part is pickable in the closet, renders correctly with
@@ -518,6 +525,7 @@ every outfit and both body extremes, has a low-poly twin, keeps budgets, and
 shows in a lineup screenshot (`/src/client/avatar/lineup.html?human=1`).
 Unit-test any new `Look` field in `look.test.ts` (and `validateLook`'s
 16-key wire limit in `isLookShape`: today a full look uses 15).
+
 ### Task 38: Body range including plus-size, with outfit shape keys
 
 **Acceptance.** Each part is pickable in the closet, renders correctly with
@@ -525,6 +533,7 @@ every outfit and both body extremes, has a low-poly twin, keeps budgets, and
 shows in a lineup screenshot (`/src/client/avatar/lineup.html?human=1`).
 Unit-test any new `Look` field in `look.test.ts` (and `validateLook`'s
 16-key wire limit in `isLookShape`: today a full look uses 15).
+
 ### Task 39: Head coverings and accessories (hijab, head wrap, turban, bindi, hearing aids)
 
 **Acceptance.** Each part is pickable in the closet, renders correctly with
@@ -532,6 +541,7 @@ every outfit and both body extremes, has a low-poly twin, keeps budgets, and
 shows in a lineup screenshot (`/src/client/avatar/lineup.html?human=1`).
 Unit-test any new `Look` field in `look.test.ts` (and `validateLook`'s
 16-key wire limit in `isLookShape`: today a full look uses 15).
+
 ### Task 40: Skin and face (vitiligo, birthmarks, monolid option)
 
 **Acceptance.** Each part is pickable in the closet, renders correctly with
@@ -539,6 +549,7 @@ every outfit and both body extremes, has a low-poly twin, keeps budgets, and
 shows in a lineup screenshot (`/src/client/avatar/lineup.html?human=1`).
 Unit-test any new `Look` field in `look.test.ts` (and `validateLook`'s
 16-key wire limit in `isLookShape`: today a full look uses 15).
+
 ### Task 41: Wheelchair (model and seated locomotion everywhere) and prosthetics
 
 **Acceptance.** Each part is pickable in the closet, renders correctly with
@@ -546,7 +557,6 @@ every outfit and both body extremes, has a low-poly twin, keeps budgets, and
 shows in a lineup screenshot (`/src/client/avatar/lineup.html?human=1`).
 Unit-test any new `Look` field in `look.test.ts` (and `validateLook`'s
 16-key wire limit in `isLookShape`: today a full look uses 15).
-
 
 ## Phase 7. Tests
 

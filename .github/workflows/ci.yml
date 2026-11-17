@@ -53,6 +53,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Markdownlint (docs)
+        run: npm run lint:md
       - name: Dead code (Knip)
         run: npm run lint:dead
       - name: File headers

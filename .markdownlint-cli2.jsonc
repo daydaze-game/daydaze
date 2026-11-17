@@ -1,0 +1,28 @@
+// markdownlint-cli2 config for the repo's Markdown docs (npm run lint:md).
+// Prettier ignores *.md (.prettierignore), so prose wrapping and list/emphasis
+// style are not enforced by a formatter; rules below are disabled only where a
+// deliberate house style would otherwise produce hundreds of churn-only edits.
+{
+  "globs": ["*.md", "docs/**/*.md", ".github/**/*.md"],
+  // docs/assets.md is read by src/game/credits.test.ts, which matches each
+  // table row to its in-game credit exactly; bracketing its URLs breaks that
+  "ignores": [
+    "docs/agents/investigations/**",
+    "node_modules/**",
+    "docs/assets.md",
+  ],
+  "gitignore": true,
+  "config": {
+    "default": true,
+    // Prose is written in long unwrapped lines in many plans and specs.
+    "MD013": false,
+    // Bold run-in labels ("**Sessions**") are the house sub-section style in
+    // docs/security.md and the roadmap; converting them would change outlines.
+    "MD036": false,
+    // CLAUDE.md is a one-line @import for Claude Code, and the PR template
+    // opens with a section, so neither is a standalone document with an H1.
+    "MD041": false,
+    // Keep a Changelog repeats "### Added" / "### Changed" under each release.
+    "MD024": { "siblings_only": true },
+  },
+}

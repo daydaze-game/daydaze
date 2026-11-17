@@ -1,0 +1,23 @@
+name: Dependabot auto-merge
+# Turns on auto-merge for Dependabot's grouped npm minor-and-patch PR. GitHub
+# then merges it once the required checks pass; a red check keeps it open.
+# Major bumps and the GitHub Actions group are left for a human (an action
+# major, like gitleaks 2 -> 3, can change behavior).
+# pull_request_target gives Dependabot's PR a token that can enable auto-merge;
+# the job never checks out or runs the PR's code.
+on:
+  pull_request_target:
+    branches: [main]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  automerge:
+    if: github.actor == 'dependabot[bot]' && contains(github.event.pull_request.title, 'the minor-and-patch group')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --merge "$PR_URL"
