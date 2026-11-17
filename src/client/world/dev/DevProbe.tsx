@@ -16,7 +16,14 @@ import {
   objectBox,
   objectPath,
 } from "./sceneUtil.ts";
-import { actions, devState, patch, useDev, useFreeCam } from "./store.ts";
+import {
+  actions,
+  canvas,
+  devState,
+  patch,
+  useDev,
+  useFreeCam,
+} from "./store.ts";
 
 export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
   const scene = useThree((s) => s.scene);
@@ -106,6 +113,9 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
       pick: null as THREE.Object3D | null,
     };
     Object.assign(window, { __dd: dd });
+    canvas.scene = scene;
+    canvas.gl = gl;
+    canvas.camera = () => get().camera;
     // the extension's hook is an EventTarget on window; it takes the object
     const hook = Reflect.get(window, "__THREE_DEVTOOLS__");
     if (hook instanceof EventTarget) {

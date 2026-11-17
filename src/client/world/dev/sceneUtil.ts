@@ -83,3 +83,21 @@ export function objectPath(o: THREE.Object3D): string {
   }
   return path.join(" > ");
 }
+
+/** Objects whose name or type contains `query`, case-insensitive. */
+export function searchScene(
+  root: THREE.Object3D,
+  query: string,
+  limit: number,
+): { hits: THREE.Object3D[]; total: number } {
+  const q = query.toLowerCase();
+  const hits: THREE.Object3D[] = [];
+  let total = 0;
+  root.traverse((o) => {
+    if (o === root) return;
+    if (!`${o.name} ${o.type}`.toLowerCase().includes(q)) return;
+    total++;
+    if (hits.length < limit) hits.push(o);
+  });
+  return { hits, total };
+}

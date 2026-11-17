@@ -155,6 +155,13 @@ export function useFreeCam(): boolean {
   return useSyncExternalStore(subscribe, () => state.freeCam);
 }
 
+/** The live scene and renderer, registered by the probe for the panel. */
+export const canvas: {
+  scene: THREE.Scene | null;
+  gl: THREE.WebGLRenderer | null;
+  camera: () => THREE.Camera | null;
+} = { scene: null, gl: null, camera: () => null };
+
 /** Panel buttons that act inside the Canvas; the probe fills them in. */
 export const actions: {
   teleport: (() => void) | null;
