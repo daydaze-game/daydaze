@@ -789,6 +789,24 @@ const SHOTS: {
     12,
     8,
   ),
+  // cocaine at its peak (2 min on, before the 183 s it ends): no screen
+  // change, just her wide eyes
+  actionStrip(
+    "cocaine-peak",
+    "quality=high&room=green-haze&adult=1&debug=1",
+    async (page) => {
+      await page
+        .getByRole("button", { name: "Do a line" })
+        .click({ timeout: 150_000 });
+      const later = page.getByRole("button", { name: "Debug: a minute later" });
+      for (let i = 0; i < 1; i++) await later.click();
+    },
+    async (page) => {
+      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+    },
+    12,
+    8,
+  ),
   // the room actions: the ladder climb and the Hot Shots throw
   actionStrip(
     "move-climb",
