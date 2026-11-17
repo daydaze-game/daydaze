@@ -37,12 +37,13 @@ every push and pull request to `main` and fails fast.
 | Command | What it checks |
 | --- | --- |
 | `npm run lint` | ESLint: TypeScript and React hooks rules |
+| `npm run lint:md` | markdownlint-cli2 on the Markdown docs (rules in `.markdownlint-cli2.jsonc`) |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
 | `npm test` | unit tests (Node's test runner) |
 | `npm run test:coverage` | the same, with a coverage report in `coverage/` |
 | `npm run build` | the production bundle in `dist/` |
-| `npm run verify` | lint, tests, types, format, build and the perf budget together |
+| `npm run verify` | lint (code and docs), tests, types, format, build and the perf budget together |
 
 Browser and server suites are slower; run the parts you touched:
 

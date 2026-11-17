@@ -52,6 +52,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Markdownlint (docs)
+        run: npm run lint:md
       - name: Prettier
         run: npm run format:check
       - name: TypeScript (client, game and Worker)
