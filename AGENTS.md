@@ -119,7 +119,8 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<names>"`,
     then `gh run download <id> -n screenshots`. Look at every screenshot.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
-    `deploy.yml` runs only by hand.
+    `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
+    config skips the browser steps (`scripts/docs-only.ts`) and reports green.
 - Merge gate: rebase onto `main`, verify green, the touched feature's Playwright
   tests green, then `git merge --no-ff`, remove the worktree and branch, push
   `main`. `docs/agents/scripts/land.sh` automates this against GitHub CI.
