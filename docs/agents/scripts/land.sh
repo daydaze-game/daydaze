@@ -27,5 +27,7 @@ if git -C $M merge-base --is-ancestor main $b && git -C $M merge --no-ff -q $b -
   echo "$w MERGED $(git -C $M log --oneline -1 | cut -c1-9) (GitHub verify run $id)"
   # main's own ci and Tests runs: a red main comes before landing anything else
   sleep 15; gh run list --branch main -L 3 --json workflowName,status,url -q '.[] | "  main: \(.workflowName) \(.status) \(.url)"'
+  # the ref only existed for CI; GitHub's delete-on-merge never fires because main is pushed directly
+  git push -q origin --delete $ref 2>&1 | grep -v "^remote:"
   cd $M && git worktree remove --force $d && git branch -D $b > /dev/null
 else echo "$w NOT-MERGED (main moved during CI; rerun)"; fi

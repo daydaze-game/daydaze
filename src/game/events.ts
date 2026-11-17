@@ -10,7 +10,7 @@
 // city's fireworks and parade; the city map lists them all. Pure.
 
 import { byTier } from "./age.ts";
-import type { TrackId } from "../audio/proceduralJukebox.ts";
+import type { TrackId } from "./trackId.ts";
 import type { DialogueSituation } from "./dialogue/types.ts";
 import type { RoomId } from "./rooms.ts";
 
