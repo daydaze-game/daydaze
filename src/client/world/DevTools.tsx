@@ -14,6 +14,12 @@ import {
   devStartEvent,
   devStartNight,
 } from "../city/eventClocks.ts";
+import {
+  netCounts,
+  netFrames,
+  netLogVersion,
+  subscribeNetLog,
+} from "../net/devNetLog.ts";
 import { devStartDanceOff } from "../rooms/pulse/danceOffClock.ts";
 import { clampToArea, type WalkArea } from "../../game/area.ts";
 import { CLUB_NIGHTS } from "../../game/events.ts";
@@ -311,6 +317,36 @@ function Pick({
   );
 }
 
+/** The movement stream (12 Hz out, constant in); hidden from the recent list. */
+const NOISY = new Set(["update", "delta"]);
+
+/** Online frames (`?online=1`): counts by type, then the latest few. */
+function NetLog() {
+  useSyncExternalStore(subscribeNetLog, netLogVersion);
+  const counts = [...netCounts()];
+  if (counts.length === 0) return null;
+  const recent = netFrames()
+    .filter((f) => !NOISY.has(f.type))
+    .slice(-6);
+  return (
+    <div style={{ maxWidth: 480 }}>
+      <div>net {counts.map(([k, n]) => `${k} ${n}`).join(" · ")}</div>
+      {recent.map((f) => (
+        <div
+          key={`${f.at}-${f.dir}-${f.text.length}-${f.type}`}
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {f.dir === "in" ? "←" : "→"} {f.text}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const TOGGLES = [
   ["wireframe", "wireframe"],
   ["freeCam", "free cam"],
@@ -428,6 +464,7 @@ export function DevPanel({
       >
         teleport here
       </button>
+      <NetLog />
       {TOGGLES.map(([key, label]) => (
         <label key={key} style={{ marginRight: 8 }}>
           <input

@@ -5,6 +5,7 @@ import { SOLO_ROOMS, type RoomId } from "../../game/rooms.ts";
 import { createApi } from "../../net/client/api.ts";
 import { OnlineSession } from "../../net/client/OnlineSession.ts";
 import { WebSocketTransport } from "../../net/client/WebSocketTransport.ts";
+import { loggedWebSocket } from "./devNetLog.ts";
 import { readFlags } from "../flags.ts";
 import { beforeTravel } from "./party.ts";
 import { enterApartment, homeVisit } from "./home.ts";
@@ -37,7 +38,12 @@ export function onlineSession(): OnlineSession | null {
   shared ??= new OnlineSession({
     api: createApi({ fetch: (url, init) => fetch(url, init) }),
     wsBaseUrl: location.origin.replace(/^http/, "ws"),
-    openTransport: (url) => new WebSocketTransport({ url, WebSocket }),
+    // in development every frame also lands in the dev panel's network log
+    openTransport: (url) =>
+      new WebSocketTransport({
+        url,
+        WebSocket: import.meta.env.DEV ? loggedWebSocket() : WebSocket,
+      }),
   });
   return shared;
 }
