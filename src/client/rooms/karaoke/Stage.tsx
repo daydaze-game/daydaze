@@ -186,7 +186,7 @@ function LightStrips({ screen }: { screen: ScreenSpot }) {
         >
           <boxGeometry args={[0.06, screen.h + 0.4, 0.03]} />
           <meshBasicMaterial
-            ref={side < 0 ? mat : undefined}
+            ref={side < 0 ? mat : null}
             color={base}
             toneMapped={false}
           />

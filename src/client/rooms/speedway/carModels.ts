@@ -458,7 +458,7 @@ export type Bucket = "paint" | "glass" | "trim" | "tyre" | "rim" | "light";
  * One car model's merged geometry per bucket. A bucket is missing when the
  * model has no pieces in it (a bumper car has no tyres or rims).
  */
-export type CarParts = Partial<Record<Bucket, BufferGeometry>>;
+export type CarParts = Partial<Record<Bucket, BufferGeometry | undefined>>;
 
 function merged(list: BufferGeometry[]): BufferGeometry | undefined {
   if (list.length === 0) return undefined;

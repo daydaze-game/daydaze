@@ -80,7 +80,7 @@ export function startReaction(
     id,
     startAt: now,
     until: now + reactionSeconds(id) + (then ? reactionSeconds(then) : 0),
-    then,
+    ...(then && { then }),
   };
 }
 

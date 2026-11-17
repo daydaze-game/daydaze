@@ -92,7 +92,7 @@ export type Player = {
   seat: {
     position: THREE.Vector3;
     yaw: number;
-    lie?: boolean;
+    lie?: boolean | undefined;
     /** A ride seat (horse, cup, chair): she sits while it holds her. */
     sit?: boolean;
     /** Head over heels, radians, about her hips: flips and tumbles. */
@@ -103,7 +103,7 @@ export type Player = {
     inside?: boolean;
     /** The clip she holds seated here instead of her own pick (a cafe table's
      * idle, typing at a desk): a chair seat's, see game/seats.ts. */
-    hold?: string;
+    hold?: string | undefined;
   } | null;
   /** Set while seated on a chair (not a ride): the doll sits until she moves. */
   sitting: boolean;

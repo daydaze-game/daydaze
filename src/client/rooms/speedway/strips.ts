@@ -63,7 +63,7 @@ export function quadBoxes(
       length: Math.hypot(dx, dz),
       height,
       depth: Math.hypot(v3[0] - v0[0], v3[1] - v0[1]),
-      color: colorOf?.(i),
+      ...(colorOf && { color: colorOf(i) }),
     };
   });
 }
