@@ -114,6 +114,7 @@ test("locked shop looks fall back to the default until owned", () => {
   };
   assert.deepEqual(unlockedLook(look, []), {
     ...DEFAULT_LOOK,
+    lips: look.lips,
     shadow: look.shadow,
   });
   const owned = ["tracksuit-y2k", "sleek-bob", "lips-chrome-berry"];
@@ -135,6 +136,13 @@ test("all hair colors are available without a purchase", () => {
   const look: Look = { ...DEFAULT_LOOK, hairColor: "#7ee8a2" };
   assert.equal(unlockedLook(look, []).hairColor, look.hairColor);
   assert.equal(unlockedLook(look, ["#7ee8a2"]).hairColor, "#7ee8a2");
+});
+
+test("every lipstick color stays available without a wardrobe purchase", () => {
+  for (const { id } of LIPS) {
+    const look = { ...DEFAULT_LOOK, lips: id };
+    assert.equal(unlockedLook(look, []).lips, id);
+  }
 });
 
 test("cleanWardrobe keeps known, unique ids and drops the rest", () => {

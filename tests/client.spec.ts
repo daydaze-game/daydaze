@@ -345,6 +345,12 @@ test("the player drives their car down the avenue and parks it", async ({
   await expect(canvas).toHaveAttribute("data-city-car", "driving", {
     timeout: 120_000,
   });
+  const dressing = page.getByRole("button", {
+    name: "Dressing room",
+    exact: true,
+  });
+  await expect(dressing).toBeDisabled();
+  await expect(dressing).toHaveAttribute("aria-expanded", "false");
   // on a desktop the car drives on the keys; the pedals are for touch
   await page.keyboard.down("w");
   // it starts at x = 14; traffic is solid and wanders, and a car in the lane
@@ -368,6 +374,7 @@ test("the player drives their car down the avenue and parks it", async ({
   await expect(lights).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Leave the car" }).click();
   await expect(canvas).toHaveAttribute("data-city-car", "parked");
+  await expect(dressing).toBeEnabled();
   // parked where it stopped: the save remembers the car and the spot
   const saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
