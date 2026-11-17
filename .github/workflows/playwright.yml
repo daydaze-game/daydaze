@@ -1,6 +1,8 @@
 name: Tests
-# The repo is public, so Actions minutes are free: run on pushes and pull
-# requests to main, and by hand. A newer run on the same ref cancels the old one.
+# The browser suites (Playwright on SwiftShader). ci.yml already runs lint,
+# tests, typecheck and the build on the same triggers, so this file does not
+# repeat them. The repo is public, so Actions minutes are free. A newer run on
+# the same ref cancels the old one.
 on:
   push:
     branches: [main]
@@ -11,19 +13,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  verify:
-    timeout-minutes: 20
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run verify
   browser:
-    needs: verify
     timeout-minutes: 45
     runs-on: ubuntu-24.04
     strategy:
@@ -48,7 +38,6 @@ jobs:
           path: test-results/
           retention-days: 14
   minigames:
-    needs: verify
     timeout-minutes: 20
     runs-on: ubuntu-24.04
     steps:
