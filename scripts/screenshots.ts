@@ -764,6 +764,7 @@ const SHOTS: {
       for (let i = 0; i < 5; i++) await later.click();
     },
     async () => {},
+    20,
     8,
   ),
   // the room actions: the ladder climb and the Hot Shots throw
