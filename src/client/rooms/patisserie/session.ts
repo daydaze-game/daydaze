@@ -5,7 +5,6 @@ import {
   newTower,
   sliderAt,
   towerScore,
-  type Tower,
 } from "../../../game/macaronTower.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -14,7 +13,7 @@ import { createStore } from "../shared/store.ts";
  * one landed (`since`, performance.now()). */
 const OFF = {
   on: false,
-  tower: newTower() as Tower,
+  tower: newTower(),
   since: 0,
   perfect: false,
 };

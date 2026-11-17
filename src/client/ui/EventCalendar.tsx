@@ -105,7 +105,9 @@ export function EventCalendar() {
   return (
     <section className="event-calendar" aria-label="Events">
       <h3>Events this week</h3>
-      {/* thirty-odd nights: the list scrolls (and takes the keyboard) */}
+      {/* thirty-odd nights: the list scrolls, so it must take focus for the
+          keyboard to scroll it (axe: scrollable-region-focusable) */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable scroll container */}
       <ul tabIndex={0} aria-label="Upcoming events">
         {rows.map((r) => (
           <li key={r.key} data-on={r.on}>

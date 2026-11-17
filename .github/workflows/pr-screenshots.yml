@@ -1,0 +1,81 @@
+name: PR screenshots
+# Screenshots for pull requests that change what players see. The changed
+# files pick the shots (scripts/pr-shots.ts), screenshots.yml takes them, and
+# a comment on the PR links the run's `screenshots` artifact (kept 7 days).
+# Download: gh run download <run-id> -n screenshots
+# Docs-only or unmapped changes pick nothing, so no shots run.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/client/**"
+      - "src/game/**"
+      - "scripts/screenshots.ts"
+      - "scripts/pr-shots.ts"
+concurrency:
+  group: pr-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  pick:
+    # a fork's token is read-only, so it could not comment
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      shots: ${{ steps.pick.outputs.shots }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          shots=$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/pr-shots.ts)
+          echo "shots=$shots" >> "$GITHUB_OUTPUT"
+          echo "Shots: ${shots:-none}"
+  shots:
+    needs: pick
+    if: needs.pick.outputs.shots != ''
+    uses: ./.github/workflows/screenshots.yml
+    with:
+      shots: ${{ needs.pick.outputs.shots }}
+  comment:
+    needs: [pick, shots]
+    # still comment when a shot failed, so the PR says so
+    if: ${{ !cancelled() && needs.pick.outputs.shots != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          SHOTS: ${{ needs.pick.outputs.shots }}
+          RESULT: ${{ needs.shots.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          marker='<!-- pr-screenshots -->'
+          {
+            echo "$marker"
+            echo "### Screenshots ($RESULT)"
+            echo
+            echo "Shots: \`$SHOTS\`"
+            echo
+            echo "Download the \`screenshots\` artifact from [this run]($RUN_URL#artifacts) (kept 7 days), or \`gh run download ${RUN_URL##*/} -n screenshots\`."
+            echo "Copy the good ones into \`docs/screenshots/\`."
+          } > body.md
+          # one comment per PR: update ours if it is there, else post it
+          id=$(gh api "repos/$GH_REPO/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.body | contains(\"$marker\")) | .id" | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GH_REPO/issues/comments/$id" -F body=@body.md > /dev/null
+          else
+            gh pr comment "$PR" --body-file body.md
+          fi

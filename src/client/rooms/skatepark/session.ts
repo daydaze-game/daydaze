@@ -4,7 +4,6 @@ import {
   NEW_RUN,
   press as pressRun,
   RUN_SECONDS,
-  type Run,
 } from "../../../game/skate.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -16,7 +15,7 @@ export type Phase = "off" | "riding" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  run: NEW_RUN as Run,
+  run: NEW_RUN,
   /** performance.now() when she dropped in. */
   startAt: 0,
 };

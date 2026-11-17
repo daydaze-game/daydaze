@@ -128,7 +128,7 @@ export const CHAT_GROUPS: readonly ChatGroup[] = (() => {
     const seed = 1 + (mix(i, 5) % 100000);
     const looks = Array.from(
       { length: size },
-      (_, m) => PEDESTRIANS[mix(i, 40 + m) % PEDESTRIANS.length]?.look as Look,
+      (_, m) => PEDESTRIANS[mix(i, 40 + m) % PEDESTRIANS.length]?.look,
     );
     out.push({
       at,

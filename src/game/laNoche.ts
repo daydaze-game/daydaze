@@ -12,7 +12,6 @@ export const STAGE = { x0: -4, x1: 4, z0: -6, z1: -3.8, height: 0.45 } as const;
 
 /** The dance floor's center and half size. */
 export const DANCE: Vec2 = [-0.4, 0.4];
-export const DANCE_HALF = 2.4;
 
 /** The bar along the right wall; its front at x = BAR.front. */
 export const BAR = { front: 5.2, back: 6, z0: -2.6, z1: 2.6 } as const;

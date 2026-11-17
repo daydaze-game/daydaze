@@ -19,7 +19,7 @@ const W = 1.8;
 const xs = (pos: Float32Array, keep: (y: number, z: number) => boolean) => {
   let max = 0;
   for (let i = 0; i < pos.length; i += 3)
-    if (keep(pos[i + 1]!, pos[i + 2]!)) max = Math.max(max, Math.abs(pos[i]!));
+    if (keep(pos[i + 1], pos[i + 2])) max = Math.max(max, Math.abs(pos[i]));
   return max;
 };
 
@@ -36,9 +36,9 @@ test("a lofted body fills the car's length, width and height", () => {
   const { positions, indices } = loftBody(SHELL, { length: L, width: W });
   let [minZ, maxZ, maxY] = [Infinity, -Infinity, -Infinity];
   for (let i = 0; i < positions.length; i += 3) {
-    minZ = Math.min(minZ, positions[i + 2]!);
-    maxZ = Math.max(maxZ, positions[i + 2]!);
-    maxY = Math.max(maxY, positions[i + 1]!);
+    minZ = Math.min(minZ, positions[i + 2]);
+    maxZ = Math.max(maxZ, positions[i + 2]);
+    maxY = Math.max(maxY, positions[i + 1]);
   }
   assert.ok(Math.abs(maxZ - L / 2) < 0.06 && Math.abs(minZ + L / 2) < 0.06);
   assert.ok(Math.abs(maxY - 0.78) < 0.02);

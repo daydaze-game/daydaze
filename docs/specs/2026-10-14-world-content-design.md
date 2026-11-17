@@ -16,7 +16,7 @@ The world is a set of districts joined by portals, with Downtown Plaza as the hu
 ### Districts and places
 
 | District | Places |
-|---|---|
+| --- | --- |
 | Downtown Plaza (hub) | street, fountain, bus stop with the world map |
 | Nightlife Row | The Velvet Room lounge, several clubs (a main dance club, a Y2K pop club, a techno warehouse, a Latin night club, the lesbian bar's dance floor), rooftop bar, karaoke bar, arcade bar, speakeasy |
 | Water Park | entrance plaza, slide towers, wave pool, lazy river, splash zone, cliff-dive lagoon, cabanas and pool bar, night swim |
@@ -49,7 +49,7 @@ The current lounge, "The Mango Room", is renamed **The Velvet Room** so that no 
 The districts sit inside distinct neighborhoods, each with its own look, music, NPCs and time-of-day mood. Players can live in any of them: the apartment's neighborhood sets the view from the window and the street outside.
 
 | Neighborhood | Feel | Holds |
-|---|---|---|
+| --- | --- | --- |
 | Downtown | glossy towers, neon billboards, taxis | Plaza hub, mega-mall, luxury street, airport link |
 | Nightlife Row | brick, neon, queues outside clubs | clubs, bars, lounge, speakeasy, secret venues |
 | Little Manila | jeepneys, parol lanterns, karaoke spilling out of doorways | Filipino restaurants, bakery, Filipino grocery, a sari-sari store |
@@ -196,7 +196,7 @@ Places have a few scripted non-player characters (NPCs) so they never feel empty
 ## Games roster
 
 | Game | Place | Mode | Difficulty | Theme |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Bassline DJ rhythm (exists as Mango Decks, renaming) | dance club | solo | hard | music |
 | Last Call cocktail mixing (exists, re-theming) | rooftop bar | solo | easy | bartending |
 | Karaoke | karaoke bar | solo or multi | easy | music |

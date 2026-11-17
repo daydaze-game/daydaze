@@ -540,6 +540,34 @@ test("Green Haze (18+, dev flag): a molly comes on after a while, then she's glo
   expect(errors).toEqual([]);
 });
 
+test("Green Haze (18+, dev flag): a line hits fast, then she's up and talking", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${STILL}&room=green-haze&adult=1&debug=1`);
+  await expect(roomTitle(page)).toHaveText("Green Haze", { timeout: 150_000 });
+  const canvas = canvasOf(page);
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-calls")), {
+      timeout: 120_000,
+    })
+    .toBeGreaterThan(15);
+  await page.getByRole("button", { name: "Do a line" }).click();
+  await expect(canvas).toHaveAttribute("data-doses", "1");
+  // it takes a minute to land: nothing yet (game/effects/substances.ts)
+  await expect(canvas).toHaveAttribute("data-under", "");
+  // two minutes on: past the 102 s the peak starts, well before the 183 s it
+  // ends (a third click would risk the comedown on a slow runner)
+  const later = page.getByRole("button", { name: "Debug: a minute later" });
+  for (let i = 0; i < 2; i++) await later.click();
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-cocaine")))
+    .toBeGreaterThan(0.5);
+  await expect(canvas).toHaveAttribute("data-under", "cocaine");
+  expect(errors).toEqual([]);
+});
+
 test("Photon Zone: a laser tag round tags a rival for points", async ({
   page,
 }) => {

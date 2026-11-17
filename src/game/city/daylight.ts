@@ -110,8 +110,8 @@ export function daylightAt(hour: number): Daylight {
   const h = ((hour % 24) + 24) % 24;
   let i = 0;
   while (i + 2 < KEYS.length && (KEYS[i + 1]?.[0] ?? 24) <= h) i++;
-  const [h0, a] = KEYS[i] ?? KEYS[0]!;
-  const [h1, b] = KEYS[i + 1] ?? KEYS[KEYS.length - 1]!;
+  const [h0, a] = KEYS[i] ?? KEYS[0];
+  const [h1, b] = KEYS[i + 1] ?? KEYS[KEYS.length - 1];
   const t = ease(h1 > h0 ? (h - h0) / (h1 - h0) : 0);
   // the sun's arc: up in the east at 6, overhead at 12.5, down in the west at 19
   const arc = (Math.PI * (h - 6)) / 13;

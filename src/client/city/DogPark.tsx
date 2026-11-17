@@ -26,7 +26,6 @@ import {
   fenceSpots,
   stepWorld,
   type Dog,
-  type GearKind,
 } from "../../game/city/dogPark.ts";
 import { Creature, type CreaturePose } from "../creatures/Creature.tsx";
 import type { Player } from "../world/PlayerController.tsx";
@@ -107,7 +106,7 @@ function Yard(): JSX.Element {
           key,
           propParts(
             scene,
-            GEAR.filter((g) => g.kind === (key as GearKind)).map((g) =>
+            GEAR.filter((g) => g.kind === key).map((g) =>
               spotOf(g.x, g.z, g.yaw),
             ),
           ),

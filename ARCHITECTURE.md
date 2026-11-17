@@ -9,7 +9,7 @@ the threat model in [docs/security.md](docs/security.md), deployment in
 
 ## The layers
 
-```
+```text
  browser                                              Cloudflare
 ┌──────────────────────────────────────────────┐    ┌──────────────────────────┐
 │ src/client   React + R3F: scenes, HUD, input │    │ server/src/worker        │
@@ -57,22 +57,10 @@ floors, looks, saves, chat effects) so both sides agree on the rules. `npm run l
   `Dressing.tsx`, the prize card (`prizeDesk.ts` → `App` grades, pays and
   records bests and daily challenges), the city map, shops, jail.
 - `city/` is the streamed open city: chunks, traffic, your car, the fuel
-  stops, the beach net, events (fireworks, the Pride parade). New York
-  blocks (Downtown, Uptown, Arts District) wear real facades near the player:
-  `game/city/nyc.ts` picks storey-high bays per street face (seeded lots,
-  ground floor, cornice, fire escapes) and `city/NycFacades.tsx` draws them
-  from `public/models/nyc/bays.glb` (`scripts/import-nyc.sh`), one
-  InstancedMesh2 per bay (culled per instance); farther blocks keep the cheap
-  box walls. Little Manila, Chinatown, Koreatown, the Arts District and
-  Uptown wear finished buildings instead (Quaternius' Ultimate Textured
-  Building Pack, `public/models/districts/lots.glb`,
-  `art/city/district_blocks.py`, `scripts/import-districts.sh`):
-  `game/city/districts.ts` tiles each street face with lots (model, palette
-  and made-up shop name from the district's look, `districtNames.ts`),
-  `city/DistrictLots.tsx` draws them with one palette atlas (the pack paints
-  with a 16-swatch palette, so one model wears every district's colors),
-  lit windows by night and a far twin past 24 m; `budget.ts` prices them.
-  Streets are dressed from the same kit
+  stops, the beach net, events (fireworks, the Pride parade). The older
+  facade renderers (`NycFacades`, `DistrictLots`, `CityHouses`, `FarCity`) were
+  deleted when the dream city replaced them; `game/city/nyc.ts`,
+  `districts.ts` and `far.ts` remain as pure logic. Streets are dressed from the same kit
   (`public/models/street/kit.glb`, `scripts/import-street.sh`):
   `game/city/streetPieces.ts` cuts the sidewalks back from the cross streets
   and places corner blocks, crosswalks, stop and slow words, double yellow
@@ -117,7 +105,8 @@ dev-only hooks the panel calls: `setDevHour` (`city/daylight.ts`),
 `devStartDanceOff` and a WebSocket frame log (`net/devNetLog.ts`). Usage is
 in [docs/dev-tools.md](docs/dev-tools.md).
 
-The far city (`game/city/far.ts`, `client/city/FarCity.tsx`): every building
+The far city (`game/city/far.ts`; its renderer `FarCity.tsx` was replaced by
+the dream city): every building
 the streamed plan does not draw (past the loaded cells, or infill past its
 range) is a `plan.far` box, drawn as one instanced mesh whose shader adds
 windows, a darker roof and lit windows at night from world position, with all
@@ -256,6 +245,8 @@ update prompt (`src/client/ui/UpdatePrompt.tsx`), then deletes the old cache.
 
 - `npm run lint`: ESLint with typescript-eslint and the React hooks rules
   (`eslint.config.mjs`).
+- `npm run lint:md`: markdownlint-cli2 over the root, `docs/` and `.github/`
+  Markdown (`.markdownlint-cli2.jsonc`).
 - `npm test`: Node's test runner over `src/**/*.test.ts` and
   `server/**/*.test.ts` (game rules, protocol, server cores).
 - `npm run typecheck`: strict TypeScript, including the Worker.
@@ -274,7 +265,10 @@ update prompt (`src/client/ui/UpdatePrompt.tsx`), then deletes the old cache.
   preloads, gzipped) passes 600 KB, and prints `dist/` by asset class; CI runs
   it after the build.
 - `npm run test:coverage`: the unit tests with a coverage report
-  (`coverage/lcov.info`, `coverage/summary.txt`).
+  (`coverage/lcov.info`, `coverage/summary.txt`). It fails below the coverage
+  minimums: Node's threshold flags for the whole project, and
+  `scripts/check-coverage.ts` for `src/game/` and `src/net/` (see
+  CONTRIBUTING.md).
 - `npm run verify`: lint, tests, typecheck, format check and build; the
   merge gate, and what CI (`.github/workflows/ci.yml`) runs on every push
   and pull request to `main`.

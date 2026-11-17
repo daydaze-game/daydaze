@@ -20,7 +20,7 @@ This spec covers the single-player client only. Multiplayer is covered by `2026-
 
 ## Layout
 
-```
+```text
 src/
   net/                    existing protocol and room server (shared with server)
   audio/                  existing procedural audio

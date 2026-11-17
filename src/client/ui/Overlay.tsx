@@ -1162,6 +1162,13 @@ export function Overlay({
                 >
                   Pop a molly
                 </button>
+                <button
+                  type="button"
+                  className="drink"
+                  onClick={() => take("line")}
+                >
+                  Do a line
+                </button>
               </>
             )}
             <VenueGames room={room} onPlay={onPlayGame} />

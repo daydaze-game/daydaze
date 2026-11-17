@@ -8,12 +8,12 @@ test("every star is a unit direction above the horizon, with sane size and warmt
   const f = starField(700, 300);
   assert.equal(f.count, 1000);
   for (let i = 0; i < f.count; i++) {
-    const [x, y, z] = [f.dir[i * 3]!, f.dir[i * 3 + 1]!, f.dir[i * 3 + 2]!];
+    const [x, y, z] = [f.dir[i * 3], f.dir[i * 3 + 1], f.dir[i * 3 + 2]];
     assert.ok(Math.abs(Math.hypot(x, y, z) - 1) < 1e-5, `unit ${i}`);
     assert.ok(y > 0.02, `above the horizon ${i}`);
-    assert.ok(f.size[i]! >= 1.3 && f.size[i]! <= 5, `size ${f.size[i]}`);
-    assert.ok(f.warmth[i]! >= 0 && f.warmth[i]! <= 1);
-    assert.ok(f.bright[i]! > 0 && f.bright[i]! <= 1);
+    assert.ok(f.size[i] >= 1.3 && f.size[i] <= 5, `size ${f.size[i]}`);
+    assert.ok(f.warmth[i] >= 0 && f.warmth[i] <= 1);
+    assert.ok(f.bright[i] > 0 && f.bright[i] <= 1);
   }
 });
 
@@ -32,16 +32,14 @@ test("the Milky Way is a dim band along one great circle", () => {
   const f = starField(0, 600);
   // all its stars lie near one plane through the origin
   const n = [0.35, 0.8, 0.5];
-  const len = Math.hypot(n[0]!, n[1]!, n[2]!);
+  const len = Math.hypot(n[0], n[1], n[2]);
   let off = 0;
   for (let i = 0; i < f.count; i++) {
     off +=
       Math.abs(
-        f.dir[i * 3]! * n[0]! +
-          f.dir[i * 3 + 1]! * n[1]! +
-          f.dir[i * 3 + 2]! * n[2]!,
+        f.dir[i * 3] * n[0] + f.dir[i * 3 + 1] * n[1] + f.dir[i * 3 + 2] * n[2],
       ) / len;
-    assert.ok(f.bright[i]! <= 0.5, "dim");
+    assert.ok(f.bright[i] <= 0.5, "dim");
   }
   assert.ok(
     off / f.count < 0.2,
@@ -74,7 +72,7 @@ test("a lower floor lets stars come down toward the horizon but no further", () 
   const f = starField(900, 300, -0.17);
   let below = 0;
   for (let i = 0; i < f.count; i++) {
-    const y = f.dir[i * 3 + 1]!;
+    const y = f.dir[i * 3 + 1];
     assert.ok(y > -0.17, `above the floor ${y}`);
     if (y < 0) below++;
   }

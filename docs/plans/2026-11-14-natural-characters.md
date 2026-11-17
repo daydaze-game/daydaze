@@ -53,7 +53,7 @@ Focused appearance/save/protocol tests; asset credit synchronization; TypeScript
 
 ## Source findings
 
-VTR3D female and male bases: 28,092 body triangles each, 101 rig bones, embedded 2048px head albedo and normal maps. Their JSON declares `RL_CC3_Plus`. Sources: https://www.cgtrader.com/free-3d-models/character/woman/realistic-human-female-body-rigged-gameready and https://www.cgtrader.com/free-3d-models/character/man/realistic-human-male-body-rigged-gameready . Reallusion EULA §§1.16, 2.1(B), 2.1 restrictions (C)(2), 2.2: https://www.reallusion.com/Content/EULA/EULA.htm . This is an unresolved rights conflict, not an assertion about the seller's permissions.
+VTR3D female and male bases: 28,092 body triangles each, 101 rig bones, embedded 2048px head albedo and normal maps. Their JSON declares `RL_CC3_Plus`. Sources: <https://www.cgtrader.com/free-3d-models/character/woman/realistic-human-female-body-rigged-gameready> and <https://www.cgtrader.com/free-3d-models/character/man/realistic-human-male-body-rigged-gameready> . Reallusion EULA §§1.16, 2.1(B), 2.1 restrictions (C)(2), 2.2: <https://www.reallusion.com/Content/EULA/EULA.htm> . This is an unresolved rights conflict, not an assertion about the seller's permissions.
 
 ## Verification record
 

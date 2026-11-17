@@ -270,3 +270,45 @@ test("molly glows, leaves faint tracers and wiggles the eyes; no geometry", () =
   for (const v of [top.glow, top.radiance, top.tracer, top.wiggle])
     assert.ok(v >= 0 && v <= 1);
 });
+
+test("a line's timeline sits in the research ranges and is the shortest dose", () => {
+  const p = DOSES.line;
+  assert.equal(p.substance, "cocaine");
+  // felt in 3-10 min, rush peaks within 16 min of that, 10-90 min in all
+  assert.ok(p.onset >= 3 && p.onset <= 10);
+  assert.ok(p.peak - p.onset <= 16);
+  assert.ok(p.end >= 10 && p.end <= 90);
+  assert.ok(DOSES.tab.end > p.end && DOSES.pill.end > p.end);
+});
+
+test("cocaine is upright and quick, then crashes slow", () => {
+  assert.ok(BODY.cocaine.peak.rate > 1);
+  assert.ok(BODY.cocaine.comedown.rate < 1);
+});
+
+test("a line raises cocaine, leaves the rest alone, and two add up", () => {
+  const peak = gameSeconds(DOSES.line.peak + 1);
+  const m = readMeters([{ dose: "line", at: 0 }], peak, soberMeters());
+  assert.equal(m.cocaine.level, DOSES.line.strength);
+  assert.equal(m.cocaine.phase, "peak");
+  assert.equal(m.molly.level + m.acid.level + m.trip.level, 0);
+  assert.equal(strongest(m), "cocaine");
+  const two = readMeters(
+    [
+      { dose: "line", at: 0 },
+      { dose: "line", at: 0 },
+    ],
+    peak,
+    soberMeters(),
+  );
+  assert.equal(two.cocaine.level, 1);
+});
+
+test("cocaine does not bend the screen", () => {
+  const m = soberMeters();
+  m.cocaine = { level: 1, phase: "peak" };
+  assert.deepEqual(
+    highParams(m, 1, false),
+    highParams(soberMeters(), 1, false),
+  );
+});

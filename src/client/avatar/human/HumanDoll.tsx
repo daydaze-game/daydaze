@@ -107,8 +107,9 @@ import { HearingAids } from "./HearingAids.tsx";
 
 const MODELS = "/models/doll";
 const REST_LID = 0.04;
-// Molly opens the rest of the upper lid at full effect, stopping at neutral.
-const MOLLY_LID = REST_LID;
+// Full effect opens the remaining upper lid; cocaine is 70% as wide.
+const WIDE_LID = REST_LID;
+const COCAINE_STARE = 0.7;
 
 // the baked clips come in their own file (a big one), fetched once the first
 // room shows, so they don't share the bandwidth it loads over; dolls wear
@@ -1351,10 +1352,18 @@ export function HumanDoll({
     // open eyes rest with the upper lid a little lowered, not wide and staring
     // only when it changes (or new meshes mount): a dictionary lookup per
     // worn mesh per doll per frame adds up in a crowd
-    // molly (her own doll only; peers: issue #8) opens the eyes wide, in
-    // fiftieths so the morphs change a few times a second, not every frame
-    const molly = own ? Math.round(getMeters().molly.level * 50) / 50 : 0;
-    const lid = closed ? 1 : REST_LID - molly * MOLLY_LID;
+    // molly and cocaine (her own doll only; peers: issue #8) open the eyes
+    // wide, in fiftieths so the morphs change a few times a second, not every
+    // frame; only molly smiles
+    const meters = own ? getMeters() : null;
+    const molly = meters ? Math.round(meters.molly.level * 50) / 50 : 0;
+    const wide = meters
+      ? Math.max(
+          molly,
+          Math.round(meters.cocaine.level * COCAINE_STARE * 50) / 50,
+        )
+      : 0;
+    const lid = closed ? 1 : REST_LID - wide * WIDE_LID;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;
