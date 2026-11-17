@@ -3044,7 +3044,7 @@ test("jail: the sentence counts down, push-ups shorten it, cards deal a hand, an
   await expect(page.getByRole("timer")).toContainText("Time left");
 });
 
-test("shoplifting: the suspicion meter fills and a caught player is penalised", async ({
+test("shoplifting: the suspicion meter fills and a caught player is penalized", async ({
   page,
 }) => {
   await page.goto(`${VELVET}&debug=1`);

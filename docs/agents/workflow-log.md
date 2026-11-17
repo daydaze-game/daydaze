@@ -1,5 +1,7 @@
 # Agent workflow log
 
+<!-- cspell:ignore dont develeop shouldve -->
+
 How the owner's rules for running coding agents on Daydaze evolved, oldest
 first. Each entry is a rule the owner gave (quoted where it was said out loud),
 why it exists and how the lead session applies it. The rules in force are
