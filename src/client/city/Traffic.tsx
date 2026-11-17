@@ -27,6 +27,8 @@ import {
   steerAngle,
 } from "../../game/driving/wheels.ts";
 import { NEAR_BODY, useTrafficBodies } from "./trafficBodies.ts";
+import { blankHeist, COPS, heistFrame } from "../../game/city/heist.ts";
+import { heistClock } from "./eventClocks.ts";
 import { useQuality } from "../world/quality.ts";
 import {
   JEEPNEY_CHROME,
@@ -43,8 +45,15 @@ import { wheelMatrix } from "./wheelPlacement.ts";
  * are instanced meshes (the downloaded car, cop, taxi, ambulance and school
  * bus bodies, one draw per body and level of detail: trafficBodies.ts; the
  * procedural jeepneys' shells, trim, chrome, interiors, wheels and lamps)
- * and the signal bulbs, which change color only when the phase does.
+ * and the signal bulbs, which change color only when the phase does. The
+ * heist's squad cars and getaway car (game/city/heist.ts) drive on the shared
+ * heist clock and are drawn with the same bodies; Heist.tsx adds their light
+ * bars.
  */
+
+/** The getaway car: a black sedan. */
+const GETAWAY_PAINT = "#141018";
+const COP_PAINT = FIXED_PAINT.cop ?? "#d9dce8";
 
 /** The jeepney's frame is a body's turned a quarter, nose on +x instead of +z. */
 const JEEPNEY_TURN = new THREE.Matrix4().makeRotationY(Math.PI / 2);
@@ -189,6 +198,14 @@ export function Traffic({ player }: { player: Player }) {
   );
   const phase = useRef("");
   const bulbs = useMemo(signalBulbs, []);
+  // the heist's cars: where they are, the meters their wheels have rolled,
+  // and the points your own car bumps into
+  const heist = useMemo(blankHeist, []);
+  const heistTravel = useMemo(() => new Float64Array(COPS + 1), []);
+  const heistPoints = useMemo(
+    () => Array.from({ length: COPS + 1 }, (): [number, number] => [0, 0]),
+    [],
+  );
 
   // Capacity stays fixed; each frame packs only the visible jeepneys (cars
   // and heavy vehicles are the downloaded bodies, drawn by useTrafficBodies).
@@ -303,6 +320,30 @@ export function Traffic({ player }: { player: Player }) {
     const { shell, trim, chrome, dark, wheels, lamps, signals } = meshes;
     const city = driving.session?.kind === "city" ? driving.session : null;
     bodies.reset();
+    // the heist's cars go first, so a busy street never crowds them out
+    heistFrame(heistClock(), heist);
+    let heistCars = 0;
+    for (let k = 0; k <= COPS; k++) {
+      const car = k < COPS ? heist.cops[k] : heist.getaway;
+      if (!car.visible) continue;
+      heistTravel[k] += car.speed * dt;
+      const point = heistPoints[heistCars++];
+      point[0] = car.x;
+      point[1] = car.z;
+      const distance = Math.hypot(car.x - player.pos.x, car.z - player.pos.z);
+      if (distance > (tier === "low" ? 80 : 180)) continue;
+      bodies.put(
+        k < COPS ? "cop" : "sedan",
+        color.set(k < COPS ? COP_PAINT : GETAWAY_PAINT),
+        car.x,
+        car.z,
+        car.yaw,
+        tier === "low" || distance > NEAR_BODY,
+        heistTravel[k],
+        0,
+        true,
+      );
+    }
     let jeepCount = 0;
     let probe = "";
     for (let i = 0; i < traffic.cars.length; i++) {
@@ -408,6 +449,9 @@ export function Traffic({ player }: { player: Player }) {
           point[1] = z;
           city.traffic[n + k] = point;
         }
+      const heistAt = city.traffic.length;
+      for (let k = 0; k < heistCars; k++)
+        city.traffic[heistAt + k] = heistPoints[k];
     }
     shell.count = trim.count = chrome.count = dark.count = jeepCount;
     wheels.count = lamps.count = jeepCount * PER_VEHICLE;
