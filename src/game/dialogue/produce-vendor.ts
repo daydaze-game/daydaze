@@ -41,7 +41,7 @@ export const produceVendorBank: RoleBank = {
     "I could talk about soil all day, so stop me whenever you like.",
     "Take your time, there's no rush at a market. That's the whole point.",
     "These came from a farm just outside town. I know the family, they're lovely.",
-    "Fun fact: the knobbliest tomatoes taste the best. Pretty ones are overrated.",
+    "Fun fact: the knobbiest tomatoes taste the best. Pretty ones are overrated.",
     "Hey, want a tip? Buy what's in season and you can't go wrong.",
     "If you can't decide, ask the vegetable. Okay, ask me. Same thing.",
     "I'll bag it up in paper so nothing gets squished on the way home.",

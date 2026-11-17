@@ -11,7 +11,7 @@ export const DEFAULT_JAIL: JailSave = { endsAt: null };
 const MINUTE_MS = 60_000;
 export const BAIL_BASE_COINS = 20;
 export const BAIL_PER_MINUTE_COINS = 10;
-export const GOOD_BEHAVIOUR_MS = 30_000;
+export const GOOD_BEHAVIOR_MS = 30_000;
 
 export function sentence(now: number, minutes: number): JailSave {
   return { endsAt: now + minutes * MINUTE_MS };
@@ -35,7 +35,7 @@ export function bailCost(jail: JailSave, now: number): number {
 // Each good-behavior win (cards, push-ups) takes time off, never below zero.
 export function goodBehavior(jail: JailSave, now: number): JailSave {
   if (jail.endsAt === null) return jail;
-  const endsAt = Math.max(now, jail.endsAt - GOOD_BEHAVIOUR_MS);
+  const endsAt = Math.max(now, jail.endsAt - GOOD_BEHAVIOR_MS);
   return { endsAt: endsAt === now ? null : endsAt };
 }
 

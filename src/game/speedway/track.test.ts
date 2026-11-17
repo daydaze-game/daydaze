@@ -23,7 +23,7 @@ for (const track of [...TRACKS, HARBOR_RUN]) {
     const n = pts.length;
     for (let i = 0; i < n; i++) {
       for (let j = i + 2; j < n; j++) {
-        if (i === 0 && j === n - 1) continue; // closing segment neighbours the first
+        if (i === 0 && j === n - 1) continue; // closing segment neighbors the first
         assert.ok(
           !segmentsCross(pts[i], pts[(i + 1) % n], pts[j], pts[(j + 1) % n]),
           `segments ${i} and ${j} cross`,

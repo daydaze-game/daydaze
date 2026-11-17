@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   DEFAULT_JAIL,
-  GOOD_BEHAVIOUR_MS,
+  GOOD_BEHAVIOR_MS,
   bailCost,
   bailOut,
   goodBehavior,
@@ -43,7 +43,7 @@ test("bail costs more the more time is left", () => {
 test("good behavior shortens the sentence and never goes below release", () => {
   const jail = sentence(NOW, 1);
   const cut = goodBehavior(jail, NOW);
-  assert.equal(remainingMs(cut, NOW), 60_000 - GOOD_BEHAVIOUR_MS);
+  assert.equal(remainingMs(cut, NOW), 60_000 - GOOD_BEHAVIOR_MS);
   assert.equal(goodBehavior({ endsAt: NOW + 5_000 }, NOW).endsAt, null);
   assert.equal(goodBehavior(DEFAULT_JAIL, NOW), DEFAULT_JAIL);
 });
