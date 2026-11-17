@@ -143,6 +143,7 @@ test("the trip breathes and cycles color; reduced motion keeps only color", () =
   const full = highParams(m, 1, false);
   assert.equal(full.breathe, BREATHE_AMOUNT);
   assert.equal(full.hue, 1);
+  assert.equal(full.geometry, 0);
   const calm = highParams(m, 1, true);
   assert.equal(calm.breathe, 0);
   assert.equal(calm.hue, 1);
@@ -153,5 +154,58 @@ test("the trip breathes and cycles color; reduced motion keeps only color", () =
     hue: 0,
     breathe: 0,
     drift: 1,
+    radiance: 0,
+    geometry: 0,
+    tracer: 0,
   });
+});
+
+test("a tab's timeline sits in the research ranges and outlasts every dose", () => {
+  const t = DOSES.tab;
+  assert.equal(t.substance, "acid");
+  // onset 15-60 min, peak reached within 90 min, 8-12 h in all
+  assert.ok(t.onset >= 15 && t.onset <= 60);
+  assert.ok(t.peak <= 90);
+  assert.ok(t.end >= 480 && t.end <= 720);
+  for (const [id, p] of Object.entries(DOSES))
+    if (id !== "tab") assert.ok(t.end > p.end, id);
+});
+
+test("acid is energetic where mushrooms are heavy", () => {
+  assert.ok(BODY.acid.comeup.tics.includes("yawn"));
+  assert.ok(BODY.acid.peak.rate > 1);
+  for (const s of SUBSTANCES)
+    for (const [phase, body] of Object.entries(BODY[s]))
+      if (s !== "acid" || phase !== "peak")
+        assert.ok(BODY.acid.peak.rate > body.rate, `${s} ${phase}`);
+});
+
+test("a tab raises acid and leaves the trip alone", () => {
+  const peak = gameSeconds(DOSES.tab.peak + 1);
+  const m = readMeters([{ dose: "tab", at: 0 }], peak, soberMeters());
+  assert.equal(m.acid.level, DOSES.tab.strength);
+  assert.equal(m.acid.phase, "peak");
+  assert.equal(m.trip.level, 0);
+  assert.equal(strongest(m), "acid");
+});
+
+test("acid is radiant, geometric and leaves tracers; calm keeps only color", () => {
+  const m = soberMeters();
+  m.acid = { level: 0.65, phase: "peak" };
+  const full = highParams(m, 1, false);
+  assert.ok(full.radiance > 0 && full.geometry > 0 && full.tracer > 0);
+  assert.ok(full.tracer < full.geometry);
+  assert.ok(full.hue > 0 && full.breathe > 0 && full.glow > 0);
+  const calm = highParams(m, 1, true);
+  assert.equal(calm.radiance, full.radiance);
+  assert.equal(calm.geometry, 0);
+  assert.equal(calm.tracer, 0);
+  assert.equal(calm.breathe, 0);
+  assert.ok(calm.hue > 0);
+  // every field stays in its range even at the cap
+  m.acid.level = 1;
+  m.trip.level = 1;
+  const top = highParams(m, 1, false);
+  for (const v of [top.glow, top.hue, top.radiance, top.geometry, top.tracer])
+    assert.ok(v >= 0 && v <= 1);
 });
