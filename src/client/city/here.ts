@@ -1,3 +1,5 @@
+// Where the player is in the city (neighborhood and park flag): a tiny store
+// the city scene writes and the HUD and audio read.
 import { useSyncExternalStore } from "react";
 import type { Neighborhood } from "../../game/city/layout.ts";
 

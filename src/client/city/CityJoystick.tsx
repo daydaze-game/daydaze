@@ -1,3 +1,5 @@
+// The touch stick for walking the city: writes into the shared `stick` the
+// keyboard walk also reads, with a small deadzone.
 import { useRef, type JSX, type PointerEvent } from "react";
 import { stick } from "../world/joystick.ts";
 

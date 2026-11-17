@@ -1,3 +1,5 @@
+// Builds the city's instanced meshes and their materials, one per plan `Kind`,
+// with glowing kinds boosted for bloom and the animated ones wired to shaders.
 import * as THREE from "three";
 import { sidewalkMaterial } from "./sidewalkLook.ts";
 import { boxMapped, groundMaps, worldMapped } from "./worldTexture.ts";

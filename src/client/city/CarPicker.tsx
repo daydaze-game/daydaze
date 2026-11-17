@@ -1,3 +1,5 @@
+// The game menu's car section: pick one of your garage cars, its paint, and
+// the custom-shop rims, tint, wrap and underglow.
 import { useState, type JSX } from "react";
 import {
   CAR_PAINTS,
