@@ -1,3 +1,5 @@
+// The Speedway pit garage: an open-front shell with its bench and fittings,
+// behind the apron's left corner.
 import * as THREE from "three";
 import type { Vec2 } from "../../../game/walk.ts";
 import { Boxes } from "./Boxes.tsx";

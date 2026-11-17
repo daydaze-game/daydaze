@@ -1,3 +1,5 @@
+// The surf panel: paddle out, then lean with buttons or arrow keys to stay in
+// the wave's pocket.
 import { useEffect, type JSX } from "react";
 import { RIDE, surfScore } from "../../../game/surf.ts";
 import { typing } from "../shared/useNow.ts";

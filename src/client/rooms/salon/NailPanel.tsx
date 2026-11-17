@@ -1,3 +1,5 @@
+// The nail station's panel: pick a polish and finish, then paint each nail to
+// match the client's wanted set.
 import { useState, type CSSProperties, type JSX } from "react";
 import {
   CLIENTS,

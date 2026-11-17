@@ -1,3 +1,5 @@
+// The skatepark's client session: the half-pipe run phases over the pure
+// run rules in `src/game/`, read by the panel and scene.
 import {
   NEW_RUN,
   press as pressRun,

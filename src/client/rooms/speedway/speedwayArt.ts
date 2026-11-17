@@ -1,3 +1,5 @@
+// Canvas paint functions for the Speedway's textures (asphalt grain and the
+// like), seeded so every client draws the same road.
 import type { Paint } from "./canvasTextures.ts";
 import { seeded } from "./canvasTextures.ts";
 

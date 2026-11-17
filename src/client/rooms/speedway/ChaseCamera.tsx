@@ -1,3 +1,5 @@
+// The camera that follows the car in a race, with a steadier, higher shot and
+// no shake under reduced motion. Damping holds at any frame rate.
 import { useFrame, useThree } from "@react-three/fiber";
 import type { RefObject } from "react";
 import * as THREE from "three";

@@ -1,3 +1,5 @@
+// The nail station's client session: the shift in progress, when this client
+// sat, and the last result, over the pure nail rules in `src/game/`.
 import {
   finish,
   newSession,

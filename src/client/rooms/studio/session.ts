@@ -1,3 +1,5 @@
+// The studio's client state: which instrument the panel picked and the last
+// note played, so the scene can light the right one.
 import { playInstrumentNote } from "../../../audio/instrumentSynths.ts";
 import type { Station } from "../../../game/studio.ts";
 import { createStore } from "../shared/store.ts";

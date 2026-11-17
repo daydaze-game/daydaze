@@ -1,3 +1,5 @@
+// The surf client session: the board's state, the lean held, and when a trick
+// last landed, over the pure ride rules in `src/game/`.
 import {
   newRide,
   step,

@@ -1,3 +1,5 @@
+// The stadium's client session: the penalty shootout phases (aim, power,
+// flight) over the pure rules in `src/game/`.
 import {
   goals,
   kick,

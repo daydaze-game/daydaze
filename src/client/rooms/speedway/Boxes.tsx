@@ -1,3 +1,5 @@
+// Many boxes in one instanced draw call, for the Speedway's barriers and
+// strips. Glowing boxes are unlit so bloom picks them up.
 import { useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 import type { Box } from "./strips.ts";

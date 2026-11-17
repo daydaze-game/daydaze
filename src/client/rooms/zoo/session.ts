@@ -1,3 +1,5 @@
+// The zoo's client session: what the scene saw last frame (its clock and where
+// the player stands and faces), written by the scene and read by Snap.
 import {
   finalScore,
   HUNT_SECONDS,

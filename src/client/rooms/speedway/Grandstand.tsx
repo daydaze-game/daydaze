@@ -1,3 +1,4 @@
+// The Speedway grandstand and its crowd, facing the pit apron from behind it.
 import { useMemo } from "react";
 import * as THREE from "three";
 import type { Vec2 } from "../../../game/walk.ts";
