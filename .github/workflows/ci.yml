@@ -54,6 +54,8 @@ jobs:
         run: npm run lint
       - name: Dead code (Knip)
         run: npm run lint:dead
+      - name: Layer rules (dependency-cruiser)
+        run: npm run lint:deps
       - name: Spelling (American English)
         run: npm run lint:spelling
       - name: Prettier
