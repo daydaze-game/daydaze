@@ -338,12 +338,12 @@ test("the 18+ lounge stays shut without the age check", async ({ page }) => {
   await expect(roomTitle(page)).toHaveText("Downtown", { timeout: 150_000 });
 });
 
-test("Green Haze (18+, dev flag): a joint and shroom tea raise the high and the trip", async ({
+test("Green Haze (18+, dev flag): a joint and shroom tea land after their onset and show in her body", async ({
   page,
 }) => {
   test.setTimeout(330_000);
   const errors = collectErrors(page);
-  await page.goto(`${STILL}&room=green-haze&adult=1`);
+  await page.goto(`${STILL}&room=green-haze&adult=1&debug=1`);
   await expect(roomTitle(page)).toHaveText("Green Haze", { timeout: 150_000 });
   const canvas = canvasOf(page);
   await expect
@@ -354,12 +354,19 @@ test("Green Haze (18+, dev flag): a joint and shroom tea raise the high and the 
   expect(Number(await canvas.getAttribute("data-calls"))).toBeLessThan(250);
   await page.getByRole("button", { name: "Light a joint" }).click();
   await page.getByRole("button", { name: "Sip shroom tea" }).click();
+  await expect(canvas).toHaveAttribute("data-doses", "2");
+  // nothing yet: both take minutes to come on (game/effects/substances.ts)
+  await expect(canvas).toHaveAttribute("data-under", "");
+  // four minutes on, the tea is at its peak and the joint past its own
+  const later = page.getByRole("button", { name: "Debug: a minute later" });
+  for (let i = 0; i < 4; i++) await later.click();
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-high")))
     .toBeGreaterThan(0.2);
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-trip")))
     .toBeGreaterThan(0.3);
+  await expect(canvas).toHaveAttribute("data-under", "trip");
   expect(errors).toEqual([]);
 });
 
@@ -1232,8 +1239,11 @@ test("the Coconut Grove pours a drink and seats the player by the fire", async (
   await page
     .getByRole("button", { name: "Have a drink" })
     .click({ timeout: 150_000 });
+  // a drink absorbs over minutes (game/effects/buzz.ts): the meter creeps up
   await expect
-    .poll(async () => Number(await canvasOf(page).getAttribute("data-buzz")))
+    .poll(async () => Number(await canvasOf(page).getAttribute("data-buzz")), {
+      timeout: 60_000,
+    })
     .toBeGreaterThan(0);
   await page.getByRole("button", { name: "Take a seat" }).click();
   await expect(canvasOf(page)).toHaveAttribute("data-seated", /tiki-/, {
@@ -1291,8 +1301,11 @@ test("the Back Room pours a drink and seats the player at the bar", async ({
   await page
     .getByRole("button", { name: "Have a drink" })
     .click({ timeout: 150_000 });
+  // a drink absorbs over minutes (game/effects/buzz.ts): the meter creeps up
   await expect
-    .poll(async () => Number(await canvasOf(page).getAttribute("data-buzz")))
+    .poll(async () => Number(await canvasOf(page).getAttribute("data-buzz")), {
+      timeout: 60_000,
+    })
     .toBeGreaterThan(0);
   await page.getByRole("button", { name: "Take a seat" }).click();
   await expect(canvasOf(page)).toHaveAttribute("data-seated", /back-/, {
@@ -1524,10 +1537,13 @@ test("the debug panel is hidden without the flag", async ({ page }) => {
 
 test("a few drinks in, chat stretches its vowels", async ({ page }) => {
   test.setTimeout(330_000);
-  await page.goto(`${LOW}&room=back-room&adult=1`);
+  await page.goto(`${LOW}&room=back-room&adult=1&debug=1`);
   const drink = page.getByRole("button", { name: "Have a drink" });
   await drink.click({ timeout: 150_000 });
   for (let i = 0; i < 4; i++) await drink.click();
+  // two minutes on, five cocktails have absorbed: past 0.10, where slurring starts
+  const later = page.getByRole("button", { name: "Debug: a minute later" });
+  for (let i = 0; i < 2; i++) await later.click();
   await expect
     .poll(async () => Number(await canvasOf(page).getAttribute("data-buzz")))
     .toBeGreaterThan(0.5);
@@ -1991,16 +2007,25 @@ test("walking the sidewalk, her foot catches: she trips, is held a moment, then 
   expect(errors).toEqual([]);
 });
 
-test("a drink in the Velvet Room raises the buzz and sways the view", async ({
+test("drinks in the Velvet Room raise the buzz, and three in the view sways", async ({
   page,
 }) => {
-  await page.goto(`${VELVET}&adult=1`);
+  await page.goto(`${VELVET}&adult=1&debug=1`);
   const canvas = canvasOf(page);
   await expect(canvas).toHaveAttribute("data-buzz", "0.00");
-  await page.getByRole("button", { name: "Have a drink" }).click();
+  const drink = page.getByRole("button", { name: "Have a drink" });
+  await drink.click();
+  const later = page.getByRole("button", { name: "Debug: a minute later" });
+  await later.click();
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-buzz")))
     .toBeGreaterThan(0);
+  // one cocktail only warms the colors: the sway starts near 0.06 BAC
+  await expect(canvas).toHaveAttribute("data-sway", "0");
+  await drink.click();
+  await drink.click();
+  await later.click();
+  await later.click();
   // full effects are the default, so the sway is on without reduced motion
   await expect(canvas).not.toHaveAttribute("data-sway", "0");
 });
@@ -2009,9 +2034,12 @@ test.describe("with reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
   test("the drunk sway is off, but the buzz still shows", async ({ page }) => {
-    await page.goto(`${VELVET}&adult=1`);
+    await page.goto(`${VELVET}&adult=1&debug=1`);
     const canvas = canvasOf(page);
-    await page.getByRole("button", { name: "Have a drink" }).click();
+    const drink = page.getByRole("button", { name: "Have a drink" });
+    for (let i = 0; i < 3; i++) await drink.click();
+    const later = page.getByRole("button", { name: "Debug: a minute later" });
+    for (let i = 0; i < 2; i++) await later.click();
     await expect
       .poll(async () => Number(await canvas.getAttribute("data-buzz")))
       .toBeGreaterThan(0);

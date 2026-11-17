@@ -1,7 +1,8 @@
 // Room-jump buttons for testing, mounted only with `?debug=1`. Playwright
 // tests use them to reach a room without walking.
 import type { RoomId } from "../../game/rooms.ts";
-import { drink } from "../effects/drunk.ts";
+import { drink, passTime } from "../effects/drunk.ts";
+import { skipAhead } from "../effects/high.ts";
 import { ADULT_OK } from "../adult.ts";
 
 /** Room jumps for testing, shown only with `?debug=1`. */
@@ -198,6 +199,15 @@ export function DebugPanel({ onGo }: { onGo: (room: RoomId) => void }) {
       </button>
       <button type="button" onClick={() => drink("shot")}>
         Debug: add a shot
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          passTime(60);
+          skipAhead(60);
+        }}
+      >
+        Debug: a minute later
       </button>
     </nav>
   );

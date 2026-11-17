@@ -138,6 +138,39 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   (Antigravity) and `opencode.json`. Vendored skills: `.agents/skills/`
   (linked from `.claude/skills/`, sources in `NOTICE.md`).
 
+## Issues and pull requests
+
+Work the way a team does: every problem is an issue, every change is a pull
+request. Use the `gh` CLI.
+
+- **Search before you file.** `gh issue list --search "<keywords>"` and
+  `gh pr list`; comment on an existing issue instead of opening a duplicate.
+  Check for another agent's issue, branch or worktree before starting work on
+  the same thing.
+- **File an issue for anything you find that is not your current task**: a bug,
+  a flaky test, a gap in the docs, a CI problem, a follow-up you chose to skip.
+  Do not fix it in the same branch. Title it like a Conventional Commit subject
+  (`fix(net): ...`), say what you saw, how to reproduce it, which files, and
+  what you expect. Add labels (`bug`, `enhancement`, `documentation`,
+  `security`, `performance`, and one `area: *`). Never put secrets in an issue.
+- **Work from an issue when one exists**: comment when you start, and
+  reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
+  stays open). When you finish something that has no issue, the PR is enough.
+- **One pull request per branch**, with the Conventional Commit subject as the
+  title and `.github/pull_request_template.md` filled in: what and why, how it
+  was checked (verify, the touched feature's Playwright tests, screenshots you
+  looked at), and the linked issue. Open it as a draft while the work is in
+  progress. `docs/agents/scripts/land.sh` opens the PR for you when it lands a
+  branch, so agents that may not push (see `docs/agents/agent-rules.md`) leave
+  a clean branch and the main session opens or lands the PR.
+- **Reviews and CI**: do not merge a PR with a red or missing check, and do not
+  push to `main` around CI. Answer review comments with a commit or a reply,
+  and resolve the thread. Close issues you have fixed with a comment pointing
+  at the commit or PR.
+- **Keep them small and current**: split a PR that mixes unrelated changes,
+  close issues that are done or no longer true, and delete the branch after
+  the merge.
+
 ## Asset pipeline
 
 - glTF: `npx -y @gltf-transform/cli@4.5.1 optimize in.glb out.glb --compress meshopt --texture-compress webp`

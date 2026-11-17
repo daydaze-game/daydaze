@@ -7,10 +7,22 @@ import {
   visualParams,
   type Intensity,
 } from "../../game/effects/buzz.ts";
-import { highParams } from "../../game/effects/high.ts";
-import { ageHigh, getHigh, getTrip, liveHigh, onHighChange } from "./high.ts";
+import { highParams, strongest } from "../../game/effects/substances.ts";
+import {
+  ageHigh,
+  dosesOnboard,
+  getMeters,
+  liveHigh,
+  onHighChange,
+} from "./high.ts";
 import { useReducedMotion } from "../motion.ts";
-import { ageBuzz, getBuzz, liveDrunk, onBuzzChange } from "./drunk.ts";
+import {
+  ageBuzz,
+  getBuzz,
+  getHangover,
+  liveDrunk,
+  onBuzzChange,
+} from "./drunk.ts";
 
 /**
  * Fades the buzz, works out this frame's drunk look and publishes it to the
@@ -25,31 +37,43 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
 
   useEffect(() => onBuzzChange(() => invalidate()), [invalidate]);
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
-  const shownHigh = useRef({ high: -1, trip: -1 });
+  const shownHigh = useRef({ high: -1, trip: -1, under: "", doses: -1 });
 
   useFrame((_, dt) => {
     ageBuzz(dt);
     const buzz = getBuzz();
-    const look = visualParams(buzz, intensity, calm);
+    const look = visualParams(buzz, intensity, calm, getHangover());
     liveDrunk.sway = look.sway;
     liveDrunk.wobble = look.wobble;
     liveDrunk.warm = look.warm;
     liveDrunk.edge = look.edge;
+    liveDrunk.ghost = look.ghost;
+    liveDrunk.glare = look.glare;
     ageHigh(dt);
-    const high = getHigh();
-    const trip = getTrip();
-    const lifted = highParams(high, trip, intensityFactor(intensity), calm);
+    const meters = getMeters();
+    const lifted = highParams(meters, intensityFactor(intensity), calm);
     liveHigh.glow = lifted.glow;
     liveHigh.hue = lifted.hue;
     liveHigh.breathe = lifted.breathe;
     liveHigh.drift = lifted.drift;
-    // two decimals, so the canvas attributes change a few times a second
-    const h = Math.round(high * 100) / 100;
-    const t = Math.round(trip * 100) / 100;
-    if (h !== shownHigh.current.high || t !== shownHigh.current.trip) {
-      shownHigh.current = { high: h, trip: t };
+    // read by tests: two decimals, so the canvas attributes change a few
+    // times a second; `under` is the substance her body shows ("" sober)
+    const h = Math.round(meters.high.level * 100) / 100;
+    const t = Math.round(meters.trip.level * 100) / 100;
+    const under = strongest(meters) ?? "";
+    const doses = dosesOnboard();
+    const was = shownHigh.current;
+    if (
+      h !== was.high ||
+      t !== was.trip ||
+      under !== was.under ||
+      doses !== was.doses
+    ) {
+      shownHigh.current = { high: h, trip: t, under, doses };
       gl.domElement.dataset.high = h.toFixed(2);
       gl.domElement.dataset.trip = t.toFixed(2);
+      gl.domElement.dataset.under = under;
+      gl.domElement.dataset.doses = String(doses);
     }
     const seen = shown.current;
     if (

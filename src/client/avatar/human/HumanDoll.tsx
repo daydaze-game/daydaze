@@ -42,7 +42,9 @@ import {
   type Mood,
   type SwimLook,
 } from "../../../game/look.ts";
-import { liveDrunk } from "../../effects/drunk.ts";
+import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
+import { getMeters } from "../../effects/high.ts";
+import { bodyFor } from "../../../game/effects/buzz.ts";
 import { useReducedMotion } from "../../motion.ts";
 import {
   DEFAULT_BODY,
@@ -63,7 +65,7 @@ import {
   loadPack,
   packsFor,
 } from "./anims.ts";
-import { idleSlot } from "../../../game/dance/idlePlan.ts";
+import { IDLE_SLOT_SECONDS, idleSlot } from "../../../game/dance/idlePlan.ts";
 import { gazeTurn, portraitAmount } from "../../../game/cameraZoom.ts";
 import {
   pickTransition,
@@ -1176,12 +1178,14 @@ export function HumanDoll({
         }
         // the player's idles count from when she stopped; a stranger's from
         // the clock, offset by her seed, so a crowd changes out of step
-        const slot = idleSlot(own ? now - a.since : t);
+        const stood = own ? now - a.since : t;
+        const slot = idleSlot(stood);
         want = pickClip({
           loaded: clips !== null,
           packs: packsFor(body.key),
           own,
           slot,
+          into: stood - slot * IDLE_SLOT_SECONDS,
           speed: pace,
           walk: gait.clip,
           mood,
@@ -1191,6 +1195,9 @@ export function HumanDoll({
           seed,
           afloat: afloatNow,
           seated: gait.seated,
+          // only the player's own drinks and doses are known: strangers
+          // stand sober (peers: issue #8)
+          body: own ? bodyFor(getMeters(), getBuzz(), getHangover()) : null,
         });
         if (want?.need) void loadPack(body.key, want.need);
       }
