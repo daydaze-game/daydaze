@@ -56,19 +56,19 @@ export function TalkingNpc({
   look: Look;
   mood: Mood;
   /** The move a dancing NPC loops (a dance or an emote such as "bartending"). */
-  dance?: DanceMoveId;
+  dance?: DanceMoveId | undefined;
   /** The venue whose floor a dancing crowd figure follows when she has no `dance` of her own. */
-  floor?: RoomId;
+  floor?: RoomId | undefined;
   /** A held pose (STILL_CLIPS id) for the pose and sit moods. */
-  hold?: string;
+  hold?: string | undefined;
   at: readonly [number, number, number];
   rot: number;
   seed: number;
-  figure?: "doll" | "crowd";
-  situation?: DialogueSituation;
-  greet?: boolean;
+  figure?: "doll" | "crowd" | undefined;
+  situation?: DialogueSituation | undefined;
+  greet?: boolean | undefined;
   context: DialogueContext;
-  onTap?: () => void;
+  onTap?: (() => void) | undefined;
 }) {
   const [line, setLine] = useState<string | null>(null);
   // lines she has said, which moves her on to another way of talking

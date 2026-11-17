@@ -161,11 +161,10 @@ export function createApi({
       response = await fetch(`${baseUrl}${path}`, {
         method,
         credentials: "include",
-        headers:
-          body === undefined
-            ? undefined
-            : { "Content-Type": "application/json" },
-        body,
+        ...(body !== undefined && {
+          headers: { "Content-Type": "application/json" },
+          body,
+        }),
       });
       text = await response.text();
     } catch {

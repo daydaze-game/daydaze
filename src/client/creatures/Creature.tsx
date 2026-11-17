@@ -69,9 +69,9 @@ export function Creature({
   /** Called every frame (dt seconds) to fill in `pose`; no allocation. */
   drive: (dt: number, pose: CreaturePose) => void;
   /** Multiplies the kind's usual size. */
-  scale?: number;
+  scale?: number | undefined;
   /** How much of its own color it adds as emitted light (a fish in a lit tank). */
-  glow?: number;
+  glow?: number | undefined;
 }): JSX.Element {
   const calm = useReducedMotion();
   const tier = useQuality();
