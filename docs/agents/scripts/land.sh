@@ -13,7 +13,7 @@ git -C $M fetch -q origin main && git -C $M merge -q --ff-only origin/main || { 
 if ! git rebase main > /tmp/land-$w-rebase.log 2>&1; then git rebase --abort; echo "$w CONFLICT $(grep -o 'Merge conflict in .*' /tmp/land-$w-rebase.log | tr '\n' ' ')"; exit 1; fi
 ref=ci/land-$w-$(git rev-parse --short HEAD)
 git push -q origin HEAD:refs/heads/$ref 2>&1 | grep -v "^remote:"
-gh pr list --head $ref --state open --json number -q '.[0].number' | grep -q . || gh pr create -q --base main --head $ref --title "$(git log -1 --format=%s)" --body "$msg
+gh pr list --head $ref --state open --json number -q '.[0].number' | grep -q . || gh pr create --base main --head $ref --title "$(git log -1 --format=%s)" --body "$msg
 
 Landed with \`docs/agents/scripts/land.sh\` from \`$b\`; GitHub verify runs on this branch before the merge." > /dev/null
 id=""; for _ in $(seq 1 30); do id=$(gh run list --workflow verify.yml --branch $ref -L 1 --json databaseId -q '.[0].databaseId'); [ -n "$id" ] && break; sleep 5; done
