@@ -112,14 +112,14 @@ export const PEDESTRIANS: readonly Pedestrian[] = CITY_SURFACES.filter(
     return {
       a,
       b,
-      dog: inPark && k === 0 ? (si % 2 ? "husky" : "shibainu") : undefined,
+      ...(inPark && k === 0 && { dog: si % 2 ? "husky" : "shibainu" }),
       // her gait clip's own pace, give or take a little, so her legs keep
       // up with the ground at 1x (src/game/dance/stride.ts)
       speed: bikes
         ? 3.6 + rand(i, 2) * 1.2
         : (naturalPace(gaitOf(gait).clip, man) ?? 1.3) *
           (0.95 + rand(i, 2) * 0.1),
-      bike: bikes ? true : undefined,
+      ...(bikes && { bike: true }),
       // on the deck the crowd is spread evenly along the whole strip
       start:
         s.kind === "boardwalk"

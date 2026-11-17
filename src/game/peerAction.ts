@@ -29,11 +29,15 @@ export type Held = {
   y: number;
   /** What a sitter does with her hands: the clip she holds (a seated clap,
    * typing, hands on the table, a sit pose she chose). Sitting only. */
-  hold?: string;
+  hold?: string | undefined;
 };
 const CODE = { sit: "sit", lie: "lay", stand: "up", rise: "rise" } as const;
 
-export type Driven = { id: string; color: string; mods?: CarMods };
+export type Driven = {
+  id: string;
+  color: string;
+  mods?: CarMods | undefined;
+};
 
 const MOD_LISTS = [
   ["rims", RIMS],

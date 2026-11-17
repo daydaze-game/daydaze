@@ -59,7 +59,6 @@ export function BumperArena() {
         length: BEAM,
         height: BEAM,
         depth: d,
-        color: undefined,
       });
     }
     for (let z = -d / 2; z <= d / 2; z += 4) {
@@ -71,7 +70,6 @@ export function BumperArena() {
         length: w,
         height: BEAM,
         depth: BEAM,
-        color: undefined,
       });
     }
     const poles: Box[] = [];
@@ -86,7 +84,6 @@ export function BumperArena() {
           length: BEAM,
           height: CEILING,
           depth: BEAM,
-          color: undefined,
         });
       }
     };

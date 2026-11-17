@@ -472,7 +472,7 @@ function Scares() {
           <mesh key={x} position={[x, 0.12, 0.035]}>
             <circleGeometry args={[0.025, 10]} />
             <meshBasicMaterial
-              ref={x < 0 ? eyes : undefined}
+              ref={x < 0 ? eyes : null}
               color={DIM}
               toneMapped={false}
             />

@@ -49,8 +49,8 @@ export function Jumbotron({
   const height = width / 2;
   return (
     <group
-      position={rest.position ? [...rest.position] : undefined}
-      rotation={rest.rotation ? [...rest.rotation] : undefined}
+      position={rest.position ? [...rest.position] : [0, 0, 0]}
+      rotation={rest.rotation ? [...rest.rotation] : [0, 0, 0]}
     >
       <mesh position-z={-0.06}>
         <boxGeometry args={[width + 0.25, height + 0.25, 0.1]} />
