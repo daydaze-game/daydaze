@@ -38,6 +38,7 @@ every push and pull request to `main` and fails fast.
 | --- | --- |
 | `npm run lint` | ESLint: TypeScript and React hooks rules |
 | `npm run lint:dead` | Knip: unused files, exports and dependencies (`knip.jsonc`) |
+| `npm run lint:deps` | dependency-cruiser: the layer rules in `.dependency-cruiser.cjs` (game is pure, no cycles) |
 | `npm run lint:spelling` | cspell, American English only; add a legitimate word (a name, a Tagalog dish) to `cspell-words.txt`, one per line in sorted order, and fix real typos and British spellings instead |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |

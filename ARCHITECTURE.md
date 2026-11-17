@@ -27,7 +27,8 @@ The rule that holds it together: **logic lives in `src/game` (and the pure
 `server/src` cores), with Node tests; React and three.js stay in
 `src/client`, and only draw and wire things up.** Nothing in `src/game`
 imports React or three.js. The server imports the same game modules (room
-floors, looks, saves, chat effects) so both sides agree on the rules.
+floors, looks, saves, chat effects) so both sides agree on the rules. `npm run lint:deps` (dependency-cruiser, config in
+`.dependency-cruiser.cjs`) enforces these layers mechanically.
 
 ## Client (`src/client`)
 
