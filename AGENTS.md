@@ -4,10 +4,10 @@ Canonical instructions for every coding agent (Claude Code loads this through
 the `@AGENTS.md` line in `CLAUDE.md`; Codex, Antigravity and opencode read it
 directly).
 
-Daydaze is a 3D (React Three Fiber) multiplayer social hangout web game for
-adults who grew up on Club Penguin and Fantage. Read `docs/VISION.md` before any
-product or design decision: it records the audience, tone, age tiers, platform
-and open decisions.
+Daydaze is a 3D (React Three Fiber) multiplayer open-city web game for
+adults: GTA-style city life plus IMVU-style dress-up hangouts. Read
+`docs/VISION.md` before any product or design decision: it records the
+audience, tone, age tiers, platform and open decisions.
 
 ## Where the work is
 

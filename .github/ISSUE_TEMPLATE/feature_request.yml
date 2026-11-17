@@ -14,7 +14,7 @@ body:
     id: why
     attributes:
       label: Why it fits
-      description: The Club Penguin, Fantage or IMVU memory it brings back, or the problem it solves.
+      description: What makes it fun for adults in an open city, or the problem it solves.
   - type: textarea
     id: refs
     attributes:
