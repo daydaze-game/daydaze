@@ -70,14 +70,12 @@ export function CityMap({
     return () => window.removeEventListener("keydown", key);
   }, [onClose]);
   return (
-    <div className="city-map-backdrop" onClick={onClose}>
-      <div
-        ref={panel}
-        className="city-map"
-        role="dialog"
-        aria-label="City map"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div
+      className="city-map-backdrop"
+      role="presentation"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div ref={panel} className="city-map" role="dialog" aria-label="City map">
         <div className="city-map-head">
           <h2>City map</h2>
           <button type="button" className="city-map-close" onClick={onClose}>

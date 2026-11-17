@@ -45,9 +45,30 @@ every push and pull request to `main` and fails fast.
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
 | `npm test` | unit tests (Node's test runner) |
-| `npm run test:coverage` | the same, with a coverage report in `coverage/` |
+| `npm run test:coverage` | the same, with a coverage report in `coverage/` and the [coverage minimums](#coverage-minimums) enforced |
 | `npm run build` | the production bundle in `dist/` |
 | `npm run verify` | every check in this table, then the build and the perf budget: the merge gate |
+
+### Coverage minimums
+
+`npm run test:coverage` fails (and so does the CI test job) when coverage
+drops under a floor. It writes `coverage/summary.txt` and `coverage/lcov.info`
+first, so the CI "Coverage summary" step still shows the numbers.
+
+- Whole project: Node's native `--test-coverage-lines`,
+  `--test-coverage-branches` and `--test-coverage-functions` flags in the
+  `test:coverage` script in `package.json` (currently 96 / 92 / 92).
+- `src/game/` (the game rules) and `src/net/` (the network protocol): the
+  floors in `MINIMUMS` in `scripts/check-coverage.ts`, checked from the lcov
+  report because Node's flags only work project-wide. Currently lines 98%,
+  branches 94%, functions 96% for `src/game/`, and lines 96%, branches 91%,
+  functions 87% for `src/net/`. A directory with no files in the report fails.
+
+The floors sit about a point under the measured numbers, so normal churn
+passes and a real drop fails. When you add tests that raise coverage, raise
+the matching floor in the same commit (round down, then take one point off),
+never lower one to get a change through; to lower a floor, say why in the
+pull request.
 
 ### Pre-commit hook
 

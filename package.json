@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-strip-types --test --test-isolation=none \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\"",
-    "test:coverage": "mkdir -p coverage && node --experimental-strip-types --test --test-isolation=none --experimental-test-coverage --test-coverage-exclude=\"**/*.test.ts\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=coverage/summary.txt --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\"",
+    "test:coverage": "mkdir -p coverage && node --experimental-strip-types --test --test-isolation=none --experimental-test-coverage --test-coverage-lines=96 --test-coverage-branches=92 --test-coverage-functions=92 --test-coverage-exclude=\"**/*.test.ts\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=coverage/summary.txt --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\" && node --experimental-strip-types scripts/check-coverage.ts",
     "lint": "eslint . --cache --cache-location .cache/eslint/",
     "lint:spelling": "cspell --no-progress",
     "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile .cache/tsc.tsbuildinfo && npm run typecheck:server",
@@ -45,6 +45,7 @@
     "cspell": "^10.5.1",
     "dependency-cruiser": "^18.8.0",
     "eslint": "^10.13.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "knip": "^6.45.1",
@@ -71,6 +72,9 @@
     "workerd": true
   },
   "overrides": {
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    }
   }
 }

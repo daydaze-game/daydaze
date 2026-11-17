@@ -118,14 +118,12 @@ export function ShopPanel({
       );
   };
   return (
-    <div className="shop-backdrop" onClick={closeShop}>
-      <div
-        ref={panel}
-        className="shop-panel"
-        role="dialog"
-        aria-label={name}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div
+      className="shop-backdrop"
+      role="presentation"
+      onClick={(e) => e.target === e.currentTarget && closeShop()}
+    >
+      <div ref={panel} className="shop-panel" role="dialog" aria-label={name}>
         <div className="shop-head">
           <h2>{name}</h2>
           <span className="shop-coins">{coins} coins</span>
