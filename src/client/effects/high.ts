@@ -1,7 +1,8 @@
-// The local player's doses (a joint, an edible, mushroom tea, an LSD tab) and the meters
-// they make, in memory like the buzz: a reload sobers the doll up. Drugs
-// exist only on 18+ servers, so at 13+ a dose does nothing. The curves and
-// the body language are in game/effects/substances.ts.
+// The local player's doses (a joint, an edible, mushroom tea, an LSD tab, a
+// molly pill) and the meters they make, in memory like the buzz: a reload
+// sobers the doll up. Drugs exist only on 18+ servers, so at 13+ a dose does
+// nothing. The curves and the body language are in
+// game/effects/substances.ts.
 
 import { activeTier, allows } from "../../game/age.ts";
 import {
@@ -32,6 +33,7 @@ export const liveHigh: HighLook = {
   radiance: 0,
   geometry: 0,
   tracer: 0,
+  wiggle: 0,
 };
 
 /** The live meters, refreshed once a frame by `ageHigh`. Read only: the doll
