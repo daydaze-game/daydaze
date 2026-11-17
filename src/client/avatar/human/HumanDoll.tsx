@@ -42,9 +42,9 @@ import {
   type Mood,
   type SwimLook,
 } from "../../../game/look.ts";
-import { liveDrunk } from "../../effects/drunk.ts";
+import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
-import { bodyOf } from "../../../game/effects/substances.ts";
+import { bodyFor } from "../../../game/effects/buzz.ts";
 import { useReducedMotion } from "../../motion.ts";
 import {
   DEFAULT_BODY,
@@ -1195,8 +1195,9 @@ export function HumanDoll({
           seed,
           afloat: afloatNow,
           seated: gait.seated,
-          // only the player's own doses are known: strangers stand sober
-          body: own ? bodyOf(getMeters()) : null,
+          // only the player's own drinks and doses are known: strangers
+          // stand sober (peers: issue #8)
+          body: own ? bodyFor(getMeters(), getBuzz(), getHangover()) : null,
         });
         if (want?.need) void loadPack(body.key, want.need);
       }
