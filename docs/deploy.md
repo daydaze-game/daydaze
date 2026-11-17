@@ -22,7 +22,7 @@ npx wrangler login
 npx wrangler whoami
 ```
 
-`login` opens a browser to authorise Wrangler. `whoami` confirms the account.
+`login` opens a browser to authorize Wrangler. `whoami` confirms the account.
 
 ## 2. Create the D1 database
 

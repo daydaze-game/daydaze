@@ -1,0 +1,38 @@
+# American-English spell check (npm run lint:spelling). Only en-US is on, so
+# British spellings (colour, neighbourhood, organise) are flagged. Project
+# words (places, NPCs, Filipino food, libraries) live in cspell-words.txt.
+version: "0.2"
+language: en-US
+dictionaries:
+  - project-words
+  - typescript
+  - node
+  - npm
+  - softwareTerms
+  - companies
+dictionaryDefinitions:
+  - name: project-words
+    path: ./cspell-words.txt
+    addWords: true
+useGitignore: true
+files:
+  - "src/**/*.{ts,tsx}"
+  - "server/src/**/*.ts"
+  - "scripts/**/*.{ts,mjs}"
+  - "tests/**/*.ts"
+  - "*.md"
+  - "docs/**/*.md"
+ignorePaths:
+  - docs/plans/**
+  - docs/specs/**
+  - docs/agents/investigations/**
+  - "**/*.generated.ts"
+  - package-lock.json
+  - public/**
+  - art/**
+  - CHANGELOG.md
+ignoreRegExpList:
+  - "#[0-9a-fA-F]{3,8}\\b" # hex colors
+  - "0x[0-9a-fA-F]+" # hex literals
+  - "https?://\\S+" # URLs
+  - "[A-Za-z0-9+/]{40,}={0,2}" # base64 blobs
