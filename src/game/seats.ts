@@ -1,3 +1,5 @@
+// Every seat in the game (chairs, stools, sofas): where to walk to, where to
+// sit, which way to face and the cushion height.
 import type { RoomId } from "./rooms.ts";
 import { footprint, FURNITURE_CATALOG, type Furniture } from "./home/decor.ts";
 import { SOFA, STOOL_XS, STOOL_Z } from "./rooftop.ts";

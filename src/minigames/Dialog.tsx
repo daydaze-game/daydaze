@@ -1,3 +1,5 @@
+// The modal frame every minigame opens in, on the native <dialog>: focus is
+// trapped, the page behind is inert and Escape closes it.
 import { useId, useLayoutEffect, useRef, type ReactNode } from "react";
 import "./Dialog.css";
 

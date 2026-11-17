@@ -1,3 +1,5 @@
+// The arrest as a fixed script of steps (approach, warn, cuffs, van) that the
+// scene plays in order. No weapons.
 import { sentence, type JailSave } from "../jail/jail.ts";
 import type { Penalty } from "../crime/shoplift.ts";
 

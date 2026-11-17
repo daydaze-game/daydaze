@@ -1,3 +1,5 @@
+// The player's walking state and its fixed-rate step. The renderer
+// interpolates between steps, so speed is the same at any frame rate.
 import { stepInArea, clampToArea, type WalkArea } from "./area.ts";
 import { portalAt } from "./portals.ts";
 import type { Portal, Spawn } from "./rooms.ts";

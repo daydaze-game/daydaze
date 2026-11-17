@@ -1,3 +1,6 @@
+// City traffic: cars follow lanes, keep right, brake for the car ahead and for
+// red lights, yield to the player and turn at junctions. Pure and
+// allocation-free, so the scene can step it every frame.
 import type { Vec2 } from "../walk.ts";
 import { neighborhoodAt } from "./cells.ts";
 import { hash } from "./hash.ts";

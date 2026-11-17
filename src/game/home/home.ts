@@ -1,3 +1,4 @@
+// The apartment save: the lock and the placed furniture. Doors start locked.
 import { validateFurniture, type Furniture } from "./decor.ts";
 
 // The apartment save. Doors start locked; the owner opens them to invite
