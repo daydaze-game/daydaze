@@ -228,6 +228,7 @@ needs `is_admin` in D1); the room-copy list in the Friends panel
 smoke-tested). Still open: online leaderboards (wait for a server economy:
 scores are client-owned, see `docs/security.md`), jail and store bans in D1
 (with A5).
+
 - Account UI and cloud saves: login, signup, logout screens; load the save
   at login, push changes debounced (`api.getSave/putSave`); upload a
   guest's local save when they make an account. Nothing in `src/client`
@@ -264,6 +265,7 @@ ends it. Left: piggyback (needs a lifted doll), pose polish (the hug's arms
 are guessed; check in the lineup), offline NPC partners. `test:e2e:online` passes (the card table used to cover the
 peer card's buttons; the card now sits on z-index 6). Original note: Holding hands, forehead kiss,
 piggyback, hug, slow dance; offline with nobody, online between two players.
+
 - Clips: look in `./mixamo` (dancing, gestures, idle folders) for paired or
   adaptable clips; add to `art/doll/blender/mocap.py` `MIXAMO_CLIPS`
   (refuses weapons/combat), rerun the retarget (writes

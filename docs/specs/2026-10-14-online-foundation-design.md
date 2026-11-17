@@ -38,7 +38,7 @@ Decisions already made:
 
 ## Architecture
 
-```
+```text
 Browser (existing Vite app, served as static assets by the Worker)
    |  HTTPS: /api/guest, /api/signup, /api/login, /api/logout, /api/me, /api/save, /api/rooms/:roomId, /api/report, /api/block
    |  WSS:   /ws/room/:roomId/:copy

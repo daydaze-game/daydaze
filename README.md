@@ -103,6 +103,7 @@ Requires Node.js 22.18 or newer (`.nvmrc` pins 24).
 npm install
 npm run dev               # client at http://localhost:5173
 npm run lint              # ESLint (TypeScript and React hooks rules)
+npm run lint:md          # markdownlint-cli2 over the Markdown docs
 npm test                  # unit tests (game rules, protocol, server)
 npm run test:coverage     # the same, with a coverage report in coverage/
 npm run typecheck         # strict TypeScript, including the Worker

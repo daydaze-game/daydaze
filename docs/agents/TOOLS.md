@@ -7,7 +7,7 @@ when something seems missing; update this file when the owner changes them.
 ## MCP servers
 
 | Server | Use | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `threejs-devtools-mcp` | inspect the live three.js scene: scene tree, draw-call breakdown, materials, textures, instanced meshes, skeletons, perf snapshot | point it at the dev server (`set_dev_port`); LIVE PREVIEW tools change the browser only, never source. Claude, Codex and Antigravity |
 | `chrome-devtools` | live Chrome on 127.0.0.1:9222: perf traces, console, network, screenshots | Claude, Codex and Antigravity |
 | `context7` (plugin + standalone) | library docs (three, drei, R3F, Vite, Playwright…) | duplicate entries, harmless |

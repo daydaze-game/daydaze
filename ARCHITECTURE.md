@@ -9,7 +9,7 @@ the threat model in [docs/security.md](docs/security.md), deployment in
 
 ## The layers
 
-```
+```text
  browser                                              Cloudflare
 ┌──────────────────────────────────────────────┐    ┌──────────────────────────┐
 │ src/client   React + R3F: scenes, HUD, input │    │ server/src/worker        │
@@ -245,6 +245,8 @@ update prompt (`src/client/ui/UpdatePrompt.tsx`), then deletes the old cache.
 
 - `npm run lint`: ESLint with typescript-eslint and the React hooks rules
   (`eslint.config.mjs`).
+- `npm run lint:md`: markdownlint-cli2 over the root, `docs/` and `.github/`
+  Markdown (`.markdownlint-cli2.jsonc`).
 - `npm test`: Node's test runner over `src/**/*.test.ts` and
   `server/**/*.test.ts` (game rules, protocol, server cores).
 - `npm run typecheck`: strict TypeScript, including the Worker.
