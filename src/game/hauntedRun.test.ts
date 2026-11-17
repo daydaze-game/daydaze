@@ -1,3 +1,5 @@
+// The haunted run: the right door goes deeper, a wrong one costs nerve, the exit
+// is fixed by the seed, and losing nerve ends it.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

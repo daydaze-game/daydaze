@@ -1,3 +1,5 @@
+// The reef spotter: rounds get longer and quicker, the window shows one fish at a
+// time, and answers score by closeness.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

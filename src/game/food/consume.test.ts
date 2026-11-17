@@ -1,3 +1,5 @@
+// Consuming food: eating and soft drinks lower the buzz, and relief never goes
+// below zero or raises a sober doll.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { relieveBuzz } from "./consume.ts";

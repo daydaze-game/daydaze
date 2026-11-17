@@ -1,3 +1,5 @@
+// Curling: stones slow to a stop and weight carries them further, rings score
+// inside out, and an end is six stones.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

@@ -1,3 +1,5 @@
+// Gymnastics: presses are judged against the nearest cue, a perfect routine scores
+// over ten, unpressed elements are missed, and each is judged once.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

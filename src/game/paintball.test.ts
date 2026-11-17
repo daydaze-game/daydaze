@@ -1,3 +1,5 @@
+// Paintball: every rival hides behind a bunker from the spawn, at least three pop
+// out in sight, and a round plays on its own field.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { clearLine, newRound, shoot, popOut } from "./laserTag.ts";

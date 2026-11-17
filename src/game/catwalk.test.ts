@@ -1,3 +1,5 @@
+// The runway walk: she stays on the runway, struts between poses and ends facing
+// the judges, and the runway is solid.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { areaOf, isBlocked, stepInArea } from "./area.ts";

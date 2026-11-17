@@ -1,3 +1,5 @@
+// Movement input: keys and sticks combine, WASD matches the arrows, opposite keys
+// cancel, diagonals clamp to unit length, and non-finite input is no move.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { moveAction, MOVE_CODES } from "./input.ts";

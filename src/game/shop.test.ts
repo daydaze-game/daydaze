@@ -1,3 +1,5 @@
+// Shops: items are real catalog options with unique ids and whole prices, every
+// store sells something, and buying spends once and adds to the wardrobe.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

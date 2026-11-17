@@ -1,3 +1,5 @@
+// Laser tag: cover blocks lines of fire, rivals hide and peek out, a clear line
+// tags a rival, and rivals fire back once per pop-out.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

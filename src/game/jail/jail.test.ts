@@ -1,3 +1,5 @@
+// Jail: sentences count down from the wall clock and survive a save, free players
+// owe no bail, bail scales with time left, and good behavior shortens the term.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

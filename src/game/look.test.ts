@@ -1,3 +1,5 @@
+// Looks: the default and NPC looks use catalog ids, catalogs have unique ids, and
+// validateLook accepts valid combinations and rejects junk.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { unlockedLook } from "./shop.ts";

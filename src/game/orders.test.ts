@@ -1,3 +1,5 @@
+// Drink orders: every order can be made from the station, a seed deals the same
+// tickets, recipes match in any order, and tips depend on speed and accuracy.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ESPRESSO } from "./barista.ts";

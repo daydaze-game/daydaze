@@ -1,3 +1,5 @@
+// Reactions: each is a baked one-shot, network ids are checked, hits flinch from
+// the side they came from, new ones queue behind the current, and trips are rare.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { clipOf } from "./dance/clips.ts";

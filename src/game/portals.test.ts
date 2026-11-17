@@ -1,3 +1,5 @@
+// Portals: portalAt finds the portal containing a point, bad points give null,
+// arrive clamps into the target room, and every spawn is walkable and clear.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { arrive, portalAt } from "./portals.ts";

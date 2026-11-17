@@ -1,3 +1,5 @@
+// Field goals: every kick is makeable with the right aim and leg, soft long kicks
+// fall short, wind carries kicks wide, and a series is five kicks.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

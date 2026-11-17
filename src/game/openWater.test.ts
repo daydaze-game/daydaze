@@ -1,3 +1,5 @@
+// Open water: dry sand then a steadily deepening sea, wading before swimming with
+// slowing, key spots on the floor, and wildlife within the low-tier budget.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pointInPolygon } from "./walk.ts";

@@ -1,3 +1,5 @@
+// Gaits: every gait keeps arms close and strides in a human range, and looks map
+// to the right gait.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK, validateLook } from "./look.ts";

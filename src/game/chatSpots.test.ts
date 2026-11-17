@@ -1,3 +1,4 @@
+// Venue chat huddles stand on open floor, clear of seats and the way in.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { areaOf, isBlocked } from "./area.ts";

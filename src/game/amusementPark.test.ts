@@ -1,3 +1,5 @@
+// Amusement park rides: durations, boarding spots on the midway, clamped progress,
+// the ferris wheel pose, and closed tracks that loop.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LINE_BANKS } from "./dialogue/index.ts";

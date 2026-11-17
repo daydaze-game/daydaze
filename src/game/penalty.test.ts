@@ -1,3 +1,5 @@
+// Penalty kicks: the keeper's reach, wide and over-the-bar kicks, corner kicks
+// beating the keeper, and the ball's flight from the spot.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

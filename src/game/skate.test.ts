@@ -1,3 +1,5 @@
+// Skating the half-pipe: drop-in, staying in the pipe, presses graded against
+// the coming lip, and combos that a bail drops.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

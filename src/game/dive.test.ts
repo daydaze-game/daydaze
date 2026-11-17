@@ -1,3 +1,5 @@
+// Scuba diving: air drains faster when deeper, the gauge warns low then out, the
+// reef deepens going out, and every life is a known species.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";

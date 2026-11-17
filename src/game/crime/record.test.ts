@@ -1,3 +1,5 @@
+// The crime record: warnings ban a store until the ban ends, fines and jail count
+// offenses without a ban, and saved data keeps good values only.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

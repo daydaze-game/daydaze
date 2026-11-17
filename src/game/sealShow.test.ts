@@ -1,3 +1,4 @@
+// The seal show: its program, a solid pool, and a hall that still walks round it.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { closeOut, judgesScore, newRoutine, press } from "./gymnastics.ts";

@@ -1,3 +1,5 @@
+// Storefronts: one per venue, inside the city and clear of roads, buildings and
+// each other, with a street door on a sidewalk.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { FOOD_ROOM_EXITS, FOOD_STOREFRONTS } from "./storefronts.ts";

@@ -1,3 +1,5 @@
+// Skee-ball: soft rolls land low, firm straight ones find the 50, hard angled
+// ones sink the 100, a game is nine balls, and the meters stay in range.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

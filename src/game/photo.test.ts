@@ -1,3 +1,4 @@
+// Photos: what the camera accepts and how a shot is checked and stored.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { photoCaption, photoFileName } from "./photo.ts";

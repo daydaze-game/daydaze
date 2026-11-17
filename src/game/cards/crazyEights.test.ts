@@ -1,3 +1,5 @@
+// Crazy Eights: the deal, legal and illegal plays, wild eights naming a suit,
+// winning by emptying your hand, and games that always end.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

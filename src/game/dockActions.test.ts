@@ -1,3 +1,5 @@
+// Dock actions: the lowest priority number is the primary, the rest keep priority
+// order, and the input is never reordered in place.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { splitActions, type DockAction } from "./dockActions.ts";

@@ -1,3 +1,5 @@
+// Home decor: the starter catalog, placing on the grid without mutating input,
+// staying in the grid, no overlaps, and rotation swapping the footprint.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ARTWORKS } from "../artworks.ts";

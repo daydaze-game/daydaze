@@ -1,3 +1,5 @@
+// The safari photo list: four different animals, snapping ticks listed animals
+// once each, and every animal can be photographed from the zoo.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

@@ -1,3 +1,5 @@
+// Hoops: a true shot drops from every spot, too soft or too hard misses, a wide
+// pull misses, and shots are deterministic.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { NEW_SHOOTOUT, scoreShot, shoot, spotFor, SPOTS } from "./hoops.ts";

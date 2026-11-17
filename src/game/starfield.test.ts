@@ -1,3 +1,5 @@
+// The starfield: unit directions above the horizon with sane size and warmth, a
+// dim Milky Way band, shooting stars, and a lower floor for stars.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { shootingStarPoint, starField } from "./starfield.ts";

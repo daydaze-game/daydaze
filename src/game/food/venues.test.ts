@@ -1,3 +1,5 @@
+// Food venues: about 100, unique ids and names, no real brands, and every menu
+// has at least three items with sane prices.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { FOOD_VENUES, venueById, menuItemById } from "./venues.ts";

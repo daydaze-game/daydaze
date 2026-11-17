@@ -1,3 +1,5 @@
+// The shoplifting stores by difficulty: a patient player escapes the easy ones,
+// tag alarms add suspicion, and hard shops always have a watcher.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

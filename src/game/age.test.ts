@@ -1,3 +1,5 @@
+// The age tiers: 18+ rooms stay shut without the age check, the 13+ default tier
+// blocks adult content, and allows() answers per feature.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

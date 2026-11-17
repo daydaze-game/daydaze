@@ -1,3 +1,5 @@
+// Cliff diving: entries grade by distance from the middle, harder tricks pay more,
+// the entry meter sweeps, five dives make a set, and each trick enters upright.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

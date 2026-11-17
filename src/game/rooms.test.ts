@@ -1,3 +1,5 @@
+// The room registry: every room is under its own id, isRoomId accepts only
+// registered rooms, shapes like the Plaza and Velvet Room, and every room has portals.
 import { areaOf, isBlocked, stepInArea } from "./area.ts";
 import { CAROUSEL_AT, RIDE_IDS, RIDES } from "./amusementPark.ts";
 import { test } from "node:test";

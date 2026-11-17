@@ -1,3 +1,5 @@
+// Sitting and standing motion: sit starts where the clip does and ends on the
+// seat facing its way, standing retraces the path, and a mid-sit click turns smoothly.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { riseFrom, seatPose, startSit, stepSeatMove } from "./seatMove.ts";

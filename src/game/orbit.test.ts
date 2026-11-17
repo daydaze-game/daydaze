@@ -1,3 +1,5 @@
+// Bar orbit: the bartender stands in the aisle between bar and back shelf, and
+// walkers keep clear of it.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BAR, BARTENDER, BLOCKERS, SHELF_X, STOOL_X } from "./orbit.ts";

@@ -1,3 +1,5 @@
+// Wine pouring: on the line scores 100, off it less, over the rim nothing, each
+// wine pours at its own speed, and the flight gates wines at 18+ and juices at 13+.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

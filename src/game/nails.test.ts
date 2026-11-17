@@ -1,3 +1,5 @@
+// The nail salon game: matching every nail fast scores most, a wrong nail costs
+// points and the tip, and a session is five clients.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

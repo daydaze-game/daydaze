@@ -1,3 +1,5 @@
+// The speed slide: perfect tucks beat the rival, bends come in order along the
+// slide, and the ride runs from push-off to the splash.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

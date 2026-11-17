@@ -1,3 +1,5 @@
+// Bowling: the ten-pin rack, gutter balls, pocket hits that knock down most pins,
+// deterministic rolls, playback snapshots, and human-bounded throws.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

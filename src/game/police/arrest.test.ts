@@ -1,3 +1,5 @@
+// Arrests: the steps play in order then end, bad clock values clamp to the
+// opening step, and only a jail penalty sends the player to a cell.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

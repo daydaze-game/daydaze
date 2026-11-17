@@ -1,3 +1,5 @@
+// Collections: closet sets use real shop items, complete sets pay once, visited
+// places fill the album in order, and stickers record best grades.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { shopItem } from "./shop.ts";

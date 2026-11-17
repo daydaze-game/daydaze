@@ -1,3 +1,5 @@
+// Walking rules: the brisk walking speed, point-in-polygon for convex, concave and
+// edge cases, rejecting non-finite points, and nearest-point projection.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

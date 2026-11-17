@@ -1,3 +1,5 @@
+// Zoo sounds: calls are loud close up and gone past hearing range, the wait
+// between calls is 6 to 16 seconds, and only animals with a recording speak.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { HEARING, loudness, nextDelay, pickCall } from "./zooSounds.ts";

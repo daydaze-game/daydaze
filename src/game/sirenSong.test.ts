@@ -1,3 +1,5 @@
+// The siren song memory game: a right round asks for one more note, and a wrong
+// note ends the song.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { current, newSong, phrase, sing, SHELLS } from "./sirenSong.ts";

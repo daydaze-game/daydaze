@@ -1,3 +1,4 @@
+// The ice show program and its timing.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { closeOut, judgesScore, newRoutine, press } from "./gymnastics.ts";

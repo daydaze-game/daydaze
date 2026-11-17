@@ -1,3 +1,5 @@
+// The water park: path length and sampling by distance (clamped, bad-input safe),
+// slides run downhill into the wave pool, and riders climb out onto the deck.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ROOMS } from "./rooms.ts";

@@ -1,3 +1,5 @@
+// Mini golf: tees and cups are on their greens, walls keep putts in, putts are
+// deterministic, and every hole can be holed within par.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

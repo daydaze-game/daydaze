@@ -1,3 +1,5 @@
+// The karaoke game: a seeded chart of notes on three lanes, the right lane on time
+// scores, the song ends after its last note, and streaks count.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

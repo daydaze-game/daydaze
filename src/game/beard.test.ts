@@ -1,3 +1,5 @@
+// Beard painting: no beard paints nothing, a beard grows below the nose and never
+// over the lips, longer beards climb higher, and a face always grows the same one.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { beardStrokes, type FaceMarks } from "./beard.ts";

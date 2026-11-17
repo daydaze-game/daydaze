@@ -1,3 +1,5 @@
+// Night looks: each belongs to a real night within sane ranges, the mall rave and
+// UV night get signatures, and lasers, cannons and confetti behave.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { CLUB_NIGHTS } from "./events.ts";

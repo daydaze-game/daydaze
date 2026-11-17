@@ -1,3 +1,5 @@
+// Volleyball: a dig then a perfect spike scores, misses and net spikes go to the
+// other side, good spikes get dug, and first to seven wins.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

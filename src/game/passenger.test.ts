@@ -1,3 +1,5 @@
+// Passengers: ride messages round-trip, the passenger sits beside the driver, and
+// getting out lands on the pavement beside the door.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {

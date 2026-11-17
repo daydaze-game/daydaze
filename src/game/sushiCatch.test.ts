@@ -1,3 +1,5 @@
+// Sushi catch: the belt speeds up and plates ride in order, a plate is in reach
+// at the seat, and right plates score while wrong ones cost.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
