@@ -107,7 +107,6 @@ import { STORES as GALLERIA_STORES } from "../../game/galleria.ts";
 import { CocktailIcon, RideIcon } from "./icons.tsx";
 import { DancePicker, HoldPicker } from "./DancePicker.tsx";
 import type { ChallengeSave } from "../../game/challenges.ts";
-import { FireworksTicker } from "../city/FireworksTicker.tsx";
 import { PRIDE_CLUBS } from "../../game/prideNight.ts";
 import { PrideTicker } from "./PrideTicker.tsx";
 import { Dressing } from "./Dressing.tsx";
@@ -941,7 +940,6 @@ export function Overlay({
         <p className="venue-sub" key={room}>
           {ROOM_HINTS[room]}
         </p>
-        {room === "city" && <FireworksTicker />}
         {PRIDE_CLUBS.has(room) && <PrideTicker />}
         <ClubNightTicker room={room} />
         <p className="coins" aria-label={`${coins} coins`}>
