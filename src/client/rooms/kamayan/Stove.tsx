@@ -306,6 +306,7 @@ export function Kitchen({ player }: { player: Player }) {
     }
     if (!took.current) {
       const seat: GameSeat = {
+        // eslint-disable-next-line no-restricted-syntax -- runs once, when the player takes the seat
         position: new THREE.Vector3(mine.cook[0], 0, mine.cook[1]),
         yaw: Math.PI,
       };

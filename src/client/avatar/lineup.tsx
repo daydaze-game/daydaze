@@ -605,6 +605,7 @@ function Probe({ count }: { count: number }) {
     document.body.dataset.frames = String(frames.current);
     if (frames.current !== 12) return;
     const dolls = Array.from({ length: count }, (_, i) =>
+      // eslint-disable-next-line no-restricted-syntax -- runs once at frame 12 for the screenshot measure, never in play
       measure(scene.getObjectByName(`doll-${i}`) ?? new THREE.Object3D()),
     );
     const total = measure(scene);

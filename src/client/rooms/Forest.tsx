@@ -88,8 +88,8 @@ function ribbon(
   const cols = section.length;
   let run = 0;
   line.forEach(([x, z], i) => {
-    const a = line[Math.max(0, i - 1)] as Vec2;
-    const b = line[Math.min(line.length - 1, i + 1)] as Vec2;
+    const a = line[Math.max(0, i - 1)];
+    const b = line[Math.min(line.length - 1, i + 1)];
     const dx = b[0] - a[0];
     const dz = b[1] - a[1];
     const len = Math.hypot(dx, dz) || 1;
@@ -97,7 +97,7 @@ function ribbon(
     const nx = -dz / len;
     const nz = dx / len;
     if (i > 0) {
-      const p = line[i - 1] as Vec2;
+      const p = line[i - 1];
       run += Math.hypot(x - p[0], z - p[1]);
     }
     for (const [off, r, g, bl, al] of section) {
@@ -343,8 +343,8 @@ function useGrounds() {
         Math.PI / 2,
       );
       b.add(g, i === 3 ? HILL_FAR : HILL, {
-        position: [hx as number, -1, hz as number],
-        scale: [r as number, h as number, (r as number) * 0.8],
+        position: [hx, -1, hz],
+        scale: [r, h, r * 0.8],
       });
     });
     return b.build();

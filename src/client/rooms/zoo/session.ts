@@ -30,7 +30,7 @@ export const zooAnimals = new Set<{ kind: Species; at: Vec2 }>();
 const OFF = {
   on: false,
   start: 0,
-  hunt: newHunt(1) as Hunt,
+  hunt: newHunt(1),
   last: null as string | null,
   over: false,
   /** The score the hunt ended on, time bonus and all. */

@@ -22,7 +22,7 @@ test("a far box is the footprint and height, in a hex wall color", () => {
     assert.match(box.color, /^#[0-9a-f]{6}$/);
   }
   // memoized: the same box each time
-  assert.equal(farBoxOf(BUILDINGS[0]!), farBoxOf(BUILDINGS[0]!));
+  assert.equal(farBoxOf(BUILDINGS[0]), farBoxOf(BUILDINGS[0]));
 });
 
 test("small buildings drop out with distance, towers last, all of them past the fog", () => {

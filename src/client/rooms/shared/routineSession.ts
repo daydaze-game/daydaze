@@ -6,7 +6,6 @@ import {
   newRoutine,
   press as pressRoutine,
   type Element,
-  type Routine,
 } from "../../../game/gymnastics.ts";
 import type { PrizeGame } from "../../../game/prizes.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -27,7 +26,7 @@ export function createRoutineSession(
 ) {
   const OFF = {
     phase: "off" as Phase,
-    routine: newRoutine(program) as Routine,
+    routine: newRoutine(program),
     startAt: 0,
   };
   const store = createStore(OFF);

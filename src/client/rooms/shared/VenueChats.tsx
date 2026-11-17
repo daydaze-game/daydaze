@@ -4,7 +4,6 @@
 import { CHAT_SPOTS } from "../../../game/chatSpots.ts";
 import { PEDESTRIANS } from "../../../game/city/pedestrians.ts";
 import { mix } from "../../../game/dance/idlePlan.ts";
-import type { Look } from "../../../game/look.ts";
 import type { RoomId } from "../../../game/rooms.ts";
 import { ChatGroup } from "./ChatGroup.tsx";
 
@@ -19,8 +18,7 @@ export function VenueChats({ room }: { room: RoomId }) {
           looks={Array.from(
             { length: spot.size },
             (_, m) =>
-              PEDESTRIANS[mix(spot.seed, 40 + m) % PEDESTRIANS.length]
-                ?.look as Look,
+              PEDESTRIANS[mix(spot.seed, 40 + m) % PEDESTRIANS.length]?.look,
           )}
           turn={(spot.seed % 7) * 0.9}
         />
