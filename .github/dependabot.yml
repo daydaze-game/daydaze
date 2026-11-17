@@ -7,6 +7,14 @@ updates:
     schedule:
       interval: weekly
     labels: [dependencies]
+    ignore:
+      # typescript-eslint has to support a new TypeScript major first (a bump
+      # to 7 fails `npm ci` with ERESOLVE), and @types/node must track the
+      # Node version in .nvmrc, not the latest release. Revisit on a Node upgrade.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
     groups:
       # One PR for every minor and patch bump keeps the queue short.
       minor-and-patch:
