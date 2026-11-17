@@ -4,7 +4,7 @@
 import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { patchShader } from "@three.ez/instanced-mesh";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { DREAM_KINDS, type DreamSpot } from "../../game/city/dream.ts";
 import { createStore } from "../rooms/shared/store.ts";
@@ -16,6 +16,8 @@ import {
   placeDreamMeshes,
   type FamilyMesh,
 } from "./dreamMeshes.ts";
+
+import { DreamLandmarkBuilding, isLandmark } from "./DreamLandmarks.tsx";
 
 const URL = "/models/city-dream/architecture.glb";
 
@@ -173,6 +175,7 @@ export function DreamBuildings() {
       material.dispose();
       delete canvas.dataset.architecture;
       delete canvas.dataset.architectureFamilies;
+      delete canvas.dataset.landmarkExpected;
     };
   }, [gltf, night, canvas]);
 
@@ -183,6 +186,11 @@ export function DreamBuildings() {
 
   useEffect(() => {
     placeDreamMeshes(meshes, spots);
+    canvas.dataset.landmarkExpected = spots
+      .filter(isLandmark)
+      .map((spot) => spot.landmark)
+      .sort()
+      .join(",");
     if (meshes.length > 0 && spots.length > 0) {
       canvas.dataset.architecture = "ready";
       const near = spots.filter((spot) => !spot.far);
@@ -197,6 +205,11 @@ export function DreamBuildings() {
 
   return (
     <group name="dream-city-architecture">
+      {spots.filter(isLandmark).map((spot) => (
+        <Suspense key={spot.id} fallback={null}>
+          <DreamLandmarkBuilding spot={spot} />
+        </Suspense>
+      ))}
       {meshes.map(({ kind, far, mesh }) => (
         <primitive key={`${kind}|${far}`} object={mesh} />
       ))}

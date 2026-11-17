@@ -53,3 +53,32 @@ test("streamed architecture remains renderable after an empty first view", () =>
   geometry.dispose();
   material.dispose();
 });
+
+test("a textured landmark does not also draw its fallback architecture", () => {
+  const geometry = new THREE.BoxGeometry(20, 16, 16);
+  const material = new THREE.MeshStandardMaterial();
+  const mesh = createDreamMesh(geometry, material);
+  placeDreamMeshes(
+    [{ kind: "palazzo", far: false, mesh }],
+    [
+      {
+        id: "vesper-hotel:0",
+        kind: "palazzo",
+        landmark: "palace",
+        x: 0,
+        y: 0,
+        z: 0,
+        sx: 1,
+        sy: 1,
+        sz: 1,
+        yaw: 0,
+        color: "#ffffff",
+        far: false,
+      },
+    ],
+  );
+  assert.equal(mesh.instancesCount, 0);
+  mesh.dispose();
+  geometry.dispose();
+  material.dispose();
+});

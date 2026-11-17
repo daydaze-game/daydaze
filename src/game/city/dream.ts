@@ -21,10 +21,20 @@ export const DREAM_KINDS = [
 ] as const;
 export type DreamKind = (typeof DREAM_KINDS)[number];
 
+/** One-off textured landmarks; each is used at one authored address only. */
+export const DREAM_LANDMARKS = ["palace", "manor", "clocktower"] as const;
+export type DreamLandmark = (typeof DREAM_LANDMARKS)[number];
+const DETAILED: Readonly<Record<string, DreamLandmark>> = {
+  "vesper-hotel": "palace",
+  "bus-shelter-block": "manor",
+  "mural-wall": "clocktower",
+};
+
 /** A single instanced model: a 20 by 16 m body, 16 m tall before its roof. */
 export type DreamSpot = {
   id: string;
   kind: DreamKind;
+  landmark?: DreamLandmark;
   x: number;
   y: number;
   z: number;
@@ -191,6 +201,7 @@ export function dreamBuilding(
     return {
       id: `${b.id}:${i}`,
       kind,
+      landmark: m.main ? DETAILED[b.id] : undefined,
       x,
       y: 0.14,
       z,
@@ -202,4 +213,16 @@ export function dreamBuilding(
       far: detailRange <= 0 || away >= detailRange,
     };
   });
+}
+
+/** Preserve the downloaded proportions and keep its front at the street edge. */
+export function landmarkPlacement(spot: DreamSpot) {
+  const scale = Math.min(spot.sx, spot.sz);
+  const forward = (spot.sz - scale) * 8;
+  return {
+    x: spot.x + Math.sin(spot.yaw) * forward,
+    y: spot.y,
+    z: spot.z + Math.cos(spot.yaw) * forward,
+    scale,
+  };
 }

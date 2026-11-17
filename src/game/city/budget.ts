@@ -42,7 +42,7 @@ import { CITY_FLEET, shipModel } from "../ships.ts";
 import { BAY_TRIANGLES, HOUSE_MODELS, type BayInstance } from "./nyc.ts";
 import { LOT_SPECS, type PlacedLot } from "./districts.ts";
 import type { DreamSpot } from "./dream.ts";
-import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
+import { dreamTriangles } from "./dreamCosts.ts";
 import { ALL_GROWTH } from "./growth.ts";
 import {
   GROUND_RANGE,
@@ -557,7 +557,7 @@ export function worstViewDreamTriangles(
     dream.map((s) => ({
       x: s.x,
       z: s.z,
-      cost: DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
+      cost: dreamTriangles(s),
     })),
     at,
   );
@@ -691,10 +691,7 @@ export function lowTierCost(
     (n, l) => n + (l.far ? LOT_SPECS[l.model].lo : LOT_SPECS[l.model].tris),
     0,
   );
-  const allDream = plan.dream.reduce(
-    (n, s) => n + DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
-    0,
-  );
+  const allDream = plan.dream.reduce((n, s) => n + dreamTriangles(s), 0);
   // The overview camera can see architecture on every side of the player.
   // Price all of it there, rather than a street camera's directional wedge.
   const visibleDream = bays

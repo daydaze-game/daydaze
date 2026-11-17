@@ -5,6 +5,7 @@ import type { Vec2 } from "../walk.ts";
 import { ALL_CELLS, cellAt, cellsWithin, VIEW_RADIUS } from "./cells.ts";
 import { BUILDINGS, CITY_SPAWN } from "./layout.ts";
 import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
+import { DREAM_LANDMARK_COST } from "./dreamLandmarkCosts.generated.ts";
 import { BAY_RANGE } from "./tuning.ts";
 import {
   drawCallsOf,
@@ -103,13 +104,27 @@ test("venue signs stay at human scale and lights are the nearest requested signs
 test("the plan prices dream near and far geometry from generated model costs", () => {
   const p = planCity(cellsWithin(origin, VIEW_RADIUS), 2, origin, 50);
   const cost = p.dream.reduce(
-    (n, s) => n + DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
+    (n, s) =>
+      n +
+      (s.landmark ? DREAM_LANDMARK_COST[s.landmark] : DREAM_MODEL_COST[s.kind])[
+        s.far ? "lo" : "tris"
+      ],
     0,
   );
   assert.equal(trianglesOf({ ...p, dream: [] }) + cost, trianglesOf(p));
   assert.equal(
     drawCallsOf({ ...p, dream: [] }) +
-      new Set(p.dream.map((s) => `${s.kind}${s.far}`)).size,
+      new Set(
+        p.dream.filter((s) => !s.landmark).map((s) => `${s.kind}${s.far}`),
+      ).size +
+      p.dream.reduce(
+        (n, s) =>
+          n +
+          (s.landmark
+            ? DREAM_LANDMARK_COST[s.landmark][s.far ? "loParts" : "parts"]
+            : 0),
+        0,
+      ),
     drawCallsOf(p),
   );
 });
