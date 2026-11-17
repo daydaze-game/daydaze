@@ -7,11 +7,12 @@
     "test": "node --experimental-strip-types --test --test-isolation=none \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "test:coverage": "mkdir -p coverage && node --experimental-strip-types --test --test-isolation=none --experimental-test-coverage --test-coverage-exclude=\"**/*.test.ts\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=coverage/summary.txt --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "lint": "eslint . --cache --cache-location .cache/eslint/",
+    "lint:spelling": "cspell --no-progress",
     "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile .cache/tsc.tsbuildinfo && npm run typecheck:server",
     "format": "prettier --write .",
     "format:check": "prettier --check . --cache --cache-location .cache/prettier",
     "lint:deps": "depcruise src server/src --config .dependency-cruiser.cjs",
-    "verify": "npm run lint && npm run lint:deps && npm test && npm run typecheck && npm run format:check && npm run build && npm run perf:budget",
+    "verify": "npm run lint && npm run lint:deps && npm run lint:spelling && npm test && npm run typecheck && npm run format:check && npm run build && npm run perf:budget",
     "typecheck:server": "wrangler types --config server/wrangler.jsonc server/worker-configuration.d.ts > /dev/null && tsc --noEmit -p server --incremental --tsBuildInfoFile .cache/tsc-server.tsbuildinfo",
     "dev:server": "vite build && wrangler dev --config server/wrangler.jsonc",
     "smoke:server": "node server/scripts/smoke.mjs",
@@ -22,7 +23,8 @@
     "test:e2e:client": "playwright test",
     "test:e2e:online": "playwright test -c playwright.online.config.ts",
     "test:e2e:sw": "playwright test -c playwright.sw.config.ts",
-    "perf:budget": "node --experimental-strip-types scripts/perf-budget.ts"
+    "perf:budget": "node --experimental-strip-types scripts/perf-budget.ts",
+    "prepare": "lefthook install || true"
   },
   "engines": {
     "node": ">=22.18.0"
@@ -39,10 +41,12 @@
     "@vitejs/plugin-react": "^6.1.2",
     "cloudflare": "^7.3.0",
     "dependency-cruiser": "^18.8.0",
+    "cspell": "^10.5.1",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "gltfjsx": "^6.5.3",
+    "lefthook": "^2.2.2",
     "prettier": "^3.9.9",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.72.0",

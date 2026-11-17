@@ -386,7 +386,7 @@ export class RoomCore {
   }
 
   /**
-   * A ban the gateway already authorised (POST /api/admin/ban). Keeps the id
+   * A ban the gateway already authorized (POST /api/admin/ban). Keeps the id
    * out of this copy; true when they were here and got disconnected.
    */
   enforceBan(targetId: string): boolean {

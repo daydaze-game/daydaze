@@ -1,7 +1,7 @@
 // The detail pass: the small parts that turn a facade, a corner or a planter
 // into a place. Balconies and fire escapes, rooftop kit, shopfront displays,
 // graffiti, planter foliage and signals. Pure and deterministic, like
-// the rest of the dressing, and types only from its neighbours so the module
+// the rest of the dressing, and types only from its neighbors so the module
 // loads on its own.
 import { hash, pick } from "./hash.ts";
 import { roofKit } from "./roofs.ts";

@@ -24,7 +24,9 @@ import {
   playStep,
   playThump,
   playWhoosh,
+  startAlarmBell,
   startAmbience,
+  startSiren,
   unlockAudio,
 } from "./worldSounds.ts";
 
@@ -52,6 +54,8 @@ test("world sounds stay silent and never throw without Web Audio", () => {
   assert.equal(playChime(1), false);
   assert.equal(playDoorThunk(), false);
   assert.doesNotThrow(startEngineHum());
+  assert.equal(startAlarmBell(), null);
+  assert.equal(startSiren(), null);
   const stop = startAmbience("beach");
   assert.equal(typeof stop, "function");
   assert.doesNotThrow(stop);
