@@ -1,3 +1,5 @@
+// The Amusement Park room: the midway and its rides, with each ride's state
+// stepped by the pure rules in `game/amusementPark.ts`.
 import { Environment, Html, Lightformer } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";

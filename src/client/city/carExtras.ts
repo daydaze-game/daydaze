@@ -1,3 +1,5 @@
+// Session-only car state: the radio station and headlights, shared by the
+// driving HUD, the car and RoomAudio.
 import type { TrackId } from "../../audio/proceduralJukebox.ts";
 import { createStore } from "../rooms/shared/store.ts";
 

@@ -1,3 +1,5 @@
+// The 3D doll's face texture: makeup, brows and beard strokes drawn on a
+// canvas along landmarks baked into the model.
 import * as THREE from "three";
 import {
   BLUSHES,

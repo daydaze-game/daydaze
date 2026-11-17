@@ -1,3 +1,5 @@
+// The shared shell of every food room: floor, sign, portals, the counter NPC
+// and seated diners, with the venue's palette and fit-out plugged in.
 import type { JSX, ReactNode } from "react";
 import { useRef } from "react";
 import { HdriLight } from "../shared/HdriLight.tsx";

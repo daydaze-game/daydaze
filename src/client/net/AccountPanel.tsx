@@ -1,3 +1,5 @@
+// The account form in the Friends panel: sign up, log in or out, and the
+// signed-in state. The network calls are in `account.ts`.
 import { useState, type Dispatch, type JSX, type SetStateAction } from "react";
 import type { SaveV1 } from "../../game/save.ts";
 import { account, signIn, signOut } from "./account.ts";

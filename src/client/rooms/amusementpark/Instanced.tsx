@@ -1,3 +1,5 @@
+// Instanced struts and boxes for the park's rides and scaffolding: many pieces
+// in one draw call each.
 import { useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 import type { Vec3 } from "../../../game/amusementPark.ts";

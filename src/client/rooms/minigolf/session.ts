@@ -1,3 +1,5 @@
+// The mini golf round's session store: the current hole, strokes and totals
+// over `game/minigolf.ts`, shared by the course scene and its overlay.
 import { useSyncExternalStore } from "react";
 import {
   HOLES,

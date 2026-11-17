@@ -1,3 +1,6 @@
+// The RoomInstance Durable Object: one hibernating WebSocket host per room
+// copy or apartment. The rules live in `roomCore.ts`; this adapter only wires
+// sockets, identity and the Directory to them.
 import { DurableObject } from "cloudflare:workers";
 import {
   CLOSE_CODES,

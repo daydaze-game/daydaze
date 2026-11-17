@@ -1,3 +1,5 @@
+// The admin-only moderation list: recent player reports with the chat lines
+// that came before each one.
 import { useEffect, useState, type JSX } from "react";
 import { ROOMS } from "../../game/rooms.ts";
 import type { Report } from "../../net/client/api.ts";

@@ -1,3 +1,5 @@
+// Sets the joint rotations of the stylized doll's rig each frame from its mood,
+// gait and dance pose. Called from `useFrame`, so it must not allocate.
 import type * as THREE from "three";
 import type { Mood } from "../../game/look.ts";
 import { JOINTS, type Pose } from "../../game/dance/moves.ts";

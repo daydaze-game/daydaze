@@ -1,3 +1,5 @@
+// The boardwalk's Skee-Ball session: aim, power and roll phases over the pure
+// rules in `game/skeeBall.ts`, paying tickets at the prize desk.
 import {
   aimAt,
   gameOver,

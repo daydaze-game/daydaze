@@ -1,3 +1,5 @@
+// The museum guide overlay: lists the exhibits and steps the tour between
+// them, with the keyboard or the buttons.
 import { useEffect, type JSX } from "react";
 import { EXHIBITS } from "../../../game/museum.ts";
 import { useEndOnUnmount } from "../shared/useNow.ts";

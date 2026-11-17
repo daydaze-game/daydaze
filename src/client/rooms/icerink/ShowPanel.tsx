@@ -1,3 +1,4 @@
+// The ice show overlay: the shared routine card with the show's wording.
 import type { JSX } from "react";
 import { RoutineCard } from "../gym/RoutinePanel.tsx";
 import { show } from "./session.ts";

@@ -1,3 +1,5 @@
+// The Mermaid Cove room: a moonlit lagoon ringed with rocks, driftwood seats
+// and shells, where a mermaid lounges.
 import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { Look } from "../../game/look.ts";

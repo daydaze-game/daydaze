@@ -1,3 +1,5 @@
+// The Cellar 214 pouring session: the flight state and the timed hold, over
+// the pure rules in `game/winePour.ts`, paying tickets at the prize desk.
 import {
   flightOver,
   flightScore,

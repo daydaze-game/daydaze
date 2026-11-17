@@ -1,3 +1,5 @@
+// The client's account state and its sign-up, login and logout calls, with
+// readable messages for each server error.
 import type { Dispatch, SetStateAction } from "react";
 import type { SaveV1 } from "../../game/save.ts";
 import type { Identity } from "../../net/identity.ts";

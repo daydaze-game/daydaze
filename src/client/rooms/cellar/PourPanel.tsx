@@ -1,3 +1,5 @@
+// The Cellar 214 overlay: hold to pour each wine to its line and score the
+// flight. Wording differs by age tier.
 import { byTier } from "../../../game/age.ts";
 import { useEffect, type JSX } from "react";
 import {

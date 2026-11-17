@@ -1,3 +1,5 @@
+// Picks and runs the sound for wherever the player is: a jukebox track in
+// venues, an ambience bed in open places, and the click and unlock hooks.
 import { useEffect, useRef, useState } from "react";
 import { eventTrack } from "../game/events.ts";
 import { nightClock } from "./city/eventClocks.ts";

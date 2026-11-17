@@ -1,3 +1,5 @@
+// The local player's buzz level (drinks add, time decays) with change
+// listeners; the rules are in `game/effects/buzz.ts`.
 import {
   addDrink,
   decayBuzz,

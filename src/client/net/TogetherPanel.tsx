@@ -1,3 +1,5 @@
+// The popup for two-player emotes: an incoming invite, the wait for an answer,
+// and the stop button while paired.
 import { useEffect, type JSX } from "react";
 import { together } from "../../game/dance/together.ts";
 import {

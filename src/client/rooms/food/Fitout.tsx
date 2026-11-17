@@ -1,3 +1,4 @@
+// The cafe fit-out that every food room shares, themed by a `FoodPalette`.
 import { Suspense, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import type { RoomId } from "../../../game/rooms.ts";

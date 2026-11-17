@@ -1,3 +1,5 @@
+// The Mermaid Cove's Siren Song session: listen to a phrase, then sing it
+// back on the shells, one note longer each round.
 import { playShellNote } from "../../../audio/worldSounds.ts";
 import { current, newSong, sing, type Song } from "../../../game/sirenSong.ts";
 import { award } from "../../ui/prizeDesk.ts";

@@ -1,3 +1,5 @@
+// The gridiron's field-goal session: a series of kicks with aim and power,
+// scored by `game/fieldGoal.ts`, with the crowd reacting.
 import {
   AIM_LIMIT,
   kick,

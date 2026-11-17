@@ -1,3 +1,5 @@
+// The city's gas stations: canopy, pump islands and convenience mart, drawn
+// through batches and skipped past `DRAW_DISTANCE`.
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

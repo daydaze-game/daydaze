@@ -1,3 +1,5 @@
+// The night market: food stalls with sign atlas, hanging lanterns and steam,
+// plus full dolls for the few vendors and shoppers nearest the player.
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";

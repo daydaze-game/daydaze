@@ -1,3 +1,5 @@
+// The dome's Hot Shots session: a timed basketball shootout with aim and power
+// sweeps, scored by `game/hoops.ts`.
 import {
   AIM_LIMIT,
   GAME_SECONDS,

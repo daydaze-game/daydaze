@@ -1,3 +1,5 @@
+// The Directory Durable Object: a SQLite headcount per room copy plus a
+// presence table, so the lobby lists copies and friends can see who is where.
 import { DurableObject } from "cloudflare:workers";
 import { isRoomId, type RoomId } from "../../../src/game/rooms.ts";
 import { isNetworkId } from "../../../src/net/networkProtocol.ts";

@@ -1,3 +1,5 @@
+// The city's pedestrians and pets: every walker follows its scripted path, and
+// only the ones nearest the player are full dolls or creatures.
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { useMemo, useRef, useState } from "react";

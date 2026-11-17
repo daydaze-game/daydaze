@@ -1,3 +1,5 @@
+// The Speedway room: race tracks and the bumper-car arena, driving the car
+// with the fixed-step physics in `game/driving/` against bots or a friend.
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import type { Group } from "three";

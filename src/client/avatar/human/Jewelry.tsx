@@ -1,3 +1,5 @@
+// Piercing jewelry for the human doll: reads the piercing anchors baked into
+// the model and attaches small studs and rings at those spots.
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { BONE } from "./anims.ts";

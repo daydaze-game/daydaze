@@ -1,3 +1,5 @@
+// The Ice Rink room: the rink and its skaters, the ice show and the curling
+// sheet, plus a cocoa stand.
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

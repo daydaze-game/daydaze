@@ -1,3 +1,5 @@
+// Loads the tiling surface texture sets and maps them onto city boxes by
+// world position; the low tier swaps in flat stand-ins to save bandwidth.
 import * as THREE from "three";
 import { SAVE_KEY } from "../../game/save.ts";
 import { bootTier } from "../flags.ts";

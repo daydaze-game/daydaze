@@ -1,3 +1,5 @@
+// The dealership's price list panel: shows the cars on display with prices and
+// lets the player buy one. The purchase rules are in `game/garage.ts`.
 import type { JSX } from "react";
 import { DISPLAY } from "../../game/dealership.ts";
 import { carById } from "../../game/driving/roster.ts";

@@ -1,3 +1,5 @@
+// The Vinyl Vault panel: preview a record on the jukebox and buy it for the
+// record player at home.
 import type { JSX } from "react";
 import { JUKEBOX_TRACKS } from "../../audio/proceduralJukebox.ts";
 import { RECORD_PRICE } from "../../game/records.ts";

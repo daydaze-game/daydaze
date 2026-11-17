@@ -1,3 +1,5 @@
+// Shader patches that animate the city's instanced materials (blink, flicker,
+// steam, sway, bob) from one shared clock.
 import type { Material } from "three";
 
 /**

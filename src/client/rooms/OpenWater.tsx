@@ -1,3 +1,5 @@
+// The Open Water room: a sandy shore running out to sea, with lane buoys, a
+// dive buoy, a beach shack and sea life.
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";

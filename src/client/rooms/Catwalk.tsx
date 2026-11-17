@@ -1,3 +1,5 @@
+// The Catwalk room: a runway show with a seated audience and judges, run on
+// the timed program in `game/catwalk.ts`.
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

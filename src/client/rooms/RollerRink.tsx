@@ -1,3 +1,5 @@
+// The Roller Rink room: an LED floor with a mirror ball, DJ, skate rental and
+// skaters; wearing skates is handled in `world/skates.ts`.
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef, type JSX } from "react";
 import * as THREE from "three";

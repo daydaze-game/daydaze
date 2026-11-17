@@ -1,3 +1,5 @@
+// The macaron tower session: a sliding macaron dropped onto the stack, over
+// the pure rules in `game/macaronTower.ts`, paying tickets at the prize desk.
 import {
   drop,
   newTower,

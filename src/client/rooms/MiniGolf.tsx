@@ -1,3 +1,5 @@
+// The Mini Golf room: the course's holes, putting and the clubhouse hut, with
+// the shot rules in `game/minigolf.ts`.
 import { Stars } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";

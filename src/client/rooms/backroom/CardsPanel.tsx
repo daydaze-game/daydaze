@@ -1,3 +1,5 @@
+// The backroom's Crazy Eights overlay: a start button that opens the shared
+// card table against Odette.
 import { useState, type JSX } from "react";
 import { CardTable } from "../../ui/CardTable.tsx";
 

@@ -1,3 +1,5 @@
+// The bowling lane's session store: the game state, with its rolls and pins,
+// shared by the 3D lane and the score panel.
 import { useSyncExternalStore } from "react";
 import {
   bowl,

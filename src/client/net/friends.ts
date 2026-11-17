@@ -1,3 +1,5 @@
+// The client's friends list store and a helper for how someone stands with
+// you.
 import type { Friends } from "../../net/friends.ts";
 import { createStore } from "../rooms/shared/store.ts";
 import { onlineSession } from "./online.ts";

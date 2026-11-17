@@ -1,3 +1,4 @@
+// The Runway Walk overlay: the shared routine card with the runway's wording.
 import type { JSX } from "react";
 import { RoutineCard } from "../gym/RoutinePanel.tsx";
 import { runway } from "./session.ts";
