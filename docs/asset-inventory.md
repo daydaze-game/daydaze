@@ -353,3 +353,6 @@ Further useful candidates already previewed include the Victorian greenhouse,
 steampunk shopfront, the rotunda, wisteria clusters, ivy pergola, flower boxes,
 and the CC0 verdigris copper textures. Several scans have open backs or ragged
 edges; collection alone does not establish that a model can ship unchanged.
+
+Separate actionable follow-ups for another agent are in
+`docs/plans/2026-11-17-collected-scenery-followups.md`. Do one per worktree.
