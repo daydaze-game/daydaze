@@ -1,3 +1,8 @@
+// The local player's doses (a joint, an edible, mushroom tea) and the meters
+// they make, in memory like the buzz: a reload sobers the doll up. Drugs
+// exist only on 18+ servers, so at 13+ a dose does nothing. The curves and
+// the body language are in game/effects/substances.ts.
+
 import { activeTier, allows } from "../../game/age.ts";
 import {
   readMeters,
@@ -9,10 +14,6 @@ import {
   type Taken,
 } from "../../game/effects/substances.ts";
 
-// The local player's doses (a joint, an edible, mushroom tea) and the meters
-// they make, in memory like the buzz: a reload sobers the doll up. Drugs
-// exist only on 18+ servers, so at 13+ a dose does nothing. The curves and
-// the body language are in game/effects/substances.ts.
 const taken: Taken[] = [];
 /** Seconds of play: doses are timed on it, so a hidden tab doesn't age them. */
 let clock = 0;
