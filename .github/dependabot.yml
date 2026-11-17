@@ -24,3 +24,7 @@ updates:
     schedule:
       interval: weekly
     labels: [dependencies, "area: ci"]
+    groups:
+      # Action bumps arrive as one PR as well.
+      actions:
+        patterns: ["*"]
