@@ -75,7 +75,7 @@ export class RoomInstance extends DurableObject<Env> {
     });
   }
 
-  async fetch(request: Request): Promise<Response> {
+  override async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const route = matchRoute("GET", url.pathname);
     const identity = parseIdentity(
@@ -109,7 +109,7 @@ export class RoomInstance extends DurableObject<Env> {
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  async webSocketMessage(
+  override async webSocketMessage(
     ws: WebSocket,
     message: string | ArrayBuffer,
   ): Promise<void> {
@@ -126,11 +126,11 @@ export class RoomInstance extends DurableObject<Env> {
     if (core.occupancy() !== before) await this.reportOccupancy();
   }
 
-  async webSocketClose(ws: WebSocket): Promise<void> {
+  override async webSocketClose(ws: WebSocket): Promise<void> {
     await this.drop(ws);
   }
 
-  async webSocketError(ws: WebSocket): Promise<void> {
+  override async webSocketError(ws: WebSocket): Promise<void> {
     await this.drop(ws);
   }
 

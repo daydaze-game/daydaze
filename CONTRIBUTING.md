@@ -38,12 +38,15 @@ every push and pull request to `main` and fails fast.
 | --- | --- |
 | `npm run lint` | ESLint: TypeScript, React hooks, and no `new` inside `useFrame` |
 | `npm run lint:headers` | every code file starts with a header comment |
+| `npm run lint` | ESLint: TypeScript and React hooks rules |
+| `npm run lint:spelling` | cspell, American English only; add a legitimate word (a name, a Tagalog dish) to `cspell-words.txt`, one per line in sorted order, and fix real typos and British spellings instead |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
 | `npm test` | unit tests (Node's test runner) |
 | `npm run test:coverage` | the same, with a coverage report in `coverage/` |
 | `npm run build` | the production bundle in `dist/` |
 | `npm run verify` | lint, headers, tests, types, format, build and the perf budget together |
+| `npm run verify` | lint, spelling, tests, types, format, build and the perf budget together |
 
 ### Pre-commit hook
 

@@ -102,7 +102,7 @@ function waveTex(
 }
 
 let caustic: THREE.Texture | null = null;
-/** Bright net lines of light on the pool floor, greyscale. */
+/** Bright net lines of light on the pool floor, grayscale. */
 export function causticTex() {
   caustic ??= waveTex(128, waves(7, 5, 3), (h) => {
     const v = Math.pow(1 - Math.min(1, Math.abs(h) * 5), 3) * 255;

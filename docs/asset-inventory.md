@@ -102,6 +102,7 @@ Triangle counts are Sketchfab's face counts or parsed from the GLB.
 | simple-food-background, simple-vendine-machine | trashbinkr, Free Standard | 1k to 5k tris | No | Not redistributable | skip |
 | retro-vending-machine | Retro Vending Machine, Steven Janes, CC-BY (a 334-face upload also exists) | 8k tris, FBX | No | Street, arcade and store vending machines, instanced | med |
 | mermaid | Mermaid, charliecatling, CC-BY 4.0 | 160 MB FBX, rigged | Yes (Mermaid Cove) | Done | skip |
+<!-- cspell:disable-next-line -->
 | neighbourhood-city-modular-lowpoly | golukumar (Free Standard) or rexrain (CC-BY): unverified | 415k tris, 1,287 materials, GLB | No | Too heavy; unusable if Standard | skip |
 | a-forest-3-with-a-road-at-night-for-game | dasy444, CC-BY | 152k tris, 39 MB FBX | No | Forest and road scene: reference only | low |
 | rollercoaster-diorama-cartoon-style | Blenderkurt, CC-BY-NC | 463k tris, .blend, 1 clip | No | NC | skip |
@@ -142,7 +143,7 @@ the 100-animal pack, Munchkin Cat, 3 DigitalLife3D models, Vetulicola, the
 3DHaupt wolf, the crocodile (unless the CC-BY upload), and in section 2 the
 Charger '70, Porsche GT3 R and Roxy, Charger F&F 8, Barbie pickup,
 rollercoaster diorama, amusement-park (either upload), ticket booth, beach 001,
-cotton-candy stall, the two trashbinkr zips, and probably the neighbourhood,
+cotton-candy stall, the two trashbinkr zips, and probably the neighborhood,
 sea keep and Brisbane wheel zips.
 
 ## 4. `/home/kaitlyn/git/daydaze/local-assets/downloads/game/hair/` (12 zips, all CC-BY per Sketchfab; another agent, `hair`, is on this)
@@ -320,7 +321,7 @@ Vetulicola, the 3DHaupt wolf, the Nile crocodile, the Chicken Rig (FourthGreen
 version), the 1970 Charger, 2024 Porsche, Porsche "Roxy", Charger F&F 8, the
 Barbie pickup, the rollercoaster diorama, the amusement park, ticket booth,
 cotton-candy stall, Beach 001, the Simple Food and Simple Vendine machine
-zips, and (unverified, probably) the neighbourhood city, sea keep and Brisbane
+zips, and (unverified, probably) the neighborhood city, sea keep and Brisbane
 wheel zips. The Mixamo FBX files are usable only baked, never redistributed.
 
 ## Local source organization (2026-11-17)
