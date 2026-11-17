@@ -54,6 +54,9 @@
     "src/client/rooms/velvet/layout.ts": ["exports", "types"],
     "src/client/rooms/velvet/materials.ts": ["exports", "types"],
     "src/game/city/bandShell.ts": ["exports", "types"],
+    // BREATHE_HZ landed on main with in-progress substance work and isn't
+    // imported yet; revisit with the other dead exports in #40
+    "src/game/effects/substances.ts": ["exports"],
     "src/game/city/districts.ts": ["exports", "types"],
     "src/game/city/el.ts": ["exports", "types"],
     "src/game/city/farmersMarket.ts": ["exports", "types"],
