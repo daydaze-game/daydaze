@@ -1,7 +1,7 @@
 # Asset inventory and use plan (2026-11-07)
 
 Research only: nothing here changes game code. Owner's brief: "look through it
-all; you don't have to use everything." Sources: `~/downloads/game/` (2.6 GB,
+all; you don't have to use everything." Sources: `/home/kaitlyn/git/daydaze/local-assets/downloads/game/` (2.6 GB,
 about 60 zips plus `animals/` and `hair/`), the two Mixamo manifests, and the
 Mixamo library `mixamo/` (a symlink to `~/git/mixamo`, 1.2 GB).
 
@@ -41,7 +41,7 @@ the files may not be redistributed, so treat it as unusable in a shipped game.
   Pack each exist twice; most WildMesh animals exist as an FBX zip and a glTF
   zip of the same model.
 
-## 1. `~/downloads/game/` root: Quaternius packs (all CC0 1.0)
+## 1. `/home/kaitlyn/git/daydaze/local-assets/downloads/game/` root: Quaternius packs (all CC0 1.0)
 
 CC0 needs no credit; keep recording them in `docs/assets.md` as before.
 Triangle counts for the older packs are not listed: they are classic
@@ -76,7 +76,7 @@ low-poly (hundreds to a few thousand triangles per model).
 | Universal Animation Library 2 Standard (43 clips, plus Mannequin_F) | Chest_Open, ClimbUp_1m, Consume, Farm_Harvest, Farm_PlantSeed, Farm_Watering, Idle_FoldArms, Idle_Lantern, Idle_TalkingPhone, LayToIdle, OverhandThrow, Slide start/loop/exit, TreeChopping, Walk_Carry, Yes, Zombie set | No | Farm and forest chores, eating and drinking, throwing, carrying, sliding (Skatepark, Roller Disco) | high |
 | Universal Base Characters Standard (Superhero male and female, 15k triangles each, 65-bone rig; 6 hairstyles, beard, eyebrows) | stylized bodies | Buzz, parted and slicked hair only (hair builds) | Same skeleton as the two Animation Libraries, so any of their clips plays unretargeted: far-LOD crowds and Paintball or Laser Tag opponents | med |
 
-## 2. `~/downloads/game/` root: Sketchfab and other single-model zips
+## 2. `/home/kaitlyn/git/daydaze/local-assets/downloads/game/` root: Sketchfab and other single-model zips
 
 Licenses come from the zip where it had one, else from the Sketchfab API.
 Triangle counts are Sketchfab's face counts or parsed from the GLB.
@@ -111,7 +111,7 @@ Triangle counts are Sketchfab's face counts or parsed from the GLB.
 | subsurface-scattering-sss-demo-lara | Sketchfab demo, CC-BY | 179k tris | No | Real-world game character likeness; doll pipeline is MakeHuman | skip |
 | angelica | Angelica, DarkNik, CC-BY | 144k tris, FBX | No | Wrong pipeline (doll is MakeHuman) | skip |
 
-## 3. `~/downloads/game/animals/` (87 files, many are FBX or glTF twins of one model)
+## 3. `/home/kaitlyn/git/daydaze/local-assets/downloads/game/animals/` (87 files, many are FBX or glTF twins of one model)
 
 | Models | Author, license | Notes | Used | Verdict | P |
 | --- | --- | --- | --- | --- | --- |
@@ -145,7 +145,7 @@ rollercoaster diorama, amusement-park (either upload), ticket booth, beach 001,
 cotton-candy stall, the two trashbinkr zips, and probably the neighbourhood,
 sea keep and Brisbane wheel zips.
 
-## 4. `~/downloads/game/hair/` (12 zips, all CC-BY per Sketchfab; another agent, `hair`, is on this)
+## 4. `/home/kaitlyn/git/daydaze/local-assets/downloads/game/hair/` (12 zips, all CC-BY per Sketchfab; another agent, `hair`, is on this)
 
 | Zip | Author | Contents | Notes | P |
 | --- | --- | --- | --- | --- |
@@ -190,7 +190,7 @@ FBX files; `art/doll/blender/mocap.py` bakes onto the doll's 52-bone rig.
 | combat (blades, blocking, grappling, kicking, punching) | 137 | 0 | Hits and kicks; useful for an arcade fighter mini game only |
 | weapons (bow, melee, pistol, rifle) | 115 | 0 | Rifle and pistol walks, reload, fire: Paintball and Photon Zone only (guns only in game zones) |
 
-Manifests: `~/downloads/game/mixamo-manifest (1).json` lists 147 dance names
+Manifests: `/home/kaitlyn/git/daydaze/local-assets/downloads/game/mixamo-manifest (1).json` lists 147 dance names
 and `mixamo-manifest.json` two reaction names; they are the owner's download
 queue (descriptions only), not assets. Of the 147 dance names, Thriller,
 YMCA, Gangnam Style, Hokey Pokey, Chicken Dance, Moonwalk, Headspin and
@@ -322,3 +322,16 @@ Barbie pickup, the rollercoaster diorama, the amusement park, ticket booth,
 cotton-candy stall, Beach 001, the Simple Food and Simple Vendine machine
 zips, and (unverified, probably) the neighbourhood city, sea keep and Brisbane
 wheel zips. The Mixamo FBX files are usable only baked, never redistributed.
+
+## Local source organization (2026-11-17)
+
+All source downloads and asset collection workspaces now live under
+`local-assets/` in the main checkout, excluded from Git. The move included
+`~/downloads` and the owner's eight `~/work-*` asset folders. Original directory
+identity and file/byte counts were verified; the receipt is
+`local-assets/relocation-2026-11-17.json`. No home-directory symlinks remain.
+
+From a linked worktree, find the source root from Git's common directory:
+`git rev-parse --git-common-dir` identifies the main checkout's `.git` folder;
+its parent contains `local-assets/downloads/game/curated-world/`. Source packs
+are local data; only runtime derivatives, scripts and credits belong in Git.

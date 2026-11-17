@@ -24,6 +24,7 @@ import math
 import os
 from pathlib import Path
 import struct
+import subprocess
 from zipfile import ZipFile, ZIP_DEFLATED
 
 import bpy
@@ -31,7 +32,10 @@ import bmesh
 from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = Path(os.environ.get("LANDMARK_SOURCE", str(Path.home() / "downloads/game/curated-world/architecture")))
+# The common checkout owns large local sources even from a linked worktree.
+COMMON_GIT = Path(subprocess.check_output(["git", "rev-parse", "--git-common-dir"], cwd=ROOT, text=True).strip())
+PROJECT = (ROOT / COMMON_GIT).resolve().parent
+SOURCE = Path(os.environ.get("LANDMARK_SOURCE", str(PROJECT / "local-assets/downloads/game/curated-world/architecture")))
 OUTPUT = Path(os.environ.get("LANDMARK_OUT", "/tmp/dream-landmarks"))
 MODELS = {
     "palace": {"folder": "majestic-victorian-mansion-rapid-assets-cdd1a0", "title": "Majestic Victorian Mansion [Rapid Assets]", "author": "RapidAssets", "uid": "cdd1a04e6c8b4a14b2681baf3c8fb66a", "yaw": 270, "height": 20},

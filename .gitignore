@@ -54,3 +54,6 @@ credentials*.json
 .claude/worktrees/
 .impeccable/hook.*.json
 art/opponents/.cache/
+
+# Large local source downloads and asset preparation workspaces
+/local-assets/

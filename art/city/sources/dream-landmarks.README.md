@@ -8,7 +8,7 @@ GLBs are optimized derivatives. No downloaded scripts are used.
 Rebuild from the untouched downloads:
 
 ```sh
-LANDMARK_SOURCE="$HOME/downloads/game/curated-world/architecture" \
+LANDMARK_SOURCE="/home/kaitlyn/git/daydaze/local-assets/downloads/game/curated-world/architecture" \
 LANDMARK_OUT=/tmp/dream-landmarks LANDMARK_PREVIEW=/tmp/dream-landmarks.png \
   nice -n 19 blender -b -t 2 --factory-startup \
   --python art/city/convert_dream_landmarks.py

@@ -38,7 +38,7 @@ threejs-shaders, threejs-3d-generator (Tripo), threejs-audio-generator
 - `blender` 5.x at `blender` (batch: `--background --factory-startup --python`).
 - gltf-transform via `npx -y @gltf-transform/cli@4.5.1` (flags in CLAUDE.md).
 - Downloads: Kenney, ambientCG, Poly Haven direct; itch.io (Quaternius) blocks
-  scripts — ask the owner. Owner zips: `~/downloads/game/`.
+  scripts — ask the owner. Owner zips: `/home/kaitlyn/git/daydaze/local-assets/downloads/game/`.
 - Architecture sources (owner, 2026-11-14): BlendKit, Quaternius/itch.io,
   Poly Haven models/textures, Fab, ambientCG, ShareTextures, CGBookcase,
   Poly Pizza, Kenney, KayKit and CGTrader. Check each asset license before
