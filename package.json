@@ -46,6 +46,7 @@
     "dependency-cruiser": "^18.8.0",
     "cspell": "^10.5.1",
     "eslint": "^10.13.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "gltfjsx": "^6.5.3",
@@ -74,6 +75,9 @@
     "workerd": true
   },
   "overrides": {
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    }
   }
 }
