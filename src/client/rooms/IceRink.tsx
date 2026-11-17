@@ -222,6 +222,7 @@ function IceShow({ player }: { player: Player }) {
         turn = f * Math.PI * 2 * (e.difficulty >= 0.3 ? 3 : 2);
       } else if (e.kind === "spin") turn = f * Math.PI * 6;
     });
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(x, 0.06 + lift, z);
     // facing along the lap, plus any turns in the air

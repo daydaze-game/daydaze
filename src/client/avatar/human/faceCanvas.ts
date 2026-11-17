@@ -520,8 +520,20 @@ function paintBrow(
   ctx.restore();
 }
 
+/** The look fields a face is painted from; an optional one may be passed as
+ * `undefined` (a look that never set it). */
+type FaceFields = Pick<
+  Look,
+  "skin" | "lips" | "brows" | "shadow" | "hairColor"
+> & {
+  makeup?: Look["makeup"] | undefined;
+  beard?: Look["beard"] | undefined;
+  body?: Look["body"] | undefined;
+  face?: Look["face"] | undefined;
+};
+
 /** The look parts a face is painted from, and the key two dolls share a face by. */
-type FaceLook = Parameters<typeof paintFace>[0];
+type FaceLook = FaceFields;
 
 const faces = new RefCache<
   Promise<THREE.Texture>,
@@ -554,21 +566,7 @@ export function releaseFace(key: string): void {
 
 /** The face texture: skin, contour, blush, shadow, liner, brows, lips, and
  * any beard. */
-export async function paintFace(
-  look: Pick<
-    Look,
-    | "skin"
-    | "lips"
-    | "brows"
-    | "shadow"
-    | "makeup"
-    | "beard"
-    | "hairColor"
-    | "body"
-    | "face"
-  >,
-  marks: Marks,
-) {
+export async function paintFace(look: FaceFields, marks: Marks) {
   const suffix = look.body === "masculine" ? "-m" : "";
   const [img, detail] = await Promise.all([
     loadFaceImage(`/models/doll-face${suffix}.png`),

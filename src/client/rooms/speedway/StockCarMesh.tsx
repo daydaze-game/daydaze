@@ -72,7 +72,7 @@ export function StockCarMesh({
   }, [scene, material]);
 
   return (
-    <group ref={ref} visible={visible}>
+    <group ref={ref ?? null} visible={visible}>
       <primitive object={carObject} />
     </group>
   );

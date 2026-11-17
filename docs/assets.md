@@ -269,6 +269,7 @@ the Ultimate Nature Pack) and compressed by `scripts/import-forest.sh` into
 | Sparse Grass | Amal Kumar | CC0 1.0 | https://polyhaven.com/a/sparse_grass | Surface textures for the city, venues and furnishings. |
 | Square Tiled Wall | Charlotte Baglioni | CC0 1.0 | https://polyhaven.com/a/square_tiled_wall | Surface textures for the city, venues and furnishings. |
 | Square Tiles | Charlotte Baglioni | CC0 1.0 | https://polyhaven.com/a/square_tiles | Surface textures for the city, venues and furnishings. |
+| Patinated city copper | ambientCG | CC0 1.0 | https://ambientcg.com/view?id=Metal058B | Shared color, normal and packed roughness/metalness maps for dream architecture roofs and metalwork; converted to 512px WebP. |
 | Stone Tile Wall | Charlotte Baglioni | CC0 1.0 | https://polyhaven.com/a/stone_tile_wall | Surface textures for the city, venues and furnishings. |
 | Terrazzo Tiles | Amal Kumar | CC0 1.0 | https://polyhaven.com/a/terrazzo_tiles | Surface textures for the city, venues and furnishings. |
 | Velour Velvet | colormass, Rico Cilliers | CC0 1.0 | https://polyhaven.com/a/velour_velvet | Surface textures for the city, venues and furnishings. |
@@ -338,3 +339,4 @@ Only the clips listed in `art/doll/blender/mocap_clips.py` ship, retargeted onto
 | Small Brook Loopable (field recording walk with daughter - rec 4) | gis_sweden | CC0 1.0 | https://freesound.org/people/gis_sweden/sounds/425141/ | Forest Trail creek loop (mono, recompressed). |
 
 The Freesound recordings are fetched with `scripts/freesound.mjs` and cut into `public/audio/` by `scripts/build-recordings.sh`.
+
