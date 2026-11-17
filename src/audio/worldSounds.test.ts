@@ -53,10 +53,8 @@ test("world sounds stay silent and never throw without Web Audio", () => {
   assert.equal(playChime(1), false);
   assert.equal(playDoorThunk(), false);
   assert.doesNotThrow(startEngineHum());
-  for (const loop of [startAlarmBell(), startSiren()]) {
-    assert.doesNotThrow(() => loop.level(1));
-    assert.doesNotThrow(loop.stop);
-  }
+  assert.equal(startAlarmBell(), null);
+  assert.equal(startSiren(), null);
   const stop = startAmbience("beach");
   assert.equal(typeof stop, "function");
   assert.doesNotThrow(stop);

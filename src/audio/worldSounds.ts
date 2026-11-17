@@ -819,11 +819,6 @@ export type DistantLoop = {
   stop: () => void;
 };
 
-const SILENT_LOOP: DistantLoop = {
-  level: () => undefined,
-  stop: () => undefined,
-};
-
 /** Wires `sources` through a loudness gain to the SFX bus and starts them;
  * `peak` is the gain at level 1. */
 function distantLoop(
@@ -853,10 +848,11 @@ function distantLoop(
   };
 }
 
-/** A bank's alarm bell: a hard ring chopped sixteen times a second. */
-export function startAlarmBell(): DistantLoop {
+/** A bank's alarm bell: a hard ring chopped sixteen times a second; null
+ * while audio is locked or missing (try again later). */
+export function startAlarmBell(): DistantLoop | null {
   const out = sfx();
-  if (!out) return SILENT_LOOP;
+  if (!out) return null;
   const { ctx, dest } = out;
   const ring = ctx.createOscillator();
   ring.type = "square";
@@ -883,10 +879,11 @@ export function startAlarmBell(): DistantLoop {
   return distantLoop(ctx, dest, tone, [ring, overtone, striker], 0.07);
 }
 
-/** Police sirens: two wailing tones a little apart, rising and falling. */
-export function startSiren(): DistantLoop {
+/** Police sirens: two wailing tones a little apart, rising and falling;
+ * null while audio is locked or missing. */
+export function startSiren(): DistantLoop | null {
   const out = sfx();
-  if (!out) return SILENT_LOOP;
+  if (!out) return null;
   const { ctx, dest } = out;
   const mix = ctx.createBiquadFilter();
   mix.type = "lowpass";

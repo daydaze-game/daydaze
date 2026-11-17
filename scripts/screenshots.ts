@@ -2096,10 +2096,25 @@ const SHOTS: {
     act: furnitureReady,
   },
   {
-    // a parade float up close (the parade is under way when the HUD says so)
+    // a parade float up close (held 60 s into a parade)
     name: "city-parade-float",
     query:
       "room=city&view=room&time=15:00&parade=60&at=-40,283&cam=-62,2.6,288,-10,2.2,283",
+    act: furnitureReady,
+  },
+  {
+    // the heist: robbers running from City Trust to the getaway car, alarm
+    // strobe over the door (slot 1000's heist, an escape)
+    name: "city-heist-run",
+    query:
+      "room=city&view=room&time=22:00&heist=6.5&at=-170,9&cam=-160,3.5,6,-178,1,-11",
+    act: furnitureReady,
+  },
+  {
+    // the squad cars parked outside City Trust, light bars flashing
+    name: "city-heist-cops",
+    query:
+      "room=city&view=room&time=22:00&heist=40&at=-160,9&cam=-138,5,10,-165,1,-8",
     act: furnitureReady,
   },
   {
