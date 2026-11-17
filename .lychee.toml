@@ -1,0 +1,9 @@
+# Config for the weekly link check (.github/workflows/link-check.yml) and for
+# running it by hand: lychee --config .lychee.toml README.md docs
+# Sites that block bots answer 403/429; those count as alive, not broken.
+accept = [200, 202, 206, 403, 429]
+timeout = 20
+max_retries = 2
+no_progress = true
+exclude = ['^https?://localhost', '^https?://127\.0\.0\.1', 'example\.(com|org)']
+exclude_path = ["node_modules", ".worktrees", ".claude", ".agents", "docs/agents"]
