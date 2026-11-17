@@ -479,7 +479,7 @@ export const CREDITS: readonly {
         license: "CC0 1.0",
         url: "https://static.makehumancommunity.org/assets/assetpacks/skins01.html",
         usedFor:
-          "Skin color detail and approximate surface relief rebaked into both avatar face projections, neutralized for selectable skin tones beneath optional makeup.",
+          "Skin color detail and approximate surface relief baked into both avatar face projections, neutralized for selectable skin tones beneath optional makeup.",
       },
       {
         title: "MakeHuman",

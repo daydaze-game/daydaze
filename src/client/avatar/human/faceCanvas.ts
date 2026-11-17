@@ -580,7 +580,7 @@ export async function paintFace(
   ctx.fillStyle = rgba(skin);
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  // CC0 skin pigmentation and pores, rebaked from the original body UVs.
+  // CC0 skin pigmentation and pores, baked from the original body UVs.
   // Soft light keeps the selected complexion and leaves makeup independent.
   ctx.save();
   ctx.globalCompositeOperation = "soft-light";
