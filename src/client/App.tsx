@@ -639,6 +639,8 @@ export function App() {
           <DevPanel
             onGo={(room) => travel(room, ROOMS[room].spawn)}
             onGame={setGame}
+            save={save}
+            onCoins={(n) => setSave((s) => ({ ...s, coins: s.coins + n }))}
           />
         )}
         {flags.debug && (

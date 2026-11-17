@@ -197,12 +197,59 @@ function useDrag(): {
   return { at: dragAt ?? saved, onPointerDown };
 }
 
+/** Coins and the save: hand out money, or dump the save to the console. */
+function GameSection({
+  coins,
+  save,
+  onCoins,
+}: {
+  coins: number;
+  save: unknown;
+  onCoins: (n: number) => void;
+}) {
+  return (
+    <Section title="game">
+      {coins} coins{" "}
+      <button type="button" onClick={() => onCoins(100)}>
+        +100
+      </button>{" "}
+      <button type="button" onClick={() => onCoins(1000)}>
+        +1000
+      </button>{" "}
+      <button
+        type="button"
+        onClick={() => {
+          Object.assign(window, { $save: save });
+          console.log("[dev] $save =", save);
+        }}
+      >
+        log save as $save
+      </button>{" "}
+      <button
+        type="button"
+        onClick={() => {
+          void navigator.clipboard
+            ?.writeText(JSON.stringify(save, null, 2))
+            .catch(() => {});
+        }}
+      >
+        copy save JSON
+      </button>
+    </Section>
+  );
+}
+
 export function DevPanel({
   onGo,
   onGame,
+  save,
+  onCoins,
 }: {
   onGo: (room: RoomId) => void;
   onGame: (game: MinigameId) => void;
+  /** The player's save, for showing and dumping; edits go through onCoins. */
+  save: { coins: number };
+  onCoins: (n: number) => void;
 }) {
   const s = useDev();
   const drag = useDrag();
@@ -270,6 +317,7 @@ export function DevPanel({
           screenshot
         </button>
       </Section>
+      <GameSection coins={save.coins} save={save} onCoins={onCoins} />
       <RenderSection />
       <SceneTree />
       <Inspector />
