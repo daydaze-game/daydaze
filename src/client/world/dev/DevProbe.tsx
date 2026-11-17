@@ -1,10 +1,11 @@
 // The dev panel's half inside the Canvas: samples gl.info twice a second,
 // applies the view switches (wireframe, grid, half res, pause, free cam),
-// handles shift+click picking and the teleport, and exposes `__dd` to the
-// console. Development only; see DevTools.tsx.
+// handles shift+click picking (the inspector's selection, outlined in
+// yellow), the teleport and "look at", and exposes `__dd` to the console. Development only; see DevTools.tsx.
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { clampToArea, type WalkArea } from "../../../game/area.ts";
 import { placePlayer, type Player } from "../PlayerController.tsx";
@@ -23,9 +24,27 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
   const get = useThree((s) => s.get);
   const setDpr = useThree((s) => s.setDpr);
   const setFrameloop = useThree((s) => s.setFrameloop);
-  const { wireframe, helpers, halfRes, paused } = useDev();
+  const { wireframe, helpers, halfRes, paused, selection } = useDev();
   const tick = useRef({ frames: 0, since: performance.now() });
+  // the selection's outline, kept on it every frame so it follows a moving
+  // doll or an edit from the inspector
+  const box = useMemo(() => {
+    const helper = new THREE.Box3Helper(new THREE.Box3(), 0xffff00);
+    for (const m of [helper.material].flat()) m.depthTest = false;
+    helper.renderOrder = 999;
+    return helper;
+  }, []);
+  useEffect(() => {
+    if (!selection) return;
+    scene.add(box);
+    return () => {
+      box.removeFromParent();
+    };
+  }, [scene, box, selection]);
+  useEffect(() => () => box.dispose(), [box]);
   useFrame(({ camera }) => {
+    const sel = devState().selection;
+    if (sel) objectBox(sel.object, sel.instanceId, box.box);
     const t = tick.current;
     t.frames++;
     const now = performance.now();
@@ -93,12 +112,9 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
       hook.dispatchEvent(new CustomEvent("observe", { detail: scene }));
       hook.dispatchEvent(new CustomEvent("observe", { detail: gl }));
     }
-    // shift+click logs what is under the cursor, keeps it as __dd.pick and
-    // outlines it; shift+click on empty sky clears the outline
+    // shift+click selects what is under the cursor for the inspector, logs
+    // it and keeps it as __dd.pick; shift+click on empty sky clears it
     const el = gl.domElement;
-    const box = new THREE.Box3Helper(new THREE.Box3(), 0xffff00);
-    for (const m of [box.material].flat()) m.depthTest = false;
-    box.renderOrder = 999;
     const onDown = (e: PointerEvent) => {
       if (!e.shiftKey) return;
       const { camera, raycaster } = get();
@@ -112,13 +128,15 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
         .intersectObjects(scene.children, true)
         .find((h) => h.object !== box);
       if (!hit) {
-        box.removeFromParent();
+        patch({ selection: null });
         return;
       }
       dd.pick = hit.object;
-      objectBox(hit.object, hit.instanceId ?? null, box.box);
-      scene.add(box);
-      const size = box.box.getSize(new THREE.Vector3());
+      const instanceId = hit.instanceId ?? null;
+      patch({ selection: { object: hit.object, instanceId } });
+      const size = objectBox(hit.object, instanceId, new THREE.Box3()).getSize(
+        new THREE.Vector3(),
+      );
       console.log(
         "[dev pick]",
         objectPath(hit.object),
@@ -128,12 +146,8 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
       );
     };
     el.addEventListener("pointerdown", onDown);
-    return () => {
-      el.removeEventListener("pointerdown", onDown);
-      box.removeFromParent();
-      box.dispose();
-    };
-  }, [scene, gl, get, player]);
+    return () => el.removeEventListener("pointerdown", onDown);
+  }, [scene, box, gl, get, player]);
   // teleport: put the doll where the middle of the view meets the floor
   // (y 0), clamped to the room's walkable area; not while seated or riding
   useEffect(() => {
@@ -150,6 +164,36 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
       actions.teleport = null;
     };
   }, [player, area, get]);
+  // look at: free cam on, orbiting the selection from a little way off
+  useEffect(() => {
+    actions.focus = () => {
+      const sel = devState().selection;
+      if (!sel) return;
+      const b = objectBox(sel.object, sel.instanceId, new THREE.Box3());
+      const center = b.getCenter(new THREE.Vector3());
+      const reach = Math.max(2, b.getSize(new THREE.Vector3()).length());
+      // the camera rig's own orbit controls give way to the free cam's on
+      // the next render; aim once the free cam's are the ones in charge
+      const rigControls = devState().freeCam ? null : get().controls;
+      patch({ freeCam: true });
+      let tries = 30;
+      const aim = () => {
+        const { camera, controls } = get();
+        if (controls instanceof OrbitControlsImpl && controls !== rigControls) {
+          const away = camera.position.clone().sub(center).normalize();
+          camera.position.copy(center).addScaledVector(away, reach);
+          controls.target.copy(center);
+          controls.update();
+        } else if (tries-- > 0) {
+          requestAnimationFrame(aim);
+        }
+      };
+      aim();
+    };
+    return () => {
+      actions.focus = null;
+    };
+  }, [get]);
   const freeCam = useFreeCam();
   return freeCam ? <OrbitControls makeDefault /> : null;
 }

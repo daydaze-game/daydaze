@@ -3,6 +3,7 @@
 // switches and panel layout remembered in localStorage across reloads.
 // Development only; see DevTools.tsx.
 import { useSyncExternalStore } from "react";
+import type * as THREE from "three";
 
 /** Readouts the probe samples twice a second. */
 export type DevStats = {
@@ -29,10 +30,17 @@ export type DevPrefs = {
   at: readonly [number, number] | null;
 };
 
-/** Switches that only last for the page (pausing survives no reload). */
+/** What the inspector shows: an object, or one instance of an instanced mesh. */
+export type Selection = {
+  object: THREE.Object3D;
+  instanceId: number | null;
+};
+
+/** State that only lasts for the page (pausing survives no reload). */
 export type DevState = DevStats &
   DevPrefs & {
     paused: boolean;
+    selection: Selection | null;
   };
 
 const PREFS_KEY = "daydaze:dev-panel";
@@ -89,6 +97,7 @@ function loadPrefs(): DevPrefs {
 let state: DevState = {
   ...loadPrefs(),
   paused: false,
+  selection: null,
   fps: 0,
   camera: "",
   calls: 0,
@@ -147,4 +156,8 @@ export function useFreeCam(): boolean {
 }
 
 /** Panel buttons that act inside the Canvas; the probe fills them in. */
-export const actions: { teleport: (() => void) | null } = { teleport: null };
+export const actions: {
+  teleport: (() => void) | null;
+  /** Turns the free camera on and points it at the selection. */
+  focus: (() => void) | null;
+} = { teleport: null, focus: null };
