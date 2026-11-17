@@ -21,7 +21,7 @@ test("a warning bans that store until the ban ends", () => {
   assert.equal(isBanned(crime, "mall", now), false);
 });
 
-test("a fine or a jail term counts the offence without a store ban", () => {
+test("a fine or a jail term counts the offense without a store ban", () => {
   const crime = recordCaught(DEFAULT_CRIME, "mall", 0, {
     kind: "fine",
     coins: 10,
