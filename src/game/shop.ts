@@ -212,7 +212,7 @@ function locked(id: string, wardrobe: readonly string[]): boolean {
   return shopItem(id) !== undefined && !wardrobe.includes(id);
 }
 
-/** The look with every unowned shop item swapped for the default. */
+/** Unowned items fall back to defaults; character colors remain available. */
 export function unlockedLook(look: Look, wardrobe: readonly string[]): Look {
   // unowned shoes come off, back to the outfit's own
   const { shoes, ...rest } = look;
@@ -230,7 +230,7 @@ export function unlockedLook(look: Look, wardrobe: readonly string[]): Look {
     hairColor: locked(look.hairColor, wardrobe)
       ? DEFAULT_LOOK.hairColor
       : look.hairColor,
-    lips: locked(look.lips, wardrobe) ? DEFAULT_LOOK.lips : look.lips,
+    lips: look.lips,
     shadow: locked(look.shadow, wardrobe) ? DEFAULT_LOOK.shadow : look.shadow,
     ...(look.piercings === undefined
       ? {}
