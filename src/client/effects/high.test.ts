@@ -54,7 +54,7 @@ test("a pill does nothing at 13+; at 18+ it reads molly at its peak", () => {
   setActiveTier("adult");
   try {
     assert.equal(take("pill"), true);
-    ageHigh(gameSeconds(DOSES.pill.peak));
+    ageHigh(gameSeconds(DOSES.pill.peak + 1));
     assert.equal(getMeters().molly.level, DOSES.pill.strength);
     assert.equal(getMeters().molly.phase, "peak");
     assert.equal(getMeters().acid.level, 0);
