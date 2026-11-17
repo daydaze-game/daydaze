@@ -25,11 +25,14 @@ const URL = "/models/city-dream/architecture.glb";
 export const cityDream = createStore({ spots: [] as readonly DreamSpot[] });
 
 /** Surface flags survive meshopt quantization; UV.y is unused. */
-function architectureMaterial(night: { value: number }) {
+function architectureMaterial(night: { value: number }, onReady: () => void) {
   const maps = groundMaps("stone_tile_wall", { full: true });
   const loader = new THREE.TextureLoader();
+  let loaded = 0;
   const copper = ["diff", "nor", "surface"].map((name) => {
-    const texture = loader.load(`/textures/city_copper/${name}.webp`);
+    const texture = loader.load(`/textures/city_copper/${name}.webp`, () => {
+      if (++loaded === 3) onReady();
+    });
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.anisotropy = 8;
     if (name === "diff") texture.colorSpace = THREE.SRGBColorSpace;
@@ -184,7 +187,12 @@ export function DreamBuildings() {
 
   useEffect(() => {
     gltf.scene.updateMatrixWorld(true);
-    const material = architectureMaterial(night);
+    let active = true;
+    const material = architectureMaterial(night, () => {
+      if (!active) return;
+      canvas.dataset.architectureMetal = "ready";
+      invalidate();
+    });
     const built = DREAM_KINDS.flatMap((kind) =>
       [false, true].map((far) => {
         const name = far ? `${kind}-lo` : kind;
@@ -199,6 +207,7 @@ export function DreamBuildings() {
     );
     setMeshes(built);
     return () => {
+      active = false;
       for (const { mesh } of built) {
         mesh.geometry.dispose();
         mesh.dispose();
@@ -208,10 +217,11 @@ export function DreamBuildings() {
       material.roughnessMap?.dispose();
       material.dispose();
       delete canvas.dataset.architecture;
+      delete canvas.dataset.architectureMetal;
       delete canvas.dataset.architectureFamilies;
       delete canvas.dataset.landmarkExpected;
     };
-  }, [gltf, night, canvas]);
+  }, [gltf, night, canvas, invalidate]);
 
   useEffect(() => {
     night.value = day.neon;

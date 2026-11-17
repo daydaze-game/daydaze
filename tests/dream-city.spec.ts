@@ -41,6 +41,7 @@ test("dream city: architecture loads across distinct streets and keeps venue doo
       `/?room=city&view=room&quality=low&still=1&at=${at}&time=${time}&cam=${cam}`,
     );
     await expect(canvas).toHaveAttribute("data-architecture", "ready");
+    await expect(canvas).toHaveAttribute("data-architecture-metal", "ready");
     await expect
       .poll(async () => Number(await canvas.getAttribute("data-frames")))
       .toBeGreaterThanOrEqual(10);

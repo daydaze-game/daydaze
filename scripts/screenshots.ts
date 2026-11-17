@@ -53,6 +53,7 @@ const cityReady = async (page: Page) => {
       const canvas = document.querySelector("canvas");
       return (
         canvas?.dataset.architecture === "ready" &&
+        canvas.dataset.architectureMetal === "ready" &&
         (canvas.dataset.landmarkExpected ?? "")
           .split(",")
           .filter(Boolean)
