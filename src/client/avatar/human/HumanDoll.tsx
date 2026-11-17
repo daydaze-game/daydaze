@@ -213,22 +213,22 @@ export type WalkState = {
 
 type Props = {
   /** Closet body sliders, 0 to 100 each. */
-  body?: BodyShape;
+  body?: BodyShape | undefined;
   look: Look;
-  swim?: SwimLook | null;
+  swim?: SwimLook | null | undefined;
   mood: Mood;
-  dance?: DanceMoveId;
-  couple?: CoupleRole;
+  dance?: DanceMoveId | undefined;
+  couple?: CoupleRole | undefined;
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
-  hold?: string;
-  buzzed?: boolean;
-  walk?: { current: WalkState };
-  seed?: number;
+  hold?: string | undefined;
+  buzzed?: boolean | undefined;
+  walk?: { current: WalkState } | undefined;
+  seed?: number | undefined;
   /** The player's own doll: full detail at any distance on the low tier. */
-  own?: boolean;
+  own?: boolean | undefined;
   /** False where sitting down or standing up must not play a clip (a ride
    * that carries her seated). */
-  joins?: boolean;
+  joins?: boolean | undefined;
 } & Omit<ThreeElements["group"], "children">;
 
 /** The part files a look wears, by kind. */
@@ -293,7 +293,7 @@ const WHEEL_RADIUS = 0.32;
 /** The wheelchair a seated gait rolls in (art/doll/blender/wheelchair.py,
  * CC-BY by Loic): feet on the floor, the seat under the doll's hips; its rear
  * wheels turn with the ground speed. */
-function Wheelchair({ walk }: { walk?: { current: WalkState } }) {
+function Wheelchair({ walk }: { walk?: { current: WalkState } | undefined }) {
   const { scene } = useGLTF(`${MODELS}/wheelchair.glb`);
   const chair = useMemo(() => scene.clone(true), [scene]);
   const wheels = useMemo(
