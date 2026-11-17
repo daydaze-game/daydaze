@@ -164,9 +164,9 @@ const ROAD_TRIM = new MeshStandardMaterial({
 type CarProps = {
   spec: CarSpec;
   color: string;
-  mods?: CarMods;
+  mods?: CarMods | undefined;
   /** Headlights on: beams on the road ahead. */
-  beams?: boolean;
+  beams?: boolean | undefined;
   ref?: Ref<Group>;
 };
 
@@ -198,7 +198,7 @@ function Extras({
   beams,
 }: {
   spec: CarSpec;
-  mods?: CarMods;
+  mods?: CarMods | undefined;
   beams: boolean;
 }) {
   const glow = glowMaterial(mods?.glow);
@@ -244,9 +244,9 @@ function BodyCar({
   const paint = usePaint(color, mods, true);
   const scale = spec.length / BODY_LENGTH[body];
   return (
-    <group ref={ref} visible={false}>
+    <group ref={ref ?? null} visible={false}>
       <group scale={scale}>
-        <mesh geometry={parts.paint} material={paint} />
+        {parts.paint && <mesh geometry={parts.paint} material={paint} />}
         {parts.glass && (
           <mesh geometry={parts.glass} material={glassMaterial(mods?.tint)} />
         )}
@@ -288,7 +288,7 @@ function ProceduralCar({ spec, color, mods, beams = false, ref }: CarProps) {
   const parts = carParts(spec);
   const paint = usePaint(color, mods, false);
   return (
-    <group ref={ref} visible={false}>
+    <group ref={ref ?? null} visible={false}>
       {parts.paint && <mesh geometry={parts.paint} material={paint} />}
       {parts.glass && (
         <mesh geometry={parts.glass} material={glassMaterial(mods?.tint)} />

@@ -157,7 +157,7 @@ export function Burst({
 }) {
   return (
     <ParticleBurst
-      ref={ref}
+      ref={ref ?? null}
       count={24}
       spec={LIGHT}
       color={color}

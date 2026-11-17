@@ -67,16 +67,16 @@ export type DollState = {
   loaded: boolean;
   /** The other clip files loaded so far (a clip in an unloaded pack plays
    * its fallback, and the play names the pack it needs). */
-  packs?: ReadonlySet<MocapPack>;
+  packs?: ReadonlySet<MocapPack> | undefined;
   /** The player's own doll: she breathes first and fidgets now and then. */
-  own?: boolean;
+  own?: boolean | undefined;
   /** Which idle slot she is in (idlePlan.ts); 0 when standing has just begun. */
-  slot?: number;
+  slot?: number | undefined;
   /** Seconds into that slot. */
-  into?: number;
+  into?: number | undefined;
   /** How a substance has her stand (effects/substances.ts), or null sober:
    * it swaps her standing idles for its loops and tics. */
-  body?: Body | null;
+  body?: Body | null | undefined;
   /** Ground speed, m/s; above a crawl she walks. */
   speed: number;
   /** Her gait's walk clip (gaits.ts). */
@@ -89,9 +89,9 @@ export type DollState = {
   couple: CoupleRole | undefined;
   seed: number;
   /** In the sea, out of her depth: she strokes or treads whatever her mood. */
-  afloat?: boolean;
+  afloat?: boolean | undefined;
   /** She rides a wheelchair: she sits whether she rolls or waits. */
-  seated?: boolean;
+  seated?: boolean | undefined;
 };
 
 /** A clip to play: `rate` scales its speed; `offset` (seconds) shifts its

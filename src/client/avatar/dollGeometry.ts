@@ -476,8 +476,8 @@ function buildHair(style: HairStyle, k: number, src: THREE.BufferGeometry) {
   }
   return {
     main: merge(parts.map(strip)),
-    pony,
-    tie: style === "ponytail" ? PONY_ROOT : undefined,
+    ...(pony && { pony }),
+    ...(style === "ponytail" && { tie: PONY_ROOT }),
   };
 }
 

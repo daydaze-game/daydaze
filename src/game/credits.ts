@@ -1448,6 +1448,14 @@ export const CREDITS: readonly {
         usedFor: "Surface textures for the city, venues and furnishings.",
       },
       {
+        title: "Patinated city copper",
+        author: "ambientCG",
+        license: "CC0 1.0",
+        url: "https://ambientcg.com/view?id=Metal058B",
+        usedFor:
+          "Shared color, normal and packed roughness/metalness maps for dream architecture roofs and metalwork; converted to 512px WebP.",
+      },
+      {
         title: "Carpet",
         author: "ambientCG",
         license: "CC0 1.0",
