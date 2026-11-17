@@ -44,6 +44,16 @@ every push and pull request to `main` and fails fast.
 | `npm run build` | the production bundle in `dist/` |
 | `npm run verify` | lint, tests, types, format, build and the perf budget together |
 
+### Pre-commit hook
+
+`npm install` installs a [lefthook](https://lefthook.dev) pre-commit hook
+(`lefthook.yml`; it also works in git worktrees). On staged files only, in
+parallel, it runs Prettier `--check` (fix with `npm run format`), ESLint on
+`*.{js,mjs,ts,tsx}`, `gitleaks git --staged` and actionlint on staged
+workflows. The last two are skipped with a message if the binary is not
+installed. It runs no typecheck or tests: CI runs the full checks anyway. In an
+emergency, skip it with `LEFTHOOK=0 git commit` or `git commit --no-verify`.
+
 Browser and server suites are slower; run the parts you touched:
 
 - `PORT=5196 npx playwright test -g "<name>" --workers=1` for the client

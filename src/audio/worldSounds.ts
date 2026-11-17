@@ -1,8 +1,9 @@
 /**
  * The world's sounds, all synthesized: footsteps, a whoosh through doors, a
- * soft UI tick, and looping ambience beds (city hum, surf, aquarium bubbles,
- * haunted wind, rink air). Routes through the shared audio bus SFX channel
- * so the global mute reaches it. Nothing here throws when audio is missing.
+ * soft UI tick, a bank alarm bell and police sirens, and looping ambience
+ * beds (city hum, surf, aquarium bubbles, haunted wind, rink air). Routes
+ * through the shared audio bus SFX channel so the global mute reaches it.
+ * Nothing here throws when audio is missing.
  */
 
 import { playCachedSound } from "./soundFiles.ts";
@@ -809,4 +810,100 @@ export function startEngineHum(): () => void {
     gain.gain.exponentialRampToValueAtTime(0.0001, end + 0.4);
     for (const osc of oscs) osc.stop(end + 0.45);
   };
+}
+
+/** A looping sound the caller fades by distance every frame. */
+export type DistantLoop = {
+  /** Loudness 0..1 (eased, so per-frame calls don't click). */
+  level: (v: number) => void;
+  stop: () => void;
+};
+
+/** Wires `sources` through a loudness gain to the SFX bus and starts them;
+ * `peak` is the gain at level 1. */
+function distantLoop(
+  ctx: AudioContext,
+  dest: AudioNode,
+  input: AudioNode,
+  sources: AudioScheduledSourceNode[],
+  peak: number,
+): DistantLoop {
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  input.connect(gain).connect(dest);
+  for (const s of sources) s.start();
+  return {
+    level: (v) =>
+      gain.gain.setTargetAtTime(
+        Math.max(0, Math.min(1, v)) * peak,
+        ctx.currentTime,
+        0.12,
+      ),
+    stop: () => {
+      const end = ctx.currentTime;
+      gain.gain.cancelScheduledValues(end);
+      gain.gain.setTargetAtTime(0, end, 0.08);
+      for (const s of sources) s.stop(end + 0.5);
+    },
+  };
+}
+
+/** A bank's alarm bell: a hard ring chopped sixteen times a second; null
+ * while audio is locked or missing (try again later). */
+export function startAlarmBell(): DistantLoop | null {
+  const out = sfx();
+  if (!out) return null;
+  const { ctx, dest } = out;
+  const ring = ctx.createOscillator();
+  ring.type = "square";
+  ring.frequency.value = 1180;
+  const overtone = ctx.createOscillator();
+  overtone.type = "triangle";
+  overtone.frequency.value = 2950;
+  // the striker: a square LFO swinging the bell's gain between 0 and 1
+  const bell = ctx.createGain();
+  bell.gain.value = 0.5;
+  const striker = ctx.createOscillator();
+  striker.type = "square";
+  striker.frequency.value = 16;
+  const depth = ctx.createGain();
+  depth.gain.value = 0.5;
+  striker.connect(depth).connect(bell.gain);
+  const tone = ctx.createBiquadFilter();
+  tone.type = "bandpass";
+  tone.frequency.value = 1800;
+  tone.Q.value = 0.7;
+  ring.connect(bell);
+  overtone.connect(bell);
+  bell.connect(tone);
+  return distantLoop(ctx, dest, tone, [ring, overtone, striker], 0.07);
+}
+
+/** Police sirens: two wailing tones a little apart, rising and falling;
+ * null while audio is locked or missing. */
+export function startSiren(): DistantLoop | null {
+  const out = sfx();
+  if (!out) return null;
+  const { ctx, dest } = out;
+  const mix = ctx.createBiquadFilter();
+  mix.type = "lowpass";
+  mix.frequency.value = 2600;
+  const sources: AudioScheduledSourceNode[] = [];
+  for (const [base, rate] of [
+    [820, 0.32],
+    [870, 0.27],
+  ]) {
+    const voice = ctx.createOscillator();
+    voice.type = "sawtooth";
+    voice.frequency.value = base;
+    // the wail: a slow sine sweeping the pitch up and down
+    const wail = ctx.createOscillator();
+    wail.frequency.value = rate;
+    const sweep = ctx.createGain();
+    sweep.gain.value = 380;
+    wail.connect(sweep).connect(voice.frequency);
+    voice.connect(mix);
+    sources.push(voice, wail);
+  }
+  return distantLoop(ctx, dest, mix, sources, 0.05);
 }
