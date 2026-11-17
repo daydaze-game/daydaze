@@ -1,3 +1,5 @@
+// Sitting and standing: walks the player to the nearest or tapped seat and
+// plays the sit-down clip.
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";

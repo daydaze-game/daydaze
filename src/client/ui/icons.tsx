@@ -1,3 +1,5 @@
+// Inline SVG icons in one thin, rounded line style. They are decoration; the
+// words beside them name the control.
 import type { ReactNode } from "react";
 
 // Inline SVG icons in the same thin, rounded line style. They are decoration:

@@ -1,3 +1,5 @@
+// The shoplifting test panel: a stub shelf from two real stores, with the
+// suspicion meter. Prices are placeholders until the Shops milestone.
 import { useState } from "react";
 import {
   START,

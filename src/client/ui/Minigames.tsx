@@ -1,3 +1,5 @@
+// Mounts the open minigame. Each one is lazy-loaded, since they are big and
+// rarely opened.
 import { lazy, Suspense } from "react";
 import { hotspotsIn, type MinigameId } from "../../game/hotspots.ts";
 import type { RoomId } from "../../game/rooms.ts";

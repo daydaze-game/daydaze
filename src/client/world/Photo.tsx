@@ -1,3 +1,5 @@
+// The photo button's snapshot: the overlay bumps a counter and the scene takes
+// the picture, tagged with the place's name.
 import { playSoundFile } from "../../audio/soundFiles.ts";
 import { useThree } from "@react-three/fiber";
 import { useEffect } from "react";

@@ -1,3 +1,5 @@
+// Slides the picture while the character creator covers the screen, so the
+// doll stays centered in the part still visible.
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 

@@ -1,3 +1,5 @@
+// The Speedway controls' requests for the scene to take on its next frame
+// (start a race, ride the bumper cars, and so on).
 import type { CarInput } from "../../game/driving/car.ts";
 import type { Session } from "../../game/speedway/session.ts";
 import type { FriendTrack } from "../../game/speedway/friendRace.ts";

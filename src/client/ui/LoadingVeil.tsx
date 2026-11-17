@@ -1,3 +1,5 @@
+// The veil over the canvas while a room loads and compiles. It fades out and
+// unmounts, and never blocks clicks.
 import { useEffect, useState } from "react";
 import { useSceneReady } from "../world/ready.ts";
 

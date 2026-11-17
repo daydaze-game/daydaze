@@ -1,3 +1,5 @@
+// Room-jump buttons for testing, mounted only with `?debug=1`. Playwright
+// tests use them to reach a room without walking.
 import type { RoomId } from "../../game/rooms.ts";
 import { drink } from "../effects/drunk.ts";
 import { ADULT_OK } from "../adult.ts";

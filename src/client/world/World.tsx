@@ -1,3 +1,5 @@
+// The 3D world: picks the current room's scene (each lazy-loaded), warms its
+// shaders, and mounts the player, camera and effects.
 import { PerformanceMonitor } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";

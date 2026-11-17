@@ -1,3 +1,5 @@
+// Whether the current room has finished compiling its shaders. The World's
+// Warmup sets it; the loading veil waits on it.
 import { useSyncExternalStore } from "react";
 
 // Whether the current room has finished compiling its shaders and is showing.

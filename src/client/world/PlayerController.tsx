@@ -1,3 +1,5 @@
+// Moves the player's doll: taps and keys feed a fixed-step walker (see
+// `src/game/walker.ts`) and the drawn pose is interpolated between steps.
 import { useFrame } from "@react-three/fiber";
 import { playerSpot } from "./playerSpot.ts";
 import { liftOf, mirrored, roleMove } from "../../game/dance/together.ts";

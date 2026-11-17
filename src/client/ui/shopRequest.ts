@@ -1,3 +1,5 @@
+// Which shop's counter is open: a clerk's tap opens it and the shop panel
+// closes it.
 import type { ShopId } from "../../game/shop.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
