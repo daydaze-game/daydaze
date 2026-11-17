@@ -152,7 +152,7 @@ test("fines are at least ten coins and rise with the item price", () => {
   assert.ok(pricey.kind === "fine" && pricey.coins > cheap.coins);
 });
 
-test("jail time grows with the item value and with repeat offences", () => {
+test("jail time grows with the item value and with repeat offenses", () => {
   const jewelry = storeNamed("jewelry");
   const cheap = penaltyFor(jewelry, 50, 0);
   const pricey = penaltyFor(jewelry, 900, 0);
