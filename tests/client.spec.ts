@@ -64,6 +64,38 @@ const roomTitle = (page: Page) => page.getByRole("heading", { level: 1 });
 const canvasOf = (page: Page) =>
   page.getByRole("img", { name: "3D room view" });
 
+test("passenger rides close the dressing room and block reopening", async ({
+  page,
+}) => {
+  await page.goto(VELVET);
+  const toggle = page.getByRole("button", {
+    name: "Dressing room",
+    exact: true,
+  });
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  // Inject a passenger transition without requiring a second online browser.
+  await page.evaluate(async () => {
+    const source = "/src/client/world/driving.ts";
+    const { driving }: { driving: { passenger: string | null } } = await import(
+      source
+    );
+    driving.passenger = "test-driver";
+  });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).toBeDisabled();
+  await page.evaluate(async () => {
+    const source = "/src/client/world/driving.ts";
+    const { driving }: { driving: { passenger: string | null } } = await import(
+      source
+    );
+    driving.passenger = null;
+  });
+  await expect(toggle).toBeEnabled();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+});
+
 test("dressing room isolates the character and saves unrestricted colors", async ({
   page,
 }) => {
