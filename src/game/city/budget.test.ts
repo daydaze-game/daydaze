@@ -142,7 +142,7 @@ test("the low tier's cost counts its dream architecture", () => {
   const cost = lowTierCost(at);
   assert.equal(cost.bays, 0);
   assert.equal(cost.lots, 0);
-  assert.ok(cost.parts.dream! > 0);
+  assert.ok(cost.parts.dream > 0);
   assert.ok(cost.triangles > cost.planTriangles);
 });
 
@@ -222,8 +222,8 @@ test("traffic is priced from the shipped car bodies, more on a road than on a la
       assert.ok(modelsInBudget().includes(path), path);
   // a distance twin is under 1,500 triangles, a near model under 6,000
   for (const key of BODY_KEYS) {
-    assert.ok(MODEL_COST[`cars/${key}-lo`]!.tris <= 1500, key);
-    assert.ok(MODEL_COST[`cars/${key}`]!.tris <= 6000, key);
+    assert.ok(MODEL_COST[`cars/${key}-lo`].tris <= 1500, key);
+    assert.ok(MODEL_COST[`cars/${key}`].tris <= 6000, key);
   }
   const lawn: Vec2 = [254, -264];
   const crossing: Vec2 = [-144, 0];
@@ -232,7 +232,7 @@ test("traffic is priced from the shipped car bodies, more on a road than on a la
   assert.ok(onRoad.triangles > onLawn.triangles);
   // at the wheel: the dearest road car's near model is in the road price
   const dearestOwn = Math.max(
-    ...Object.values(ROSTER_BODY).map((k) => MODEL_COST[`cars/${k}`]!.tris),
+    ...Object.values(ROSTER_BODY).map((k) => MODEL_COST[`cars/${k}`].tris),
   );
   assert.ok(onRoad.triangles >= dearestOwn);
   assert.ok(onLawn.triangles < dearestOwn);
@@ -324,7 +324,7 @@ test("distant landmark roofs retain the detailed skyline height", () => {
     const entry = metadata[kind];
     assert.ok(entry, kind);
     assert.ok(
-      Math.abs(entry.near.bounds.max[1]! - entry.far.bounds.max[1]!) < 0.3,
+      Math.abs(entry.near.bounds.max[1] - entry.far.bounds.max[1]) < 0.3,
       `${kind} loses its roof or spire when switching detail`,
     );
   }

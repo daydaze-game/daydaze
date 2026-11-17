@@ -25,7 +25,7 @@ const BETWEEN = 1.4;
 
 const OFF = {
   phase: "off" as Phase,
-  match: NEW_RALLY as Rally,
+  match: NEW_RALLY,
   since: 0,
   /** performance.now() the ball is there to hit. */
   arrives: 0,

@@ -9,6 +9,23 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+/** Rules that need TypeScript's type information (see where it's used). */
+const typeAware = {
+  files: ["**/*.{ts,tsx}"],
+  languageOptions: {
+    parserOptions: {
+      projectService: true,
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+  rules: {
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
+    "@typescript-eslint/no-unnecessary-type-conversion": "error",
+  },
+};
+
 export default defineConfig(
   {
     ignores: [
@@ -47,6 +64,16 @@ export default defineConfig(
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
     },
+  },
+  // Type-aware rules: the project service finds each file's tsconfig
+  // (server/src/worker is typed through server/tsconfig.json). Loading the
+  // TypeScript program makes a run about 10x slower, so ESLINT_NO_TYPES=1
+  // (set by the pre-commit hook) skips them; CI always runs them.
+  ...(process.env.ESLINT_NO_TYPES === "1" ? [] : [typeAware]),
+  {
+    // node:test's test() and describe() return promises by design.
+    files: ["**/*.test.ts"],
+    rules: { "@typescript-eslint/no-floating-promises": "off" },
   },
   {
     files: ["src/**/*.{ts,tsx}"],

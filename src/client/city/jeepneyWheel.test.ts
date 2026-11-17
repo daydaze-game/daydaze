@@ -52,9 +52,9 @@ test("a jeepney's wheels sit at its old axles once the frame is turned onto it, 
   expected.forEach(([x, y, z], k) => {
     const p = at(k);
     assert.ok(
-      Math.abs(p.x - x!) < 1e-9 &&
-        Math.abs(p.y - y!) < 1e-9 &&
-        Math.abs(p.z - z!) < 1e-9,
+      Math.abs(p.x - x) < 1e-9 &&
+        Math.abs(p.y - y) < 1e-9 &&
+        Math.abs(p.z - z) < 1e-9,
       `wheel ${k}`,
     );
   });

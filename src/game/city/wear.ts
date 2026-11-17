@@ -89,7 +89,7 @@ export function avenueWear(): Wear[] {
       out.push({
         kind: "patch",
         x: at,
-        z: LANES[hash(x, 23) < 0.5 ? 0 : 1]! + (hash(x, 24) - 0.5) * 2,
+        z: LANES[hash(x, 23) < 0.5 ? 0 : 1] + (hash(x, 24) - 0.5) * 2,
         sx: 2.4 + 3 * hash(x, 25),
         sz: 1.4 + 1.2 * hash(x, 26),
       });

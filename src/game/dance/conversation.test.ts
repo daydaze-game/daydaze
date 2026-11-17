@@ -52,7 +52,7 @@ test("exactly one member speaks at a time, and never the same one twice running"
         // a change of speaker is never to the same person (a window edge may
         // start the same person's turn afresh, so only count real changes)
         if (who !== last && last !== -1) assert.notEqual(who, last);
-        last = who as number;
+        last = who;
       }
     }
 });
