@@ -35,7 +35,7 @@ The look is maximalist: dense, layered, glowing, colourful, with constant small 
 ### Merged on `main`
 
 | Area | What exists | Evidence |
-|---|---|---|
+| --- | --- | --- |
 | Online foundation | A Cloudflare Worker, Durable Objects and D1 schema covering: guests and accounts (PBKDF2), shared room copies, chat, block/mute/report, admin kick and ban, persisted rate limits, CSP and security headers, origin checks, and a smoke test. | `server/`, `src/net/`, `docs/security.md`, `docs/deploy.md`, `npm run smoke:server` |
 | Framework-free online client | `OnlineSession`, `WebSocketTransport` and the typed API. They are not yet wired into the 3D client. | `src/net/client/` |
 | 3D client | React Three Fiber world, click-to-walk, orbit camera and quality tiers. The code-built doll uses toon shading and painted face layers. Also a closet, chat UI, the Velvet Room lounge and the Plaza night street with portals. | `src/client/`, `src/game/`, `tests/client.spec.ts` |
@@ -50,7 +50,7 @@ The look is maximalist: dense, layered, glowing, colourful, with constant small 
 ### Landed since (2026-10-15 to 2026-10-16)
 
 | Area | What exists | Evidence |
-|---|---|---|
+| --- | --- | --- |
 | City | Downtown and Nightlife Row (384 m square), cell streaming, traffic, doors into every room; Poly Haven asphalt and concrete; night-street HDRI on the high tier | `src/game/city/`, `src/client/city/` |
 | 3D doll | MakeHuman CC0 doll built in Blender: strand-card hair (12 styles), face presets, makeup, piercings, hourglass figure with sliders, six outfits and two swimsuits, LOD body | `art/doll/blender/`, `src/client/avatar/human/` |
 | Character creator | Full-screen closet with picture tiles for hair, face, outfits and swimsuits | `src/client/ui/Overlay.tsx`, `public/closet/` |
@@ -102,7 +102,7 @@ The look is maximalist: dense, layered, glowing, colourful, with constant small 
 Today the save is `SaveV1`: name, look and settings, client-only. The Water Park branch adds a swimsuit look slot. Later milestones extend the save as shown below. Every change gets a versioned migration, validation of old saves and round-trip tests.
 
 | Field | Needed by | Owner | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `look.swimsuit` | M1 Water Park | client save | In flight. |
 | `coins` | M4 | client save, then the server after M9 | Client-owned until trading exists (VISION). |
 | `inventory` (clothes, furniture, items, `stolen` tag with expiry) | M4, M6 | client save, then the server | Server-owned once multiplayer swap racks and break-ins exist. |
@@ -359,7 +359,7 @@ Every milestone ends with `npm run verify` green, its Playwright specs green und
 ## 5. Games roster with milestones
 
 | Game | Place | Mode | Difficulty | Theme | Milestone |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Bassline DJ rhythm | dance club | solo | hard | music | exists; launched from the world in M3 |
 | Last Call cocktail mixing | rooftop bar | solo | easy | bartending | exists; launched from the world in M3 |
 | Karaoke | karaoke bar | solo or multi | easy | music | M3 |
@@ -414,10 +414,12 @@ Multiplayer-only games play against bots or as local turns until M9.
 Every venue in the content spec, grouped and assigned to a milestone. Tick a line when it ships.
 
 **Hub and city**
+
 - [ ] Downtown Plaza as the city square, with a fountain and a bus stop with the world map (M1)
 - [ ] Bus stops and taxi ranks in every neighborhood (M1 to M8)
 
 **Nightlife Row (M3)**
+
 - [ ] Velvet Room
 - [ ] Main dance club
 - [ ] Y2K pop club
@@ -430,6 +432,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Speakeasy (the secret door is wired in M10)
 
 **Water Park (M1, completed in M7)**
+
 - [ ] Entrance plaza
 - [ ] Slide towers
 - [ ] Wave pool
@@ -440,6 +443,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Night swim
 
 **Amusement Park (M1, completed in M7)**
+
 - [ ] Entrance gate
 - [ ] Roller coaster
 - [ ] Ferris wheel
@@ -453,10 +457,12 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Photo booth
 
 **Speedway (M2)**
+
 - [ ] Race track with grandstand and pit garage
 - [ ] Bumper car arena
 
 **Marina (M8)**
+
 - [ ] Docks
 - [ ] Yacht club bar
 - [ ] Party yacht to a private island
@@ -464,16 +470,19 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Rowboats
 
 **Airport (M8)**
+
 - [ ] Terminal lounge
 - [ ] Private jet cabin party
 - [ ] Vacation spots: tropical island, snowy mountain town, city rooftop
 
 **Ice Rink and Winter Village (M8)**
+
 - [ ] Rink with free and couple skating
 - [ ] Hot cocoa stand
 - [ ] Cabin lodge
 
 **Sports Complex (M7 and M8)**
+
 - [ ] Shooting range
 - [ ] Paintball
 - [ ] Basketball
@@ -484,6 +493,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Gym
 
 **Zoo (M8)**
+
 - [ ] Savanna walk with a lion pride
 - [ ] Giraffe deck
 - [ ] Penguin house
@@ -493,6 +503,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Safari tram
 
 **Aquarium (M8)**
+
 - [ ] Shark tunnel
 - [ ] Jellyfish glow room
 - [ ] Coral reef tank
@@ -501,44 +512,52 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Underwater cafe and lounge
 
 **Mermaid Cove (M8)**
+
 - [ ] Sea caves
 - [ ] Coral lagoon
 - [ ] Mermaid rocks
 - [ ] Sunken ship
 
 **Boardwalk and Beach (M8)**
+
 - [ ] Pier
 - [ ] Bonfire
 - [ ] Surf break
 - [ ] Volleyball court
 
 **Fashion District (M4 and M8)**
+
 - [ ] Boutiques
 - [ ] Salon
 - [ ] Nail bar
 - [ ] Runway
 
 **Park and Gardens (M8)**
+
 - [ ] Picnic lawn
 - [ ] Boating lake
 - [ ] Night-sky lookout
 - [ ] Misty Lanmaoa grove (eating it is M10)
 
 **Home (M6)**
+
 - [ ] Own apartment, decorated, visitable by friends (visits in M9)
 
 **Jail, hospital and police (M6a)**
+
 - [ ] Jail cell block, yard and phone
 - [ ] Hospital wake-up spot
 - [ ] Police NPCs
 
 **18+ area (M10)**
+
 - [ ] Weed lounge
 - [ ] Smoke shop
 - [ ] Secret strip club
 - [ ] Secret massage parlor
 
 **Food Street (M5; neighborhood venues land with their neighborhood in M8)**
+
 - [ ] Turo-turo and carinderia
 - [ ] Jollibee-inspired fried-chicken and spaghetti joint (original name)
 - [ ] Ube bakery
@@ -561,6 +580,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Yunnan mushroom hot pot
 
 **Cafes (M5)**
+
 - [ ] Bookshop cafe
 - [ ] Cat cafe
 - [ ] Dog cafe
@@ -591,6 +611,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] 24-hour convenience store
 
 **Restaurants, more (M5)**
+
 - [ ] Lechon and kamayan hall
 - [ ] Filipino BBQ skewers
 - [ ] Silog breakfast
@@ -644,11 +665,13 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Drive-in burger diner with roller-skating servers
 
 **Malls (M4; the dead mall in M8)**
+
 - [ ] Y2K mega-mall (atrium, escalators, fountain, food court, arcade, photo-sticker booth, cinema, pretzel stand)
 - [ ] Outdoor luxury street
 - [ ] Retro dead mall
 
 **Stores (M4; the smoke shop in M10)**
+
 - [ ] Style boutiques (Y2K, streetwear, glam evening, cottagecore, goth/alt, athleisure, lingerie, swimwear)
 - [ ] Shoe store and sneaker shop
 - [ ] Jewelry and accessories, handbags, hats and wigs, sunglasses kiosk
@@ -660,6 +683,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Flower shop, party supply, bridal and formal, sports gear
 
 **Groceries (M4)**
+
 - [ ] Supermarket
 - [ ] Filipino grocery
 - [ ] Asian supermarket
@@ -667,6 +691,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Bodega with a cat
 
 **Thrift and vintage (M4)**
+
 - [ ] Thrift stores with daily restock
 - [ ] Vintage boutique
 - [ ] Weekend flea market
@@ -674,6 +699,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Swap rack (player-to-player in M9)
 
 **Salons (M4)**
+
 - [ ] Glam salon
 - [ ] Braiding shop
 - [ ] Barbershop
@@ -683,6 +709,7 @@ Every venue in the content spec, grouped and assigned to a milestone. Tick a lin
 - [ ] Luxe nail studio
 
 **Vehicles**
+
 - [ ] Starter cars, kart and bumper cars (M2)
 - [ ] Customization garage (M4)
 - [ ] Scooter (M5)
@@ -727,7 +754,7 @@ These hold in every milestone.
 ### Risks
 
 | Risk | Mitigation |
-|---|---|
+| --- | --- |
 | Scope: the content list is very large. | Kits plus data: one restaurant kit, one shop kit, one facade kit. Venues are data files. Ship playable slices per milestone. |
 | Phone performance with a streamed city and maximalist neon. | Instancing, LOD, emissive materials instead of lights, quality tiers, and budgets measured in M11. |
 | Headless WebGL tests are slow (SwiftShader). | `--workers=2`, few Playwright cases per feature, and logic tested in Node. |
@@ -753,7 +780,7 @@ These hold in every milestone.
 One row per user request.
 
 | # | User request | Spec section | Milestone |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | Multiplayer game with Club Penguin and Fantage nostalgia, not for children | VISION; online spec | M0, M9 |
 | 2 | GTA meets IMVU meets Fantage | VISION "one-line pitch"; city spec | M1 to M11 |
 | 3 | 3D like Roblox, IMVU-style real 3D | VISION "Renderer" | M0 |

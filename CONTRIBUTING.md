@@ -37,6 +37,7 @@ every push and pull request to `main` and fails fast.
 | Command | What it checks |
 | --- | --- |
 | `npm run lint` | ESLint; the rules, and why each is on, are in `eslint.config.mjs` |
+| `npm run lint:md` | markdownlint-cli2 on the Markdown docs (rules in `.markdownlint-cli2.jsonc`) |
 | `npm run lint:dead` | Knip: unused files, exports and dependencies (`knip.jsonc`) |
 | `npm run lint:headers` | every code file starts with a header comment |
 | `npm run lint:deps` | dependency-cruiser: the layer rules in `.dependency-cruiser.cjs` (game is pure, no cycles) |
