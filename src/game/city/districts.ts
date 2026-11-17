@@ -12,7 +12,7 @@
 //
 // The pack paints with a 32 px palette (4 by 4 swatches, one per role: wall,
 // trim, roof, door, glass...) and every model keeps its UVs into it, so the
-// client swaps palettes per lot (src/client/city/DistrictLots.tsx) and one
+// client swaps palettes per lot and one
 // model wears every district's colors.
 
 import { EL_STATIONS, stairsRect } from "./el.ts";
