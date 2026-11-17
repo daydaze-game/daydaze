@@ -370,6 +370,33 @@ test("Green Haze (18+, dev flag): a joint and shroom tea land after their onset 
   expect(errors).toEqual([]);
 });
 
+test("Green Haze (18+, dev flag): a tab comes on slowly, then she's up and exploring", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${STILL}&room=green-haze&adult=1&debug=1`);
+  await expect(roomTitle(page)).toHaveText("Green Haze", { timeout: 150_000 });
+  const canvas = canvasOf(page);
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-calls")), {
+      timeout: 120_000,
+    })
+    .toBeGreaterThan(15);
+  await page.getByRole("button", { name: "Drop a tab" }).click();
+  await expect(canvas).toHaveAttribute("data-doses", "1");
+  // a tab takes its time: nothing yet (game/effects/substances.ts)
+  await expect(canvas).toHaveAttribute("data-under", "");
+  // five minutes on, past the 298 s the peak starts
+  const later = page.getByRole("button", { name: "Debug: a minute later" });
+  for (let i = 0; i < 5; i++) await later.click();
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-acid")))
+    .toBeGreaterThan(0.5);
+  await expect(canvas).toHaveAttribute("data-under", "acid");
+  expect(errors).toEqual([]);
+});
+
 test("Photon Zone: a laser tag round tags a rival for points", async ({
   page,
 }) => {
@@ -2990,7 +3017,7 @@ test("jail: the sentence counts down, push-ups shorten it, cards deal a hand, an
   await expect(page.getByRole("timer")).toContainText("Time left");
 });
 
-test("shoplifting: the suspicion meter fills and a caught player is penalised", async ({
+test("shoplifting: the suspicion meter fills and a caught player is penalized", async ({
   page,
 }) => {
   await page.goto(`${VELVET}&debug=1`);

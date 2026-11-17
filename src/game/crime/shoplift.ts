@@ -206,7 +206,7 @@ const DAY_MS = 86_400_000;
 const MIN_FINE = 10;
 const MAX_JAIL_MINUTES = 15;
 
-// Penalty by store consequence and item price. Each earlier offence raises it.
+// Penalty by store consequence and item price. Each earlier offense raises it.
 export function penaltyFor(
   store: Store,
   price: number,
