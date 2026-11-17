@@ -1,0 +1,27 @@
+<!doctype html><html><head><title>Crowd face bake</title></head><body><script type="module">
+import { acquireFace, acquireIris, readMarks } from '/src/client/avatar/human/faceCanvas.ts';
+import { DEFAULT_LOOK } from '/src/game/look.ts';
+const marks = await fetch('/tmp/crowd-study/marks.json').then(r => r.json());
+const colors = {
+ 'male-a': ['masculine','#d4ac8a','#241710'],
+ 'male-b': ['masculine','#94603f','#171310'],
+ 'male-c': ['masculine','#f3d4c4','#633e22'],
+ 'male-d': ['masculine','#633c29','#171310'],
+ 'male-e': ['masculine','#af7e63','#4c2519'],
+ 'female-a': ['feminine','#e6b48e','#422314'],
+ 'female-b': ['feminine','#c49b72','#201310'],
+ 'female-c': ['feminine','#633c29','#171310'],
+ 'female-d': ['feminine','#f3d4c4','#b47d3d'],
+};
+window.paint = async () => {
+ const out = {};
+ for (const [id,[body,skin,hairColor]] of Object.entries(colors)) {
+  const face = acquireFace({...DEFAULT_LOOK,body,skin,hairColor},readMarks(marks[body]),body==='masculine'?'-m':'');
+  const texture=await face.texture;
+  out[id]=texture.image.toDataURL('image/png').split(',')[1];
+ }
+ out.iris=acquireIris('#6b3f22').image.toDataURL('image/png').split(',')[1];
+ return out;
+};
+document.body.dataset.ready='true';
+</script></body></html>

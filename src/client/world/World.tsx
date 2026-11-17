@@ -60,6 +60,7 @@ import { CompileGate } from "./compileGate.ts";
 import { Photo } from "./Photo.tsx";
 import { Confetti } from "./Confetti.tsx";
 import { CreatorFrame } from "./CreatorFrame.tsx";
+import { DressingStudio } from "../avatar/DressingStudio.tsx";
 import { PetFollower } from "../creatures/PetFollower.tsx";
 import type { PetSave } from "../../game/pet.ts";
 
@@ -590,6 +591,7 @@ const SCENES: Record<Exclude<RoomId, "city">, ComponentType<SceneProps>> = {
 };
 
 export type WorldProps = {
+  dressing: boolean;
   room: RoomId;
   arrival: Spawn;
   look: Look;
@@ -630,6 +632,7 @@ const DevProbe = import.meta.env.DEV
   : null;
 
 export function World({
+  dressing,
   room,
   arrival,
   look,
@@ -770,6 +773,7 @@ export function World({
             <VendingWatch room={room} player={player} />
           </Suspense>
           <PlayerController
+            editing={dressing}
             player={player}
             area={area}
             look={look}
@@ -804,7 +808,7 @@ export function World({
               <DevProbe player={player} area={area} />
             </Suspense>
           )}
-          {!freeCam && (
+          {!dressing && !freeCam && (
             <CameraRig
               player={player}
               view={view}
@@ -812,12 +816,25 @@ export function World({
               body={bodyOf(look)}
             />
           )}
-          <CreatorFrame />
+          {!dressing && <CreatorFrame />}
           <Confetti />
-          {tier === "high" ? <Effects /> : <NeonClamp key={`clamp-${room}`} />}
+          {!dressing &&
+            (tier === "high" ? (
+              <Effects />
+            ) : (
+              <NeonClamp key={`clamp-${room}`} />
+            ))}
           <Warmup key={`warm-${room}`} />
           <LateWarmup key={`late-${room}`} />
         </Suspense>
+        {dressing && (
+          <DressingStudio
+            look={look}
+            body={body}
+            swim={swimFor(def, swim)}
+            view={view}
+          />
+        )}
       </QualityContext.Provider>
     </Canvas>
   );
