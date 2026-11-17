@@ -103,7 +103,7 @@ npm install
 npm run dev               # client at http://localhost:5173
 npm run lint              # ESLint (TypeScript and React hooks rules)
 npm test                  # unit tests (game rules, protocol, server)
-npm run test:coverage     # the same, with a coverage report in coverage/
+npm run test:coverage     # the same, with a coverage report in coverage/ and coverage minimums enforced
 npm run typecheck         # strict TypeScript, including the Worker
 npm run verify            # lint, tests, typecheck, format check, build, perf budget
 npm run test:e2e:client   # Playwright browser tests (slow: software WebGL)
