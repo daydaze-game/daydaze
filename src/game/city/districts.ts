@@ -12,7 +12,7 @@
 //
 // The pack paints with a 32 px palette (4 by 4 swatches, one per role: wall,
 // trim, roof, door, glass...) and every model keeps its UVs into it, so the
-// client swaps palettes per lot (src/client/city/DistrictLots.tsx) and one
+// client swaps palettes per lot and one
 // model wears every district's colors.
 
 import { EL_STATIONS, stairsRect } from "./el.ts";
@@ -98,19 +98,6 @@ export function signBoard(
     h: Math.min(SIGN_HEIGHT, (hi - lo) * sy - 2 * SIGN_MARGIN),
   };
 }
-
-/** Lots farther than this from the player draw their far twin (LOT_SPECS lo),
- * a third to half the triangles. The plan decides when it is cut, not the
- * camera: the twins are separate meshes, filled per plan reload. */
-export const LOT_NEAR = 24;
-
-/** The box behind a block's lots stands this far in from its footprint: the
- * pack sets its upper storeys back by up to half a meter (and the walls sit
- * 0.2 m in), and a box any nearer would hide them. */
-export const LOT_WALL_INSET = 0.8;
-
-/** The most lots of one model in any view; sizes each model's InstancedMesh. */
-export const LOT_CAPACITY = 192;
 
 /** The pack's 16 palette swatches by role (row-major from the top left of
  * its 4 by 4 grid; art/city/district_blocks.py PREVIEW shows where each

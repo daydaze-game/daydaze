@@ -21,7 +21,6 @@ export const WATER_DOOR = {
 
 /** The dive shack on the sand, and where its rental counter's customers stand. */
 export const SHACK = { x: 13.5, z: 8, w: 6, d: 4.2 } as const;
-export const COUNTER: Vec2 = [10, 7.2];
 /** The dive buoy out in the deep: swim into it to go down (with gear). */
 export const DIVE_BUOY: Vec2 = [0, -30];
 export const DIVE_RADIUS = 2.2;

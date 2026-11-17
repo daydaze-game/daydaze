@@ -226,7 +226,7 @@ Clip ids in `mocap.ts` stay stable; add a pack name per clip.
 | Box loungers on the pool deck | `src/client/rooms/waterpark/Deck.tsx` (`loungerFrame`) | Beach diorama parts (CC-BY) or the already-shipped Orange Chaise Lounge (`public/models/beach/`) |
 | Box-built rooms: Haunted EscapeSet, Galleria, Violet Hour decor, Bowling, Rooftop Bar | `src/client/rooms/haunted/EscapeSet.tsx`, `Galleria.tsx`, `violethour/Decor.tsx`, `Bowling.tsx`, `RooftopBar.tsx` | House Interior Pack and Furniture packs |
 | **Done 2026-11-13 (feat/opponents).** Opponents of the two tag games were dolls in a laser vest | `src/client/rooms/LaserTag.tsx` (`Rivals`), `shared/Opponent.tsx`, `src/game/opponents.ts` | Universal Base Characters, clothed per team and holding the Sci-Fi Essentials pistol, on UAL pistol, jog, crouch, hit and death clips (`art/opponents/`) |
-| Repeated identical buildings in the east and west districts | `src/client/city/NycFacades.tsx`, `CityHouses.tsx`, `src/game/city/layout.ts` | Ultimate Textured Building Pack |
+| Repeated identical buildings in the east and west districts (the old `NycFacades` and `CityHouses` renderers were replaced by the dream city) | `src/game/city/layout.ts` | Ultimate Textured Building Pack |
 | Sparse grass on lawns and dunes (the trees are done) | `src/client/city/CityPark.tsx` | Ultimate Stylized Nature grass and flowers |
 | Instant sit and pop-in poses, one jog, foot sliding | `src/game/gaits.ts`, `art/doll/blender/mocap.py` | Mixamo locomotion and seated packs, UAL |
 | No ambient life in parks (no butterflies, no birds beyond gulls and ducks) | `src/client/city/ParkWildlife.tsx` | Butterfly pack, stylized static wildlife |

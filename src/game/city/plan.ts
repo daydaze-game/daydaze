@@ -11,7 +11,6 @@ import {
   CITY_SURFACES,
   PROPS,
   type Building,
-  type BuildingStyle,
   type PropKind,
   type Surface,
 } from "./layout.ts";
@@ -195,33 +194,6 @@ export const TRIANGLES: Record<Kind, number> = {
   steam: 48,
 };
 
-/** Which wall material each building style is built from. */
-const FACADE: Record<BuildingStyle, FacadeKind> = {
-  tower: "concrete",
-  glass: "curtain",
-  billboard: "concrete",
-  storefront: "brick",
-  deck: "concrete",
-  brick: "brick",
-  club: "stucco",
-  warehouse: "siding",
-  velvet: "stucco",
-  gate: "concrete",
-};
-
-export const facadeOf = (style: BuildingStyle): FacadeKind => FACADE[style];
-
-/** Stone trim: floor-line cornices and rooflines on non-nightlife buildings. */
-export const CORNICE_COLOR = "#d8cfbf";
-
-/** Nightlife buildings wear neon (corner tubes, glowing floor bands); the
- * rest of the city is brick, stucco and stone by day. */
-const NEON_STYLES: ReadonlySet<BuildingStyle> = new Set([
-  "club",
-  "velvet",
-  "billboard",
-]);
-export const wearsNeon = (style: BuildingStyle) => NEON_STYLES.has(style);
 // street paint as it is by day (faded yellow and white); lane paint is flat-lit,
 // so laneTint (daylight.ts) tints it down to a violet dusk at night
 const DASH_COLOR = "#e6bf4a";

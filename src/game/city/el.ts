@@ -5,7 +5,6 @@
 // round past the end of the line. Pure: the client draws the trestle and train
 // from these numbers and rides the player along (src/client/city/ElLine.tsx,
 // ElRide.tsx).
-import { hash } from "./hash.ts";
 
 export type ElStation = {
   id: "manila" | "downtown" | "chinatown";
@@ -34,8 +33,6 @@ export const EL_X1 = 430;
 export const EL_SPEED = 18;
 export const EL_DWELL = 14;
 export const EL_TURN_DWELL = 20;
-/** The train is three cars of 12 m; its middle is `x`. */
-export const EL_TRAIN_LENGTH = 36;
 /** Platforms are this long, centered on the station. */
 export const EL_PLATFORM = 44;
 /** The stairs climb this far along the avenue, in meters, to the platform. */
@@ -252,9 +249,6 @@ export function trestleColumns(
   }
   return out.map((x) => Math.round(x * 10) / 10).sort((a, b) => a - b);
 }
-
-/** A small stable wobble per column so a row of them is not a picket fence. */
-export const columnSeed = (x: number) => hash(x, 3);
 
 /** A box of the trestle or a station: its material, center and size. */
 export type ElBox = {

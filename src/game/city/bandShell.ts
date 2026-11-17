@@ -200,9 +200,6 @@ export const BAND: readonly Musician[] = [
   },
 ];
 
-/** The bandleader's place, for the chat. */
-export const BANDLEADER = BAND[0];
-
 /** Folding chairs in two rows at the back of the audience, facing the stage. */
 export const CHAIRS: readonly { at: Vec2; yaw: number }[] = [
   AUDIENCE.z0 + 10.2,

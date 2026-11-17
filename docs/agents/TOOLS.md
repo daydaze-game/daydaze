@@ -70,9 +70,8 @@ threejs-shaders, threejs-3d-generator (Tripo), threejs-audio-generator
 ## Packages and tools added 2026-10-26
 
 - `@three.ez/instanced-mesh` (MIT): InstancedMesh2 with per-instance frustum culling, LOD and sorting: use it for trees, furniture, crowds and facades instead of plain InstancedMesh with `frustumCulled = false`.
-- `three-mesh-bvh` (MIT): BVH-accelerated raycasts/collisions (walking, cars, pets, camera).
 - `@elevenlabs/elevenlabs-js` (dev): offline sound/music generation (`scripts/gen-sounds.mjs`).
 - KTX-Software 4.4.2 in `~/.local/opt/ktx` (`toktx`, `ktx` on PATH via `~/.local/bin`): KTX2/Basis GPU textures, e.g. `npx -y @gltf-transform/cli@4.5.1 etc1s in.glb out.glb` or `uastc`; three needs `KTX2Loader` with the basis transcoder (drei `useGLTF` accepts it).
 - ffmpeg (Homebrew) for audio transcoding.
-- `cloudflare` SDK: npm (devDependency, 7.3.0) and Python (in the uv `.venv`), owner-installed 2026-10-27, for future R2/infra scripts. Any call that creates, uploads, deploys or changes Cloudflare resources needs the owner's explicit approval first.
+- `cloudflare` SDK: Python only (in the uv `.venv`; the npm package was dropped, use `npx cloudflare@7` if needed), owner-installed 2026-10-27, for future R2/infra scripts. Any call that creates, uploads, deploys or changes Cloudflare resources needs the owner's explicit approval first.
 - `scripts/with-env.sh <command>`: runs a command with the .env keys loaded (owner permission rule in .claude/settings.json).

@@ -36,9 +36,6 @@ export function marketFlag(search: string): boolean | null {
 
 /** The lane between the two rows, down the middle of the green. */
 export const LANE_X = (MARKET_GREEN.x0 + MARKET_GREEN.x1) / 2;
-/** Where the customers stand along the lane, north to south. */
-export const LANE_Z0 = MARKET_GREEN.z0;
-export const LANE_Z1 = MARKET_GREEN.z1;
 
 /** The stall model (farm/market-stand.glb, 0.95 x 1.19 m) is drawn this big. */
 export const STALL_SCALE = 2.4;
@@ -232,13 +229,6 @@ export function stallNear(at: Vec2, range = 3.2): MarketStall | null {
   }
   return best;
 }
-
-/** Whether (x, z) is on the market green, `pad` meters out. */
-export const onGreen = (x: number, z: number, pad = 0): boolean =>
-  x > MARKET_GREEN.x0 - pad &&
-  x < MARKET_GREEN.x1 + pad &&
-  z > MARKET_GREEN.z0 - pad &&
-  z < MARKET_GREEN.z1 + pad;
 
 /** What a crate of produce costs at the market: more than the farm stand pays. */
 export const marketPrice = (crop: CropId): number =>

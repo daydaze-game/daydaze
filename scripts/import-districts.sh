@@ -3,7 +3,7 @@
 # Pack (CC0; the owner's download) with art/city/district_blocks.py, then
 # compresses them into public/models/districts/lots.glb (meshopt). Node names
 # and UVs stay: the client finds each lot by name and recolors it by moving
-# the UVs along its own palette atlas (src/client/city/DistrictLots.tsx).
+# the UVs along its own palette atlas (the renderer, DistrictLots.tsx, was replaced by the dream city).
 #   gh release download packs -R dpologdvinity/daydaze-assets -p 'Ultimate_Textured_Building_Pack_-_Dec_2019-20261026T213332Z-1-001.zip' -D /tmp/db-pack
 #   unzip -q /tmp/db-pack/*.zip -d /tmp/db-kit
 #   bash scripts/import-districts.sh

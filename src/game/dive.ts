@@ -74,9 +74,6 @@ export const SPECIES = [
 ] as const;
 export type SpeciesId = (typeof SPECIES)[number]["id"];
 
-export const isSpecies = (v: unknown): v is SpeciesId =>
-  SPECIES.some((s) => s.id === v);
-
 export const speciesLabel = (id: SpeciesId): string =>
   SPECIES.find((s) => s.id === id)?.label ?? id;
 

@@ -339,7 +339,6 @@ export const BARN_POS: Vec2 = [-13, -8];
 export const SILO_POS: Vec2 = [-19, -8];
 export const STAND_POS: Vec2 = [10, 12];
 export const TRACTOR_POS: Vec2 = [14, -8];
-export const SCARECROW_POS: Vec2 = [0, -4];
 
 /** Crop field: 6 plots in two rows of 3. */
 export const PLOTS: readonly { id: number; position: Vec2 }[] = [
