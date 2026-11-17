@@ -9,7 +9,7 @@ the threat model in [docs/security.md](docs/security.md), deployment in
 
 ## The layers
 
-```
+```text
  browser                                              Cloudflare
 ┌──────────────────────────────────────────────┐    ┌──────────────────────────┐
 │ src/client   React + R3F: scenes, HUD, input │    │ server/src/worker        │
