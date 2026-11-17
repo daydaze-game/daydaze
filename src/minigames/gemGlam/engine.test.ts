@@ -53,7 +53,7 @@ test("the same seed deals the same board", () => {
 test("an illegal swap changes nothing and costs no move", () => {
   const g = newGame("easy", 4);
   const before = JSON.stringify(g.board);
-  assert.equal(play(g, [0, 0], [2, 2]), null); // not neighbours
+  assert.equal(play(g, [0, 0], [2, 2]), null); // not neighbors
   assert.equal(g.moves, MOVES.easy);
   assert.equal(JSON.stringify(g.board), before);
 });

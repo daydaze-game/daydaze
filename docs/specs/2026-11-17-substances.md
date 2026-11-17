@@ -50,8 +50,10 @@ substances; research it so it's accurate"). Research with sources:
 - `src/game/dance/idlePlan.ts` `bodyIdle()` picks loop or tic from `BODY`.
   `pickClip` takes the doll's `body`, and `HumanDoll` passes it for the
   player's doll only (peers: issue #8).
-- `src/client/effects/DrunkPost.tsx` is the one post pass; each substance adds
-  its uniforms there.
+- `src/client/effects/DrunkPost.tsx` holds the post passes; each substance adds
+  its uniforms to `DrunkEffect`. Acid also adds `TracerEffect`: it keeps two
+  ping-ponged history targets (`max(current, old * 0.86)`) and draws one extra
+  fullscreen quad only while acid is felt (high tier only).
 
 ## The plan, one worktree each (merge, delete, then the next)
 
@@ -59,8 +61,8 @@ substances; research it so it's accurate"). Research with sources:
 | --- | --- | --- |
 | 1 | `substance-model` | The model above; weed (joint, edible) and mushroom tea retuned to the research; the drugs gate |
 | 2 | `alcohol` | Done: the buzz is blood alcohol (`game/effects/buzz.ts`). A drink absorbs over 35-50 real minutes (a fizzy cocktail fastest, a neat shot slowest, slower and lower after food). The liver clears a steady 0.015% an hour, and water doesn't speed it up. Each effect starts at its researched BAC: warm colors at once, the view's sway (nystagmus) from 0.06, body sway from 0.08, slurred chat from 0.10, double vision from 0.12. The body goes tipsy, then drunk, then sloppy, and a hangover (glare, yawns) follows a night past 0.08; water eases it. Alcohol's clock is linear (the liver works by the hour), matched to the shared curve at 90 minutes (×18). Drunk idle/walk clips need Mixamo (owner). |
-| 3 | `acid` | LSD tab: come-up yawns, then energetic and exploring; sharper, faster geometry and trails than mushrooms; 15.5 min |
-| 4 | `molly` | MDMA: gurning (jaw morph), dancing and swaying, rubbing arms, sweating and thirst; glowing neons, big pupils; comedown low |
+| 3 | `acid` | Done: LSD tab (`tab`, ~100 µg, 15.5 min of play, the longest). Come-up yawns, then an energetic, exploring peak (an idle rate above 1), then a wired-but-tired tail. The screen gets radiant color (saturation plus a little contrast), mushrooms' breathing and hue drift at lower depth, faint six-fold hue bands round the edge (`geometry`) and afterimage `tracer`s. Reduced motion keeps the color and drops the bands, breathing and tracers. Acid's tinny, echoing sound is an open audio issue. |
+| 4 | `molly` | Done: MDMA pill (`pill`, 80-120 mg, 10 min of play). Tingly come-up, a dancing, swaying peak (idle rate 1.1, dance clips as tics), a low tired tail. The screen gets neon glow and radiance, mild tracers (below acid's) and a tiny ~1 Hz eye `wiggle` (nystagmus); no geometry, since it is not a psychedelic. Her own doll opens her eyes wide and smiles (the `smile` key). Reduced motion keeps the color and drops tracers and wiggle. Gurning and big pupils need new doll assets (tracked in a GitHub issue), as do hugging, rubbing arms and shivering clips. Sweating, thirst and heat belong to row 8. |
 | 5 | `cocaine` | A bump: sniffing and nose-rubbing, fidgeting, upright, fast talk; no visual distortion beyond pupils; crash and craving |
 | 6 | `ketamine` | Wobbly, high-stepping walk, blank stare, slow; double/choppy vision, room stretching; a strong dose is a k-hole (sit or lie, can't move) |
 | 7 | `nitrous` | A balloon: seconds to peak, sudden sway so she sits, slack face, then a laugh; wah-wah phaser sound, muffled audio, tunnel blur |

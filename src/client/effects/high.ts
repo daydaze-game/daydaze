@@ -9,10 +9,11 @@ import {
   type Taken,
 } from "../../game/effects/substances.ts";
 
-// The local player's doses (a joint, an edible, mushroom tea) and the meters
-// they make, in memory like the buzz: a reload sobers the doll up. Drugs
-// exist only on 18+ servers, so at 13+ a dose does nothing. The curves and
-// the body language are in game/effects/substances.ts.
+// The local player's doses (a joint, an edible, mushroom tea, an LSD tab, a
+// molly pill) and the meters they make, in memory like the buzz: a reload
+// sobers the doll up. Drugs exist only on 18+ servers, so at 13+ a dose does
+// nothing. The curves and the body language are in
+// game/effects/substances.ts.
 const taken: Taken[] = [];
 /** Seconds of play: doses are timed on it, so a hidden tab doesn't age them. */
 let clock = 0;
@@ -23,7 +24,16 @@ const changed = () => {
 };
 
 /** This frame's screen look, rewritten by DrunkState. */
-export const liveHigh: HighLook = { glow: 0, hue: 0, breathe: 0, drift: 1 };
+export const liveHigh: HighLook = {
+  glow: 0,
+  hue: 0,
+  breathe: 0,
+  drift: 1,
+  radiance: 0,
+  geometry: 0,
+  tracer: 0,
+  wiggle: 0,
+};
 
 /** The live meters, refreshed once a frame by `ageHigh`. Read only: the doll
  * reads them every frame, so this is the object itself, not a copy. */

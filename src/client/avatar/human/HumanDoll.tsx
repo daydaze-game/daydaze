@@ -107,6 +107,8 @@ import { HearingAids } from "./HearingAids.tsx";
 
 const MODELS = "/models/doll";
 const REST_LID = 0.04;
+// Molly opens the rest of the upper lid at full effect, stopping at neutral.
+const MOLLY_LID = REST_LID;
 
 // the baked clips come in their own file (a big one), fetched once the first
 // room shows, so they don't share the bandwidth it loads over; dolls wear
@@ -1023,6 +1025,8 @@ export function HumanDoll({
   const gaze = useMemo(() => ({ kept: new THREE.Quaternion(), on: false }), []);
   const lidShown = useRef(-1);
   const lidMeshes = useRef<THREE.Mesh[] | null>(null);
+  const smileShown = useRef(-1);
+  const smileMeshes = useRef<THREE.Mesh[] | null>(null);
   // a far doll's skeleton updates every third frame (thinned): the time owed
   const owed = useRef({ dt: 0, tick: 0 });
   const track = useMemo(() => {
@@ -1341,17 +1345,28 @@ export function HumanDoll({
         0,
       );
     }
-    // blink and a faint smile, on every mesh that carries the keys
+    // blink and molly's wide smile, on every mesh that carries the keys
     const tm = state.clock.elapsedTime;
     const closed = tm > blinkAt.current && tm < blinkAt.current + 0.14;
     // open eyes rest with the upper lid a little lowered, not wide and staring
     // only when it changes (or new meshes mount): a dictionary lookup per
     // worn mesh per doll per frame adds up in a crowd
-    const lid = closed ? 1 : REST_LID;
+    // molly (her own doll only; peers: issue #8) opens the eyes wide, in
+    // fiftieths so the morphs change a few times a second, not every frame
+    const molly = own ? Math.round(getMeters().molly.level * 50) / 50 : 0;
+    const lid = closed ? 1 : REST_LID - molly * MOLLY_LID;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;
       setMorph(wornList.current, "blink", lid);
+    }
+    if (
+      smileShown.current !== molly ||
+      smileMeshes.current !== wornList.current
+    ) {
+      smileShown.current = molly;
+      smileMeshes.current = wornList.current;
+      setMorph(wornList.current, "smile", Math.min(1, molly * 1.5));
     }
     // face and body shape change rarely: set them only when they, or the
     // worn meshes (parts mount later), change, never every frame

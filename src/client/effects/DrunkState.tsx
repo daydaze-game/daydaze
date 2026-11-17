@@ -7,7 +7,12 @@ import {
   visualParams,
   type Intensity,
 } from "../../game/effects/buzz.ts";
-import { highParams, strongest } from "../../game/effects/substances.ts";
+import {
+  highParams,
+  strongest,
+  SUBSTANCES,
+  type Substance,
+} from "../../game/effects/substances.ts";
 import {
   ageHigh,
   dosesOnboard,
@@ -37,7 +42,15 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
 
   useEffect(() => onBuzzChange(() => invalidate()), [invalidate]);
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
-  const shownHigh = useRef({ high: -1, trip: -1, under: "", doses: -1 });
+  // what the canvas attributes last showed: each meter at two decimals
+  const shownHigh = useRef({
+    levels: { high: -1, trip: -1, acid: -1, molly: -1 } satisfies Record<
+      Substance,
+      number
+    >,
+    under: "",
+    doses: -1,
+  });
 
   useFrame((_, dt) => {
     ageBuzz(dt);
@@ -56,22 +69,28 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
     liveHigh.hue = lifted.hue;
     liveHigh.breathe = lifted.breathe;
     liveHigh.drift = lifted.drift;
+    liveHigh.radiance = lifted.radiance;
+    liveHigh.geometry = lifted.geometry;
+    liveHigh.tracer = lifted.tracer;
+    liveHigh.wiggle = lifted.wiggle;
     // read by tests: two decimals, so the canvas attributes change a few
     // times a second; `under` is the substance her body shows ("" sober)
-    const h = Math.round(meters.high.level * 100) / 100;
-    const t = Math.round(meters.trip.level * 100) / 100;
+    const was = shownHigh.current;
     const under = strongest(meters) ?? "";
     const doses = dosesOnboard();
-    const was = shownHigh.current;
-    if (
-      h !== was.high ||
-      t !== was.trip ||
-      under !== was.under ||
-      doses !== was.doses
-    ) {
-      shownHigh.current = { high: h, trip: t, under, doses };
-      gl.domElement.dataset.high = h.toFixed(2);
-      gl.domElement.dataset.trip = t.toFixed(2);
+    let dirty = under !== was.under || doses !== was.doses;
+    for (const sub of SUBSTANCES) {
+      const level = Math.round(meters[sub].level * 100) / 100;
+      if (level !== was.levels[sub]) {
+        was.levels[sub] = level;
+        dirty = true;
+      }
+    }
+    if (dirty) {
+      was.under = under;
+      was.doses = doses;
+      for (const sub of SUBSTANCES)
+        gl.domElement.dataset[sub] = was.levels[sub].toFixed(2);
       gl.domElement.dataset.under = under;
       gl.domElement.dataset.doses = String(doses);
     }

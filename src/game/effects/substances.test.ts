@@ -143,6 +143,7 @@ test("the trip breathes and cycles color; reduced motion keeps only color", () =
   const full = highParams(m, 1, false);
   assert.equal(full.breathe, BREATHE_AMOUNT);
   assert.equal(full.hue, 1);
+  assert.equal(full.geometry, 0);
   const calm = highParams(m, 1, true);
   assert.equal(calm.breathe, 0);
   assert.equal(calm.hue, 1);
@@ -153,5 +154,119 @@ test("the trip breathes and cycles color; reduced motion keeps only color", () =
     hue: 0,
     breathe: 0,
     drift: 1,
+    radiance: 0,
+    geometry: 0,
+    tracer: 0,
+    wiggle: 0,
   });
+});
+
+test("a tab's timeline sits in the research ranges and outlasts every dose", () => {
+  const t = DOSES.tab;
+  assert.equal(t.substance, "acid");
+  // onset 15-60 min, peak reached within 90 min, 8-12 h in all
+  assert.ok(t.onset >= 15 && t.onset <= 60);
+  assert.ok(t.peak <= 90);
+  assert.ok(t.end >= 480 && t.end <= 720);
+  for (const [id, p] of Object.entries(DOSES))
+    if (id !== "tab") assert.ok(t.end > p.end, id);
+});
+
+test("acid is energetic where mushrooms are heavy", () => {
+  assert.ok(BODY.acid.comeup.tics.includes("yawn"));
+  assert.ok(BODY.acid.peak.rate > 1);
+  for (const s of ["high", "trip"] as const)
+    for (const [phase, body] of Object.entries(BODY[s]))
+      assert.ok(BODY.acid.peak.rate > body.rate, `${s} ${phase}`);
+});
+
+test("a tab raises acid and leaves the trip alone", () => {
+  const peak = gameSeconds(DOSES.tab.peak + 1);
+  const m = readMeters([{ dose: "tab", at: 0 }], peak, soberMeters());
+  assert.equal(m.acid.level, DOSES.tab.strength);
+  assert.equal(m.acid.phase, "peak");
+  assert.equal(m.trip.level, 0);
+  assert.equal(strongest(m), "acid");
+});
+
+test("acid is radiant, geometric and leaves tracers; calm keeps only color", () => {
+  const m = soberMeters();
+  m.acid = { level: 0.65, phase: "peak" };
+  const full = highParams(m, 1, false);
+  assert.ok(full.radiance > 0 && full.geometry > 0 && full.tracer > 0);
+  assert.ok(full.tracer < full.geometry);
+  assert.ok(full.hue > 0 && full.breathe > 0 && full.glow > 0);
+  const calm = highParams(m, 1, true);
+  assert.equal(calm.radiance, full.radiance);
+  assert.equal(calm.geometry, 0);
+  assert.equal(calm.tracer, 0);
+  assert.equal(calm.breathe, 0);
+  assert.ok(calm.hue > 0);
+  // every field stays in its range even at the cap
+  m.acid.level = 1;
+  m.trip.level = 1;
+  const top = highParams(m, 1, false);
+  for (const v of [top.glow, top.hue, top.radiance, top.geometry, top.tracer])
+    assert.ok(v >= 0 && v <= 1);
+});
+
+test("a pill's timeline sits in the research ranges and the tab outlasts it", () => {
+  const p = DOSES.pill;
+  assert.equal(p.substance, "molly");
+  // felt in 30-45 min, up over 15-30 more, 3-6 h in all
+  assert.ok(p.onset >= 20 && p.onset <= 60);
+  assert.ok(p.peak - p.onset >= 15 && p.peak - p.onset <= 30);
+  assert.ok(p.end >= 180 && p.end <= 360);
+  assert.ok(DOSES.tab.end > p.end);
+});
+
+test("molly is for dancing, with a tic to start", () => {
+  assert.ok(BODY.molly.peak.rate > 1);
+  assert.ok(BODY.molly.comeup.tics.length > 0);
+});
+
+test("a pill raises molly, leaves acid and the trip alone, and two add up", () => {
+  const peak = gameSeconds(DOSES.pill.peak + 1);
+  const m = readMeters([{ dose: "pill", at: 0 }], peak, soberMeters());
+  assert.equal(m.molly.level, DOSES.pill.strength);
+  assert.equal(m.molly.phase, "peak");
+  assert.equal(m.acid.level, 0);
+  assert.equal(m.trip.level, 0);
+  assert.equal(strongest(m), "molly");
+  const two = readMeters(
+    [
+      { dose: "pill", at: 0 },
+      { dose: "pill", at: 0 },
+    ],
+    peak,
+    soberMeters(),
+  );
+  assert.equal(two.molly.level, 1);
+});
+
+test("molly glows, leaves faint tracers and wiggles the eyes; no geometry", () => {
+  const m = soberMeters();
+  m.molly = { level: 0.6, phase: "peak" };
+  const full = highParams(m, 1, false);
+  assert.ok(full.glow > 0 && full.radiance > 0);
+  assert.ok(full.tracer > 0 && full.wiggle > 0);
+  assert.equal(full.geometry, 0);
+  const acid = soberMeters();
+  acid.acid = { level: 0.6, phase: "peak" };
+  assert.ok(full.tracer < highParams(acid, 1, false).tracer);
+  // reduced motion drops the movement and keeps the color
+  const calm = highParams(m, 1, true);
+  assert.equal(calm.wiggle, 0);
+  assert.equal(calm.tracer, 0);
+  assert.equal(calm.radiance, full.radiance);
+  assert.ok(calm.glow > 0);
+  // intensity off shows nothing
+  const off = highParams(m, 0, false);
+  assert.equal(off.glow + off.radiance + off.tracer + off.wiggle, 0);
+  // everything stays in range at the cap
+  m.molly.level = 1;
+  m.acid.level = 1;
+  const top = highParams(m, 1, false);
+  for (const v of [top.glow, top.radiance, top.tracer, top.wiggle])
+    assert.ok(v >= 0 && v <= 1);
 });

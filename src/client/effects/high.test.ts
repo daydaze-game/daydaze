@@ -29,3 +29,39 @@ test("at 18+ a joint lands after its onset and wears off", () => {
     setActiveTier("teen"); // tests share one process
   }
 });
+
+test("a tab does nothing at 13+; at 18+ it reads acid at its peak", () => {
+  setActiveTier("teen");
+  assert.equal(take("tab"), false);
+  setActiveTier("adult");
+  try {
+    assert.equal(take("tab"), true);
+    ageHigh(gameSeconds(DOSES.tab.peak));
+    assert.equal(getMeters().acid.level, DOSES.tab.strength);
+    assert.equal(getMeters().acid.phase, "peak");
+    assert.equal(getMeters().trip.level, 0);
+    ageHigh(gameSeconds(DOSES.tab.end));
+    assert.equal(getMeters().acid.level, 0);
+    assert.equal(dosesOnboard(), 0);
+  } finally {
+    setActiveTier("teen");
+  }
+});
+
+test("a pill does nothing at 13+; at 18+ it reads molly at its peak", () => {
+  setActiveTier("teen");
+  assert.equal(take("pill"), false);
+  setActiveTier("adult");
+  try {
+    assert.equal(take("pill"), true);
+    ageHigh(gameSeconds(DOSES.pill.peak + 1));
+    assert.equal(getMeters().molly.level, DOSES.pill.strength);
+    assert.equal(getMeters().molly.phase, "peak");
+    assert.equal(getMeters().acid.level, 0);
+    ageHigh(gameSeconds(DOSES.pill.end));
+    assert.equal(getMeters().molly.level, 0);
+    assert.equal(dosesOnboard(), 0);
+  } finally {
+    setActiveTier("teen");
+  }
+});
