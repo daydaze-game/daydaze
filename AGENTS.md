@@ -68,6 +68,12 @@ hour), `?night=<club-night-id>`, `?online=1` (multiplayer), `?adult=1`
 tenth, so a frame strip on the slow software renderer catches a half-second
 move; the `walkStrip` shots in `scripts/screenshots.ts` use it).
 
+In development, `` ` `` opens the dev panel (stats, wireframe, free cam,
+room/game/event jumps, a live hour, inspector, scene tree) and `__dd` in the
+console holds the scene, renderer and player; every control, handle and URL
+flag is in `docs/dev-tools.md`. It is dev-only: keep its call sites behind
+`import.meta.env.DEV` dynamic imports so production never ships it.
+
 ## Online
 
 `?online=1` joins rooms through `src/net/client/OnlineSession.ts`; without it,

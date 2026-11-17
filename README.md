@@ -71,6 +71,10 @@ next up is [`docs/plans/2026-11-14-next.md`](docs/plans/2026-11-14-next.md).
 - [docs/deploy.md](docs/deploy.md): deploying the Worker.
 - [CONTRIBUTING.md](CONTRIBUTING.md): local workflow, checks, commit and
   pull request conventions.
+- [docs/dev-tools.md](docs/dev-tools.md): the in-game dev panel (press
+  `` ` `` in `npm run dev`), console handles and every URL flag.
+- [CHANGELOG.md](CHANGELOG.md): what changed, newest first.
+- [docs/README.md](docs/README.md): an index of everything under `docs/`.
 - `docs/specs/`: design specs.
 - [docs/agents/](docs/agents/README.md): how the game is built with
   parallel AI coding agents (workflow, agent brief, merge scripts, the
@@ -78,11 +82,17 @@ next up is [`docs/plans/2026-11-14-next.md`](docs/plans/2026-11-14-next.md).
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull
-request to `main`: install (cached), lint, format and type checks, unit
-tests with coverage, and the production build; a `v*` tag drafts a release.
-The slow browser suites (`playwright.yml`) and the Cloudflare deploy
-(`deploy.yml`, owner-approved) run by hand.
+GitHub Actions, in `.github/workflows/`:
+
+| Workflow | When | What |
+| --- | --- | --- |
+| `ci.yml` | push and pull request to `main`, `v*` tags | install (cached), lint, format and type checks, unit tests with coverage, the production build and perf budget; a tag drafts a release |
+| `playwright.yml` | push and pull request to `main`, by hand | `npm run verify`, then the client browser tests in four shards and the minigames suite |
+| `verify.yml` | push to `feat/**`, `fix/**`, `perf/**`, `ci/**` | `npm run verify`, so branches are checked before they merge |
+| `browser-test.yml` | by hand, `-f grep="<title>"` | the Playwright tests whose titles match |
+| `screenshots.yml` | by hand, `-f shots="<names>"` | screenshots as a downloadable artifact |
+| `profile.yml` | push to `perf/smooth`, by hand | a performance profile |
+| `deploy.yml` | by hand, owner-approved | the Cloudflare deploy |
 
 ## Develop
 
@@ -102,10 +112,14 @@ npm run test:e2e:sw       # the service worker on a production build
 npm run smoke:server      # the server end to end
 ```
 
+In development, press `` ` `` for the dev panel: FPS and draw calls,
+wireframe, a free camera, jumps to any room, game or event, a live clock, an
+object inspector and more. See [docs/dev-tools.md](docs/dev-tools.md).
+
 URL flags: `?quality=low|high` forces a quality tier, `?still=1` renders a
 few frames and stops (for screenshots), `?debug=1` shows room jump buttons,
 `?online=1` turns on online play, `?timescale=0.1` slows game time for frame
-strips.
+strips. The full list is in [docs/dev-tools.md](docs/dev-tools.md#url-flags).
 
 ### Online locally
 

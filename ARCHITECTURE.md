@@ -104,6 +104,18 @@ floors, looks, saves, chat effects) so both sides agree on the rules.
 Quality tiers (`world/quality.ts`, `?quality=low|high`) keep the low tier
 under 250 draw calls, 300k triangles and 4 real lights.
 
+Dev tools (`world/DevTools.tsx`, `world/dev/`): an in-game panel (press
+`` ` ``) for development only. `App.tsx` and `World.tsx` load its two
+halves with a dynamic `import()` behind `import.meta.env.DEV`, so production
+builds leave it out. `DevPanel` is DOM, outside the Canvas; `DevProbe` runs
+inside it (stats from `gl.info`, the view switches, picking). A small module
+store (`dev/store.ts`) carries state between the two React roots and
+remembers the panel's layout in `localStorage`. The game exposes a few
+dev-only hooks the panel calls: `setDevHour` (`city/daylight.ts`),
+`devStartEvent` and `devStartNight` (`city/eventClocks.ts`),
+`devStartDanceOff` and a WebSocket frame log (`net/devNetLog.ts`). Usage is
+in [docs/dev-tools.md](docs/dev-tools.md).
+
 The far city (`game/city/far.ts`, `client/city/FarCity.tsx`): every building
 the streamed plan does not draw (past the loaded cells, or infill past its
 range) is a `plan.far` box, drawn as one instanced mesh whose shader adds
