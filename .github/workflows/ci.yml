@@ -52,6 +52,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Dead code (Knip)
+        run: npm run lint:dead
       - name: File headers
         run: npm run lint:headers
       - name: Layer rules (dependency-cruiser)
