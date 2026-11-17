@@ -276,7 +276,10 @@ update prompt (`src/client/ui/UpdatePrompt.tsx`), then deletes the old cache.
   preloads, gzipped) passes 600 KB, and prints `dist/` by asset class; CI runs
   it after the build.
 - `npm run test:coverage`: the unit tests with a coverage report
-  (`coverage/lcov.info`, `coverage/summary.txt`).
+  (`coverage/lcov.info`, `coverage/summary.txt`). It fails below the coverage
+  minimums: Node's threshold flags for the whole project, and
+  `scripts/check-coverage.ts` for `src/game/` and `src/net/` (see
+  CONTRIBUTING.md).
 - `npm run verify`: lint, tests, typecheck, format check and build; the
   merge gate, and what CI (`.github/workflows/ci.yml`) runs on every push
   and pull request to `main`.
