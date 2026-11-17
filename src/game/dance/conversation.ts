@@ -113,7 +113,7 @@ const REACT_PERCENT = 70;
 
 const hash = (...n: number[]): number => n.reduce((h, x) => mix(h, x), 0x1234);
 const pick = <T>(pool: readonly T[], h: number): T =>
-  pool[(h >>> 8) % pool.length] as T;
+  pool[(h >>> 8) % pool.length];
 
 type Turn = { start: number; end: number; speaker: number };
 

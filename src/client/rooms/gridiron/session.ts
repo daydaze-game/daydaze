@@ -9,7 +9,6 @@ import {
   scoreKick,
   seriesOver,
   type KickResult,
-  type Series,
 } from "../../../game/fieldGoal.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -20,7 +19,7 @@ export type Phase = "off" | "aim" | "power" | "flying" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  series: NEW_SERIES as Series,
+  series: NEW_SERIES,
   since: 0,
   aim: 0,
   kick: null as KickResult | null,

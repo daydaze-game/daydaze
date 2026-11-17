@@ -8,7 +8,6 @@ import {
   rest,
   slide,
   weightAt,
-  type End,
 } from "../../../game/curling.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -18,7 +17,7 @@ export type Phase = "off" | "aim" | "weight" | "sliding" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  end: newEnd() as End,
+  end: newEnd(),
   /** performance.now() the phase began. */
   since: 0,
   aim: 0,

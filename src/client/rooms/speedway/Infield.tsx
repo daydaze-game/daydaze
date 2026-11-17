@@ -27,7 +27,7 @@ function InfieldBillboard({
     sponsorBannerPaint(sponsor),
   );
   return (
-    <group position={pos as [number, number, number]} rotation-y={rot}>
+    <group position={pos} rotation-y={rot}>
       <primitive
         object={model.clone(true)}
         scale={[3, 3, 3]}

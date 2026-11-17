@@ -127,7 +127,7 @@ export function Creature({
   const sway = useRef<THREE.Group>(null);
   const pose = useRef(newPose());
   const state = useRef({
-    clip: "" as string,
+    clip: "",
     owed: 0,
     frame: 0,
     t: 0,

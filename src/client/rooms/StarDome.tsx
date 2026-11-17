@@ -127,7 +127,7 @@ export function StarDome({
   );
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    skyMat.uniforms.uTime!.value = t;
+    skyMat.uniforms.uTime.value = t;
     const s = streak.current;
     if (!s) return;
     // reduced motion: no streaks, they are the one fast thing in the sky

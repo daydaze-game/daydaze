@@ -48,6 +48,28 @@ export default defineConfig(
     },
   },
   {
+    // Type-aware rules: the project service finds each file's tsconfig
+    // (server/src/worker is typed through server/tsconfig.json).
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-unnecessary-type-assertion": "error",
+      "@typescript-eslint/no-unnecessary-type-conversion": "error",
+    },
+  },
+  {
+    // node:test's test() and describe() return promises by design.
+    files: ["**/*.test.ts"],
+    rules: { "@typescript-eslint/no-floating-promises": "off" },
+  },
+  {
     files: ["src/**/*.{ts,tsx}"],
     plugins: { "react-hooks": reactHooks },
     rules: {

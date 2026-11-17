@@ -234,14 +234,14 @@ vMapUv = (mapTransform * vec3(uv * aUv.zw + aUv.xy, 1.0)).xy;
     return mesh;
   }, []);
   useEffect(() => {
-    (shade.material as THREE.MeshBasicMaterial).opacity = 0.5 * day.sun;
+    shade.material.opacity = 0.5 * day.sun;
     shade.position.z = shadeOffset(day.sunDirection);
   }, [shade, day]);
   useEffect(
     () => () => {
       for (const mesh of [wear, shade]) {
         mesh.geometry.dispose();
-        const material = mesh.material as THREE.MeshBasicMaterial;
+        const material = mesh.material;
         material.map?.dispose();
         material.dispose();
       }

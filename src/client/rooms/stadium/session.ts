@@ -7,7 +7,6 @@ import {
   scoreKick,
   shootoutOver,
   type KickResult,
-  type Shootout,
 } from "../../../game/penalty.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -22,7 +21,7 @@ export type Phase = "off" | "aim" | "power" | "flying" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  game: NEW_SHOOTOUT as Shootout,
+  game: NEW_SHOOTOUT,
   /** The keeper's seed for this shootout. */
   seed: 1,
   since: 0,

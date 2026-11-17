@@ -10,7 +10,6 @@ import {
   tripKg,
   tripOver,
   type Catch,
-  type Trip,
 } from "../../../game/fishing.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -29,7 +28,7 @@ const SHOW = 2.4;
 
 const OFF = {
   phase: "off" as Phase,
-  trip: NEW_TRIP as Trip,
+  trip: NEW_TRIP,
   /** performance.now() the current phase started. */
   since: 0,
   power: 0,
