@@ -1,5 +1,5 @@
 // The low tier's whole streamed city against the render budget: the plan
-// with the bays the low tier really draws, plus the street trees, the
+// with the architecture the low tier really draws, plus the street trees, the
 // furniture and the park's undergrowth, each costed from its shipped GLB.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -8,6 +8,8 @@ import { CHAT_GROUPS, nearestChatGroups } from "./chatGroups.ts";
 import { CHAT_DOLLS, CHAT_RADIUS } from "./tuning.ts";
 import { CITY_SPAWN } from "./layout.ts";
 import { HOUSE_MODELS, HOUSE_MODEL_TRIANGLES } from "./nyc.ts";
+import { DREAM_KINDS } from "./dream.ts";
+import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
 import { QUEUE_LOOKS, QUEUE_PERSON_TRIS } from "./queues.ts";
 import {
   BAYS_CAMERA,
@@ -17,6 +19,7 @@ import {
   MODEL_COST,
   modelsInBudget,
   NPC_DOLL_TRIS,
+  planView,
   SEASON_MODEL,
   trafficCost,
 } from "./budget.ts";
@@ -25,6 +28,7 @@ import type { Vec2 } from "../walk.ts";
 
 type Gltf = {
   meshes: {
+    name?: string;
     primitives: { indices?: number; attributes: { POSITION: number } }[];
   }[];
   accessors: { count: number }[];
@@ -38,7 +42,7 @@ const isGltf = (v: unknown): v is Gltf =>
   Array.isArray(v.accessors);
 
 /** Triangles and primitives in a GLB, read from its JSON chunk. */
-function glbCost(path: string): { tris: number; parts: number } {
+function glbCost(path: string, name?: string): { tris: number; parts: number } {
   const bytes = readFileSync(
     new URL(`../../../public/models/${path}.glb`, import.meta.url),
   );
@@ -47,18 +51,32 @@ function glbCost(path: string): { tris: number; parts: number } {
   assert.ok(isGltf(gltf), path);
   let tris = 0;
   let parts = 0;
-  for (const mesh of gltf.meshes)
+  for (const mesh of gltf.meshes) {
+    if (name && mesh.name !== name) continue;
     for (const p of mesh.primitives) {
       parts += 1;
       const n = gltf.accessors[p.indices ?? p.attributes.POSITION]?.count ?? 0;
       tris += n / 3;
     }
+  }
   return { tris: Math.round(tris), parts };
 }
 
 test("the budget's model costs match the shipped GLBs", () => {
   for (const path of modelsInBudget())
     assert.deepEqual(MODEL_COST[path], glbCost(path), path);
+});
+
+test("every dream family and its distant twin match generated costs and one draw call", () => {
+  for (const kind of DREAM_KINDS)
+    for (const far of [false, true]) {
+      const name = `${kind}${far ? "-lo" : ""}`;
+      assert.deepEqual(
+        glbCost("city-dream/architecture", name),
+        { tris: DREAM_MODEL_COST[kind][far ? "lo" : "tris"], parts: 1 },
+        name,
+      );
+    }
 });
 
 test("each house model's triangle count matches the shipped GLB", () => {
@@ -80,7 +98,7 @@ test("the queue people are one part each and no dearer than the budget says", ()
   }
 });
 
-test("wherever she stands, the low tier's city (bays, trees, furniture, park) fits 250 draw calls and 300k triangles", () => {
+test("wherever she stands, the low tier's city (architecture, trees, furniture, park) fits 250 draw calls and 300k triangles", () => {
   let worst = { tris: 0, at: [0, 0] as Vec2 };
   for (let x = -432; x <= 432; x += 32)
     for (let z = -320; z <= 368; z += 32) {
@@ -98,7 +116,7 @@ test("wherever she stands, the low tier's city (bays, trees, furniture, park) fi
   assert.ok(worst.tris < 300_000, `${worst.tris} triangles at ${worst.at}`);
 });
 
-test("pulled out to the overview, the low tier draws the infill and yards out to the whole view and still fits", () => {
+test("pulled out to the overview, the low tier draws distant architecture and yards and still fits", () => {
   let worst = { tris: 0, at: [0, 0] as Vec2 };
   for (let x = -432; x <= 432; x += 48)
     for (let z = -320; z <= 368; z += 48) {
@@ -108,7 +126,7 @@ test("pulled out to the overview, the low tier draws the infill and yards out to
       if (cost.triangles > worst.tris) worst = { tris: cost.triangles, at };
     }
   assert.ok(worst.tris < 300_000, `${worst.tris} triangles at ${worst.at}`);
-  // and the infill really shows out there: more of it than the near view has
+  // Sculpted architecture remains present in the overview without legacy bays.
   const at = CITY_SPAWN.position;
   assert.ok(
     lowTierCost(at, false).planTriangles > 0 &&
@@ -116,11 +134,23 @@ test("pulled out to the overview, the low tier draws the infill and yards out to
   );
 });
 
-test("the low tier's cost counts the bays it draws", () => {
+test("the low tier's cost counts its dream architecture", () => {
   const at = CITY_SPAWN.position;
   const cost = lowTierCost(at);
-  assert.ok(cost.bays > 0, "the spawn is near New York blocks");
+  assert.equal(cost.bays, 0);
+  assert.equal(cost.lots, 0);
+  assert.ok(cost.parts.dream! > 0);
   assert.ok(cost.triangles > cost.planTriangles);
+});
+
+test("overview prices all architecture around the player for its distant camera", () => {
+  const at = CITY_SPAWN.position;
+  const plan = planView(at, "low", false);
+  const all = plan.dream.reduce(
+    (n, s) => n + DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
+    0,
+  );
+  assert.equal(lowTierCost(at, false).parts.dream, all);
 });
 
 test("the bays come in as the camera nears her and go as it pulls out to the overview, without flicker between", () => {
@@ -172,7 +202,8 @@ test("the park's zoomed-out view prices its walkers, wildlife and dogs, and stil
     assert.ok(priced.includes(model), `${model} is priced`);
   const cost = lowTierCost(at);
   assert.ok(
-    cost.triangles >= cost.planTriangles + live.triangles,
+    cost.triangles >=
+      (cost.parts.plan ?? 0) + (cost.parts.dream ?? 0) + live.triangles,
     "the total includes the live people and animals",
   );
   assert.ok(cost.triangles < 295_000, `${cost.triangles} triangles`);

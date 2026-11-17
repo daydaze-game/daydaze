@@ -61,6 +61,19 @@ Two throwaway prototypes of the same neon lounge were compared: 3D in the style 
 - Minigames may stay as 2D overlays launched from the 3D world.
 - The network protocol moves from 2D `x, y, heading` to a 3D position and rotation.
 
+## World scenery (decided 2026-11-14)
+
+The city is another world: alluring, glamorous and fantastical, with a sense
+of discovery from the first arrival view. Ordinary interchangeable apartment
+blocks, Sims-like suburbia and toy-like Roblox scenery miss the target.
+Every street needs its own recognizable composition of architecture, heights,
+rooflines, greenery and focal points. Color changes and shop signs alone are
+not enough. Use high-quality 3D scenery and retain distinct silhouettes in the
+distant skyline. The owner permits customizing free downloaded assets,
+searching for more, and creating bespoke scenery in Blender; search existing
+free assets first. The initial art direction is a celestial garden city (see
+`docs/specs/2026-11-14-dream-city.md`).
+
 ## What came from Club Lion
 
 - `src/net/`: the network protocol and room server, with tests.

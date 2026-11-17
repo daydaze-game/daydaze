@@ -1,192 +1,144 @@
+// The active city plan uses dream architecture, preserving streets and trees.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Vec2 } from "../walk.ts";
-import {
-  ALL_CELLS,
-  cellAt,
-  cellsWithin,
-  VIEW_RADIUS,
-  type Cell,
-} from "./cells.ts";
+import { ALL_CELLS, cellAt, cellsWithin, VIEW_RADIUS } from "./cells.ts";
 import { BUILDINGS, CITY_SPAWN } from "./layout.ts";
-import { isMotel } from "./nyc.ts";
+import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
 import { BAY_RANGE } from "./tuning.ts";
-import { LOT_NEAR } from "./districts.ts";
 import {
   drawCallsOf,
-  CORNICE_COLOR,
   FACADE_KINDS,
-  facadeOf,
-  wearsNeon,
   KINDS,
   GARDEN_FIRST,
   isGardenAt,
   planCity,
   TREE_VARIANTS,
   trianglesOf,
-  type CityPlan,
 } from "./plan.ts";
+const origin: Vec2 = [0, 0];
 
-const origin: [number, number] = [0, 0];
-
-/** Buildings drawn: one facade instance each, whatever its material. */
-const facades = (plan: CityPlan) =>
-  FACADE_KINDS.reduce((n, k) => n + plan.instances[k].length, 0);
-
-function insideCells(
-  p: { x: number; z: number },
-  cells: readonly Cell[],
-): boolean {
-  return cells.some(
-    (c) =>
-      p.x >= c.x0 - 1e-6 &&
-      p.x <= c.x1 + 1e-6 &&
-      p.z >= c.z0 - 1e-6 &&
-      p.z <= c.z1 + 1e-6,
-  );
-}
-
-test("the full city draws every building and every neon sign", () => {
-  // the motels (Palm Court, 184 m south of the origin) are past the view radius
-  const plan = planCity(ALL_CELLS, 0, origin);
-  assert.equal(facades(plan), BUILDINGS.filter((b) => !isMotel(b)).length);
-  assert.equal(
-    plan.instances.sign.length,
-    BUILDINGS.filter((b) => b.sign).length,
-  );
-  const court = planCity(ALL_CELLS, 0, [0, 250]);
-  assert.ok(facades(court) > facades(plan), "motels near Palm Court are drawn");
-});
-
-test("each building's walls take its style's material", () => {
-  assert.equal(facadeOf("brick"), "brick");
-  assert.equal(facadeOf("storefront"), "brick");
-  assert.equal(facadeOf("club"), "stucco");
-  assert.equal(facadeOf("tower"), "concrete");
-  assert.equal(facadeOf("warehouse"), "siding");
-  assert.equal(facadeOf("glass"), "curtain");
-  const plan = planCity(ALL_CELLS, 0, origin);
-  for (const kind of FACADE_KINDS)
-    assert.equal(
-      plan.instances[kind].length,
-      BUILDINGS.filter((b) => !isMotel(b) && facadeOf(b.style) === kind).length,
-      kind,
+test("active architecture replaces every old body, bay, lot, house and far box", () => {
+  for (const at of [
+    [0, 0],
+    [-300, -8],
+    [262, -8],
+    [-96, -256],
+    [264, -256],
+    [-380, -256],
+    [0, 256],
+  ] satisfies Vec2[]) {
+    const plan = planCity(cellsWithin(at, VIEW_RADIUS), 2, at, BAY_RANGE.low);
+    assert.ok(plan.dream.length > 0, `${at}`);
+    for (const k of FACADE_KINDS) assert.equal(plan.instances[k].length, 0, k);
+    for (const k of [
+      "roof",
+      "roofGravel",
+      "roofSkin",
+      "window",
+      "band",
+    ] as const)
+      assert.equal(plan.instances[k].length, 0, k);
+    assert.deepEqual(
+      [plan.bays, plan.lots, plan.houses, plan.far],
+      [[], [], [], []],
     );
-});
-
-test("only the cells in view are drawn", () => {
-  const corner: [number, number] = [-170, 170];
-  const cells = cellsWithin(corner, 60);
-  const plan = planCity(cells, 0, corner);
-  assert.ok(facades(plan) < BUILDINGS.length);
-  // building kit (tanks, antennas) hangs off a building drawn whole, so it can
-  // stand just outside the view; the ground kinds are clipped to the cells
-  for (const kind of ["road", "sidewalk", "lane", "palmTrunk"] as const) {
-    for (const i of plan.instances[kind]) {
-      assert.ok(
-        insideCells(i, cells),
-        `${kind} at ${i.x},${i.z} is outside the view`,
-      );
-    }
   }
 });
 
-test("a building is drawn when any of its cells is in view", () => {
-  const cell = cellAt([-160, 30]);
-  const plan = planCity([cell], 0, origin);
-  const expected = BUILDINGS.filter((b) =>
-    b.footprint.some(
-      ([x, z]) => x >= cell.x0 && x <= cell.x1 && z >= cell.z0 && z <= cell.z1,
-    ),
-  );
-  assert.ok(expected.length > 0, "the test cell should hold a building");
-  assert.equal(facades(plan), expected.length);
+test("architecture has exactly one active LOD per module, and no duplicate IDs", () => {
+  const p = planCity(ALL_CELLS, 2, origin, 50);
+  assert.equal(new Set(p.dream.map((s) => s.id)).size, p.dream.length);
+  assert.ok(p.dream.some((s) => s.far));
+  assert.ok(p.dream.some((s) => !s.far));
+  assert.ok(planCity([], 0, origin, 50).dream.every((s) => s.far));
 });
 
-test("the real lights are the neon signs nearest the player", () => {
-  const plan = planCity(ALL_CELLS, 2, [110, -20]);
-  assert.equal(plan.lights.length, 2);
-  const [first, second] = plan.lights;
-  const dist = (l: { x: number; z: number }) => Math.hypot(l.x - 110, l.z + 20);
-  assert.ok(dist(first) <= dist(second));
-  // the nearest sign to the Velvet Room is its own
-  assert.ok(dist(first) < 30, `nearest light is ${dist(first)} m away`);
+test("arrival landmarks keep their sculpted facades in street and overview views", () => {
+  for (const range of [0, 50, 90]) {
+    const p = planCity(
+      cellsWithin(CITY_SPAWN.position, VIEW_RADIUS),
+      2,
+      CITY_SPAWN.position,
+      range,
+    );
+    for (const id of ["arcade-square", "vesper-hotel"])
+      assert.ok(
+        p.dream.some((s) => s.id.startsWith(`${id}:`) && !s.far),
+        `${id}, range ${range}`,
+      );
+  }
 });
 
-test("no light count leaves a plan with more lights than asked", () => {
+test("ground stays clipped to loaded cells while distant architecture carries the skyline", () => {
+  const cells = [cellAt([-160, 30])];
+  const p = planCity(cells, 0, origin, 50);
+  for (const kind of ["road", "sidewalk", "lane"] as const)
+    for (const i of p.instances[kind])
+      assert.ok(
+        cells.some(
+          (c) => i.x >= c.x0 && i.x <= c.x1 && i.z >= c.z0 && i.z <= c.z1,
+        ),
+        kind,
+      );
+  assert.ok(p.dream.some((s) => s.far));
+  assert.ok(p.dream.length < BUILDINGS.length);
+});
+
+test("venue signs stay at human scale and lights are the nearest requested signs", () => {
+  const p = planCity(ALL_CELLS, 2, [110, -20], 50);
+  assert.equal(p.lights.length, 2);
+  assert.ok(p.instances.sign.length > 0);
+  for (const s of p.instances.sign) {
+    assert.ok(s.y >= 4 && s.y <= 6);
+    assert.ok(s.sx <= 6 && s.sy <= 1.5);
+  }
+  assert.equal(p.instances.label.length, p.instances.sign.length);
+  const d = (l: { x: number; z: number }) => Math.hypot(l.x - 110, l.z + 20);
+  assert.ok(d(p.lights[0]!) <= d(p.lights[1]!));
+  assert.ok(d(p.lights[0]!) < 30);
   assert.equal(planCity(ALL_CELLS, 0, origin).lights.length, 0);
-  assert.ok(planCity(ALL_CELLS, 6, origin).lights.length <= 6);
 });
 
-test("wherever she stands, the streamed city fits the low tier budget: under 250 draw calls and 300k triangles", () => {
-  // only the cells within VIEW_RADIUS are ever drawn, so the budget is per
-  // view: sample the whole city on a 32 m grid
-  let worst: { tris: number; at: Vec2 } = { tris: 0, at: [0, 0] };
-  for (let x = -432; x <= 432; x += 32) {
+test("the plan prices dream near and far geometry from generated model costs", () => {
+  const p = planCity(cellsWithin(origin, VIEW_RADIUS), 2, origin, 50);
+  const cost = p.dream.reduce(
+    (n, s) => n + DREAM_MODEL_COST[s.kind][s.far ? "lo" : "tris"],
+    0,
+  );
+  assert.equal(trianglesOf({ ...p, dream: [] }) + cost, trianglesOf(p));
+  assert.equal(
+    drawCallsOf({ ...p, dream: [] }) +
+      new Set(p.dream.map((s) => `${s.kind}${s.far}`)).size,
+    drawCallsOf(p),
+  );
+});
+
+test("streamed plans fit 250 draw calls and 300k triangles before live scenery", () => {
+  for (let x = -432; x <= 432; x += 32)
     for (let z = -304; z <= 368; z += 32) {
       const at: Vec2 = [x, z];
-      const plan = planCity(cellsWithin(at, VIEW_RADIUS), 2, at);
+      const p = planCity(cellsWithin(at, VIEW_RADIUS), 2, at, 50);
+      assert.ok(drawCallsOf(p) < 250, `${at}`);
       assert.ok(
-        drawCallsOf(plan) <= 250,
-        `${drawCallsOf(plan)} draw calls at ${at}`,
+        trianglesOf(p) < 300000,
+        `${trianglesOf(p)} triangles at ${at}`,
       );
-      const tris = trianglesOf(plan);
-      if (tris > worst.tris) worst = { tris, at };
     }
-  }
-  assert.ok(worst.tris < 300_000, `${worst.tris} triangles at ${worst.at}`);
-  // with no cells there is only the far city's one draw (far.ts)
-  assert.ok(drawCallsOf(planCity([], 2, origin)) <= 1);
 });
 
-test("the streamed view stays inside the budget too", () => {
-  const cells = cellsWithin(CITY_SPAWN.position, VIEW_RADIUS);
-  const plan = planCity(cells, 2, CITY_SPAWN.position);
-  assert.ok(drawCallsOf(plan) <= KINDS.length);
-  assert.ok(trianglesOf(plan) < 300_000);
-});
-
-test("every instance has a finite position and a positive size", () => {
-  const plan = planCity(ALL_CELLS, 2, origin);
-  for (const kind of KINDS) {
-    for (const i of plan.instances[kind]) {
+test("every active instance has finite position and positive size", () => {
+  const p = planCity(ALL_CELLS, 2, CITY_SPAWN.position, 50);
+  for (const k of KINDS)
+    for (const i of p.instances[k]) {
       for (const v of [i.x, i.y, i.z, i.sx, i.sy, i.sz])
-        assert.ok(Number.isFinite(v), kind);
-      assert.ok(i.sx > 0 && i.sy > 0 && i.sz > 0, kind);
+        assert.ok(Number.isFinite(v), k);
+      assert.ok(i.sx > 0 && i.sy > 0 && i.sz > 0, k);
     }
-  }
-});
-
-test("only nightlife buildings wear neon; the rest get stone cornices", () => {
-  assert.equal(wearsNeon("club"), true);
-  assert.equal(wearsNeon("velvet"), true);
-  assert.equal(wearsNeon("brick"), false);
-  assert.equal(wearsNeon("storefront"), false);
-  // one plain building on its own: cornices at each floor, no neon bands
-  const plain = BUILDINGS.find((b) => !wearsNeon(b.style) && b.height > 9);
-  assert.ok(plain);
-  const cell = cellAt(plain.footprint[0] ?? [0, 0]);
-  const plan = planCity([cell], 0, origin);
-  const bandsOnIt = plan.instances.band.filter(
-    (i) =>
-      Math.abs(i.x - (plain.footprint[0]?.[0] ?? 0)) < 40 &&
-      Math.abs(i.z - (plain.footprint[0]?.[1] ?? 0)) < 40 &&
-      BUILDINGS.filter((b) => b !== plain && wearsNeon(b.style)).every(
-        (b) =>
-          Math.hypot(
-            i.x - (b.footprint[0]?.[0] ?? 0),
-            i.z - (b.footprint[0]?.[1] ?? 0),
-          ) > 60,
-      ),
-  );
-  assert.equal(bandsOnIt.length, 0);
-  assert.ok(plan.instances.ledge.some((l) => l.color === CORNICE_COLOR));
 });
 
 test("street trees come as spots for the tree models, not boxes and balls", () => {
   const plan = planCity(ALL_CELLS, 0, origin);
-  const props = BUILDINGS.length; // keep the import used
-  assert.ok(props > 0);
   assert.ok(plan.trees.length > 50, `${plan.trees.length} trees`);
   for (const t of plan.trees) {
     assert.ok(
@@ -210,51 +162,4 @@ test("street trees come as spots for the tree models, not boxes and balls", () =
   assert.ok(plan.instances.treeTrunk.length === 0);
   // the same spot always grows the same tree
   assert.deepEqual(planCity(ALL_CELLS, 0, origin).trees, plan.trees);
-});
-
-test("the five districts wear district lots near the player, Downtown wears bays", () => {
-  // Little Manila, Chinatown, Koreatown, the Arts District and Uptown
-  for (const at of [
-    [-300, -8],
-    [262, -8],
-    [372, -8],
-    [-96, -256],
-    [264, -256],
-  ] satisfies Vec2[]) {
-    const plan = planCity(cellsWithin(at, VIEW_RADIUS), 2, at, BAY_RANGE.low);
-    assert.ok(plan.lots.length > 10, `lots at ${at}`);
-    // the shop boards ride on the plan's panels and labels
-    assert.ok(plan.lots.some((l) => l.sign !== null));
-    assert.ok(plan.lots.every((l) => !l.back || l.sign === null));
-  }
-  const downtown: Vec2 = [-30, -6];
-  const plan = planCity(
-    cellsWithin(downtown, VIEW_RADIUS),
-    2,
-    downtown,
-    BAY_RANGE.low,
-  );
-  assert.ok(plan.bays.length > 0, "Downtown keeps its bays");
-});
-
-test("a block wears lots or bays, never both; far blocks are plain boxes", () => {
-  const at: Vec2 = [-300, -8];
-  const near = planCity(cellsWithin(at, VIEW_RADIUS), 2, at, BAY_RANGE.low);
-  const none = planCity(cellsWithin(at, VIEW_RADIUS), 2, at, 0);
-  assert.equal(none.lots.length, 0);
-  assert.equal(none.bays.length, 0);
-  const reach = BAY_RANGE.low * 0.85;
-  for (const lot of near.lots)
-    assert.ok(
-      Math.hypot(lot.x - at[0], lot.z - at[1]) < reach + 40,
-      "lots stay within the lot range plus the block's own size",
-    );
-});
-
-test("lots past LOT_NEAR from the player draw their far twin, nearer ones the full model", () => {
-  const at: Vec2 = [262, -8];
-  const plan = planCity(cellsWithin(at, VIEW_RADIUS), 2, at, BAY_RANGE.low);
-  assert.ok(plan.lots.some((l) => l.far) && plan.lots.some((l) => !l.far));
-  for (const lot of plan.lots)
-    assert.equal(lot.far, Math.hypot(lot.x - at[0], lot.z - at[1]) >= LOT_NEAR);
 });

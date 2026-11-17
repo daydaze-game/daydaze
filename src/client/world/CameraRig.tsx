@@ -1,3 +1,4 @@
+// Camera framing and orbit controls, including the city's arrival composition.
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
@@ -397,10 +398,10 @@ const ROOM_SHOTS: Record<RoomId, { eye: THREE.Vector3; look: THREE.Vector3 }> =
       eye: new THREE.Vector3(0, 4.4, 10.4),
       look: new THREE.Vector3(0, 1.3, -1.2),
     },
-    // high over the first slice of the city; the orbit allows this far out
+    // Across the arrival plaza, with the avenue and rooflines in view.
     city: {
-      eye: new THREE.Vector3(-120, 150, 170),
-      look: new THREE.Vector3(0, 0, 0),
+      eye: new THREE.Vector3(-16, 14, 43),
+      look: new THREE.Vector3(16, 10, -25),
     },
   };
 
