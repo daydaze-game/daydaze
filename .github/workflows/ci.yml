@@ -1,7 +1,8 @@
 # Continuous integration for every push and pull request to main: install
 # (cached), lint, format and type checks, the unit tests with coverage, and
-# the production build. The slow browser suites live in playwright.yml and
-# run by hand. A pushed v* tag also drafts a GitHub release with the build.
+# the production build. The slow browser suites live in playwright.yml and run
+# beside this on the same triggers. A pushed v* tag also drafts a GitHub
+# release with the build.
 name: ci
 
 on:
