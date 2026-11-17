@@ -87,8 +87,6 @@ export const BAY_WIDTH = 4;
 export const BAY_HEIGHT = 3;
 /** The cornice is one meter tall; the wall below it is whole storeys. */
 const CORNICE_HEIGHT = 1;
-/** Kit walls sit this far in front of the box behind them. */
-export const WALL_INSET = 0.25;
 
 const NYC_NEIGHBORHOODS: ReadonlySet<Neighborhood> = new Set([
   "downtown",
@@ -422,8 +420,6 @@ export const HOUSE_MODEL_TRIANGLES = [
   1158, 1172, 1702, 1049, 751, 785, 1178, 1284, 4278, 1712, 3646, 1674, 5126,
   3429, 1628, 2363, 2458,
 ] as const;
-/** Triangles of the largest house model. */
-export const HOUSE_TRIANGLES = Math.max(...HOUSE_MODEL_TRIANGLES);
 /** The tallest a cottage stands, meters. */
 const BEACH_HOUSE_HEIGHT = 14;
 

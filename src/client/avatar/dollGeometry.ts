@@ -77,7 +77,6 @@ export const headGeometry = faceUv(headBase.clone());
 const headGeometryFar = faceUv(headBaseFar.clone());
 
 export const HEAD_TOP = (TY0 - 70) * S;
-export const HEAD_CHIN = -(762 - TY0) * S;
 
 export function lathe(profile: [number, number][], segments = 28) {
   return new THREE.LatheGeometry(

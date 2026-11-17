@@ -26,8 +26,6 @@ export const ESPRESSO_DOOR = {
 export const COUNTER = { x0: -5, x1: 4, z0: -4.2, z1: -3.4 } as const;
 export const MACHINE_X = -1.5;
 export const BARISTA: Vec2 = [-3, -5];
-/** Where the player stands to work the station. */
-export const STATION: Vec2 = [MACHINE_X, -2.8];
 /** Cafe tables down the window side, two chairs each. */
 export const TABLES: readonly Vec2[] = [
   [-4.6, 1.4],
