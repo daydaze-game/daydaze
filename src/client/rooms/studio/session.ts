@@ -4,10 +4,13 @@ import { playInstrumentNote } from "../../../audio/instrumentSynths.ts";
 import type { Station } from "../../../game/studio.ts";
 import { createStore } from "../shared/store.ts";
 
+// A function, not a const: a typed const would narrow back to its literal.
+const firstStation = (): Station => "piano";
+
 /** The instrument picked on the panel (the scene picks the one you walk up
  * to), and the last note played, so the scene can light it. */
 export const studio = createStore({
-  station: "piano" as Station,
+  station: firstStation(),
   last: null as { station: Station; note: number; at: number } | null,
 });
 

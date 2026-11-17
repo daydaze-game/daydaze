@@ -20,7 +20,7 @@ import { createStore } from "./store.ts";
 export function createOrderSession(station: Station, prize: PrizeGame) {
   const OFF = {
     on: false,
-    shift: newShift(0) as Shift,
+    shift: newShift(0),
     /** performance.now() the current ticket came in. */
     since: 0,
     last: null as { name: string; right: boolean; tip: number } | null,

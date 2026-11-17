@@ -70,8 +70,7 @@ for (const name of names) {
     };
     const linkProgram = gl2.linkProgram;
     gl2.linkProgram = function (program) {
-      const vertex =
-        sources.get(shadersOf.get(program)?.[0] ?? (program as never)) ?? "";
+      const vertex = sources.get(shadersOf.get(program)?.[0] ?? program) ?? "";
       const flags = [
         ...vertex.matchAll(
           /^#define (USE_\w+|SKINNING|NUM_\w+ \d+|MORPH\w+|DOUBLE_SIDED|FLAT_SHADED)/gm,
