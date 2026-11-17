@@ -52,6 +52,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Layer rules (dependency-cruiser)
+        run: npm run lint:deps
       - name: Spelling (American English)
         run: npm run lint:spelling
       - name: Prettier

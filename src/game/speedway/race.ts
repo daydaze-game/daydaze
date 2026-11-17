@@ -96,7 +96,7 @@ export function createRace(
       state: { position: slot.position, yaw: slot.yaw, speed: 0 },
       lap: initialLap(nowMs),
       isPlayer: i === 0,
-      skill: i === 0 ? undefined : skill,
+      ...(i !== 0 && { skill }),
       finishedMs: null,
       draft: 0,
       pit: createPitState(),
