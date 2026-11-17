@@ -12,9 +12,28 @@ import {
   type Daylight,
 } from "../../game/city/daylight.ts";
 
-/** The hour now: pinned by `?time=`, else the local clock. */
+/** A live pin from the dev panel (development only), and when it was set. */
+let devHour: number | null = null;
+let devSetAt = 0;
+const devListeners = new Set<() => void>();
+
+/** Dev panel: pin the hour live, or null to let go; the sky follows at once. */
+export function setDevHour(hour: number | null): void {
+  devHour = hour;
+  devSetAt = Date.now();
+  for (const fn of devListeners) fn();
+}
+
+/** Seconds into the day from the dev pin, running on from it; null if unset. */
+export function devDaySeconds(): number | null {
+  return devHour === null
+    ? null
+    : devHour * 3600 + (Date.now() - devSetAt) / 1000;
+}
+
+/** The hour now: the dev pin, else `?time=`, else the local clock. */
 export const cityHour = () =>
-  parseTimeFlag(location.search) ?? hourOf(new Date());
+  devHour ?? parseTimeFlag(location.search) ?? hourOf(new Date());
 
 /** Sky colors, shared by the dome's shader (CitySky.tsx). */
 export const SKY_UNIFORMS = {
@@ -24,15 +43,17 @@ export const SKY_UNIFORMS = {
   uNeon: { value: 1 },
 };
 
-/** The light now, refreshed every 30 s (a pinned hour never changes). */
+/** The light now, refreshed every 30 s and whenever the dev pin moves. */
 export function useDaylight(): Daylight {
   const [light, setLight] = useState(() => daylightAt(cityHour()));
   useEffect(() => {
-    const id = window.setInterval(
-      () => setLight(daylightAt(cityHour())),
-      30_000,
-    );
-    return () => window.clearInterval(id);
+    const refresh = () => setLight(daylightAt(cityHour()));
+    const id = window.setInterval(refresh, 30_000);
+    devListeners.add(refresh);
+    return () => {
+      window.clearInterval(id);
+      devListeners.delete(refresh);
+    };
   }, []);
   useEffect(() => {
     SKY_UNIFORMS.uZenith.value.setRGB(...light.zenith);

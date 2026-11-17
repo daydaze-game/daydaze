@@ -6,8 +6,9 @@
 // module store carries them from the Canvas (its own React root) to the DOM.
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
+import { cityHour, setDevHour } from "../city/daylight.ts";
 import { clampToArea, type WalkArea } from "../../game/area.ts";
 import { CLUB_NIGHTS } from "../../game/events.ts";
 import { MINIGAME_IDS, type MinigameId } from "../../game/hotspots.ts";
@@ -274,7 +275,13 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
   return freeCam ? <OrbitControls makeDefault /> : null;
 }
 
-/** Night and hour are read once at start, so changing them reloads the page. */
+/** 21.5 as "21:30". */
+function formatHour(h: number): string {
+  const m = Math.round(h * 60);
+  return `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+}
+
+/** The night is read once at start, so changing it reloads the page. */
 function reloadWith(key: string, value: string): void {
   const url = new URL(window.location.href);
   url.searchParams.set(key, value);
@@ -322,6 +329,8 @@ export function DevPanel({
   onGame: (game: MinigameId) => void;
 }) {
   const s = useSyncExternalStore(subscribe, () => state);
+  // the dev hour pin; null follows ?time= or the real clock
+  const [hour, setHour] = useState<number | null>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Backquote") patch({ open: !state.open });
@@ -373,16 +382,36 @@ export function DevPanel({
           options={CLUB_NIGHTS.map((n) => n.id)}
           onPick={(v) => reloadWith("night", v)}
         />
-        <label style={{ marginRight: 8 }}>
-          time{" "}
+      </div>
+      <div>
+        <label>
+          hour{" "}
           <input
-            type="time"
-            onChange={(e) =>
-              e.target.value && reloadWith("time", e.target.value)
-            }
-            style={{ width: 90 }}
-          />
-        </label>
+            type="range"
+            min={0}
+            max={23.75}
+            step={0.25}
+            value={hour ?? cityHour()}
+            onChange={(e) => {
+              const h = Number(e.target.value);
+              setHour(h);
+              setDevHour(h);
+            }}
+            style={{ width: 200, verticalAlign: "middle" }}
+          />{" "}
+          {formatHour(hour ?? cityHour())}
+        </label>{" "}
+        {hour !== null && (
+          <button
+            type="button"
+            onClick={() => {
+              setHour(null);
+              setDevHour(null);
+            }}
+          >
+            real clock
+          </button>
+        )}
       </div>
       <button
         type="button"

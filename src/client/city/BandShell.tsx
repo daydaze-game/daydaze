@@ -43,7 +43,7 @@ import type { Player } from "../world/PlayerController.tsx";
 import { useQuality } from "../world/quality.ts";
 import { dimMeshes } from "./CityFurniture.tsx";
 import { bandDesk } from "./bandDesk.ts";
-import { useDaylight } from "./daylight.ts";
+import { devDaySeconds, useDaylight } from "./daylight.ts";
 import { disposeInstanced } from "./dispose.ts";
 import { propParts, type PropSpot } from "./instancedProps.ts";
 import { usePreloadNear } from "./preloadNear.ts";
@@ -79,6 +79,8 @@ const held = Number(
  */
 export function bandClock(): number {
   if (Number.isFinite(held)) return FIRST_SET + held;
+  const dev = devDaySeconds();
+  if (dev !== null) return dev;
   if (pinned !== null) return pinned * 3600 + (Date.now() - loadedAt) / 1000;
   const d = new Date();
   return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
