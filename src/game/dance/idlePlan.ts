@@ -1,5 +1,5 @@
-// What a standing doll does while she waits: the player breathes and now and
-// then fidgets (looks around, checks behind her, takes a call); each NPC has
+// What a standing doll does while she waits: the player mostly breathes and
+// shifts her weight, and now and then fidgets (looks around, folds her arms); each NPC has
 // a temperament picked by its seed, so a crowd is made of people who stand
 // differently (one still, one restless, one on the phone, one who talks with
 // her hands). Time is cut into slots; every slot draws one clip, and a clip
@@ -20,18 +20,18 @@ export const CALM_IDLES: readonly string[] = [
   "idle-short",
 ];
 
-/** Small fidgets: a look around, a glance behind, arms folded. Core pack. */
+/** Small, unhurried fidgets: a look around, a gaze off, arms folded. Core
+ * pack. Short, busy loops (checking over both shoulders, wiping a brow, the
+ * bouncy happy idle) are left out: repeated for a whole slot they read as
+ * paranoid or wired, so a sober doll never plays them. */
 export const FIDGET_IDLES: readonly string[] = [
   "idle-look-around",
-  "idle-shoulders",
   "idle-bored",
   "idle-distance",
-  "idle-sweat",
   "idle-casual-2",
   "idle-casual-3",
   "idle-casual-4",
   "idle-fold-arms",
-  "idle-happy",
 ];
 
 /** Standing with a phone or a tablet. Core pack. */
@@ -62,7 +62,7 @@ export type Temperament = "calm" | "restless" | "phone" | "chatty";
 const WEIGHTS: Record<Temperament, readonly [number, number, number, number]> =
   {
     calm: [70, 30, 0, 0],
-    restless: [15, 85, 0, 0],
+    restless: [40, 60, 0, 0],
     phone: [20, 10, 70, 0],
     chatty: [20, 25, 0, 55],
   };
@@ -109,7 +109,7 @@ export function packOfIdle(id: string): MocapPack {
 
 /** The clip a standing doll plays in `slot` (counted from when she began to
  * stand, for the player; from the clock, for an NPC). The player starts on
- * her breathing and fidgets about half the time after; an NPC follows her
+ * her breathing and fidgets about one slot in five after; an NPC follows her
  * temperament. `gestures` says whether the social pack has loaded: until it
  * has, a chatty NPC fidgets instead. */
 export function idlePlan(
@@ -121,7 +121,7 @@ export function idlePlan(
   const h = mix(seed, slot);
   if (own) {
     if (slot <= 0) return "idle-breathing";
-    return h % 100 < 50 ? pickFrom(CALM_IDLES, h) : pickFrom(FIDGET_IDLES, h);
+    return h % 100 < 80 ? pickFrom(CALM_IDLES, h) : pickFrom(FIDGET_IDLES, h);
   }
   const [calm, fidget, phone] = WEIGHTS[temperamentOf(seed)];
   const roll = h % 100;

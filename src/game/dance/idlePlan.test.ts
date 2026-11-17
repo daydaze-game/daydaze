@@ -52,12 +52,20 @@ test("the player starts on her breathing and then rotates idles", () => {
     assert.ok(CALM_IDLES.includes(id) || FIDGET_IDLES.includes(id), id);
     seen.add(id);
   }
-  assert.ok(seen.size >= 8, `${seen.size} idles in 80 slots`);
-  // she fidgets about half the time, not always and not never
+  assert.ok(seen.size >= 7, `${seen.size} idles in 80 slots`);
+  // she mostly stands easy and fidgets now and then, not always and not never
   let fidgets = 0;
   for (let slot = 1; slot <= 400; slot++)
     if (FIDGET_IDLES.includes(idlePlan(0, slot, true, true))) fidgets += 1;
-  assert.ok(fidgets > 140 && fidgets < 260, `${fidgets} of 400`);
+  assert.ok(fidgets > 40 && fidgets < 130, `${fidgets} of 400`);
+});
+
+test("a sober doll never plays the busy loops that read as wired", () => {
+  const wired = ["idle-shoulders", "idle-sweat", "idle-happy"];
+  for (let seed = 0; seed < 50; seed++)
+    for (let slot = 0; slot < 60; slot++)
+      for (const own of [true, false])
+        assert.equal(wired.includes(idlePlan(seed, slot, own, true)), false);
 });
 
 test("temperaments differ across a crowd and decide how a stranger stands", () => {
@@ -82,7 +90,7 @@ test("temperaments differ across a crowd and decide how a stranger stands", () =
     return n / 500;
   };
   assert.ok(share("calm", CALM_IDLES) > 0.55);
-  assert.ok(share("restless", FIDGET_IDLES) > 0.7);
+  assert.ok(share("restless", FIDGET_IDLES) > 0.45);
   assert.ok(share("phone", PHONE_IDLES) > 0.55);
   assert.ok(share("chatty", GESTURE_IDLES) > 0.4);
   // without the social pack a chatty stranger fidgets instead
