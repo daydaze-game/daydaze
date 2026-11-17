@@ -1,5 +1,5 @@
-// A Crazy Eights table against an NPC, used in the jail. `onWin` runs once
-// when you empty your hand first.
+// A Crazy Eights table against an NPC, used in the jail and the Back Room.
+// `onWin` runs once when you empty your hand first.
 import { useState, type JSX } from "react";
 import {
   deal,

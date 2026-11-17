@@ -1,5 +1,5 @@
-// Box lists for `Boxes`: each box is a base center, heading and size in
-// meters, built here for the track's strips.
+// The track's strips: box lists for `Boxes` (each a base center, heading and
+// size in meters) and ribbon geometry offset along the track's points.
 import * as THREE from "three";
 import type { Vec2 } from "../../../game/walk.ts";
 
