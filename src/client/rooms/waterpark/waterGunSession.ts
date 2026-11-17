@@ -8,7 +8,6 @@ import {
   battleOver,
   newBattle,
   squirt,
-  type Battle,
   type Target,
 } from "../../../game/waterGuns.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -21,7 +20,7 @@ const EDGE = 0.4;
 
 const OFF = {
   phase: "off" as Phase,
-  battle: newBattle(1) as Battle,
+  battle: newBattle(1),
   /** performance.now() the battle began. */
   since: 0,
   /** Where the squirt will land: [x, z] on the pool. */

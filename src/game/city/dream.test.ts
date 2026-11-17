@@ -178,8 +178,7 @@ test("textured landmarks keep their proportions and the street-facing boundary",
       p.z + Math.cos(spot.yaw) * p.scale * 8,
     ];
     assert.ok(
-      Math.hypot(oldFront[0]! - newFront[0]!, oldFront[1]! - newFront[1]!) <
-        1e-6,
+      Math.hypot(oldFront[0] - newFront[0], oldFront[1] - newFront[1]) < 1e-6,
       id,
     );
   }

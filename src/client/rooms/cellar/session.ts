@@ -6,7 +6,6 @@ import {
   levelAfter,
   newFlight,
   pour,
-  type Flight,
 } from "../../../game/winePour.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -15,7 +14,7 @@ import { createStore } from "../shared/store.ts";
  * (performance.now()), or null between pours. */
 const OFF = {
   on: false,
-  flight: newFlight() as Flight,
+  flight: newFlight(),
   pouring: null as number | null,
 };
 

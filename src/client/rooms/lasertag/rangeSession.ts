@@ -9,7 +9,6 @@ import {
   fireAt,
   newDrill,
   RAIL_Y,
-  type Drill,
   type Gun,
   type Target,
 } from "../../../game/targetRange.ts";
@@ -20,7 +19,7 @@ export type Phase = "off" | "playing" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  drill: newDrill("pistol", 1) as Drill,
+  drill: newDrill("pistol", 1),
   /** performance.now() the drill began. */
   since: 0,
   /** Where the beam will hit: [x, y] on the wall. */
