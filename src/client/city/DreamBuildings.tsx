@@ -27,6 +27,17 @@ export const cityDream = createStore({ spots: [] as readonly DreamSpot[] });
 /** Surface flags survive meshopt quantization; UV.y is unused. */
 function architectureMaterial(night: { value: number }) {
   const maps = groundMaps("stone_tile_wall", { full: true });
+  const loader = new THREE.TextureLoader();
+  const copper = ["diff", "nor", "surface"].map((name) => {
+    const texture = loader.load(`/textures/city_copper/${name}.webp`);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.anisotropy = 8;
+    if (name === "diff") texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  });
+  const [copperColor, copperNormal, copperSurface] = copper;
+  // These textures belong to this material, including under StrictMode remounts.
+
   const material = boxMapped(
     new THREE.MeshStandardMaterial({
       ...maps,
@@ -38,10 +49,16 @@ function architectureMaterial(night: { value: number }) {
     }),
     0.32,
   );
+  material.addEventListener("dispose", () => {
+    for (const texture of copper) texture.dispose();
+  });
   const boxed = material.onBeforeCompile;
   material.onBeforeCompile = (shader, renderer) => {
     boxed.call(material, shader, renderer);
     shader.uniforms.uDreamNight = night;
+    shader.uniforms.uCopperColor = { value: copperColor };
+    shader.uniforms.uCopperNormal = { value: copperNormal };
+    shader.uniforms.uCopperSurface = { value: copperSurface };
     shader.vertexShader = shader.vertexShader.replace(
       "void main() {",
       "attribute float aSurface;\nattribute float aDistant;\nvarying float vSurface;\nvarying float vDistant;\nvarying vec3 vArchitectureP;\nvarying vec3 vArchitectureN;\nvoid main() {\nvSurface = aSurface;\nvDistant = aDistant;\nvArchitectureP = position;\nvArchitectureN = normal;",
@@ -50,7 +67,7 @@ function architectureMaterial(night: { value: number }) {
     shader.fragmentShader = shader.fragmentShader
       .replace(
         "void main() {",
-        "varying float vSurface;\nvarying float vDistant;\nvarying vec3 vArchitectureP;\nvarying vec3 vArchitectureN;\nuniform float uDreamNight;\nvoid main() {",
+        "varying float vSurface;\nvarying float vDistant;\nvarying vec3 vArchitectureP;\nvarying vec3 vArchitectureN;\nuniform float uDreamNight;\nuniform sampler2D uCopperColor;\nuniform sampler2D uCopperNormal;\nuniform sampler2D uCopperSurface;\nvoid main() {",
       )
       .replace(
         "#include <color_fragment>",
@@ -73,8 +90,17 @@ function architectureMaterial(night: { value: number }) {
         /#ifdef USE_MAP\nfloat bk =[\s\S]*?diffuseColor \*= sampledDiffuseColor;\n#endif/,
         [
           // Keep the stone courses aligned; randomly offset texture samples
-          // would break the mortar lines. Glass and metal retain their paint.
+          // would break the mortar lines. Copper uses its own aligned projection.
           "float dreamStone = 1.0 - smoothstep(0.06, 0.14, vSurface);",
+          "float dreamBrass = 1.0 - smoothstep(0.04, 0.1, abs(vSurface - 0.25));",
+          // Local projection preserves roof detail through instance transforms
+          // and LOD changes; no random offsets separate color and PBR channels.
+          "vec3 dreamAxes = abs(vArchitectureN);",
+          "vec2 dreamCopperUv = (dreamAxes.y >= max(dreamAxes.x, dreamAxes.z) ? vArchitectureP.xz : dreamAxes.x >= dreamAxes.z ? vArchitectureP.zy : vArchitectureP.xy) * 0.23;",
+          "vec3 dreamCopper = texture2D(uCopperColor, dreamCopperUv).rgb;",
+          "vec2 dreamCopperPbr = texture2D(uCopperSurface, dreamCopperUv).gb;",
+          "vec3 dreamRoofColor = mix(diffuseColor.rgb * (0.55 + dreamCopper * 1.7), dreamCopper, 0.36);",
+          "diffuseColor.rgb = mix(diffuseColor.rgb, dreamRoofColor, dreamBrass);",
           "vec3 dreamMasonry = texture2D(map, vMapUv).rgb * 1.6 + 0.2;",
           "diffuseColor.rgb *= mix(vec3(1.0), dreamMasonry, dreamStone);",
           "float dreamFoot = smoothstep(0.0, 2.0, vBoxP.y);",
@@ -83,25 +109,29 @@ function architectureMaterial(night: { value: number }) {
       )
       .replace(
         "#include <normal_fragment_maps>",
-        THREE.ShaderChunk.normal_fragment_maps.replace(
-          "mapN.xy *= normalScale;",
-          "mapN.xy *= normalScale * dreamStone;",
-        ),
+        THREE.ShaderChunk.normal_fragment_maps
+          .replace(
+            "vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;",
+            "vec3 mapN = mix(texture2D(normalMap, vNormalMapUv).xyz, texture2D(uCopperNormal, dreamCopperUv).xyz, dreamBrass) * 2.0 - 1.0;",
+          )
+          .replace(
+            "mapN.xy *= normalScale;",
+            "mapN.xy *= normalScale * (dreamStone + dreamBrass * 0.65);",
+          ),
       )
       .replace(
         "#include <roughnessmap_fragment>",
         [
           "#include <roughnessmap_fragment>",
-          "float dreamBrass = 1.0 - smoothstep(0.04, 0.1, abs(vSurface - 0.25));",
           "float dreamGlass = 1.0 - smoothstep(0.04, 0.1, abs(vSurface - 0.5));",
-          "roughnessFactor = mix(roughnessFactor, 0.42, dreamBrass);",
+          "roughnessFactor = mix(roughnessFactor, clamp(dreamCopperPbr.x, 0.28, 0.92), dreamBrass);",
           "roughnessFactor = mix(roughnessFactor, 0.18, dreamGlass);",
           "diffuseColor.rgb *= mix(1.0, 0.42, dreamGlass);",
         ].join("\n"),
       )
       .replace(
         "#include <metalnessmap_fragment>",
-        "#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.45, dreamBrass);",
+        "#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, dreamCopperPbr.y * 0.72, dreamBrass);",
       )
       .replace(
         "#include <emissivemap_fragment>",
@@ -114,12 +144,12 @@ function architectureMaterial(night: { value: number }) {
           "float dreamWindow = mix(0.7, 1.0, step(0.24, boxHash(floor(vBoxP.xz * 0.4) + floor(vBoxP.y * 0.3))));",
           "totalEmissiveRadiance = dreamGlass * mix(dreamSky * 0.2, dreamLit * dreamWindow * 0.16, uDreamNight);",
           "totalEmissiveRadiance += dreamDistantWindow * mix(vec3(0.025, 0.065, 0.075), vec3(0.32, 0.18, 0.07), uDreamNight);",
-          "totalEmissiveRadiance += dreamBrass * vColor.rgb * 0.06;",
+
           "totalEmissiveRadiance += step(0.9, vSurface) * vColor.rgb * mix(0.32, 1.25, uDreamNight);",
         ].join("\n"),
       );
   };
-  material.customProgramCacheKey = () => "dream-architecture-v3";
+  material.customProgramCacheKey = () => "dream-architecture-v4-copper";
   return material;
 }
 

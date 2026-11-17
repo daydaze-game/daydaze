@@ -337,3 +337,7 @@ Only the clips listed in `art/doll/blender/mocap_clips.py` ship, retargeted onto
 | Small Brook Loopable (field recording walk with daughter - rec 4) | gis_sweden | CC0 1.0 | https://freesound.org/people/gis_sweden/sounds/425141/ | Forest Trail creek loop (mono, recompressed). |
 
 The Freesound recordings are fetched with `scripts/freesound.mjs` and cut into `public/audio/` by `scripts/build-recordings.sh`.
+
+| Asset | Author | License | Source | Used for |
+| --- | --- | --- | --- | --- |
+| Patinated city copper | ambientCG | CC0 1.0 | https://ambientcg.com/view?id=Metal058B | Shared color, normal and packed roughness/metalness maps for dream architecture roofs and metalwork; converted to 512px WebP. |

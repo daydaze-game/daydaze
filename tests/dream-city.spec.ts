@@ -7,6 +7,12 @@ test("dream city: architecture loads across distinct streets and keeps venue doo
 }) => {
   test.setTimeout(360_000);
   const errors: string[] = [];
+  const copperMaps = new Set<string>();
+  page.on("response", (response) => {
+    const path = new URL(response.url()).pathname;
+    if (path.startsWith("/textures/city_copper/") && response.ok())
+      copperMaps.add(path.split("/").at(-1) ?? "");
+  });
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
     if (
@@ -62,6 +68,11 @@ test("dream city: architecture loads across distinct streets and keeps venue doo
     );
   }
   expect(signatures.size).toBeGreaterThan(1);
+  expect([...copperMaps].sort()).toEqual([
+    "diff.webp",
+    "nor.webp",
+    "surface.webp",
+  ]);
   // The new facade still leads into the existing playable club.
   await page.goto("/?room=city&view=full&quality=low&at=113,9&time=12:00");
   await expect(canvas).toHaveAttribute("data-architecture", "ready");
