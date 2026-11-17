@@ -28,7 +28,7 @@ import { ROOMS, isRoomId, type RoomId } from "../../../game/rooms.ts";
 import { Inspector } from "./Inspector.tsx";
 import { RenderSection } from "./RenderSection.tsx";
 import { SceneTree } from "./SceneTree.tsx";
-import { actions, devState, patch, useDev } from "./store.ts";
+import { actions, canvas, devState, patch, useDev } from "./store.ts";
 import { Pick, Section, Toggle, formatHour } from "./widgets.tsx";
 
 /** The movement stream (12 Hz out, constant in); hidden from the recent list. */
@@ -139,6 +139,26 @@ function GoSection({
   );
 }
 
+/**
+ * Saves the canvas as a PNG. The buffer is cleared after each frame, so this
+ * draws one more frame and reads it straight back; that frame skips the high
+ * tier's bloom pass (a plain render), so glow looks flatter than on screen.
+ */
+function screenshot(): void {
+  const { scene, gl } = canvas;
+  const camera = canvas.camera();
+  if (!scene || !gl || !camera) return;
+  gl.render(scene, camera);
+  gl.domElement.toBlob((blob) => {
+    if (!blob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `daydaze-${new Date().toISOString().replace(/[:.]/g, "-")}.png`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }, "image/png");
+}
+
 /** Where the panel sits while dragged; saved once on release. */
 function useDrag(): {
   at: readonly [number, number] | null;
@@ -246,6 +266,9 @@ export function DevPanel({
         <Toggle name="helpers" label="grid + axes" />
         <Toggle name="halfRes" label="half res" />
         <Toggle name="paused" label="pause" />
+        <button type="button" onClick={screenshot}>
+          screenshot
+        </button>
       </Section>
       <RenderSection />
       <SceneTree />
