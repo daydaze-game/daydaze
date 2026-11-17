@@ -1,9 +1,20 @@
 // The dressing room drawer: slides in from the right (a bottom sheet on
 // phones), Esc closes it, and focus returns to the toggle.
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { CloseIcon, MirrorIcon } from "./icons.tsx";
-import { useHud } from "../rooms/speedway/RaceHud.tsx";
 import { driving } from "../world/driving.ts";
+
+/** Includes passengers and requests, which have no race HUD of their own. */
+const isInVehicle = () =>
+  driving.session !== null ||
+  driving.request !== null ||
+  driving.passenger !== null;
 
 /**
  * The dressing room: a toggle and a drawer that slides in from the right
@@ -21,13 +32,17 @@ export function Dressing({
 }) {
   const toggle = useRef<HTMLButtonElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
-  const inVehicle = useHud() !== null;
+  const [inVehicle, setInVehicle] = useState(isInVehicle);
+  useEffect(() => {
+    const id = window.setInterval(() => setInVehicle(isInVehicle()), 100);
+    return () => window.clearInterval(id);
+  }, []);
 
   // Focus moves after the drawer is visible, so it waits one frame for React.
   const setOpen = useCallback(
     (next: boolean) => {
       // Check live state as well as the HUD: a ride can start between polls.
-      if (next && (driving.session || driving.request)) return;
+      if (next && isInVehicle()) return;
       onOpenChange(next);
       requestAnimationFrame(() =>
         (next ? title.current : toggle.current)?.focus(),
