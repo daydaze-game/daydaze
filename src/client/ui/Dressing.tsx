@@ -54,6 +54,12 @@ export function Dressing({
         Dressing room
       </button>
 
+      {open && (
+        <p className="dressing-hint">
+          Drag to rotate · Scroll or pinch to zoom
+        </p>
+      )}
+
       <section
         id="dressing"
         className="dressing"

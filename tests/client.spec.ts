@@ -64,6 +64,83 @@ const roomTitle = (page: Page) => page.getByRole("heading", { level: 1 });
 const canvasOf = (page: Page) =>
   page.getByRole("img", { name: "3D room view" });
 
+test("dressing room isolates the character and saves unrestricted colors", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  const errors = collectErrors(page);
+  await page.goto(VELVET);
+  await page
+    .getByRole("button", { name: "Dressing room", exact: true })
+    .click();
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
+    timeout: 150_000,
+  });
+  await expect(
+    page.locator('input[type="color"][aria-label*="skin"]'),
+  ).toHaveCount(0);
+  await page
+    .getByRole("slider", { name: "Nose length", exact: true })
+    .press("End");
+  await expect(
+    page.getByRole("slider", { name: "Nose length", exact: true }),
+  ).toHaveValue("1");
+  await page
+    .getByRole("textbox", { name: "Eye color hex", exact: true })
+    .fill("#12ab34");
+  await page.getByRole("tab", { name: "Hair", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Hair color hex", exact: true })
+    .fill("#7ee8a2");
+  await page.getByRole("tab", { name: "Makeup", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Lipstick hex", exact: true })
+    .fill("#cc1234");
+  await page
+    .getByRole("textbox", { name: "Blush hex", exact: true })
+    .fill("#aa5678");
+  await page.getByRole("tab", { name: "Outfit", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Outfit color hex", exact: true })
+    .fill("#c9a227");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const look = JSON.parse(
+          localStorage.getItem("daydaze-save-v1") ?? "{}",
+        ).look;
+        return [
+          look?.hairColor,
+          look?.outfitColor,
+          look?.lips,
+          look?.face?.split("|")[1],
+          look?.makeup?.split("|")[1],
+        ];
+      }),
+    )
+    .toEqual(["#7ee8a2", "#c9a227", "#cc1234", "#12ab34", "#aa5678"]);
+  await page.screenshot({ path: "test-results/dressing-studio-desktop.png" });
+  await page.reload();
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
+    timeout: 150_000,
+  });
+  await expect(
+    page.getByRole("slider", { name: "Nose length", exact: true }),
+  ).toHaveValue("1");
+  await page.getByRole("tab", { name: "Hair", exact: true }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Hair color hex", exact: true }),
+  ).toHaveValue("#7ee8a2");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready");
+  await page.screenshot({ path: "test-results/dressing-studio-phone.png" });
+  await page
+    .getByRole("button", { name: "Close dressing room", exact: true })
+    .click();
+  await expect(canvasOf(page)).not.toHaveAttribute("data-studio");
+  expect(errors).toEqual([]);
+});
+
 test("seasonal dressing follows the preview date", async ({ page }) => {
   test.setTimeout(330_000);
   await page.goto(`${STILL}&room=city&date=2026-12-20`);
@@ -1332,6 +1409,52 @@ test("loads the Velvet Room with no errors and mounts the canvas", async ({
     timeout: 150_000,
   });
   expect(errors).toEqual([]);
+});
+
+test("natural faces can add and remove eyeshadow and keep that choice after reload", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  await page.goto(VELVET);
+  const openMakeup = async () => {
+    const toggle = page.getByRole("button", {
+      name: "Dressing room",
+      exact: true,
+    });
+    if ((await toggle.getAttribute("aria-expanded")) !== "true")
+      await toggle.click();
+    await page.getByRole("tab", { name: "Makeup", exact: true }).click();
+  };
+  await openMakeup();
+  const styles = page.getByRole("radiogroup", {
+    name: "Eyeshadow style",
+    exact: true,
+  });
+  const none = styles.getByRole("radio", { name: "No eyeshadow", exact: true });
+  await expect(none).toHaveAttribute("aria-checked", "true");
+  await styles.getByRole("radio", { name: "Smoky", exact: true }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").look
+            ?.makeup?.[5],
+      ),
+    )
+    .toBe("2");
+  await none.click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").look
+            ?.makeup?.[5],
+      ),
+    )
+    .toBe("4");
+  await page.reload();
+  await openMakeup();
+  await expect(none).toHaveAttribute("aria-checked", "true");
 });
 
 test("glasses, freckles, a bindi and hearing aids from the closet go into the saved makeup", async ({

@@ -27,6 +27,7 @@ sys.path.insert(0, HERE)
 import doll_hair  # noqa: E402
 import doll_outfits  # noqa: E402
 import proxies  # noqa: E402
+import skin_detail  # noqa: E402
 
 MH = os.path.join(HERE, ".cache", "mh")
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
@@ -129,38 +130,37 @@ SHAPE = [
     (target("breast/breast-volume-vert-up.target"), 0.15),
     (target("hip/hip-waist-up.target"), 0.15),
     (target("stomach/stomach-tone-incr.target"), 0.15),
-    (pair("eyes/{s}-eye-scale-incr.target"), 0.9),
+    (pair("eyes/{s}-eye-scale-incr.target"), 0.15),
     (pair("eyes/{s}-eye-bag-decr.target"), 0.6),
-    # doll glam: outer corners lifted into an almond cat-eye
-    (pair("eyes/{s}-eye-corner2-up.target"), 0.45),
-    (pair("eyes/{s}-eye-height2-incr.target"), 0.3),
-    (target("nose/nose-volume-decr.target"), 0.5),
-    (target("nose/nose-point-width-decr.target"), 0.5),
-    (target("nose/nose-point-up.target"), 0.6),
+    # Relaxed almond eyes; pronounced lift remains an optional face preset.
+    (pair("eyes/{s}-eye-corner2-up.target"), 0.12),
+    (pair("eyes/{s}-eye-height2-incr.target"), 0.05),
+    (target("nose/nose-volume-decr.target"), 0.1),
+    (target("nose/nose-point-width-decr.target"), 0.15),
+    (target("nose/nose-point-up.target"), 0.15),
     # natural fullness; the Lip fullness slider and the Full preset add more
     (target("mouth/mouth-upperlip-volume-incr.target"), 0.15),
     (target("mouth/mouth-lowerlip-volume-incr.target"), 0.1),
     (target("mouth/mouth-cupidsbow-incr.target"), 0.5),
     (target("mouth/mouth-scale-horiz-decr.target"), 0.1),
-    (pair("cheek/{s}-cheek-bones-incr.target"), 0.7),
-        (target("chin/chin-prominent-decr.target"), 0.5),
+    (pair("cheek/{s}-cheek-bones-incr.target"), 0.2),
+    (target("chin/chin-prominent-decr.target"), 0.15),
     (target("head/head-oval.target"), 0.45),
-    (target("head/head-fat-decr.target"), 0.3),
+    (target("head/head-fat-decr.target"), 0.05),
     (target("neck/neck-scale-horiz-decr.target"), 0.6),
-    # doll glam: a tiny button nose, a V jaw and pointed chin, soft young
-    # cheeks, a pout, and tall almond eyes
-    (target("nose/nose-scale-horiz-decr.target"), 0.4),
-    (target("nose/nose-scale-vert-decr.target"), 0.25),
-    (target("nose/nose-scale-depth-decr.target"), 0.25),
-    (target("nose/nose-nostrils-width-decr.target"), 0.4),
-    (target("nose/nose-width1-decr.target"), 0.3),
-    (target("nose/nose-width2-decr.target"), 0.3),
-    (target("chin/chin-width-decr.target"), 0.3),
+    # Preserve a natural nose bridge and jaw instead of stacking reductions.
+    (target("nose/nose-scale-horiz-decr.target"), 0.05),
+    (target("nose/nose-scale-vert-decr.target"), 0.05),
+    (target("nose/nose-scale-depth-decr.target"), 0.05),
+    (target("nose/nose-nostrils-width-decr.target"), 0.05),
+    (target("nose/nose-width1-decr.target"), 0.05),
+    (target("nose/nose-width2-decr.target"), 0.05),
+    (target("chin/chin-width-decr.target"), 0.1),
     (target("chin/chin-height-decr.target"), 0.15),
     (target("chin/chin-triangle.target"), 0.0),
     (target("head/head-invertedtriangular.target"), 0.2),
     (target("head/head-age-decr.target"), 0.2),
-    (pair("cheek/{s}-cheek-volume-decr.target"), 0.3),
+    (pair("cheek/{s}-cheek-volume-decr.target"), 0.0),
     (pair("cheek/{s}-cheek-inner-decr.target"), 0.0),
     (target("mouth/mouth-upperlip-ext-up.target"), 0.0),
     (target("mouth/mouth-lowerlip-height-incr.target"), 0.0),
@@ -183,9 +183,9 @@ if SEX == "male":
             1.0,
         ),
         (target(UNI + "maxmuscle-averageweight.target") - AVG, 0.25),
-        (pair("eyes/{s}-eye-scale-incr.target"), 0.45),
+        (pair("eyes/{s}-eye-scale-incr.target"), 0.1),
         (pair("eyes/{s}-eye-bag-decr.target"), 0.6),
-        (pair("cheek/{s}-cheek-bones-incr.target"), 0.4),
+        (pair("cheek/{s}-cheek-bones-incr.target"), 0.2),
     ]
 P = BASE + sum(t * w for t, w in SHAPE)
 
@@ -216,7 +216,7 @@ def refine(P):
     nose_w = np.abs(target("nose/nose-volume-decr.target")).sum(1)
     nose = P[nose_w > nose_w.max() * 0.3].mean(axis=0)
     w = _falloff(P, nose, 0.42)[:, None]
-    P = P + (P - nose) * -0.1 * w
+    P = P + (P - nose) * -0.02 * w
     # taper the lower face from the mouth down to the chin
     below = np.clip((mouth[1] - P[:, 1]) / 0.55, 0, 1) * _falloff(P, mouth, 1.1)
     P[:, 0] = P[:, 0] - (P[:, 0] - mouth[0]) * 0.08 * below
@@ -233,6 +233,12 @@ KEYS = {
     "eyeSize": pair("eyes/{s}-eye-scale-incr.target") * 0.8,
     "eyeTilt": pair("eyes/{s}-eye-corner2-up.target") * 0.8,
     "nose": target("nose/nose-scale-horiz-incr.target") * 0.8,
+    "noseLength": -target("nose/nose-scale-vert-decr.target") * 0.65,
+    "noseBridge": target("nose/nose-hump-incr.target") * 0.65,
+    "noseTip": target("nose/nose-point-up.target") * 0.65,
+    "mouthWidth": target("mouth/mouth-scale-horiz-incr.target") * 0.65,
+    "chinHeight": -target("chin/chin-height-decr.target") * 0.65,
+    "chinDepth": -target("chin/chin-prominent-decr.target") * 0.65,
     "lips": (
         target("mouth/mouth-upperlip-volume-incr.target")
         + target("mouth/mouth-lowerlip-volume-incr.target")
@@ -577,8 +583,14 @@ def build_body():
     global BODY_SRC
     BODY_SRC = src
     face_uvs(ob, src)
+    print("Baking face masks", flush=True)
     global MARKS
     MARKS = face_maps(ob, src)
+    print("Baking skin detail", flush=True)
+    skin_detail.bake(ob, os.path.join(MH, "3dobjs", "base.obj"),
+                     os.path.join(HERE, ".cache", "skin-detail-source.png"),
+                     os.path.join(ROOT, "public", "models", f"doll-skin-detail{SUFFIX}.png"), MARKS)
+    print("Binding body and face shapes", flush=True)
     weights(ob, src)
     shape_keys(ob, src)
     return ob
@@ -603,7 +615,7 @@ def lid_line(group, upper, bins=12):
     return np.array(line)
 
 
-LASH_LEN = 0.0145
+LASH_LEN = 0.007
 LIDS = {}
 LASH_BASE = 10**9
 
@@ -926,6 +938,9 @@ def export(rig, objects, name):
     bpy.ops.object.select_all(action="DESELECT")
     rig.select_set(True)
     for ob in objects:
+        if ob.type == "MESH" and ob.data.shape_keys:
+            for key in ob.data.shape_keys.key_blocks:
+                key.value = 0
         ob.select_set(True)
     bpy.ops.export_scene.gltf(
         filepath=os.path.join(OUT_DIR, name + ".glb"),
@@ -981,7 +996,10 @@ def piercing_anchors(body):
 def main():
     reset()
     rig = build_armature()
+    print("Building body", SEX, flush=True)
     body = build_body()
+    if os.environ.get("SKIN_ONLY"):
+        return
     smooth(body)
     eyes = build_eyes()
     bind(body, rig)
@@ -1000,6 +1018,7 @@ def main():
     hair_only = bool(os.environ.get("HAIR_ONLY"))
     # OUTFIT_ONLY=1 rebuilds the body and outfits without the (slow) hair
     outfit_only = bool(os.environ.get("OUTFIT_ONLY"))
+    print("Building fitted parts", flush=True)
     parts = ([] if outfit_only else doll_hair.build(ctx)) + (
         [] if hair_only else doll_outfits.build(ctx, body, BODY_SRC)
     )

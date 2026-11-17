@@ -275,6 +275,7 @@ function worldDirection(local: Vec2, camera: THREE.Camera): Vec2 | null {
 }
 
 export function PlayerController({
+  editing = false,
   player,
   area,
   look,
@@ -288,6 +289,7 @@ export function PlayerController({
   onPortal,
   water = null,
 }: {
+  editing?: boolean;
   player: Player;
   area: WalkArea;
   look: Look;
@@ -343,7 +345,7 @@ export function PlayerController({
 
   // Space jumps, in the city (other rooms give Space to their games)
   useEffect(() => {
-    if (area !== CITY_AREA) return;
+    if (area !== CITY_AREA || editing) return;
     const key = (e: KeyboardEvent) => {
       if (e.code !== "Space" || e.repeat) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -363,10 +365,11 @@ export function PlayerController({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [area, player]);
+  }, [area, player, editing]);
   // leaving the room mid-dive must not leave the next one underwater
   useEffect(() => () => submergedView.set({ on: false }), []);
   useFrame((state, rawDt) => {
+    if (editing) return;
     const dt = rawDt * TIME_SCALE;
     playerSpot.x = player.pos.x;
     playerSpot.z = player.pos.z;
