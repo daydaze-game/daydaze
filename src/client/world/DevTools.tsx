@@ -7,6 +7,9 @@ import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import * as THREE from "three";
+import { CLUB_NIGHTS } from "../../game/events.ts";
+import { MINIGAME_IDS, type MinigameId } from "../../game/hotspots.ts";
+import { ROOMS, isRoomId, type RoomId } from "../../game/rooms.ts";
 
 type DevState = {
   open: boolean;
@@ -190,6 +193,37 @@ export function DevProbe() {
   return freeCam ? <OrbitControls makeDefault /> : null;
 }
 
+/** Night and hour are read once at start, so changing them reloads the page. */
+function reloadWith(key: string, value: string): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set(key, value);
+  window.location.assign(url);
+}
+
+/** A dropdown that fires on choosing, then resets to its label. */
+function Pick({
+  label,
+  options,
+  onPick,
+}: {
+  label: string;
+  options: readonly string[];
+  onPick: (value: string) => void;
+}) {
+  return (
+    <select
+      value=""
+      onChange={(e) => onPick(e.target.value)}
+      style={{ marginRight: 8, maxWidth: 110 }}
+    >
+      <option value="">{label}…</option>
+      {options.map((o) => (
+        <option key={o}>{o}</option>
+      ))}
+    </select>
+  );
+}
+
 const TOGGLES = [
   ["wireframe", "wireframe"],
   ["freeCam", "free cam"],
@@ -199,7 +233,13 @@ const TOGGLES = [
 ] as const;
 
 /** Outside the Canvas: the readout and the switches. */
-export function DevPanel() {
+export function DevPanel({
+  onGo,
+  onGame,
+}: {
+  onGo: (room: RoomId) => void;
+  onGame: (game: MinigameId) => void;
+}) {
   const s = useSyncExternalStore(subscribe, () => state);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -230,6 +270,36 @@ export function DevPanel() {
       <div>
         {s.geometries} geo · {s.textures} tex · {s.lights} lights · {s.objects}{" "}
         objects
+      </div>
+      <div style={{ marginTop: 4 }}>
+        <Pick
+          label="room"
+          options={Object.keys(ROOMS)}
+          onPick={(v) => isRoomId(v) && onGo(v)}
+        />
+        <Pick
+          label="game"
+          options={MINIGAME_IDS}
+          onPick={(v) => {
+            const g = MINIGAME_IDS.find((id) => id === v);
+            if (g) onGame(g);
+          }}
+        />
+        <Pick
+          label="event night"
+          options={CLUB_NIGHTS.map((n) => n.id)}
+          onPick={(v) => reloadWith("night", v)}
+        />
+        <label style={{ marginRight: 8 }}>
+          time{" "}
+          <input
+            type="time"
+            onChange={(e) =>
+              e.target.value && reloadWith("time", e.target.value)
+            }
+            style={{ width: 90 }}
+          />
+        </label>
       </div>
       {TOGGLES.map(([key, label]) => (
         <label key={key} style={{ marginRight: 8 }}>

@@ -635,7 +635,12 @@ export function App() {
             onlineSession()?.sendChat(text);
           }}
         />
-        {import.meta.env.DEV && <DevPanel />}
+        {import.meta.env.DEV && (
+          <DevPanel
+            onGo={(room) => travel(room, ROOMS[room].spawn)}
+            onGame={setGame}
+          />
+        )}
         {flags.debug && (
           <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
         )}
