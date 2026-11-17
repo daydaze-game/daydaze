@@ -25,6 +25,7 @@ import { Ocean } from "./Ocean.tsx";
 import { CITY_LAND, Outskirts } from "./Outskirts.tsx";
 import { Fireworks } from "./Fireworks.tsx";
 import { Parade } from "./Parade.tsx";
+import { Heist } from "./Heist.tsx";
 import { BeachLife } from "./BeachLife.tsx";
 import { BEACH_COURT, VolleyCourt } from "./VolleyCourt.tsx";
 import { SquareLife } from "./SquareLife.tsx";
@@ -313,6 +314,7 @@ export function CityScene({
       <VolleyCourt spot={BEACH_COURT} prize="volleyball" player={player} />
       <Fireworks />
       <Parade />
+      <Heist />
       <SquareLife />
       <Parols />
       {KINDS.map((kind) => (
