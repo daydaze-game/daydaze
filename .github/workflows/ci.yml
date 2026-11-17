@@ -54,6 +54,8 @@ jobs:
         run: npm run lint
       - name: Dead code (Knip)
         run: npm run lint:dead
+      - name: Spelling (American English)
+        run: npm run lint:spelling
       - name: Prettier
         run: npm run format:check
       - name: TypeScript (client, game and Worker)

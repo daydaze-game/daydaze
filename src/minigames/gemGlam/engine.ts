@@ -1,5 +1,5 @@
 /**
- * Gem Glam: the arcade's match-3. Swap two neighbouring gems to line up
+ * Gem Glam: the arcade's match-3. Swap two neighboring gems to line up
  * three or more of a kind; matches clear, gems fall and new ones drop in, and
  * cascades score more. Four in a line leaves a sparkle gem that clears its
  * row and column when matched; five leaves a disco gem that clears every gem
@@ -183,7 +183,7 @@ function clearAndDrop(
 }
 
 /**
- * Swaps two neighbouring gems. Returns the clear steps (cascades included),
+ * Swaps two neighboring gems. Returns the clear steps (cascades included),
  * or null when the swap is illegal and the board is unchanged.
  */
 export function play(g: Game, a: Cell, b: Cell): Step[] | null {

@@ -29,10 +29,7 @@ function play(store: Store, actions: readonly Action[]): Stealth {
 }
 
 // Browse until the beat the store looks away from the player, then pocket.
-function patientRun(
-  store: Store,
-  pocketAt: (beat: number) => boolean,
-): Action[] {
+function patientRun(pocketAt: (beat: number) => boolean): Action[] {
   const actions: Action[] = [];
   let beat = 0;
   while (!pocketAt(beat)) {
@@ -57,10 +54,7 @@ test("the store list has unique ids and at least one store per difficulty", () =
 
 test("the bodega is easy: a patient player walks out with the item", () => {
   const bodega = storeNamed("bodega");
-  const actions = patientRun(
-    bodega,
-    (beat) => watchersFacing(bodega, beat) === 0,
-  );
+  const actions = patientRun((beat) => watchersFacing(bodega, beat) === 0);
   const result = play(bodega, actions);
   assert.equal(result.outcome, "escaped");
   assert.equal(result.pocketed, true);
@@ -70,7 +64,7 @@ test("the mall is medium: a patient player escapes, but the tag alarm adds suspi
   const mall = storeNamed("mall");
   const result = play(
     mall,
-    patientRun(mall, (b) => watchersFacing(mall, b) === 0),
+    patientRun((b) => watchersFacing(mall, b) === 0),
   );
   assert.equal(result.outcome, "escaped");
   assert.ok(result.suspicion > 0);
@@ -152,7 +146,7 @@ test("fines are at least ten coins and rise with the item price", () => {
   assert.ok(pricey.kind === "fine" && pricey.coins > cheap.coins);
 });
 
-test("jail time grows with the item value and with repeat offences", () => {
+test("jail time grows with the item value and with repeat offenses", () => {
   const jewelry = storeNamed("jewelry");
   const cheap = penaltyFor(jewelry, 50, 0);
   const pricey = penaltyFor(jewelry, 900, 0);

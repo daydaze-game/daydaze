@@ -24,7 +24,7 @@ const DT = 1 / 240;
 /** A pin hit this hard, or pushed this far, goes down. */
 const TOPPLE_SPEED = 0.45;
 const TOPPLE_SHIFT = 0.07;
-/** How far a falling pin's body reaches into its neighbours. */
+/** How far a falling pin's body reaches into its neighbors. */
 const TUMBLE_REACH = 0.15;
 /** Snapshots for playback, this many per second. */
 const SAMPLE_RATE = 30;

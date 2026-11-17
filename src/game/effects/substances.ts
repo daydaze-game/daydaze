@@ -10,7 +10,7 @@ const clamp01 = (x: number) =>
   Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0;
 
 /** Every meter, in a fixed order (ties go to the earlier one). */
-export const SUBSTANCES = ["high", "trip"] as const;
+export const SUBSTANCES = ["high", "trip", "acid"] as const;
 export type Substance = (typeof SUBSTANCES)[number];
 
 /** Where a dose is in its curve; `null` when it is over or not yet felt. */
@@ -57,6 +57,16 @@ export const DOSES = {
     peak: 60,
     peakEnd: 150,
     end: 270,
+  },
+  // LSD tab (~100 µg, a common dose): felt in 15-60 min, comes up over 45-90,
+  // peaks 3-5 h, 8-12 h in all: the longest of any substance
+  tab: {
+    substance: "acid",
+    strength: 0.65,
+    onset: 30,
+    peak: 90,
+    peakEnd: 330,
+    end: 600,
   },
 } as const satisfies Record<string, Profile>;
 export type Dose = keyof typeof DOSES;
@@ -112,10 +122,11 @@ export type Meters = Record<Substance, Meter>;
 export const soberMeters = (): Meters => ({
   high: { level: 0, phase: null },
   trip: { level: 0, phase: null },
+  acid: { level: 0, phase: null },
 });
 
 // scratch for readMeters: the most each meter's strongest dose is felt
-const topFelt: Record<Substance, number> = { high: 0, trip: 0 };
+const topFelt: Record<Substance, number> = { high: 0, trip: 0, acid: 0 };
 
 /** Fills `out` with every meter at play time `now`. Writes in place, since
  * the client reads it every frame. */
@@ -218,6 +229,26 @@ export const BODY: Record<Substance, Record<Phase, Body>> = {
       rate: 0.9,
     },
   },
+  acid: {
+    // yawning, a little queasy, tingling
+    comeup: {
+      loops: ["idle-breathing", "idle-weight-shift"],
+      tics: ["yawn", "yawn", "sigh"],
+      rate: 1,
+    },
+    // energetic and exploring: the urge to walk, laugh and stare at things
+    peak: {
+      loops: ["idle-look-around", "idle-casual-2", "idle-casual-3"],
+      tics: ["laugh", "surprised", "excited", "look-distance", "happy-hands"],
+      rate: 1.08,
+    },
+    // the long tail: wired but tired
+    comedown: {
+      loops: ["idle-bored", "idle-weight-shift"],
+      tics: ["sigh", "yawn", "look-distance"],
+      rate: 0.95,
+    },
+  },
 };
 
 /** Her body for a meter, or null when it doesn't show. */
@@ -239,6 +270,15 @@ export type HighLook = {
   /** 1 while the colors drift on their own, 0 (held still) under reduced
    * motion. */
   drift: number;
+  /** Radiant color: extra saturation and a little contrast, 0..1. Kept
+   * under reduced motion (it is color, not movement). */
+  radiance: number;
+  /** Faint kaleidoscopic hue bands round the screen edge, 0..1. Zero under
+   * reduced motion. */
+  geometry: number;
+  /** Afterimage trails behind moving things, 0..1. Zero under reduced
+   * motion. */
+  tracer: number;
 };
 
 export const BREATHE_AMOUNT = 0.006;
@@ -246,7 +286,8 @@ export const BREATHE_HZ = 0.25;
 
 /** The screen look for the meters at the setting's intensity factor (0..1):
  * weed is a faint glow and color lift (no hallucinations, which are a myth
- * at normal doses); a trip saturates, shifts colors and breathes. */
+ * at normal doses); a trip saturates, shifts colors and breathes; acid adds
+ * radiant color, faint peripheral geometry and tracers. */
 export function highParams(
   meters: Readonly<Meters>,
   factor: number,
@@ -255,10 +296,15 @@ export function highParams(
   const f = clamp01(factor);
   const h = clamp01(meters.high.level) * f;
   const t = clamp01(meters.trip.level) * f;
+  const a = clamp01(meters.acid.level) * f;
   return {
-    glow: Math.min(1, h * 0.8 + t * 0.4),
-    hue: t,
-    breathe: calm ? 0 : t * BREATHE_AMOUNT,
+    glow: Math.min(1, h * 0.8 + t * 0.4 + a * 0.3),
+    hue: Math.max(t, a * 0.7),
+    // acid breathes like a trip, at half the depth
+    breathe: calm ? 0 : (t + a * 0.5) * BREATHE_AMOUNT,
     drift: calm ? 0 : 1,
+    radiance: a,
+    geometry: calm ? 0 : a,
+    tracer: calm ? 0 : a * 0.85,
   };
 }
