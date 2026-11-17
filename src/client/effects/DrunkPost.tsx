@@ -2,7 +2,8 @@
 // screen, tints it and breathes the colors from the live drunk and high looks,
 // a small one before it for heavy drinking's double vision (it samples the
 // input beside each pixel, so the composer gives it a pass of its own), and
-// acid's tracers (it keeps its own history frame).
+// acid's tracers (it keeps its own history frame). Molly reuses the glow,
+// radiance and tracer paths and adds an eye wiggle.
 import { useFrame } from "@react-three/fiber";
 import { Effect, EffectAttribute } from "postprocessing";
 import { useEffect, useMemo } from "react";
@@ -32,6 +33,7 @@ uniform float drift;
 uniform float glare;
 uniform float radiance;
 uniform float geometry;
+uniform float wiggle;
 
 // rotates a color round the gray axis by angle a
 vec3 hueTurn(vec3 c, float a) {
@@ -44,6 +46,9 @@ vec3 hueTurn(vec3 c, float a) {
 void mainUv(inout vec2 uv) {
 	uv.x += sin(time * 2.2) * sway;
 	uv.y += cos(time * 1.6) * sway * 0.5;
+	// molly: the eyes wiggle, a hair of sideways jitter at about 1 Hz (held
+	// still under reduced motion, where drift is 0)
+	uv.x += sin(time * 6.0 * drift) * wiggle * 0.0015;
 	// the trip: the whole view swells and settles, slower than a breath
 	uv = 0.5 + (uv - 0.5) * (1.0 - breathe * sin(time * 1.57));
 }
@@ -83,7 +88,8 @@ class DrunkEffect extends Effect {
     | "drift"
     | "glare"
     | "radiance"
-    | "geometry",
+    | "geometry"
+    | "wiggle",
     Uniform
   >;
 
@@ -100,6 +106,7 @@ class DrunkEffect extends Effect {
       glare: new Uniform(0),
       radiance: new Uniform(0),
       geometry: new Uniform(0),
+      wiggle: new Uniform(0),
     };
     super("DrunkEffect", SHADER, {
       uniforms: new Map(Object.entries(uniforms)),
@@ -253,6 +260,7 @@ export function DrunkPost() {
     effect.params.drift.value = liveHigh.drift;
     effect.params.radiance.value = liveHigh.radiance;
     effect.params.geometry.value = liveHigh.geometry;
+    effect.params.wiggle.value = liveHigh.wiggle;
     tracer.params.tracer.value = liveHigh.tracer;
   });
   return (
