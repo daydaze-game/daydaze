@@ -16,7 +16,13 @@ import {
   onHighChange,
 } from "./high.ts";
 import { useReducedMotion } from "../motion.ts";
-import { ageBuzz, getBuzz, liveDrunk, onBuzzChange } from "./drunk.ts";
+import {
+  ageBuzz,
+  getBuzz,
+  getHangover,
+  liveDrunk,
+  onBuzzChange,
+} from "./drunk.ts";
 
 /**
  * Fades the buzz, works out this frame's drunk look and publishes it to the
@@ -36,11 +42,13 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
   useFrame((_, dt) => {
     ageBuzz(dt);
     const buzz = getBuzz();
-    const look = visualParams(buzz, intensity, calm);
+    const look = visualParams(buzz, intensity, calm, getHangover());
     liveDrunk.sway = look.sway;
     liveDrunk.wobble = look.wobble;
     liveDrunk.warm = look.warm;
     liveDrunk.edge = look.edge;
+    liveDrunk.ghost = look.ghost;
+    liveDrunk.glare = look.glare;
     ageHigh(dt);
     const meters = getMeters();
     const lifted = highParams(meters, intensityFactor(intensity), calm);
