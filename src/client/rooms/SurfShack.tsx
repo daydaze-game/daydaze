@@ -228,6 +228,7 @@ function Break({ player }: { player: Player }) {
     const z = BREAK_Z + 1.4;
     const lean = s.surf.v * 0.08;
     const wiped = s.surf.state === "wiped";
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(x, wiped ? -1.4 : y + 0.08, z);
     player.seat.yaw = s.surf.v >= 0 ? Math.PI / 2 : -Math.PI / 2;

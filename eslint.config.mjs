@@ -66,4 +66,19 @@ export default defineConfig(
       "jsx-a11y/aria-role": "off",
     },
   },
+  {
+    // Render rule: allocate nothing inside useFrame (GC hitches at 60 fps).
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "CallExpression[callee.name='useFrame'] :function NewExpression",
+          message:
+            "No `new` inside useFrame: hoist it to a module constant or useMemo/useRef.",
+        },
+      ],
+    },
+  },
 );
