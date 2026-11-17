@@ -269,6 +269,7 @@ export function Range({ player }: { player: Player }) {
     }
     if (!took.current) {
       const mine: GameSeat = {
+        // eslint-disable-next-line no-restricted-syntax -- runs once, when the player takes the seat
         position: new THREE.Vector3(...LINE),
         yaw: Math.PI,
       };
