@@ -1,0 +1,18 @@
+# Git hooks (lefthook): fast checks on staged files only, run in parallel.
+# Full lint, typecheck and tests stay in CI (`npm run verify`). Installed by
+# `npm install` (the "prepare" script). Skip in an emergency with
+# `LEFTHOOK=0 git commit` or `git commit --no-verify`. See CONTRIBUTING.md.
+pre-commit:
+  parallel: true
+  jobs:
+    - name: prettier
+      run: npx prettier --check --ignore-unknown {staged_files} || { echo "Prettier - run 'npm run format', then re-stage."; exit 1; }
+    - name: eslint
+      glob: "*.{js,mjs,ts,tsx}"
+      run: npx eslint --no-warn-ignored {staged_files}
+    - name: gitleaks
+      # Optional tool: CI and other machines may not have it.
+      run: if command -v gitleaks >/dev/null; then gitleaks git --staged --no-banner --redact; else echo "gitleaks not installed - skipping secret scan"; fi
+    - name: actionlint
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: if command -v actionlint >/dev/null; then actionlint {staged_files}; else echo "actionlint not installed - skipping"; fi
