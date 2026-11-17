@@ -28,7 +28,7 @@ jobs:
       # one shot per process (a fresh browser each), against a local dev server
       - run: |
           npx vite --port 5195 --strictPort > /tmp/vite.log 2>&1 &
-          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:5195 && break; sleep 1; done
+          for _ in $(seq 1 60); do curl -sf -o /dev/null http://localhost:5195 && break; sleep 1; done
           for s in $SHOTS; do
             case "$s" in *[!a-z0-9-]*) echo "bad shot name: $s"; exit 1;; esac
             node --experimental-strip-types scripts/screenshots.ts "$s"

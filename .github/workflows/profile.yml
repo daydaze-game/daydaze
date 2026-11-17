@@ -51,7 +51,8 @@ jobs:
             AREAS=$(printf '%s' "$MESSAGE" | grep -oE '\[profile:[a-z,]+\]' | head -1 | tr -d '[]' | cut -d: -f2 | tr ',' ' ')
           fi
           AREAS=${AREAS:-spawn nightlife park beachside pulse}
-          node --experimental-strip-types scripts/perf-profile.ts $AREAS | tee profile/summary.txt
+          read -ra areas <<< "$AREAS"
+          node --experimental-strip-types scripts/perf-profile.ts "${areas[@]}" | tee profile/summary.txt
         env:
           AREAS: ${{ inputs.areas }}
           MESSAGE: ${{ github.event.head_commit.message }}
