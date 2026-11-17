@@ -37,12 +37,23 @@ every push and pull request to `main` and fails fast.
 | Command | What it checks |
 | --- | --- |
 | `npm run lint` | ESLint: TypeScript and React hooks rules |
+| `npm run lint:spelling` | cspell, American English only; add a legitimate word (a name, a Tagalog dish) to `cspell-words.txt`, one per line in sorted order, and fix real typos and British spellings instead |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
 | `npm test` | unit tests (Node's test runner) |
 | `npm run test:coverage` | the same, with a coverage report in `coverage/` |
 | `npm run build` | the production bundle in `dist/` |
-| `npm run verify` | lint, tests, types, format, build and the perf budget together |
+| `npm run verify` | lint, spelling, tests, types, format, build and the perf budget together |
+
+### Pre-commit hook
+
+`npm install` installs a [lefthook](https://lefthook.dev) pre-commit hook
+(`lefthook.yml`; it also works in git worktrees). On staged files only, in
+parallel, it runs Prettier `--check` (fix with `npm run format`), ESLint on
+`*.{js,mjs,ts,tsx}`, `gitleaks git --staged` and actionlint on staged
+workflows. The last two are skipped with a message if the binary is not
+installed. It runs no typecheck or tests: CI runs the full checks anyway. In an
+emergency, skip it with `LEFTHOOK=0 git commit` or `git commit --no-verify`.
 
 Browser and server suites are slower; run the parts you touched:
 

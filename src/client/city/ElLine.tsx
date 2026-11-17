@@ -134,14 +134,14 @@ export class ElLineBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
 > {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch(error: Error) {
+  override componentDidCatch(error: Error) {
     console.warn("the El could not be drawn", error);
   }
-  render() {
+  override render() {
     return this.state.failed ? null : this.props.children;
   }
 }
