@@ -214,3 +214,15 @@ export function dreamBuilding(
     };
   });
 }
+
+/** Preserve the downloaded proportions and keep its front at the street edge. */
+export function landmarkPlacement(spot: DreamSpot) {
+  const scale = Math.min(spot.sx, spot.sz);
+  const forward = (spot.sz - scale) * 8;
+  return {
+    x: spot.x + Math.sin(spot.yaw) * forward,
+    y: spot.y,
+    z: spot.z + Math.cos(spot.yaw) * forward,
+    scale,
+  };
+}

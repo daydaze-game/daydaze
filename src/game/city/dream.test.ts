@@ -158,3 +158,29 @@ test("detailed landmarks replace one central module each without repeating on wi
   assert.equal(all.length, expected.size);
   assert.equal(new Set(all.map((s) => s.landmark)).size, expected.size);
 });
+
+test("textured landmarks keep their proportions and the street-facing boundary", async () => {
+  const dream = await import("./dream.ts");
+  assert.equal(typeof dream.landmarkPlacement, "function");
+  for (const id of ["vesper-hotel", "bus-shelter-block", "mural-wall"]) {
+    const b = BUILDINGS.find((b) => b.id === id);
+    assert.ok(b);
+    const spot = spots(b).find((s) => s.landmark !== undefined);
+    assert.ok(spot);
+    const p = dream.landmarkPlacement(spot);
+    assert.equal(p.scale, Math.min(spot.sx, spot.sz));
+    const oldFront = [
+      spot.x + Math.sin(spot.yaw) * spot.sz * 8,
+      spot.z + Math.cos(spot.yaw) * spot.sz * 8,
+    ];
+    const newFront = [
+      p.x + Math.sin(spot.yaw) * p.scale * 8,
+      p.z + Math.cos(spot.yaw) * p.scale * 8,
+    ];
+    assert.ok(
+      Math.hypot(oldFront[0]! - newFront[0]!, oldFront[1]! - newFront[1]!) <
+        1e-6,
+      id,
+    );
+  }
+});

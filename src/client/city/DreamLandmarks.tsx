@@ -3,7 +3,11 @@
 import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useEffect, useMemo } from "react";
-import type { DreamLandmark, DreamSpot } from "../../game/city/dream.ts";
+import {
+  landmarkPlacement,
+  type DreamLandmark,
+  type DreamSpot,
+} from "../../game/city/dream.ts";
 
 type LandmarkSpot = DreamSpot & { landmark: DreamLandmark };
 
@@ -12,6 +16,7 @@ export function isLandmark(spot: DreamSpot): spot is LandmarkSpot {
 }
 
 export function DreamLandmarkBuilding({ spot }: { spot: LandmarkSpot }) {
+  const placement = landmarkPlacement(spot);
   const name = `${spot.landmark}${spot.far ? "-lo" : ""}`;
   const gltf = useGLTF(`/models/city-dream/${name}.glb`);
   const scene = useMemo(() => gltf.scene.clone(true), [gltf]);
@@ -26,9 +31,9 @@ export function DreamLandmarkBuilding({ spot }: { spot: LandmarkSpot }) {
   return (
     <group
       name={`landmark-${spot.id}`}
-      position={[spot.x, spot.y, spot.z]}
+      position={[placement.x, placement.y, placement.z]}
       rotation={[0, spot.yaw, 0]}
-      scale={[spot.sx, spot.sy, spot.sz]}
+      scale={placement.scale}
     >
       <primitive object={scene} dispose={null} />
     </group>

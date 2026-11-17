@@ -116,6 +116,33 @@ def reduce(objects, target):
             bpy.ops.object.modifier_apply(modifier=mod.name)
 
 
+
+def retain_roofs(objects):
+    """Keep the original upper silhouette while simplifying the lower body.
+
+    A decimator can delete an entire thin finial or pointed roof. Partition
+    those faces first; the two meshes share the original UVs and materials.
+    """
+    lower, upper = bounds(objects)
+    roofline = upper[2] - (upper[2] - lower[2]) * 0.2
+    roofs = []
+    for obj in objects:
+        roof = copy_mesh(obj, obj.name + " roof")
+        for mesh, keep_roof in [(obj.data, False), (roof.data, True)]:
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+            remove = [face for face in bm.faces
+                      if any(v.co.z >= roofline for v in face.verts) != keep_roof]
+            bmesh.ops.delete(bm, geom=remove, context="FACES")
+            bm.to_mesh(mesh)
+            bm.free()
+        if roof.data.polygons:
+            roofs.append(roof)
+        else:
+            bpy.data.objects.remove(roof, do_unlink=True)
+    return roofs
+
+
 def export(objects, path):
     bpy.ops.object.select_all(action="DESELECT")
     for obj in objects:
@@ -213,7 +240,9 @@ def main():
             near = [copy_mesh(obj,key) for obj in originals]
             far = [copy_mesh(obj,key+"-lo") for obj in originals]
             reduce(near,18000)
+            roofs = retain_roofs(far)
             reduce(far,1000)
+            far.extend(roofs)
             near_cost = export(near,OUTPUT/(key+".glb"))
             far_cost = export(far,OUTPUT/(key+"-lo.glb"))
             costs[key] = {"tris": near_cost["tris"],"lo": far_cost["tris"],"parts":near_cost["parts"],"loParts":far_cost["parts"]}

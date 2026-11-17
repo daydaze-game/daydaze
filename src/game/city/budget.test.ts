@@ -303,3 +303,29 @@ test("textured landmarks are priced from their shipped near and far meshes", () 
     DREAM_LANDMARK_COST.palace.tris,
   );
 });
+
+test("distant landmark roofs retain the detailed skyline height", () => {
+  const metadata: Record<
+    string,
+    {
+      near: { bounds: { max: number[] } };
+      far: { bounds: { max: number[] } };
+    }
+  > = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../public/models/city-dream/landmarks.generated.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  for (const kind of DREAM_LANDMARKS) {
+    const entry = metadata[kind];
+    assert.ok(entry, kind);
+    assert.ok(
+      Math.abs(entry.near.bounds.max[1]! - entry.far.bounds.max[1]!) < 0.3,
+      `${kind} loses its roof or spire when switching detail`,
+    );
+  }
+});
