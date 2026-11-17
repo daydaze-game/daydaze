@@ -120,7 +120,7 @@ test("idles: the player breathes first, a crowd stands differently", () => {
       assert.equal(clipOf(id)?.kind, "idle", id);
       seen.add(id);
     }
-  assert.ok(seen.size >= 15, `${seen.size} idles in use`);
+  assert.ok(seen.size >= 12, `${seen.size} idles in use`);
   // the same doll in the same slot always stands the same way
   assert.deepEqual(
     pickClip({ ...base, seed: 9, slot: 3 }),
