@@ -4,6 +4,7 @@
 // so nothing here is about style.
 import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -53,6 +54,16 @@ export default defineConfig(
     rules: {
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "error",
+    },
+  },
+  {
+    // Accessibility of the DOM UI (src/client/ui and friends).
+    files: ["src/**/*.tsx"],
+    extends: [jsxA11y.flatConfigs.recommended],
+    rules: {
+      // R3F and NPC components take a `role` prop that is a game role, not an
+      // ARIA role, so this rule misreads them.
+      "jsx-a11y/aria-role": "off",
     },
   },
 );
