@@ -2,6 +2,8 @@
 // phones), Esc closes it, and focus returns to the toggle.
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { CloseIcon, MirrorIcon } from "./icons.tsx";
+import { useHud } from "../rooms/speedway/RaceHud.tsx";
+import { driving } from "../world/driving.ts";
 
 /**
  * The dressing room: a toggle and a drawer that slides in from the right
@@ -19,10 +21,13 @@ export function Dressing({
 }) {
   const toggle = useRef<HTMLButtonElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
+  const inVehicle = useHud() !== null;
 
   // Focus moves after the drawer is visible, so it waits one frame for React.
   const setOpen = useCallback(
     (next: boolean) => {
+      // Check live state as well as the HUD: a ride can start between polls.
+      if (next && (driving.session || driving.request)) return;
       onOpenChange(next);
       requestAnimationFrame(() =>
         (next ? title.current : toggle.current)?.focus(),
@@ -30,6 +35,10 @@ export function Dressing({
     },
     [onOpenChange],
   );
+
+  useEffect(() => {
+    if (inVehicle && open) setOpen(false);
+  }, [inVehicle, open, setOpen]);
 
   useEffect(() => {
     if (!open) return;
@@ -48,6 +57,12 @@ export function Dressing({
         className="dressing-toggle"
         aria-expanded={open}
         aria-controls="dressing"
+        disabled={inVehicle && !open}
+        title={
+          inVehicle
+            ? "Park or finish your ride to customize your character"
+            : undefined
+        }
         onClick={() => setOpen(!open)}
       >
         <MirrorIcon />
