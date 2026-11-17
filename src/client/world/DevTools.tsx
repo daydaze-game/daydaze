@@ -12,6 +12,12 @@ type DevState = {
   open: boolean;
   wireframe: boolean;
   freeCam: boolean;
+  helpers: boolean;
+  halfRes: boolean;
+  paused: boolean;
+  geometries: number;
+  textures: number;
+  lights: number;
   fps: number;
   calls: number;
   triangles: number;
@@ -21,6 +27,12 @@ let state: DevState = {
   open: false,
   wireframe: false,
   freeCam: false,
+  helpers: false,
+  halfRes: false,
+  paused: false,
+  geometries: 0,
+  textures: 0,
+  lights: 0,
   fps: 0,
   calls: 0,
   triangles: 0,
@@ -57,6 +69,15 @@ function applyWireframe(scene: THREE.Scene, on: boolean): void {
   });
 }
 
+/** Real lights in the scene; the low tier allows at most 4. */
+function countLights(scene: THREE.Scene): number {
+  let n = 0;
+  scene.traverse((o) => {
+    if (o instanceof THREE.Light && !(o instanceof THREE.AmbientLight)) n++;
+  });
+  return n;
+}
+
 /** Inside the Canvas: samples gl.info twice a second, applies the toggles. */
 export function DevProbe() {
   const scene = useThree((s) => s.scene);
@@ -71,6 +92,9 @@ export function DevProbe() {
       fps: Math.round((t.frames * 1000) / (now - t.since)),
       calls: gl.info.render.calls,
       triangles: gl.info.render.triangles,
+      geometries: gl.info.memory.geometries,
+      textures: gl.info.memory.textures,
+      lights: countLights(scene),
     });
     t.frames = 0;
     t.since = now;
@@ -78,11 +102,46 @@ export function DevProbe() {
     if (state.wireframe) applyWireframe(scene, true);
   });
   useEffect(() => applyWireframe(scene, wire), [scene, wire]);
+  const { helpers, halfRes, paused } = useSyncExternalStore(
+    subscribe,
+    () => state,
+  );
+  const setDpr = useThree((s) => s.setDpr);
+  const setFrameloop = useThree((s) => s.setFrameloop);
+  useEffect(() => {
+    if (!helpers) return;
+    const grid = new THREE.GridHelper(100, 100);
+    const axes = new THREE.AxesHelper(5);
+    scene.add(grid, axes);
+    return () => {
+      scene.remove(grid, axes);
+      grid.dispose();
+      axes.dispose();
+    };
+  }, [scene, helpers]);
+  useEffect(() => {
+    if (!halfRes) return;
+    const before = window.devicePixelRatio;
+    setDpr(0.5);
+    return () => setDpr(Math.min(before, 1.5));
+  }, [halfRes, setDpr]);
+  // "never" also stops this probe's frames, so only the panel can resume
+  useEffect(() => {
+    setFrameloop(paused ? "never" : "always");
+  }, [paused, setFrameloop]);
   const freeCam = useFreeCam();
   return freeCam ? <OrbitControls makeDefault /> : null;
 }
 
-/** Outside the Canvas: the readout and the two switches. */
+const TOGGLES = [
+  ["wireframe", "wireframe"],
+  ["freeCam", "free cam"],
+  ["helpers", "grid + axes"],
+  ["halfRes", "half res"],
+  ["paused", "pause"],
+] as const;
+
+/** Outside the Canvas: the readout and the switches. */
 export function DevPanel() {
   const s = useSyncExternalStore(subscribe, () => state);
   useEffect(() => {
@@ -110,22 +169,19 @@ export function DevPanel() {
       <div>
         {s.fps} fps · {s.calls} calls · {(s.triangles / 1000).toFixed(0)}k tris
       </div>
-      <label>
-        <input
-          type="checkbox"
-          checked={s.wireframe}
-          onChange={(e) => patch({ wireframe: e.target.checked })}
-        />{" "}
-        wireframe
-      </label>{" "}
-      <label>
-        <input
-          type="checkbox"
-          checked={s.freeCam}
-          onChange={(e) => patch({ freeCam: e.target.checked })}
-        />{" "}
-        free cam
-      </label>
+      <div>
+        {s.geometries} geo · {s.textures} tex · {s.lights} lights
+      </div>
+      {TOGGLES.map(([key, label]) => (
+        <label key={key} style={{ marginRight: 8 }}>
+          <input
+            type="checkbox"
+            checked={s[key]}
+            onChange={(e) => patch({ [key]: e.target.checked })}
+          />{" "}
+          {label}
+        </label>
+      ))}
     </div>
   );
 }
