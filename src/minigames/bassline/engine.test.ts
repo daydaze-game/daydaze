@@ -1,3 +1,5 @@
+// The Bassline engine: hits are judged by distance from the target time within
+// the spec's windows, and the combo multiplier climbs, caps and resets on a miss.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

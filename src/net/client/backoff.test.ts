@@ -1,3 +1,5 @@
+// Reconnect backoff: delays double from 1 s and cap at 15 s, jitter stays within
+// 20% and under the cap, and bad inputs still give an in-range delay.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MAX_DELAY_MS, nextDelay } from "./backoff.ts";

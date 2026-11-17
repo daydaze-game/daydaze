@@ -1,3 +1,5 @@
+// The API client: routes send credentials with the right method, path and body,
+// replies are validated, and errors are reported rather than thrown.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK } from "../../game/look.ts";

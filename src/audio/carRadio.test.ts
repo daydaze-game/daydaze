@@ -1,3 +1,4 @@
+// The car radio button cycles off, through every station, and back to off.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { nextStation, STATIONS } from "./carRadio.ts";

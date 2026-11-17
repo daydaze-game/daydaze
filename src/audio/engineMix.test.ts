@@ -1,3 +1,5 @@
+// The engine sound idles at a standstill and climbs with speed; out-of-range and
+// bad speeds are clamped.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { engineMix } from "./engineMix.ts";

@@ -1,3 +1,5 @@
+// Friends: asking each other makes friends, one way is a request, and a friends
+// reply with anything off is refused.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { friendLists, parseFriends } from "./friends.ts";

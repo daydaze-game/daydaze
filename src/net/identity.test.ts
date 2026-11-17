@@ -1,3 +1,4 @@
+// Identities need a network id, a display name and boolean flags.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseIdentity } from "./identity.ts";

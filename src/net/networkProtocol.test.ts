@@ -1,3 +1,5 @@
+// The wire protocol: compact position deltas that round, a decoder that validates
+// every field and normalizes yaw, and bounded look shapes within the wire limit.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

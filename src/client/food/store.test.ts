@@ -1,3 +1,5 @@
+// The food store: a held item is replaced, eating empties the tray and lowers the
+// buzz, deliveries land after their timer, and 13+ drinks leave no buzz.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

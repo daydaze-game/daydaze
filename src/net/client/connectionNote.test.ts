@@ -1,3 +1,5 @@
+// The connection note: a healthy connection shows nothing, and dropped, offline
+// and refused connections each say what happened.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { connectionNote } from "./connectionNote.ts";

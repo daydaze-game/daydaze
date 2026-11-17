@@ -1,3 +1,5 @@
+// The Last Call engine: the menu has regular and zero-proof drinks, recipes use
+// known ingredients, ingredients match in any pour order, and pouring stops when full.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

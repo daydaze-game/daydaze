@@ -1,3 +1,5 @@
+// Bar sounds: each plays on a working audio context, and without audio they report
+// false and never throw.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { playBarSound, type BarSound } from "./barSynths.ts";

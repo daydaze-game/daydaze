@@ -1,3 +1,5 @@
+// Instrument synths: the scales, note-to-frequency lookup for pitched instruments,
+// null for drums and bad indices, and a label for every instrument type.
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,3 +1,5 @@
+// The trivia engine: a bank of distinct questions with four answers each, a game
+// deals ten, and answering all right is an S.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
