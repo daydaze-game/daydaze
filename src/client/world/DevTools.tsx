@@ -18,7 +18,9 @@ type DevState = {
   geometries: number;
   textures: number;
   lights: number;
+  objects: number;
   fps: number;
+  camera: string;
   calls: number;
   triangles: number;
 };
@@ -33,7 +35,9 @@ let state: DevState = {
   geometries: 0,
   textures: 0,
   lights: 0,
+  objects: 0,
   fps: 0,
+  camera: "",
   calls: 0,
   triangles: 0,
 };
@@ -69,6 +73,13 @@ function applyWireframe(scene: THREE.Scene, on: boolean): void {
   });
 }
 
+/** Every object in the scene graph, for a feel of how big a room is. */
+function countObjects(scene: THREE.Scene): number {
+  let n = 0;
+  scene.traverse(() => n++);
+  return n;
+}
+
 /** Real lights in the scene; the low tier allows at most 4. */
 function countLights(scene: THREE.Scene): number {
   let n = 0;
@@ -83,18 +94,23 @@ export function DevProbe() {
   const scene = useThree((s) => s.scene);
   const wire = useSyncExternalStore(subscribe, () => state.wireframe);
   const tick = useRef({ frames: 0, since: performance.now() });
-  useFrame(({ gl }) => {
+  useFrame(({ gl, camera }) => {
     const t = tick.current;
     t.frames++;
     const now = performance.now();
     if (now - t.since < 500) return;
     patch({
       fps: Math.round((t.frames * 1000) / (now - t.since)),
+      camera: camera.position
+        .toArray()
+        .map((n) => n.toFixed(1))
+        .join(", "),
       calls: gl.info.render.calls,
       triangles: gl.info.render.triangles,
       geometries: gl.info.memory.geometries,
       textures: gl.info.memory.textures,
       lights: countLights(scene),
+      objects: countObjects(scene),
     });
     t.frames = 0;
     t.since = now;
@@ -129,6 +145,47 @@ export function DevProbe() {
   useEffect(() => {
     setFrameloop(paused ? "never" : "always");
   }, [paused, setFrameloop]);
+  // console handles, and the hook the Three.js Developer Tools extension
+  // listens for, so it can see this R3F scene and renderer
+  const gl = useThree((s) => s.gl);
+  const get = useThree((s) => s.get);
+  useEffect(() => {
+    const dd = { THREE, scene, gl, get, pick: null as THREE.Object3D | null };
+    Object.assign(window, { __dd: dd });
+    // the extension's hook is an EventTarget on window; it takes the object
+    const hook = Reflect.get(window, "__THREE_DEVTOOLS__");
+    if (hook instanceof EventTarget) {
+      hook.dispatchEvent(new CustomEvent("observe", { detail: scene }));
+      hook.dispatchEvent(new CustomEvent("observe", { detail: gl }));
+    }
+    // shift+click logs what is under the cursor and keeps it as __dd.pick
+    const el = gl.domElement;
+    const onDown = (e: PointerEvent) => {
+      if (!e.shiftKey) return;
+      const { camera, raycaster } = get();
+      const r = el.getBoundingClientRect();
+      const ndc = new THREE.Vector2(
+        ((e.clientX - r.left) / r.width) * 2 - 1,
+        -((e.clientY - r.top) / r.height) * 2 + 1,
+      );
+      raycaster.setFromCamera(ndc, camera);
+      const hit = raycaster.intersectObjects(scene.children, true)[0];
+      if (!hit) return;
+      dd.pick = hit.object;
+      const path: string[] = [];
+      for (let o: THREE.Object3D | null = hit.object; o; o = o.parent) {
+        path.unshift(o.name || o.type);
+      }
+      console.log(
+        "[dev pick]",
+        path.join(" > "),
+        hit.point.toArray(),
+        hit.object,
+      );
+    };
+    el.addEventListener("pointerdown", onDown);
+    return () => el.removeEventListener("pointerdown", onDown);
+  }, [scene, gl, get]);
   const freeCam = useFreeCam();
   return freeCam ? <OrbitControls makeDefault /> : null;
 }
@@ -169,8 +226,10 @@ export function DevPanel() {
       <div>
         {s.fps} fps · {s.calls} calls · {(s.triangles / 1000).toFixed(0)}k tris
       </div>
+      <div>cam {s.camera}</div>
       <div>
-        {s.geometries} geo · {s.textures} tex · {s.lights} lights
+        {s.geometries} geo · {s.textures} tex · {s.lights} lights · {s.objects}{" "}
+        objects
       </div>
       {TOGGLES.map(([key, label]) => (
         <label key={key} style={{ marginRight: 8 }}>
