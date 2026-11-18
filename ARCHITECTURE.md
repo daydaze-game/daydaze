@@ -58,9 +58,9 @@ floors, looks, saves, chat effects) so both sides agree on the rules. `npm run l
   records bests and daily challenges), the city map, shops, jail.
 - `city/` is the streamed open city: chunks, traffic, your car, the fuel
   stops, the beach net, events (fireworks, the Pride parade). The older
-  facade renderers (`NycFacades`, `DistrictLots`, `CityHouses`, `FarCity`) were
-  deleted when the dream city replaced them; `game/city/nyc.ts`,
-  `districts.ts` and `far.ts` remain as pure logic. Streets are dressed from the same kit
+  facade renderers and their pure logic (`NycFacades`, `DistrictLots`,
+  `CityHouses`, `FarCity`, `nyc.ts`, `districts.ts`, `far.ts`) were deleted when
+  the dream city replaced them. Streets are dressed from the same kit
   (`public/models/street/kit.glb`, `scripts/import-street.sh`):
   `game/city/streetPieces.ts` cuts the sidewalks back from the cross streets
   and places corner blocks, crosswalks, stop and slow words, double yellow
@@ -105,20 +105,13 @@ dev-only hooks the panel calls: `setDevHour` (`city/daylight.ts`),
 `devStartDanceOff` and a WebSocket frame log (`net/devNetLog.ts`). Usage is
 in [docs/dev-tools.md](docs/dev-tools.md).
 
-The far city (`game/city/far.ts`; its renderer `FarCity.tsx` was replaced by
-the dream city): every building
-the streamed plan does not draw (past the loaded cells, or infill past its
-range) is a `plan.far` box, drawn as one instanced mesh whose shader adds
-windows, a darker roof and lit windows at night from world position, with all
-roads as a second flat mesh. Boxes under 6.5% of their distance, and past the
-fog (560 m), are skipped; both draws are priced in `budget.ts` and the park
-grid test (at most 270k triangles) still holds. Main Avenue under the El wears
+Main Avenue under the El wears
 (`game/city/wear.ts`, `client/city/AvenueWear.tsx`): tire tracks, oil, patches,
 drains and covers from one canvas atlas in one instanced mesh, plus a shade
 band with sun stripes through the deck's ties that follows the sun.
 
 Loading: the city's first picture waits only on what is near. Region parts (the
-band shell, dog yard, market, Ferris wheel, district lots, Suburbia's houses)
+band shell, dog yard, market, Ferris wheel)
 and each street-furniture kind sit in their own `Suspense` and fetch their
 models when the plan or the player first comes near (`city/preloadNear.ts`,
 `CityFurniture.tsx`), not at startup; panels with big static data (the credits
