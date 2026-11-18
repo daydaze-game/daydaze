@@ -136,6 +136,7 @@ jobs:
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
         run: |
+          python3 -m venv /tmp/pil && /tmp/pil/bin/pip install -q pillow
           slugify() { tr '/' '-' | tr -c 'A-Za-z0-9._\n-' '-'; }
           slug=$(printf '%s\n' "$REF" | slugify)
           git config --global user.name "github-actions[bot]"
@@ -156,12 +157,10 @@ jobs:
             cp shots/*.png shots/stats.jsonl "site/$slug/" 2>/dev/null || true
             # JPEGs are a quarter the size, kinder to a phone and to the repo;
             # the PNG originals stay in the screenshots artifact
-            if command -v ffmpeg > /dev/null; then
-              for png in "site/$slug"/*.png; do
-                [ -e "$png" ] || continue
-                ffmpeg -loglevel error -y -i "$png" -q:v 3 "${png%.png}.jpg" && rm "$png"
-              done
-            fi
+            /tmp/pil/bin/python -c 'import pathlib, sys; from PIL import Image
+          for p in pathlib.Path(sys.argv[1]).glob("*.png"):
+              Image.open(p).convert("RGB").save(p.with_suffix(".jpg"), quality=85)
+              p.unlink()' "site/$slug"
             node --experimental-strip-types scripts/shot-plan.ts --gallery "site/$slug" "$REF" "$SHA"
             rm -f "site/$slug/stats.jsonl"
             # drop the folders of branches that are gone
