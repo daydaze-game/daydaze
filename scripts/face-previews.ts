@@ -30,7 +30,7 @@ try {
     {
       field: "lipShape",
       prefix: "lips",
-      shot: "lipstile",
+      shot: "lipTile",
       options: LIP_SHAPES,
     },
   ] as const) {

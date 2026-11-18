@@ -313,7 +313,7 @@ const SHOTS = {
     fov: 8,
   },
   // Native lip preset previews use the same neutral face.
-  lipstile: {
+  lipTile: {
     looks: [{ ...DEFAULT_LOOK, hairStyle: "buns" as const, ...makeupParam() }],
     x: () => 0,
     cam: [0, 1.482 + portraitLift * 1.375, 0.48] as const,
@@ -713,7 +713,7 @@ function Probe({
 function Lab() {
   const [previewFace, setPreviewFace] = useState<string | null>(null);
   useEffect(() => {
-    if (shot !== "eyetile" && shot !== "lipstile") return;
+    if (shot !== "eyetile" && shot !== "lipTile") return;
     // Reuse one WebGL context while the capture script changes native presets.
     const select = (code: unknown) => {
       if (typeof code === "string" && decodeFace(code)) setPreviewFace(code);
@@ -824,7 +824,7 @@ function Lab() {
         count={plan.looks.length}
         selection={previewFace}
       />
-      {(shot === "eyetile" || shot === "lipstile") && (
+      {(shot === "eyetile" || shot === "lipTile") && (
         <Suspense fallback={null}>
           <NeutralPreview />
         </Suspense>
