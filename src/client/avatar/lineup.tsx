@@ -2,7 +2,7 @@
 // /src/client/avatar/lineup.html?shot=face|body|lineup|far on the dev server.
 // Writes draw-call and triangle counts to data-stats on <body> for before/after.
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import * as THREE from "three";
 import {
@@ -24,7 +24,7 @@ import { isDanceMoveId, stillClipsOf } from "../../game/dance/moves.ts";
 import { liftOf, roleMove, together } from "../../game/dance/together.ts";
 import { GAIT_LIST } from "../../game/gaits.ts";
 import { naturalPace } from "../../game/dance/clips.ts";
-import { Environment, Lightformer } from "@react-three/drei";
+import { Environment, Lightformer, useGLTF } from "@react-three/drei";
 import { Suspense } from "react";
 import { BODY_TRAITS, cleanBody, DEFAULT_BODY } from "../../game/body.ts";
 
@@ -306,11 +306,19 @@ const SHOTS = {
   // the closet's eye tile (public/closet/eye-*.webp): the eyes, close up,
   // on a clear background (`?clear=1`)
   eyetile: {
-    looks: [{ ...LINEUP[0], hairStyle: "buns" as const, ...makeupParam() }],
+    looks: [{ ...DEFAULT_LOOK, hairStyle: "buns" as const, ...makeupParam() }],
     x: () => 0,
-    cam: [0, 1.53, 0.55] as const,
-    target: [0, 1.53, 0] as const,
-    fov: 24,
+    cam: [0, 1.55 + portraitLift * 1.5, 0.55] as const,
+    target: [0, 1.55 + portraitLift * 1.5, 0] as const,
+    fov: 12,
+  },
+  // Native lip preset previews use the same neutral face.
+  lipstile: {
+    looks: [{ ...DEFAULT_LOOK, hairStyle: "buns" as const, ...makeupParam() }],
+    x: () => 0,
+    cam: [0, 1.495 + portraitLift, 0.48] as const,
+    target: [0, 1.495 + portraitLift, 0] as const,
+    fov: 12,
   },
   // prosthetic legs: shorts and a mini show the pylon, jeans cover it
   limbs: {
@@ -616,6 +624,49 @@ function measure(root: THREE.Object3D) {
   return { calls, tris: Math.round(tris) };
 }
 
+// Catalog comparisons show anatomy in the bind pose, independent of load time
+// and idle animation. This is limited to the dev lab's preset thumbnail shots.
+const PREVIEW_EXPRESSIONS = [
+  ["blink", 0.04],
+  ["smile", 0],
+] as const;
+
+function NeutralPreview() {
+  const { scene: source } = useGLTF(
+    `/models/doll/body${portraitLift ? "-m" : ""}.glb`,
+  );
+  const rest = useMemo(() => {
+    const bones = new Map<string, THREE.Bone>();
+    source.traverse((node) => {
+      if (node instanceof THREE.Bone) bones.set(node.name, node);
+    });
+    return bones;
+  }, [source]);
+  const restore = useMemo(
+    () => (node: THREE.Object3D) => {
+      if (node instanceof THREE.Mesh && node.morphTargetInfluences) {
+        for (const [key, value] of PREVIEW_EXPRESSIONS) {
+          const index = node.morphTargetDictionary?.[key];
+          if (index !== undefined) node.morphTargetInfluences[index] = value;
+        }
+      }
+      if (!(node instanceof THREE.Bone)) return;
+      const original = rest.get(node.name);
+      if (!original) return;
+      node.position.copy(original.position);
+      node.quaternion.copy(original.quaternion);
+      node.scale.copy(original.scale);
+    },
+    [rest],
+  );
+  useFrame(({ scene, camera, gl }) => {
+    scene.traverse(restore);
+    scene.updateMatrixWorld(true);
+    gl.render(scene, camera);
+  }, 1);
+  return null;
+}
+
 function Probe({ count }: { count: number }) {
   const scene = useThree((s) => s.scene);
   const invalidate = useThree((s) => s.invalidate);
@@ -749,6 +800,11 @@ function Lab() {
         </group>
       ))}
       <Probe count={plan.looks.length} />
+      {(shot === "eyetile" || shot === "lipstile") && (
+        <Suspense fallback={null}>
+          <NeutralPreview />
+        </Suspense>
+      )}
     </Canvas>
   );
 }
