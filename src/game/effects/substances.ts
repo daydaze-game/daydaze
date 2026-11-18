@@ -38,6 +38,17 @@ export const DOSES = {
     peakEnd: 45,
     end: 225,
   },
+  // vaporized: like smoked, felt in about a minute and peaking sooner (Spindle
+  // 2018: blood THC peaked at 10 min, drug effect within the hour); shorter
+  // than a joint, since a few puffs from a cart are a smaller dose
+  vape: {
+    substance: "high",
+    strength: 0.4,
+    onset: 1,
+    peak: 10,
+    peakEnd: 35,
+    end: 150,
+  },
   // eaten: 20 min-2 h before anything (the redose trap), peak about 1.5-3 h,
   // 4-10 h in all; about as strong as smoking at its peak, but far longer
   edible: {
@@ -97,6 +108,47 @@ const DOSE_IDS: readonly string[] = Object.keys(DOSES);
 export const isDose = (x: unknown): x is Dose =>
   typeof x === "string" && DOSE_IDS.includes(x);
 
+/** Weed strains, as the folk labels players know: a small modifier on any
+ * weed dose, never a new timeline. The labels are unreliable (THC %, CBD and
+ * terpenes predict effects better; docs/research/substances.md section 2), so
+ * the nudges are small. `hybrid` is the unlabeled default; `hemp` is the weak
+ * gas-station kind (CBD, delta-8). */
+export const STRAINS = ["hybrid", "sativa", "indica", "hemp"] as const;
+export type Strain = (typeof STRAINS)[number];
+
+/** How a strain scales a weed dose's peak strength and its onset delay. */
+export const STRAIN_MODS: Record<Strain, { strength: number; onset: number }> =
+  {
+    hybrid: { strength: 1, onset: 1 },
+    sativa: { strength: 0.95, onset: 0.9 },
+    indica: { strength: 1.05, onset: 1.1 },
+    // delta-8 is about 50-70% of delta-9; hemp flower and CBD carts less
+    hemp: { strength: 0.45, onset: 1 },
+  };
+
+const STRAIN_IDS: readonly string[] = STRAINS;
+export const isStrain = (x: unknown): x is Strain =>
+  typeof x === "string" && STRAIN_IDS.includes(x);
+
+// every dose's profile per strain, built once so readMeters (every frame)
+// allocates nothing; only weed doses are scaled
+const PROFILES = new Map<string, Profile>();
+for (const dose of Object.keys(DOSES).filter(isDose))
+  for (const strain of STRAINS) {
+    const p: Profile = DOSES[dose];
+    const m = STRAIN_MODS[strain];
+    PROFILES.set(
+      `${dose}:${strain}`,
+      p.substance === "high"
+        ? { ...p, strength: p.strength * m.strength, onset: p.onset * m.onset }
+        : p,
+    );
+  }
+
+/** The profile of a dose of a strain (missing strain: hybrid). */
+export const profileOf = (dose: Dose, strain: Strain = "hybrid"): Profile =>
+  PROFILES.get(`${dose}:${strain}`) ?? DOSES[dose];
+
 /** Real minutes as play seconds: 20 × minutes^0.6. One curve for every
  * substance keeps their order and proportions (a balloon is over in under a
  * minute, a tab lasts longest) while short ones stay playable and long ones
@@ -134,19 +186,19 @@ export function phaseOf(p: Profile, since: number): Phase | null {
 }
 
 /** A dose taken, `at` seconds on the client's play clock. */
-export type Taken = { dose: Dose; at: number };
+export type Taken = { dose: Dose; at: number; strain?: Strain };
 
 /** One meter now: its level (all its doses added, capped at 1) and the phase
- * of the dose felt most. */
-export type Meter = { level: number; phase: Phase | null };
+ * and strain of the dose felt most. */
+export type Meter = { level: number; phase: Phase | null; strain: Strain };
 export type Meters = Record<Substance, Meter>;
 
 export const soberMeters = (): Meters => ({
-  high: { level: 0, phase: null },
-  trip: { level: 0, phase: null },
-  acid: { level: 0, phase: null },
-  molly: { level: 0, phase: null },
-  cocaine: { level: 0, phase: null },
+  high: { level: 0, phase: null, strain: "hybrid" },
+  trip: { level: 0, phase: null, strain: "hybrid" },
+  acid: { level: 0, phase: null, strain: "hybrid" },
+  molly: { level: 0, phase: null, strain: "hybrid" },
+  cocaine: { level: 0, phase: null, strain: "hybrid" },
 });
 
 // scratch for readMeters: the most each meter's strongest dose is felt
@@ -168,12 +220,13 @@ export function readMeters(
   for (const s of SUBSTANCES) {
     out[s].level = 0;
     out[s].phase = null;
+    out[s].strain = "hybrid";
     topFelt[s] = 0;
   }
   // the phase comes from the dose felt most: a second joint at the peak of
   // the first still reads "peak", not "comeup"
   for (const t of taken) {
-    const p = DOSES[t.dose];
+    const p = profileOf(t.dose, t.strain);
     const felt = doseLevel(p, now - t.at);
     if (felt <= 0) continue;
     const m = out[p.substance];
@@ -181,6 +234,7 @@ export function readMeters(
     if (felt > topFelt[p.substance]) {
       topFelt[p.substance] = felt;
       m.phase = phaseOf(p, now - t.at);
+      m.strain = t.strain ?? "hybrid";
     }
   }
   return out;
@@ -188,7 +242,7 @@ export function readMeters(
 
 /** Whether a dose taken `at` is over by `now` (the client drops it). */
 export const spent = (t: Taken, now: number): boolean =>
-  now - t.at >= gameSeconds(DOSES[t.dose].end);
+  now - t.at >= gameSeconds(profileOf(t.dose, t.strain).end);
 
 /** Below this a meter tints the screen but doesn't change how she stands. */
 export const FELT = 0.15;
@@ -332,11 +386,57 @@ export const BODY: Record<Substance, Record<Phase, Body>> = {
   },
 };
 
+/** Weed body language by strain, where it differs from BODY.high (hybrid;
+ * hemp is too faint to change how she stands). Sativa is bright and chatty,
+ * indica heavy and sleepy; folk lore, kept subtle (the labels are unreliable). */
+export const STRAIN_BODY: Partial<Record<Strain, Record<Phase, Body>>> = {
+  sativa: {
+    comeup: {
+      loops: ["idle-happy", "idle-breathing"],
+      tics: ["laugh"],
+      rate: 1,
+    },
+    // upbeat and talkative: giggles, animated hands
+    peak: {
+      loops: ["idle-happy", "idle-look-around", "idle-casual-2"],
+      tics: ["laugh", "talk-two-hands", "happy-hands", "excited"],
+      rate: 1.05,
+    },
+    comedown: {
+      loops: ["idle-breathing", "idle-weight-shift"],
+      tics: ["yawn", "sigh"],
+      rate: 0.95,
+    },
+  },
+  indica: {
+    comeup: {
+      loops: ["idle-breathing", "idle-bored"],
+      tics: ["sigh", "yawn"],
+      rate: 0.8,
+    },
+    // couch-lock: slow, zoned out, snacking
+    peak: {
+      loops: ["idle-bored", "idle-breathing", "idle-distance"],
+      tics: ["yawn", "sigh", "consume"],
+      rate: 0.75,
+    },
+    // the sleepy comedown
+    comedown: {
+      loops: ["idle-bored", "idle-breathing"],
+      tics: ["yawn", "sigh"],
+      rate: 0.7,
+    },
+  },
+};
+
 /** Her body for a meter, or null when it doesn't show. */
 export function bodyOf(meters: Readonly<Meters>): Body | null {
   const s = strongest(meters);
   const phase = s ? meters[s].phase : null;
-  return s && phase ? BODY[s][phase] : null;
+  if (!s || !phase) return null;
+  if (s === "high")
+    return STRAIN_BODY[meters.high.strain]?.[phase] ?? BODY.high[phase];
+  return BODY[s][phase];
 }
 
 export type HighLook = {
@@ -384,13 +484,19 @@ export function highParams(
   const t = clamp01(meters.trip.level) * f;
   const a = clamp01(meters.acid.level) * f;
   const m = clamp01(meters.molly.level) * f;
+  const strain = meters.high.strain;
   return {
-    glow: Math.min(1, h * 0.8 + t * 0.4 + a * 0.3 + m * 0.5),
+    // indica glows heavier, sativa's color pops a little more (hemp is faint
+    // already: its strength is scaled down)
+    glow: Math.min(
+      1,
+      h * (strain === "indica" ? 0.95 : 0.8) + t * 0.4 + a * 0.3 + m * 0.5,
+    ),
     hue: Math.max(t, a * 0.7),
     // acid breathes like a trip, at half the depth
     breathe: calm ? 0 : (t + a * 0.5) * BREATHE_AMOUNT,
     drift: calm ? 0 : 1,
-    radiance: Math.min(1, a + m * 0.6),
+    radiance: Math.min(1, a + m * 0.6 + (strain === "sativa" ? h * 0.15 : 0)),
     geometry: calm ? 0 : a,
     tracer: calm ? 0 : Math.min(1, a * 0.85 + m * 0.3),
     wiggle: calm ? 0 : m,
