@@ -16,6 +16,8 @@ import {
   type WebGLRenderer,
 } from "three";
 import { FullScreenQuad } from "three-stdlib";
+import { tracerDamp } from "../../game/effects/tracer.ts";
+import type { RoomId } from "../../game/rooms.ts";
 import { liveDrunk } from "./drunk.ts";
 import { liveHigh } from "./high.ts";
 
@@ -148,9 +150,8 @@ class GhostEffect extends Effect {
 }
 
 // Tracers: each frame's history is the brighter of the new frame and the last
-// history faded by TRACER_DAMP, so bright things leave trails that die in
-// about half a second. Two targets swap places each frame.
-const TRACER_DAMP = 0.86;
+// history faded by `tracerDamp(dt)`, so bright things leave trails that die in
+// about half a second at any frame rate. Two targets swap places each frame.
 const TRACER_SHADER = /* glsl */ `
 uniform sampler2D history;
 uniform float tracer;
@@ -203,12 +204,18 @@ class TracerEffect extends Effect {
 
   override setSize(width: number, height: number): void {
     for (const t of this.targets) t.setSize(width, height);
+    this.reset();
+  }
+
+  /** Forget the history, so the next frame starts clean (a room change). */
+  reset(): void {
     this.stale = true;
   }
 
   override update(
     renderer: WebGLRenderer,
     inputBuffer: WebGLRenderTarget,
+    deltaTime: number,
   ): void {
     if (this.params.tracer.value <= 0.001) {
       this.stale = true;
@@ -220,7 +227,7 @@ class TracerEffect extends Effect {
       u.current.value = inputBuffer.texture;
       u.old.value = read.texture;
       // a fresh start has no history: damp 0 copies the frame straight in
-      u.damp.value = this.stale ? 0 : TRACER_DAMP;
+      u.damp.value = this.stale ? 0 : tracerDamp(deltaTime);
     }
     const was = renderer.getRenderTarget();
     renderer.setRenderTarget(write);
@@ -240,11 +247,13 @@ class TracerEffect extends Effect {
 }
 
 /** The drunk post passes, inside the composer on the high tier only. */
-export function DrunkPost() {
+export function DrunkPost({ room }: { room: RoomId }) {
   const effect = useMemo(() => new DrunkEffect(), []);
   const ghost = useMemo(() => new GhostEffect(), []);
   const tracer = useMemo(() => new TracerEffect(), []);
   useEffect(() => () => tracer.dispose(), [tracer]);
+  // the old room's frame must not ghost into the new one
+  useEffect(() => tracer.reset(), [tracer, room]);
   useFrame((state) => {
     ghost.params.ghost.value = liveDrunk.ghost;
     ghost.params.time.value = state.clock.elapsedTime;
