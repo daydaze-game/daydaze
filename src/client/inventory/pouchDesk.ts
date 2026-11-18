@@ -70,8 +70,16 @@ export function takeFromPouch(id: ItemId): boolean {
  * Returns what she got, or null. */
 export function takeGift(now = Date.now()): ItemId | null {
   const d = pouchDesk.get();
-  const got = open() ? claimGift(d.inventory, d.giftDay, dayOf(now)) : null;
-  if (!got) return null;
+  if (!open()) return null;
+  const today = dayOf(now);
+  const got = claimGift(d.inventory, d.giftDay, today);
+  if (!got) {
+    // nothing taken: say why (the pouch panel shows it when she carries something)
+    pouchDesk.set({
+      note: d.giftDay >= today ? "Come back tomorrow" : "Your pouch is full",
+    });
+    return null;
+  }
   commit(
     { inventory: got.inventory, giftDay: got.giftDay, coins: d.coins },
     `Your friend gave you a ${itemOf(got.item)?.name ?? "gift"}`,

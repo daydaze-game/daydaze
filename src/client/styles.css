@@ -3065,6 +3065,14 @@ button:focus-visible {
   width: auto;
 }
 
+/* The weed pouch rides low on the left, so a shop panel (top right) never covers it. */
+.pouch-panel {
+  right: auto;
+  left: 1rem;
+  top: auto;
+  bottom: 5rem;
+}
+
 /* Street counters stay legible over the city, with accessible menu controls. */
 .food-vendor-panel {
   position: fixed;

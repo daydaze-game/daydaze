@@ -492,9 +492,16 @@ async function walkToGasCounter(page: Page) {
   const station = GAS_STATIONS[0];
   if (!station) throw new Error("no gas station");
   const [x, z] = counterOf(station);
+  // the dev probe (and `__dd`) mounts a moment after the first frames; place
+  // her the way the dev teleport does, so the walker keeps the spot
+  await page.waitForFunction(() => Reflect.get(window, "__dd") !== undefined);
   await page.evaluate(
     ([px, pz]) => {
-      Reflect.get(window, "__dd").player.pos.set(px, 0, pz);
+      const p = Reflect.get(window, "__dd").player;
+      p.walk.pos = [px, pz];
+      p.before.pos = p.walk.pos;
+      p.pos.set(px, 0, pz);
+      p.acc = 0;
     },
     [x, z] as const,
   );

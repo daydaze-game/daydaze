@@ -11,7 +11,11 @@ export function PouchPanel(): JSX.Element | null {
   const [open, setOpen] = useState(false);
   if (!usable(activeTier(), inventory)) return null;
   return (
-    <section className="game-panel" aria-label="Pouch" data-pouch="open">
+    <section
+      className="game-panel pouch-panel"
+      aria-label="Pouch"
+      data-pouch="open"
+    >
       <button
         type="button"
         aria-expanded={open}
