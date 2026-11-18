@@ -183,15 +183,15 @@ export function galleryMarkdown(
   meta: { ref: string; sha: string; repo: string; time: string },
 ): string {
   const byName = new Map(stats.map((s) => [s.name, s]));
-  const pngs = files.filter((f) => f.endsWith(".png")).sort();
+  const images = files.filter((f) => f.endsWith(".png")).sort();
   const lines = [
     `# Screenshots: ${meta.ref}`,
     "",
-    `Commit [\`${meta.sha.slice(0, 7)}\`](https://github.com/${meta.repo}/commit/${meta.sha}), taken ${meta.time}. ${pngs.length} images, low tier unless the name says otherwise.`,
+    `Commit [\`${meta.sha.slice(0, 7)}\`](https://github.com/${meta.repo}/commit/${meta.sha}), taken ${meta.time}. ${images.length} images, low tier unless the name says otherwise.`,
   ];
-  const left = new Set(pngs);
+  const left = new Set(images);
   for (const { title, prefix } of GROUPS) {
-    const group = pngs.filter((f) => left.has(f) && f.startsWith(prefix));
+    const group = images.filter((f) => left.has(f) && f.startsWith(prefix));
     if (!group.length) continue;
     group.forEach((f) => left.delete(f));
     lines.push(

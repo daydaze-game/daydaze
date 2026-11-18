@@ -1,5 +1,5 @@
 // The screenshot token language: registry names, raw queries, presets, turns,
-// viewports, the hard error on bad tokens, sharding and the gallery README.
+// viewport sizes, the hard error on bad tokens, sharding and the gallery README.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ADULT_ROOMS } from "../src/game/age.ts";

@@ -2549,7 +2549,7 @@ const isRegistered = (n: string) => registry.has(n) || prefixOf(n) !== "";
 
 if (process.argv[2] === "--matrix") {
   // the workflow's plan: `--matrix "<tokens>" <shards>` prints
-  // [{"shard":0,"shots":"<tokens>"}, ...]; a bad token fails here, browserless
+  // [{"shard":0,"shots":"<tokens>"}, ...]; a bad token fails here, before a browser starts
   const tokens = (process.argv[3] ?? "").split(/\s+/).filter(Boolean);
   const chunks = shard(
     expandShots(tokens, isRegistered),
