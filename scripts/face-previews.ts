@@ -50,7 +50,7 @@ try {
         const select: unknown = Reflect.get(window, "setPreviewFace");
         if (typeof select !== "function")
           throw new Error("Missing live preset selection");
-        select(code);
+        Reflect.apply(select, undefined, [code]);
       }, face);
       await page.waitForFunction(
         (code) =>
