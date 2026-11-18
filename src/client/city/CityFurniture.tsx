@@ -37,6 +37,7 @@ import { useDaylight } from "./daylight.ts";
 import { boxMapped, surface } from "./worldTexture.ts";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
 import { disposeInstanced } from "./dispose.ts";
+import { isMesh } from "../world/guards.ts";
 
 const MODELS = "/models/street";
 /** The most pieces of one kind in view at once. */
@@ -68,7 +69,7 @@ export function partsOf(
   scene.updateMatrixWorld(true);
   const parts: THREE.InstancedMesh[] = [];
   scene.traverse((o) => {
-    if (!(o instanceof THREE.Mesh)) return;
+    if (!isMesh(o)) return;
     const geometry = bakedGeometry(o);
     const found = Array.isArray(o.material) ? o.material[0] : o.material;
     if (!found) return;

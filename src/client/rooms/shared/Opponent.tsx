@@ -23,6 +23,7 @@ import {
   type OpponentSense,
 } from "../../../game/opponents.ts";
 import { useQuality } from "../../world/quality.ts";
+import { isSkinnedMesh } from "../../world/guards.ts";
 
 const DIR = "/models/opponents";
 const CLIPS_URL = `${DIR}/opponent-clips.glb`;
@@ -92,7 +93,7 @@ function dress(root: THREE.Object3D, look: OpponentLook, skin: THREE.Texture) {
   const owned: THREE.Material[] = [];
   root.traverse((o) => {
     o.frustumCulled = false;
-    if (!(o instanceof THREE.SkinnedMesh)) return;
+    if (!isSkinnedMesh(o)) return;
     const own = new THREE.MeshStandardMaterial({
       roughness: 0.7,
       metalness: 0,
@@ -187,7 +188,7 @@ export function Opponent({
     () => () => {
       rig.mixer.stopAllAction();
       rig.root.traverse((o) => {
-        if (o instanceof THREE.SkinnedMesh) o.skeleton.dispose();
+        if (isSkinnedMesh(o)) o.skeleton.dispose();
       });
       // the eyes' texture and the skin belong to the cache, the materials to us
       for (const m of rig.owned) m.dispose();
