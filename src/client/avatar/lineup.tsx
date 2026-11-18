@@ -316,8 +316,8 @@ const SHOTS = {
   lipstile: {
     looks: [{ ...DEFAULT_LOOK, hairStyle: "buns" as const, ...makeupParam() }],
     x: () => 0,
-    cam: [0, 1.482 + portraitLift, 0.48] as const,
-    target: [0, 1.482 + portraitLift, 0] as const,
+    cam: [0, 1.482 + portraitLift * 1.375, 0.48] as const,
+    target: [0, 1.482 + portraitLift * 1.375, 0] as const,
     fov: 8,
   },
   // prosthetic legs: shorts and a mini show the pylon, jeans cover it
