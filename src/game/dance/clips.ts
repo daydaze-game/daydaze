@@ -173,24 +173,32 @@ export function pickClip(s: DollState): Play | null {
         return null;
       return play(move.id, 1, s.couple === "follow" ? move.period / 2 : 0);
     }
-    default:
+    default: {
+      // a clip's length in seconds, or 0 while its pack hasn't loaded
+      const ready = (id: string) => {
+        const c = clipOf(id);
+        return c && (c.pack === "core" || s.packs?.has(c.pack)) ? c.period : 0;
+      };
       if (s.body)
         return play(
-          bodyIdle(s.body, s.seed, s.slot ?? 0, s.into ?? 0, (id) => {
-            const c = clipOf(id);
-            return c && (c.pack === "core" || s.packs?.has(c.pack))
-              ? c.period
-              : 0;
-          }),
+          bodyIdle(s.body, s.seed, s.slot ?? 0, s.into ?? 0, ready),
           s.body.rate,
           0,
           "idle-breathing",
         );
       return play(
-        idlePlan(s.seed, s.slot ?? 0, s.own === true, !!s.packs?.has("social")),
+        idlePlan(
+          s.seed,
+          s.slot ?? 0,
+          s.own === true,
+          !!s.packs?.has("social"),
+          s.into ?? 0,
+          ready,
+        ),
         1,
         0,
         "idle-breathing",
       );
+    }
   }
 }
