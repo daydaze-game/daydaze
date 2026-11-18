@@ -132,22 +132,25 @@ export const isStrain = (x: unknown): x is Strain =>
 
 // every dose's profile per strain, built once so readMeters (every frame)
 // allocates nothing; only weed doses are scaled
-const PROFILES = new Map<string, Profile>();
-for (const dose of Object.keys(DOSES).filter(isDose))
+const PROFILES = new Map<Dose, Map<Strain, Profile>>();
+for (const dose of Object.keys(DOSES).filter(isDose)) {
+  const p: Profile = DOSES[dose];
+  const byStrain = new Map<Strain, Profile>();
   for (const strain of STRAINS) {
-    const p: Profile = DOSES[dose];
     const m = STRAIN_MODS[strain];
-    PROFILES.set(
-      `${dose}:${strain}`,
+    byStrain.set(
+      strain,
       p.substance === "high"
         ? { ...p, strength: p.strength * m.strength, onset: p.onset * m.onset }
         : p,
     );
   }
+  PROFILES.set(dose, byStrain);
+}
 
 /** The profile of a dose of a strain (missing strain: hybrid). */
 export const profileOf = (dose: Dose, strain: Strain = "hybrid"): Profile =>
-  PROFILES.get(`${dose}:${strain}`) ?? DOSES[dose];
+  PROFILES.get(dose)?.get(strain) ?? DOSES[dose];
 
 /** Real minutes as play seconds: 20 × minutes^0.6. One curve for every
  * substance keeps their order and proportions (a balloon is over in under a
@@ -387,7 +390,7 @@ export const BODY: Record<Substance, Record<Phase, Body>> = {
 };
 
 /** Weed body language by strain, where it differs from BODY.high (hybrid;
- * hemp is too faint to change how she stands). Sativa is bright and chatty,
+ * hemp stands like hybrid, only fainter: its level is lower). Sativa is bright and chatty,
  * indica heavy and sleepy; folk lore, kept subtle (the labels are unreliable). */
 export const STRAIN_BODY: Partial<Record<Strain, Record<Phase, Body>>> = {
   sativa: {

@@ -13,6 +13,7 @@ import {
   gameSeconds,
   highParams,
   isDose,
+  isStrain,
   phaseOf,
   profileOf,
   readMeters,
@@ -379,14 +380,14 @@ test("a strain flows from the dose to the meter and the body", () => {
   assert.equal(bodyOf(hybrid), BODY.high.peak);
   assert.equal(bodyOf(sativa), STRAIN_BODY.sativa?.peak);
   assert.equal(spent({ dose: "joint", at: 0 }, at), false);
-  // hemp stays under the "stands differently" line
+  // hemp stands like hybrid, only fainter
   const hemp = readMeters(
     [{ dose: "joint", at: 0, strain: "hemp" }],
     at,
     soberMeters(),
   );
   assert.ok(hemp.high.level < hybrid.high.level);
-  assert.equal(bodyOf(hemp), hemp.high.level >= 0.15 ? BODY.high.peak : null);
+  assert.equal(bodyOf(hemp), BODY.high.peak);
 });
 
 test("indica glows heavier and sativa's color pops; hybrid is unchanged", () => {
@@ -405,4 +406,34 @@ test("indica glows heavier and sativa's color pops; hybrid is unchanged", () => 
   assert.ok(sativa.radiance > hybrid.radiance);
   assert.equal(sativa.glow, hybrid.glow);
   assert.equal(hybrid.radiance, 0);
+});
+
+test("the meter's strain follows the dose felt most, and resets when sober", () => {
+  const stack: Taken[] = [
+    { dose: "edible", at: 0, strain: "hemp" },
+    { dose: "joint", at: 0 },
+  ];
+  const at = gameSeconds(DOSES.joint.peak) + 1;
+  const m = readMeters(stack, at, soberMeters());
+  assert.equal(m.high.strain, "hybrid");
+  const hempFirst = readMeters(
+    [
+      { dose: "joint", at: 0, strain: "hemp" },
+      { dose: "vape", at: 0 },
+    ],
+    at,
+    soberMeters(),
+  );
+  assert.equal(hempFirst.high.strain, "hybrid");
+  readMeters([], at, m);
+  assert.equal(m.high.strain, "hybrid");
+  const indica = readMeters(
+    [{ dose: "joint", at: 0, strain: "indica" }],
+    at,
+    soberMeters(),
+  );
+  readMeters([], at, indica);
+  assert.equal(indica.high.strain, "hybrid");
+  assert.equal(isStrain("sativa"), true);
+  assert.equal(isStrain("toString"), false);
 });

@@ -163,8 +163,9 @@ high" ("in da couch"). Honest status: the labels are **unreliable**. Sativa- and
 samples are genetically indistinct, and the terpene chemotypes do not line up with the labels;
 the labels only loosely track scent (sativa with bergamotene and farnesene). THC %, CBD and the
 terpene profile predict effects better. The game uses the labels anyway, as a **flavor
-modifier** players already know from dispensaries, and keeps them small: a strain nudges
-strength and onset a little and picks a body style; it never changes the real timeline.
+modifier** players already know from dispensaries, and keeps them small: a strain scales
+strength and onset (sativa and indica a little, hemp a lot) and picks a body style; it
+never changes the rest of the timeline.
 Hybrid is the unlabeled default.
 
 ### Hemp (gas station) versus dispensary [FARM-BILL]
@@ -173,8 +174,8 @@ Gas stations and smoke shops sell hemp: flower and pre-rolls at or under 0.3% de
 products (little or no intoxication), delta-8 gummies and carts (about 50-70% of delta-9's
 potency, user reports) and hemp-derived delta-9 gummies (5-15 mg a serving). Dispensary
 products are tested, labeled with THC %, and stronger. The game models hemp as a weaker
-"strain" (about 0.45 of a hybrid's strength) and sells it at the counter; the dispensary sells
-every other strain. A federal hemp redefinition scheduled for November 2026 (a 0.4 mg per container total
+"strain" (about 0.45 of a hybrid's strength), to be sold at the gas-station counter; the
+dispensary sells every other strain (the inventory work, a later change). A federal hemp redefinition scheduled for November 2026 (a 0.4 mg per container total
 THC limit; retailer sources, not confirmed): the game is fiction and ignores it. Gas-station sales are 18+
 only here.
 
