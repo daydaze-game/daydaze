@@ -3,7 +3,7 @@
 // the option label as its accessible name. Also augments React's CSSProperties
 // with the `--c` swatch variable.
 
-import { useId, useState, type CSSProperties } from "react";
+import { useId, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { isColor } from "../../game/look.ts";
 
 declare module "react" {
@@ -27,6 +27,30 @@ type PickerProps<T extends string> = {
   onPick: (id: T) => void;
 };
 
+/** Moves focus and selection between buttons in a radiogroup with arrow keys. */
+export function onRadioKeyDown<T extends string>(
+  e: KeyboardEvent<HTMLButtonElement>,
+  options: readonly { id: T }[],
+  currentIndex: number,
+  onPick: (id: T) => void,
+) {
+  let nextIndex = -1;
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+    nextIndex = (currentIndex + 1) % options.length;
+  } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    nextIndex = (currentIndex - 1 + options.length) % options.length;
+  }
+  if (nextIndex >= 0) {
+    e.preventDefault();
+    onPick(options[nextIndex].id);
+    const parent = e.currentTarget.parentElement;
+    const buttons = parent?.querySelectorAll<HTMLButtonElement>(
+      'button[role="radio"]',
+    );
+    buttons?.[nextIndex]?.focus();
+  }
+}
+
 /** Round color gems; the option label is the accessible name. */
 export function Swatches<T extends string>({
   label,
@@ -34,21 +58,25 @@ export function Swatches<T extends string>({
   value,
   onPick,
 }: PickerProps<T>) {
+  const selectedIndex = options.findIndex((o) => o.id === value);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
   return (
     <div className="row" role="radiogroup" aria-label={label}>
-      {options.map((o) => {
+      {options.map((o, idx) => {
         const style: CSSProperties = { "--c": o.swatch ?? o.id };
         return (
           <button
             key={o.id}
             type="button"
             role="radio"
+            tabIndex={idx === activeIndex ? 0 : -1}
             aria-checked={o.id === value}
             aria-label={o.label}
             title={o.label}
             className="gem"
             style={style}
             onClick={() => onPick(o.id)}
+            onKeyDown={(e) => onRadioKeyDown(e, options, idx, onPick)}
           />
         );
       })}
@@ -125,6 +153,8 @@ export function Tiles<T extends string>({
   onPick,
   tiles,
 }: PickerProps<T> & { tiles: string }) {
+  const selectedIndex = options.findIndex((o) => o.id === value);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
   return (
     <div
       className="tiles"
@@ -132,14 +162,16 @@ export function Tiles<T extends string>({
       role="radiogroup"
       aria-label={label}
     >
-      {options.map((o) => (
+      {options.map((o, idx) => (
         <button
           key={o.id}
           type="button"
           role="radio"
+          tabIndex={idx === activeIndex ? 0 : -1}
           aria-checked={o.id === value}
           className="tile"
           onClick={() => onPick(o.id)}
+          onKeyDown={(e) => onRadioKeyDown(e, options, idx, onPick)}
         >
           <img
             src={`/closet/${tiles}-${o.id}.webp`}
@@ -164,16 +196,20 @@ export function Chips<T extends string>({
   onPick,
   thumbs = false,
 }: PickerProps<T> & { thumbs?: boolean }) {
+  const selectedIndex = options.findIndex((o) => o.id === value);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
   return (
     <div className="row" role="radiogroup" aria-label={label}>
-      {options.map((o) => (
+      {options.map((o, idx) => (
         <button
           key={o.id}
           type="button"
           role="radio"
+          tabIndex={idx === activeIndex ? 0 : -1}
           aria-checked={o.id === value}
           className={thumbs ? "chip thumb" : "chip"}
           onClick={() => onPick(o.id)}
+          onKeyDown={(e) => onRadioKeyDown(e, options, idx, onPick)}
           title={o.label}
         >
           {thumbs ? <img src={`/doll/${o.id}.png`} alt={o.label} /> : o.label}
@@ -194,15 +230,19 @@ export function Segmented<T extends string>({
   onPick,
   className,
 }: PickerProps<T> & { className: string }) {
+  const selectedIndex = options.findIndex((o) => o.id === value);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
   return (
     <div className={`seg ${className}`} role="radiogroup" aria-label={label}>
-      {options.map((o) => (
+      {options.map((o, idx) => (
         <button
           key={o.id}
           type="button"
           role="radio"
+          tabIndex={idx === activeIndex ? 0 : -1}
           aria-checked={o.id === value}
           onClick={() => onPick(o.id)}
+          onKeyDown={(e) => onRadioKeyDown(e, options, idx, onPick)}
         >
           {o.label}
         </button>

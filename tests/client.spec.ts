@@ -4375,3 +4375,42 @@ test("a part of the game that fails to load offers a reload, not a blank page", 
   await expect(page.getByRole("alert")).toContainText("didn't load");
   await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
 });
+
+test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  const errors = collectErrors(page);
+  await page.goto(VELVET);
+  await page
+    .getByRole("button", { name: "Dressing room", exact: true })
+    .click();
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
+    timeout: 150_000,
+  });
+
+  await page.getByRole("tab", { name: "Makeup", exact: true }).click();
+  const brows = page.getByRole("radiogroup", { name: "Brows", exact: true });
+  await expect(brows.getByRole("radio")).toHaveCount(10);
+
+  // Focus the checked choice
+  const checked = brows.locator('button[role="radio"][aria-checked="true"]');
+  await checked.focus();
+  await expect(checked).toBeFocused();
+
+  // Arrow keys compare choices with wrap
+  await page.keyboard.press("ArrowRight");
+  const next = brows.locator('button[role="radio"][aria-checked="true"]');
+  await expect(next).toBeFocused();
+  await expect(next).not.toHaveText(await checked.innerText());
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(checked).toBeFocused();
+  await expect(checked).toHaveAttribute("aria-checked", "true");
+
+  // Tab leaves the group in a single step
+  await page.keyboard.press("Tab");
+  await expect(brows.locator('button[role="radio"]:focus')).toHaveCount(0);
+
+  expect(errors).toEqual([]);
+});
