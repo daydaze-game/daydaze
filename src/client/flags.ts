@@ -29,7 +29,7 @@ export type Flags = {
   slide: number | null;
   /** `?at=0,300` starts the room at that point (x, z), facing `yaw` (0).
    * `?spot=<building-id>` starts in the city in front of that building
-   * (spots.ts), facing it unless `yaw` is given. */
+   * (spots.ts), her back to it unless `yaw` is given. */
   at: Spawn | null;
   /** `?adult=1` opens the 18+ rooms, in a development build only (adult.ts). */
   adult: boolean;

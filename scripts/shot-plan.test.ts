@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ADULT_ROOMS } from "../src/game/age.ts";
 import { BUILDINGS } from "../src/game/city/layout.ts";
+import { spotFor } from "../src/game/city/spots.ts";
 import {
   expandShots,
   galleryMarkdown,
@@ -41,6 +42,7 @@ test("a bad query is rejected before any browser starts", () => {
     "room=city&w=99999&h=1080",
     "name=x",
     "room=city&&view=full",
+    "spot=nowhere",
   ])
     assert.throws(() => expandShots([bad], known), /bad shots/, bad);
 });
@@ -57,6 +59,14 @@ test("turn=N gives N evenly spaced headings named -NN", () => {
   );
   // the canonical token expands back to the same one shot
   for (const s of shots) assert.deepEqual(expandShots([s.token], known), [s]);
+});
+
+test("a spot's turn starts from the spot's own heading", () => {
+  const [first] = expandShots(["spot=pulse&turn=4"], known);
+  assert.equal(
+    new URLSearchParams(first?.query).get("yaw"),
+    spotFor("pulse")?.yaw.toFixed(3),
+  );
 });
 
 test("w and h set the viewport and stay out of the page's query", () => {

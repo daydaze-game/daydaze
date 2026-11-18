@@ -125,7 +125,7 @@ These work in any build, without the panel:
 | --- | --- |
 | `?room=<id>` | Start in a room (ids in `src/game/rooms.ts`). |
 | `?at=x,z&yaw=r` | Start at a spot in that room. |
-| `?spot=<building-id>` | Start in the city in front of that building, facing its door (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
+| `?spot=<building-id>` | Start in the city in front of that building, back to its door so `view=full` frames it (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
 | `?view=room\|full\|face\|detail` | Start with that camera view. |
 | `?time=HH:MM` | Pin the city's hour. |
 | `?night=<id>` | Start an hour into a club night (ids in `src/game/events.ts`). |

@@ -1,7 +1,9 @@
 // Named city spots for the ?spot=<building-id> flag and the screenshot tour:
-// where to stand to look at one building. A building with a door gets a spot
-// just outside the door's trigger, out from the building, facing the door; a
-// doorless one gets a spot on the sidewalk of its nearest road, facing it.
+// where to stand to show off one building. A building with a door gets a spot
+// just outside the door's trigger, out from the building; a doorless one gets
+// a spot on the sidewalk of its nearest road. Either way she stands with her
+// back to the building: the "full" camera stands in front of her and looks
+// back (CameraRig's CLOSE), so the building fills the frame behind her.
 import type { Spawn } from "../rooms.ts";
 import { yawTowards, type Vec2 } from "../walk.ts";
 import { BUILDINGS, ROAD_EDGES, ROAD_NODES } from "./layout.ts";
@@ -39,7 +41,11 @@ function step(from: Vec2, to: Vec2, meters: number): Vec2 {
   ];
 }
 
-/** Where to stand to look at a building, or null for an unknown id. */
+/** Facing from `from` away from `to`. */
+const awayFrom = (from: Vec2, to: Vec2) =>
+  yawTowards(from, [2 * from[0] - to[0], 2 * from[1] - to[1]]);
+
+/** Where to stand to show a building, or null for an unknown id. */
 export function spotFor(id: string): Spawn | null {
   const b = BUILDINGS.find((x) => x.id === id);
   if (!b) return null;
@@ -51,7 +57,7 @@ export function spotFor(id: string): Spawn | null {
   if (b.door) {
     const door = b.door.position;
     const position = step(door, center, -(b.door.radius + DOOR_GAP));
-    return { position, yaw: yawTowards(position, door) };
+    return { position, yaw: awayFrom(position, door) };
   }
   // the nearest road centerline, then back onto its sidewalk
   let best: { at: Vec2; width: number; d: number } | null = null;
@@ -67,5 +73,5 @@ export function spotFor(id: string): Spawn | null {
   const position: Vec2 = best
     ? step(best.at, center, best.width / 2 + KERB_GAP)
     : [center[0], center[1] + 20];
-  return { position, yaw: yawTowards(position, center) };
+  return { position, yaw: awayFrom(position, center) };
 }

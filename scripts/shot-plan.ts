@@ -19,6 +19,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mayEnter } from "../src/game/age.ts";
 import { BUILDINGS } from "../src/game/city/layout.ts";
+import { spotFor } from "../src/game/city/spots.ts";
 import { ROOMS, isRoomId } from "../src/game/rooms.ts";
 
 /** One shot to take: a registry name, or a query with its own name. */
@@ -78,6 +79,8 @@ function expandQuery(token: string): PlannedShot[] {
   for (const k of ["name", "turn", "w", "h"]) params.delete(k);
   const query = join(params);
   if (!query) throw new Error("no client flags");
+  const spot = params.has("spot") ? spotFor(params.get("spot") ?? "") : null;
+  if (params.has("spot") && !spot) throw new Error("no building with that id");
   if (name !== undefined && !NAME.test(name))
     throw new Error(`name must be [a-z0-9-]`);
   let viewport: PlannedShot["viewport"];
@@ -101,7 +104,8 @@ function expandQuery(token: string): PlannedShot[] {
   // the client reads yaw only with a spawn spot
   if (!params.has("at") && !params.has("spot"))
     throw new Error("turn needs at= or spot=");
-  const start = Number(params.get("yaw") ?? 0);
+  // from the given heading, else the spot's own, so -00 is the usual framing
+  const start = Number(params.get("yaw") ?? spot?.yaw ?? 0);
   if (!Number.isFinite(start)) throw new Error("yaw is not a number");
   return Array.from({ length: n }, (_, i) => {
     const turned = new Map(params);
