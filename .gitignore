@@ -57,3 +57,6 @@ art/opponents/.cache/
 
 # Large local source downloads and asset preparation workspaces
 /local-assets/
+
+# Screen recordings from scripts/record.ts
+/recordings/
