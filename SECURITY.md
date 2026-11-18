@@ -4,7 +4,7 @@
 
 Please don't open a public issue for a security problem. Report it privately
 through GitHub's [private vulnerability reporting](https://github.com/dpologdvinity/daydaze/security/advisories/new)
-or by email to kaitlynbassford@gmail.com.
+or by email to <kaitlynbassford@gmail.com>.
 
 Include what you found, how to reproduce it, and what it affects. You'll get
 a reply within a week. Once a fix ships you can be credited in the advisory if

@@ -132,7 +132,7 @@ tiling breakup and weathering (`boxMapped` with `weather`), day/night dimming,
 merged and instanced per kind. Record each in `docs/assets.md`.
 
 | Pack | Where it goes |
-|---|---|
+| --- | --- |
 | Downtown City MegaKit (153 glTF) | NYC blocks in Downtown, Uptown and the Arts District: brick and stone walk-ups, cornices, fire escapes, storefronts with awnings, doors and stoops; replaces the box buildings there |
 | Ultimate Textured Building Pack, Buildings Packs 2017/2019 | variety elsewhere: Suburbia houses, Little Manila and Chinatown shophouses, Beachside pastel motels (Ocean City) |
 | Street Pack, Kenney City Kit Roads | street furniture everywhere: lamps, hydrants, benches, bins, traffic lights, signs, bus stops, mailboxes |
@@ -170,7 +170,7 @@ merged and instanced per kind. Record each in `docs/assets.md`.
 Each builds on what exists where it can; packs from the asset map above.
 
 | Idea | Builds on | Packs |
-|---|---|---|
+| --- | --- | --- |
 | Fishing | Starboard Marina's fishing game | Animated Fish, Cute Fish, Ships |
 | Oceans and beaches with fish and animals | Beachside, the Ocean, Mermaid Cove | Cute Fish, Animated Animals (crabs, gulls, dolphins if present) |
 | Swimming in the ocean with the fish | the water park's swim state, the Ocean | Cute Fish, Animated Fish |
@@ -217,6 +217,7 @@ Each builds on what exists where it can; packs from the asset map above.
 Merged tonight (all on main, pushed): street trees; full Mixamo rig with natural per-sex walks; zoo (animated farm, Sketchfab giraffe/elephant/lion/penguin, zebra) and aquarium sea life; pets; credits screen; street furniture, daytime paint and skyline, traffic lights; the park; NYC facades (Downtown, Uptown, Arts District, Little Manila, Chinatown/Koreatown, Suburbia houses, fire escapes); Seaside Swim and the scuba reef; Sunny Acres Farm; the stock-car oval; bus rides and taxis; the marina's boats and fish; two sound passes (ElevenLabs + Freesound); the 13+ gate (alcohol only on 18+ servers); fixes from a full code review. The repo is public (CI runs free).
 
 Open branches in `.worktrees/` (each has a WIP or finished commit; rebase onto main, verify, run its Playwright tests, then merge):
+
 - `feat/street`: boardwalk visual pass (planks, counters, animated Ferris wheel) in progress; then joggers (owner added `mixamo/running/Jogging.fbx`).
 - `feat/nyc`: the El elevated train; must fix its review findings (stuck ride after tab throttling, store reset on unmount, get-off teleport, per-frame alloc, online position, error boundary).
 - `feat/oval`: pit crew fixed and build cache untracked; verify green, Speedway tests were running.
@@ -227,6 +228,7 @@ Open branches in `.worktrees/` (each has a WIP or finished commit; rebase onto m
 - `feat/transit` (Codex): bus-shelter riders follow-up, committed, not browser-tested.
 
 Owner notes: Mixamo clips in `mixamo/` are named `Name_Description` with dashes for spaces; check there before asking for downloads. Don't spend Meshy credits yet (owner is looking for animals). Chrome GPU play-testing is postponed. `.env` has no VITE_ keys.
+
 - `feat/nyc` second review (d66e6308..4a959cdf), new Important items beyond the first list: NycFacades disposes memoized InstancedMesh2 in cleanup (StrictMode remount reuses disposed meshes: build them in the effect); verify the patchShader + instance-color tint with one screenshot and guard `color` with `#ifdef USE_COLOR` (bayMaterial is shared with meshes.ts:482); wrap planTrip in try/catch inside useFrame; the El request branch must skip when driving, sliding or mid-portal (same guards as PlayerController L206/L311); the waiting "Get off" label should read "Cancel". Minors: `as` casts in ElLine/elStore/NycFacades, unused `_trainX`, ElPanel stale `now`, gate `?elspeed`/`?elat` on DEV, el.ts header and declaration order, budget El gaps and VIEW_WEDGE margin.
 
 ## Handoff 3 (2026-11-05 evening)
@@ -234,6 +236,7 @@ Owner notes: Mixamo clips in `mixamo/` are named `Name_Description` with dashes 
 Merged since Handoff 2 (all on main): oval polish, the El train, transit riders, sci-fi rooms (laser-tag test fixed), owner animals (tigers, bear, elk, Labrador), zoo Scatter quantization fix + habitat plants + blue whale + park wildlife, Fairground downloads, wonder-pass Tasks 36-41 (textured hair, short cuts, plus-size, hijab/wrap/turban/bindi/hearing aids, vitiligo/birthmarks/monolid, wheelchair + prosthetic legs), the boardwalk (planks, counters, shops on the deck, crowd, joggers, world-mapped texture fix), apartment furniture catalog + color looks + wall pieces, sushi/ramen interiors, grocery + plated food.
 
 Open branches (rebase onto main, `npm run verify`, the feature's Playwright tests with a unique PORT via `flock -w 7200 /tmp/daydaze-pw.lock`, look at screenshots, then `git merge --no-ff` only if `git merge-base --is-ancestor main <branch>`):
+
 - `feat/animals`: MERGED (5e24f728) — one `bakedGeometry()` helper for every baked GLB.
 - `fix/review-2` (.worktrees/fixes, head b3711a5b): static city pieces merged into one mesh per reload (17.5k -> 800 instances), the zoom test uses 6 large wheel flicks; 28/29 city tests passed; open: "the city map takes the player to Beachside" timed out once (check branch vs main). Then merge.
 - `feat/orbit`: MERGED — Orbit 9 space-station club (follow-up: the bartender's head pokes through the bar counter in docs/screenshots/orbit.png).
@@ -254,6 +257,7 @@ Lessons: subagent code reviews report to the lead; agents must check for conflic
 Merged since Handoff 3: plus2, Orbit 9 (+ bartender aisle fix), the wonder43 flake sweep (3 green GitHub Actions runs). Wonder pass Tasks 36-41 and 43 are done; Task 42 (browser suite on push/PR) is committed on `feat/taxi`.
 
 Paused branches (each agent committed WIP; resume by giving each branch a fresh agent with its task, then rebase, verify, its Playwright test, screenshots, merge):
+
 - `feat/cove`: mermaids lounge/swim/sing fix committed; tests + screenshot pending.
 - `feat/home2` (TV picture, wall pieces, pink velvet; verify green) and `feat/motels` (pastel motels, VACANCY signs, Suburbia variety).
 - `fix/review-2`: static city merge (perf); checking the Beachside map test vs main.

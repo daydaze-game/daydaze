@@ -114,8 +114,17 @@ test("look shapes are plain string records with bounded keys and values", () => 
 test("a look with every optional field is valid and fits the wire limit (client and server share both checks)", () => {
   const full = {
     ...DEFAULT_LOOK,
-    face: encodeFace(DEFAULT_FACE),
-    makeup: encodeMakeup(DEFAULT_MAKEUP),
+    face: encodeFace({
+      ...DEFAULT_FACE,
+      noseLength: 1,
+      chinDepth: -1,
+      eyeColor: "#123abc",
+    }),
+    makeup: encodeMakeup({
+      ...DEFAULT_MAKEUP,
+      blush: "#123456",
+      highlight: "#abcdef",
+    }),
     piercings: encodePiercings(NO_PIERCINGS),
     gait: "wheelchair",
     shoes: "boots",

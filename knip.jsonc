@@ -1,0 +1,39 @@
+// Knip: finds unused files, exports and dependencies (`npm run lint:dead`).
+// Vite entries come from the html pages (Knip does not follow their root-
+// absolute script src, so the .tsx files they load are listed too).
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "index.html",
+    "minigames.html",
+    "src/client/avatar/lineup.tsx",
+    "src/client/rooms/shared/game3d/kit.tsx",
+    "server/src/worker/index.ts",
+    "scripts/*.{ts,mjs}",
+    "server/scripts/*.mjs",
+    "tests/*.ts",
+    "playwright*.config.ts",
+    "**/*.test.ts",
+  ],
+  // art/, docs/, public/ and prototypes/ are outside this list on purpose.
+  "project": [
+    "src/**",
+    "server/src/**",
+    "server/scripts/**",
+    "scripts/**",
+    "tests/**",
+    "*.ts",
+  ],
+  // a constant exported for tests' sake but used in its own file is fine
+  "ignoreExportsUsedInFile": true,
+  // system tool called by scripts/gen-sounds.mjs
+  "ignoreBinaries": ["ffmpeg"],
+  "ignoreIssues": {
+    // BREATHE_HZ landed on main with in-progress substance work and isn't
+    // imported yet; revisit with the other dead exports in #40
+    "src/game/effects/substances.ts": ["exports"],
+    // intentional aliases of one value
+    "src/game/gaits.ts": ["duplicates"],
+    "src/game/skate.ts": ["duplicates"],
+  },
+}

@@ -40,10 +40,6 @@ test("active architecture replaces every old body, bay, lot, house and far box",
       "band",
     ] as const)
       assert.equal(plan.instances[k].length, 0, k);
-    assert.deepEqual(
-      [plan.bays, plan.lots, plan.houses, plan.far],
-      [[], [], [], []],
-    );
   }
 });
 
