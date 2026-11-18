@@ -34,40 +34,48 @@ try {
       options: LIP_SHAPES,
     },
   ] as const) {
+    const params = new URLSearchParams({
+      human: "1",
+      studio: "1",
+      still: "1",
+      shot: group.shot,
+    });
+    await page.goto(`${base}/src/client/avatar/lineup.html?${params}`);
+    await page.waitForFunction(
+      () => typeof Reflect.get(window, "setPreviewFace") === "function",
+    );
     for (const option of group.options) {
       const face = encodeFace({ ...DEFAULT_FACE, [group.field]: option.id });
-      const params = new URLSearchParams({
-        human: "1",
-        studio: "1",
-        still: "1",
-        shot: group.shot,
-        face,
-      });
-      await page.goto(`${base}/src/client/avatar/lineup.html?${params}`);
+      await page.evaluate((code) => {
+        const select: unknown = Reflect.get(window, "setPreviewFace");
+        if (typeof select !== "function")
+          throw new Error("Missing live preset selection");
+        select(code);
+      }, face);
       await page.waitForFunction(
-        () =>
+        (code) =>
           document.body.dataset.ready === "true" &&
+          document.body.dataset.previewFace === code &&
           Number(document.body.dataset.frames) >= 12,
-        null,
+        face,
         {
           timeout: 180_000,
         },
       );
       if (errors.length) throw new Error(errors.join("\n"));
       const file = new URL(`${group.prefix}-${option.id}.webp`, output);
-      const png = await page.screenshot({ timeout: 180_000 });
-      const webp = await page.evaluate(async (base64) => {
-        const image = new Image();
-        image.src = `data:image/png;base64,${base64}`;
-        await image.decode();
+      const webp = await page.evaluate(() => {
+        const source = document.querySelector("canvas");
+        if (!source) throw new Error("Missing native preview canvas");
         const canvas = document.createElement("canvas");
         canvas.width = 256;
         canvas.height = 160;
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Cannot create preview image canvas");
-        context.drawImage(image, 0, 0, 256, 160);
+        // The lab preserves its drawing buffer so native pixels can be exported.
+        context.drawImage(source, 0, 0, 256, 160);
         return canvas.toDataURL("image/webp", 0.88).split(",")[1];
-      }, png.toString("base64"));
+      });
       await writeFile(file, Buffer.from(webp, "base64"));
       console.log(file.pathname);
     }

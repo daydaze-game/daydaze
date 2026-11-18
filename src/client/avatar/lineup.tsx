@@ -2,7 +2,7 @@
 // /src/client/avatar/lineup.html?shot=face|body|lineup|far on the dev server.
 // Writes draw-call and triangle counts to data-stats on <body> for before/after.
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as THREE from "three";
 import {
@@ -310,15 +310,15 @@ const SHOTS = {
     x: () => 0,
     cam: [0, 1.55 + portraitLift * 1.5, 0.55] as const,
     target: [0, 1.55 + portraitLift * 1.5, 0] as const,
-    fov: 12,
+    fov: 8,
   },
   // Native lip preset previews use the same neutral face.
   lipstile: {
     looks: [{ ...DEFAULT_LOOK, hairStyle: "buns" as const, ...makeupParam() }],
     x: () => 0,
-    cam: [0, 1.495 + portraitLift, 0.48] as const,
-    target: [0, 1.495 + portraitLift, 0] as const,
-    fov: 12,
+    cam: [0, 1.482 + portraitLift, 0.48] as const,
+    target: [0, 1.482 + portraitLift, 0] as const,
+    fov: 8,
   },
   // prosthetic legs: shorts and a mini show the pylon, jeans cover it
   limbs: {
@@ -667,7 +667,13 @@ function NeutralPreview() {
   return null;
 }
 
-function Probe({ count }: { count: number }) {
+function Probe({
+  count,
+  selection,
+}: {
+  count: number;
+  selection: string | null;
+}) {
   const scene = useThree((s) => s.scene);
   const invalidate = useThree((s) => s.invalidate);
   const frames = useRef(0);
@@ -691,6 +697,8 @@ function Probe({ count }: { count: number }) {
     if (still && settled.current < 12) invalidate();
     document.body.dataset.frames = String(frames.current);
     document.body.dataset.ready = settled.current >= 10 ? "true" : "false";
+    if (settled.current >= 10)
+      document.body.dataset.previewFace = selection ?? "";
     if (settled.current !== 10) return;
     const dolls = Array.from({ length: count }, (_, i) =>
       // eslint-disable-next-line no-restricted-syntax -- runs once at frame 12 for the screenshot measure, never in play
@@ -703,6 +711,18 @@ function Probe({ count }: { count: number }) {
 }
 
 function Lab() {
+  const [previewFace, setPreviewFace] = useState<string | null>(null);
+  useEffect(() => {
+    if (shot !== "eyetile" && shot !== "lipstile") return;
+    // Reuse one WebGL context while the capture script changes native presets.
+    const select = (code: unknown) => {
+      if (typeof code === "string" && decodeFace(code)) setPreviewFace(code);
+    };
+    Reflect.set(window, "setPreviewFace", select);
+    return () => {
+      Reflect.deleteProperty(window, "setPreviewFace");
+    };
+  }, []);
   return (
     <Canvas
       frameloop={still ? "demand" : "always"}
@@ -761,7 +781,7 @@ function Lab() {
           {human ? (
             <Suspense fallback={null}>
               <HumanDoll
-                look={look}
+                look={previewFace ? { ...look, face: previewFace } : look}
                 mood={
                   shot === "dance" || shot === "piggyback"
                     ? "dance"
@@ -799,7 +819,11 @@ function Lab() {
           )}
         </group>
       ))}
-      <Probe count={plan.looks.length} />
+      <Probe
+        key={previewFace}
+        count={plan.looks.length}
+        selection={previewFace}
+      />
       {(shot === "eyetile" || shot === "lipstile") && (
         <Suspense fallback={null}>
           <NeutralPreview />
