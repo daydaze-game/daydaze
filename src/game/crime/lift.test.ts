@@ -27,7 +27,7 @@ test("lifted stock is tagged, and its shop knows it when you wear it", () => {
 });
 
 test("the stolen tags survive a save, and junk in them doesn't", () => {
-  const saved = JSON.parse(
+  const saved: unknown = JSON.parse(
     JSON.stringify({
       offences: 1,
       bans: {},

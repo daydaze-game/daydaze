@@ -11,7 +11,7 @@ export type Identity = {
 };
 
 export function parseIdentity(value: unknown): Identity | null {
-  const f = new Map(
+  const f = new Map<string, unknown>(
     typeof value === "object" && value !== null ? Object.entries(value) : [],
   );
   const id = f.get("id");

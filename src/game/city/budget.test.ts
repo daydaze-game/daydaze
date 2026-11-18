@@ -292,13 +292,7 @@ test("textured landmarks are priced from their shipped near and far meshes", () 
 });
 
 test("distant landmark roofs retain the detailed skyline height", () => {
-  const metadata: Record<
-    string,
-    {
-      near: { bounds: { max: number[] } };
-      far: { bounds: { max: number[] } };
-    }
-  > = JSON.parse(
+  const raw: unknown = JSON.parse(
     readFileSync(
       new URL(
         "../../../public/models/city-dream/landmarks.generated.json",
@@ -307,9 +301,28 @@ test("distant landmark roofs retain the detailed skyline height", () => {
       "utf8",
     ),
   );
+  type Detail = { bounds: { max: number[] } };
+  type Entry = { near: Detail; far: Detail };
+  const isDetail = (v: unknown): v is Detail =>
+    typeof v === "object" &&
+    v !== null &&
+    "bounds" in v &&
+    typeof v.bounds === "object" &&
+    v.bounds !== null &&
+    "max" in v.bounds &&
+    Array.isArray(v.bounds.max);
+  const isEntry = (v: unknown): v is Entry =>
+    typeof v === "object" &&
+    v !== null &&
+    "near" in v &&
+    isDetail(v.near) &&
+    "far" in v &&
+    isDetail(v.far);
+  assert.ok(typeof raw === "object" && raw !== null);
+  const metadata = new Map<string, unknown>(Object.entries(raw));
   for (const kind of DREAM_LANDMARKS) {
-    const entry = metadata[kind];
-    assert.ok(entry, kind);
+    const entry = metadata.get(kind);
+    assert.ok(isEntry(entry), kind);
     assert.ok(
       Math.abs(entry.near.bounds.max[1] - entry.far.bounds.max[1]) < 0.3,
       `${kind} loses its roof or spire when switching detail`,
