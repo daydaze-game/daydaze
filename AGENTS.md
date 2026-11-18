@@ -44,23 +44,23 @@ audience, tone, age tiers, platform and open decisions.
 
 Node.js 22.18 or newer (`.nvmrc` pins 24).
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Client on `http://localhost:5173` (`-- --port 5195` for another) |
-| `npm run build` / `npm run preview` | Vite build of `dist/` / serve it |
-| `npm test` | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts` |
-| `npm run test:coverage` | Same, with coverage into `coverage/` |
-| `npm run lint` | ESLint |
-| `npm run lint:md` | markdownlint-cli2 over the Markdown docs |
-| `npm run typecheck` | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`) |
-| `npm run format` / `format:check` | Prettier |
-| `npm run verify` | lint, test, typecheck, format check, build, perf budget: the merge gate |
-| `npm run test:e2e:client` | Playwright client tests (`tests/client.spec.ts`) |
-| `npm run test:e2e` / `test:e2e:sw` | Playwright minigames / service-worker configs |
-| `npm run test:e2e:online` | Two browser players against a local Worker (~7 min) |
-| `npm run dev:server` | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
-| `npm run smoke:server` | End-to-end check of a throwaway local Worker |
-| `npm run perf:budget` | Check `dist/` against the performance budget (run after build) |
+| Command                             | What it does                                                                                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                       | Client on `http://localhost:5173` (`-- --port 5195` for another)                                                                                |
+| `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
+| `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
+| `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
+| `npm run lint`                      | ESLint                                                                                                                                          |
+| `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
+| `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
+| `npm run format` / `format:check`   | Prettier                                                                                                                                        |
+| `npm run verify`                    | lint, test, typecheck, format check, build, perf budget: the merge gate                                                                         |
+| `npm run test:e2e:client`           | Playwright client tests (`tests/client.spec.ts`)                                                                                                |
+| `npm run test:e2e` / `test:e2e:sw`  | Playwright minigames / service-worker configs                                                                                                   |
+| `npm run test:e2e:online`           | Two browser players against a local Worker (~7 min)                                                                                             |
+| `npm run dev:server`                | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
+| `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
+| `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
 
 Client URL flags: `?quality=low|high`, `?still=1` (render a few frames and
 stop, for screenshots), `?debug=1` (room jump buttons), `?time=HH:MM` (pin the
@@ -200,14 +200,14 @@ Secrets live in a git-ignored `.env` (loaded by direnv's `.envrc`). Run commands
 that need keys through `bash scripts/with-env.sh <command>`; never print `.env`.
 Each key and what it's for is in `docs/agents/TOOLS.md`.
 
-| Variable | Used by |
-| --- | --- |
-| `MESHY_API_KEY` | The `meshy` MCP server in `.mcp.json` |
-| `TRIPO_API_KEY` | `scripts/tripo.sh` |
-| `ELEVENLABS_API_KEY` | Offline sound generation (`scripts/gen-sounds.mjs`) |
-| `SKETCHFAB_API_TOKEN`, `POLYPIZZA_API_KEY`, `FREESOUND_API_KEY` | Asset search and download |
-| `GEMINI_API_KEY`, `POLLINATIONS_API_KEY`, `ITCH_API_KEY` | Optional reference images and owner library |
-| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `R2_*` | Owner-approved infrastructure only |
+| Variable                                                        | Used by                                             |
+| --------------------------------------------------------------- | --------------------------------------------------- |
+| `MESHY_API_KEY`                                                 | The `meshy` MCP server in `.mcp.json`               |
+| `TRIPO_API_KEY`                                                 | `scripts/tripo.sh`                                  |
+| `ELEVENLABS_API_KEY`                                            | Offline sound generation (`scripts/gen-sounds.mjs`) |
+| `SKETCHFAB_API_TOKEN`, `POLYPIZZA_API_KEY`, `FREESOUND_API_KEY` | Asset search and download                           |
+| `GEMINI_API_KEY`, `POLLINATIONS_API_KEY`, `ITCH_API_KEY`        | Optional reference images and owner library         |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `R2_*`         | Owner-approved infrastructure only                  |
 
 ## Commits
 

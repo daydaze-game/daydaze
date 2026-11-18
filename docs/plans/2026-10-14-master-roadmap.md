@@ -34,31 +34,31 @@ The look is maximalist: dense, layered, glowing, colourful, with constant small 
 
 ### Merged on `main`
 
-| Area | What exists | Evidence |
-| --- | --- | --- |
-| Online foundation | A Cloudflare Worker, Durable Objects and D1 schema covering: guests and accounts (PBKDF2), shared room copies, chat, block/mute/report, admin kick and ban, persisted rate limits, CSP and security headers, origin checks, and a smoke test. | `server/`, `src/net/`, `docs/security.md`, `docs/deploy.md`, `npm run smoke:server` |
-| Framework-free online client | `OnlineSession`, `WebSocketTransport` and the typed API. They are not yet wired into the 3D client. | `src/net/client/` |
-| 3D client | React Three Fiber world, click-to-walk, orbit camera and quality tiers. The code-built doll uses toon shading and painted face layers. Also a closet, chat UI, the Velvet Room lounge and the Plaza night street with portals. | `src/client/`, `src/game/`, `tests/client.spec.ts` |
-| Minigames (2D overlays) | Last Call (cocktail mixing) and Bassline (DJ rhythm). | `src/minigames/`, `tests/minigames.spec.ts` |
-| Procedural audio | A shared bus, instruments, a jukebox and bar sounds. | `src/audio/` |
-| Doll art | Layered 2D face, hair and makeup art with a compositor. | `art/doll/` |
-| Specs and plans | Content spec, city spec (approved), online spec, client spec, Speedway plan. | `docs/specs/`, `docs/plans/` |
-| Renames | Mango Room became The Velvet Room. Mango Decks became Bassline. Mango Mixology became Last Call. | commits `9706ff2`, `ef43176`, `f1865e7` |
+| Area                         | What exists                                                                                                                                                                                                                                   | Evidence                                                                            |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Online foundation            | A Cloudflare Worker, Durable Objects and D1 schema covering: guests and accounts (PBKDF2), shared room copies, chat, block/mute/report, admin kick and ban, persisted rate limits, CSP and security headers, origin checks, and a smoke test. | `server/`, `src/net/`, `docs/security.md`, `docs/deploy.md`, `npm run smoke:server` |
+| Framework-free online client | `OnlineSession`, `WebSocketTransport` and the typed API. They are not yet wired into the 3D client.                                                                                                                                           | `src/net/client/`                                                                   |
+| 3D client                    | React Three Fiber world, click-to-walk, orbit camera and quality tiers. The code-built doll uses toon shading and painted face layers. Also a closet, chat UI, the Velvet Room lounge and the Plaza night street with portals.                | `src/client/`, `src/game/`, `tests/client.spec.ts`                                  |
+| Minigames (2D overlays)      | Last Call (cocktail mixing) and Bassline (DJ rhythm).                                                                                                                                                                                         | `src/minigames/`, `tests/minigames.spec.ts`                                         |
+| Procedural audio             | A shared bus, instruments, a jukebox and bar sounds.                                                                                                                                                                                          | `src/audio/`                                                                        |
+| Doll art                     | Layered 2D face, hair and makeup art with a compositor.                                                                                                                                                                                       | `art/doll/`                                                                         |
+| Specs and plans              | Content spec, city spec (approved), online spec, client spec, Speedway plan.                                                                                                                                                                  | `docs/specs/`, `docs/plans/`                                                        |
+| Renames                      | Mango Room became The Velvet Room. Mango Decks became Bassline. Mango Mixology became Last Call.                                                                                                                                              | commits `9706ff2`, `ef43176`, `f1865e7`                                             |
 
 `npm run verify` is green on `main` (700+ unit tests). `main` is pushed to the private GitHub repo after each green change; deploying still needs the user's OK.
 
 ### Landed since (2026-10-15 to 2026-10-16)
 
-| Area | What exists | Evidence |
-| --- | --- | --- |
-| City | Downtown and Nightlife Row (384 m square), cell streaming, traffic, doors into every room; Poly Haven asphalt and concrete; night-street HDRI on the high tier | `src/game/city/`, `src/client/city/` |
-| 3D doll | MakeHuman CC0 doll built in Blender: strand-card hair (12 styles), face presets, makeup, piercings, hourglass figure with sliders, six outfits and two swimsuits, LOD body | `art/doll/blender/`, `src/client/avatar/human/` |
-| Character creator | Full-screen closet with picture tiles for hair, face, outfits and swimsuits | `src/client/ui/Overlay.tsx`, `public/closet/` |
-| Motion | CMU and Mixamo motion capture: walk styles (natural, catwalk, sexy, feminine, casual), captured dances, held poses for Pose and Sit, lying on beds | `art/doll/blender/mocap.py`, `src/game/dance/` |
-| Seating | Chairs, stools, banquettes, the apartment sofa and bed | `src/game/seats.ts` |
-| Amusement Park | Nine rideable rides: ferris wheel, Comet coaster, Starlight hyper coaster (20 m, back lot), carousel, teacups, swings, drop tower, pirate ship, log flume (water-ride lot); the Midway booths | `src/game/amusementPark.ts`, `src/client/rooms/amusementpark/` |
-| Rooms | Velvet Room, Plaza, Pulse, The Violet Hour, three food rooms, shops, apartment, jail, Water Park, Speedway | `src/client/rooms/` |
-| Props | 14 Meshy-generated furniture and venue props | `public/models/props/`, `art/props/` |
+| Area              | What exists                                                                                                                                                                                   | Evidence                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| City              | Downtown and Nightlife Row (384 m square), cell streaming, traffic, doors into every room; Poly Haven asphalt and concrete; night-street HDRI on the high tier                                | `src/game/city/`, `src/client/city/`                           |
+| 3D doll           | MakeHuman CC0 doll built in Blender: strand-card hair (12 styles), face presets, makeup, piercings, hourglass figure with sliders, six outfits and two swimsuits, LOD body                    | `art/doll/blender/`, `src/client/avatar/human/`                |
+| Character creator | Full-screen closet with picture tiles for hair, face, outfits and swimsuits                                                                                                                   | `src/client/ui/Overlay.tsx`, `public/closet/`                  |
+| Motion            | CMU and Mixamo motion capture: walk styles (natural, catwalk, sexy, feminine, casual), captured dances, held poses for Pose and Sit, lying on beds                                            | `art/doll/blender/mocap.py`, `src/game/dance/`                 |
+| Seating           | Chairs, stools, banquettes, the apartment sofa and bed                                                                                                                                        | `src/game/seats.ts`                                            |
+| Amusement Park    | Nine rideable rides: ferris wheel, Comet coaster, Starlight hyper coaster (20 m, back lot), carousel, teacups, swings, drop tower, pirate ship, log flume (water-ride lot); the Midway booths | `src/game/amusementPark.ts`, `src/client/rooms/amusementpark/` |
+| Rooms             | Velvet Room, Plaza, Pulse, The Violet Hour, three food rooms, shops, apartment, jail, Water Park, Speedway                                                                                    | `src/client/rooms/`                                            |
+| Props             | 14 Meshy-generated furniture and venue props                                                                                                                                                  | `public/models/props/`, `art/props/`                           |
 
 ---|---|---|
 | `feat/water-park` | Water Park room, Plaza gate, auto-swimsuit slot in the save, slide ride, lifeguard, cashier and swimmers, screenshots | Being finished: rebasing onto `main`, carrying the Velvet rename, tests and screenshots. Merges first. |
@@ -101,19 +101,19 @@ The look is maximalist: dense, layered, glowing, colourful, with constant small 
 
 Today the save is `SaveV1`: name, look and settings, client-only. The Water Park branch adds a swimsuit look slot. Later milestones extend the save as shown below. Every change gets a versioned migration, validation of old saves and round-trip tests.
 
-| Field | Needed by | Owner | Notes |
-| --- | --- | --- | --- |
-| `look.swimsuit` | M1 Water Park | client save | In flight. |
-| `coins` | M4 | client save, then the server after M9 | Client-owned until trading exists (VISION). |
-| `inventory` (clothes, furniture, items, `stolen` tag with expiry) | M4, M6 | client save, then the server | Server-owned once multiplayer swap racks and break-ins exist. |
-| `body` (bust, hips/butt, waist, height) | M4 | client save | Body-shape sliders. |
-| `identity` (pronouns, accessibility items) | M4 | client save | Shown on the profile card. |
-| `cars` (owned ids, paint, rims, wrap, tint, underglow, parked location, locked) | M2, M4 | client save, then the server | Theft needs the server. |
-| `home` (apartment id, neighborhood, decor layout, door locked) | M6 | server | Break-ins need server ownership. |
-| `jail` (sentence end, bail amount, offence) and `storeBans` | M6 | server | Must not be client-skippable once online. |
-| `buzz` (drunk, high, trip levels with decay timestamps) | M3, M10 | client, with chat effects enforced by the server | Never punishing. |
-| `relationships` (friends, blocks, mutes) | M9 | server | Blocks already exist in the online spec. |
-| `birthdate` (locked) and the 18+ flag | M10 | server only | The birthdate is never stored on the client. |
+| Field                                                                           | Needed by     | Owner                                            | Notes                                                         |
+| ------------------------------------------------------------------------------- | ------------- | ------------------------------------------------ | ------------------------------------------------------------- |
+| `look.swimsuit`                                                                 | M1 Water Park | client save                                      | In flight.                                                    |
+| `coins`                                                                         | M4            | client save, then the server after M9            | Client-owned until trading exists (VISION).                   |
+| `inventory` (clothes, furniture, items, `stolen` tag with expiry)               | M4, M6        | client save, then the server                     | Server-owned once multiplayer swap racks and break-ins exist. |
+| `body` (bust, hips/butt, waist, height)                                         | M4            | client save                                      | Body-shape sliders.                                           |
+| `identity` (pronouns, accessibility items)                                      | M4            | client save                                      | Shown on the profile card.                                    |
+| `cars` (owned ids, paint, rims, wrap, tint, underglow, parked location, locked) | M2, M4        | client save, then the server                     | Theft needs the server.                                       |
+| `home` (apartment id, neighborhood, decor layout, door locked)                  | M6            | server                                           | Break-ins need server ownership.                              |
+| `jail` (sentence end, bail amount, offence) and `storeBans`                     | M6            | server                                           | Must not be client-skippable once online.                     |
+| `buzz` (drunk, high, trip levels with decay timestamps)                         | M3, M10       | client, with chat effects enforced by the server | Never punishing.                                              |
+| `relationships` (friends, blocks, mutes)                                        | M9            | server                                           | Blocks already exist in the online spec.                      |
+| `birthdate` (locked) and the 18+ flag                                           | M10           | server only                                      | The birthdate is never stored on the client.                  |
 
 ---
 
@@ -358,52 +358,52 @@ Every milestone ends with `npm run verify` green, its Playwright specs green und
 
 ## 5. Games roster with milestones
 
-| Game | Place | Mode | Difficulty | Theme | Milestone |
-| --- | --- | --- | --- | --- | --- |
-| Bassline DJ rhythm | dance club | solo | hard | music | exists; launched from the world in M3 |
-| Last Call cocktail mixing | rooftop bar | solo | easy | bartending | exists; launched from the world in M3 |
-| Karaoke | karaoke bar | solo or multi | easy | music | M3 |
-| Speed slide race | Water Park | multi | medium | water | M7 |
-| Cliff dive tricks | Water Park | solo | hard | water | M7 |
-| Water gun battle | Water Park | multi | medium | water | M7 |
-| Pool volleyball | Water Park | multi | medium | sports | M7 |
-| Bumper cars | Speedway | multi | easy | party | M2 |
-| Race track: kart and car races | Speedway | solo time trial or multi | easy to hard | racing | M2 (multi in M9) |
-| Haunted house | Amusement Park | solo | medium | horror | M7 |
-| Carnival booths: ring toss, whack-a-mole, shooting gallery | Amusement Park | solo | easy to hard | carnival | M7 |
-| Jet-ski race | Marina | multi | medium | water racing | M8 |
-| Yacht party DJ set and dance-off | party yacht | multi | easy | party | M8 |
-| Fishing off the dock | Marina | solo | easy | chill | M8 |
-| Figure skating tricks | Ice Rink | solo | medium to hard | winter | M8 |
-| Curling | Ice Rink | multi | easy | winter | M8 |
-| Basketball shootout | Sports Complex | solo or multi | easy to hard | sports | M8 |
-| Penalty kicks | Sports Complex | solo or multi | easy | sports | M8 |
-| Tennis | Sports Complex | multi | medium | sports | M8 |
-| Bowling | Sports Complex | multi | easy | sports | M8 |
-| Mini golf | Sports Complex | solo or multi | easy | sports | M8 |
-| Dance battle | any club | multi | medium | dance | M3 |
-| Safari photo hunt | Zoo | solo | easy | animals | M8 |
-| Feeding time | Zoo | solo | easy | animals | M8 |
-| Reef dive spotter | Aquarium | solo | medium | ocean | M8 |
-| Seal show tricks (rhythm) | Aquarium | solo or multi | medium | ocean | M8 |
-| Shooting range | Shooting range | solo | easy to hard | action | M7 |
-| Paintball arena | Sports Complex | multi | medium | action | M7 |
-| Laser tag | arcade bar | multi | medium | action | M7 |
-| Alien invasion arcade shooter (no zombies) | arcade bar | solo or co-op | medium to hard | sci-fi action | M7 |
-| Runway battle with player voting | Fashion District | multi | medium | fashion | M8 (voting in M9) |
-| Trivia night (2000s pop culture) | arcade bar | multi | medium | nostalgia | M3 |
-| Surf | Boardwalk | solo | hard | beach | M8 |
-| Beach volleyball | Boardwalk | multi | medium | sports | M8 |
-| Card table | speakeasy | multi | easy | chill | M3 |
-| Match-3 puzzle | arcade bar | solo | easy to hard | arcade | M3 |
-| Nail painting | nail salon | solo | easy to medium | beauty | M4 |
-| Boba builder | boba shop | solo | easy | food | M5 |
-| Halo-halo stacker | Filipino dessert spot | solo | easy to medium | food | M5 |
-| Sushi conveyor catch | sushi bar | solo | medium | food | M5 |
-| Ramen rush | ramen counter | solo | hard | food | M5 |
-| Filipino cook-off | Little Manila | multi (2) | medium | food | M5 (venue in M8) |
-| Delivery job | whole city | solo | easy to medium | racing | M5 |
-| Jail card games and push-ups | jail | solo | easy | chill | M6a |
+| Game                                                       | Place                 | Mode                     | Difficulty     | Theme         | Milestone                             |
+| ---------------------------------------------------------- | --------------------- | ------------------------ | -------------- | ------------- | ------------------------------------- |
+| Bassline DJ rhythm                                         | dance club            | solo                     | hard           | music         | exists; launched from the world in M3 |
+| Last Call cocktail mixing                                  | rooftop bar           | solo                     | easy           | bartending    | exists; launched from the world in M3 |
+| Karaoke                                                    | karaoke bar           | solo or multi            | easy           | music         | M3                                    |
+| Speed slide race                                           | Water Park            | multi                    | medium         | water         | M7                                    |
+| Cliff dive tricks                                          | Water Park            | solo                     | hard           | water         | M7                                    |
+| Water gun battle                                           | Water Park            | multi                    | medium         | water         | M7                                    |
+| Pool volleyball                                            | Water Park            | multi                    | medium         | sports        | M7                                    |
+| Bumper cars                                                | Speedway              | multi                    | easy           | party         | M2                                    |
+| Race track: kart and car races                             | Speedway              | solo time trial or multi | easy to hard   | racing        | M2 (multi in M9)                      |
+| Haunted house                                              | Amusement Park        | solo                     | medium         | horror        | M7                                    |
+| Carnival booths: ring toss, whack-a-mole, shooting gallery | Amusement Park        | solo                     | easy to hard   | carnival      | M7                                    |
+| Jet-ski race                                               | Marina                | multi                    | medium         | water racing  | M8                                    |
+| Yacht party DJ set and dance-off                           | party yacht           | multi                    | easy           | party         | M8                                    |
+| Fishing off the dock                                       | Marina                | solo                     | easy           | chill         | M8                                    |
+| Figure skating tricks                                      | Ice Rink              | solo                     | medium to hard | winter        | M8                                    |
+| Curling                                                    | Ice Rink              | multi                    | easy           | winter        | M8                                    |
+| Basketball shootout                                        | Sports Complex        | solo or multi            | easy to hard   | sports        | M8                                    |
+| Penalty kicks                                              | Sports Complex        | solo or multi            | easy           | sports        | M8                                    |
+| Tennis                                                     | Sports Complex        | multi                    | medium         | sports        | M8                                    |
+| Bowling                                                    | Sports Complex        | multi                    | easy           | sports        | M8                                    |
+| Mini golf                                                  | Sports Complex        | solo or multi            | easy           | sports        | M8                                    |
+| Dance battle                                               | any club              | multi                    | medium         | dance         | M3                                    |
+| Safari photo hunt                                          | Zoo                   | solo                     | easy           | animals       | M8                                    |
+| Feeding time                                               | Zoo                   | solo                     | easy           | animals       | M8                                    |
+| Reef dive spotter                                          | Aquarium              | solo                     | medium         | ocean         | M8                                    |
+| Seal show tricks (rhythm)                                  | Aquarium              | solo or multi            | medium         | ocean         | M8                                    |
+| Shooting range                                             | Shooting range        | solo                     | easy to hard   | action        | M7                                    |
+| Paintball arena                                            | Sports Complex        | multi                    | medium         | action        | M7                                    |
+| Laser tag                                                  | arcade bar            | multi                    | medium         | action        | M7                                    |
+| Alien invasion arcade shooter (no zombies)                 | arcade bar            | solo or co-op            | medium to hard | sci-fi action | M7                                    |
+| Runway battle with player voting                           | Fashion District      | multi                    | medium         | fashion       | M8 (voting in M9)                     |
+| Trivia night (2000s pop culture)                           | arcade bar            | multi                    | medium         | nostalgia     | M3                                    |
+| Surf                                                       | Boardwalk             | solo                     | hard           | beach         | M8                                    |
+| Beach volleyball                                           | Boardwalk             | multi                    | medium         | sports        | M8                                    |
+| Card table                                                 | speakeasy             | multi                    | easy           | chill         | M3                                    |
+| Match-3 puzzle                                             | arcade bar            | solo                     | easy to hard   | arcade        | M3                                    |
+| Nail painting                                              | nail salon            | solo                     | easy to medium | beauty        | M4                                    |
+| Boba builder                                               | boba shop             | solo                     | easy           | food          | M5                                    |
+| Halo-halo stacker                                          | Filipino dessert spot | solo                     | easy to medium | food          | M5                                    |
+| Sushi conveyor catch                                       | sushi bar             | solo                     | medium         | food          | M5                                    |
+| Ramen rush                                                 | ramen counter         | solo                     | hard           | food          | M5                                    |
+| Filipino cook-off                                          | Little Manila         | multi (2)                | medium         | food          | M5 (venue in M8)                      |
+| Delivery job                                               | whole city            | solo                     | easy to medium | racing        | M5                                    |
+| Jail card games and push-ups                               | jail                  | solo                     | easy           | chill         | M6a                                   |
 
 Multiplayer-only games play against bots or as local turns until M9.
 
@@ -753,17 +753,17 @@ These hold in every milestone.
 
 ### Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Scope: the content list is very large. | Kits plus data: one restaurant kit, one shop kit, one facade kit. Venues are data files. Ship playable slices per milestone. |
-| Phone performance with a streamed city and maximalist neon. | Instancing, LOD, emissive materials instead of lights, quality tiers, and budgets measured in M11. |
-| Headless WebGL tests are slow (SwiftShader). | `--workers=2`, few Playwright cases per feature, and logic tested in Node. |
-| Cloudflare free-plan limits: 10 ms CPU per request; PBKDF2 at 100k iterations is estimated at 30–80 ms (unverified). | Measure before launch. Move login to the Paid plan or reduce iterations behind a review. Regions keep Durable Object load spread. |
-| Client-owned coins can be cheated. | Accepted until trading exists (VISION). M9 moves items and homes to the server. |
-| Trademark and lookalike risk (cars, the Jollibee-style joint, the Sephora-style store, the DoorDash-style app, the Hello-Kitty-style parlor). | Original names, logos and mascots. Banned-word tests. A design review of each lookalike before it ships. |
-| Adult content reaching minors. | A server-enforced gate (M10). 18+ scenes are not loaded for under-18 players. Secret venues have no UI mention. |
-| Harassment through break-ins and theft. | Offline auto-lock, blocks, automatic harassment blocking and reports, admin bans. |
-| Several Playwright-heavy agents at once overload the machine. | At most about 3 scene agents in parallel, plus pure-logic agents. |
+| Risk                                                                                                                                          | Mitigation                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Scope: the content list is very large.                                                                                                        | Kits plus data: one restaurant kit, one shop kit, one facade kit. Venues are data files. Ship playable slices per milestone.      |
+| Phone performance with a streamed city and maximalist neon.                                                                                   | Instancing, LOD, emissive materials instead of lights, quality tiers, and budgets measured in M11.                                |
+| Headless WebGL tests are slow (SwiftShader).                                                                                                  | `--workers=2`, few Playwright cases per feature, and logic tested in Node.                                                        |
+| Cloudflare free-plan limits: 10 ms CPU per request; PBKDF2 at 100k iterations is estimated at 30–80 ms (unverified).                          | Measure before launch. Move login to the Paid plan or reduce iterations behind a review. Regions keep Durable Object load spread. |
+| Client-owned coins can be cheated.                                                                                                            | Accepted until trading exists (VISION). M9 moves items and homes to the server.                                                   |
+| Trademark and lookalike risk (cars, the Jollibee-style joint, the Sephora-style store, the DoorDash-style app, the Hello-Kitty-style parlor). | Original names, logos and mascots. Banned-word tests. A design review of each lookalike before it ships.                          |
+| Adult content reaching minors.                                                                                                                | A server-enforced gate (M10). 18+ scenes are not loaded for under-18 players. Secret venues have no UI mention.                   |
+| Harassment through break-ins and theft.                                                                                                       | Offline auto-lock, blocks, automatic harassment blocking and reports, admin bans.                                                 |
+| Several Playwright-heavy agents at once overload the machine.                                                                                 | At most about 3 scene agents in parallel, plus pure-logic agents.                                                                 |
 
 ### Open decisions for the user
 
@@ -779,52 +779,52 @@ These hold in every milestone.
 
 One row per user request.
 
-| # | User request | Spec section | Milestone |
-| --- | --- | --- | --- |
-| 1 | Multiplayer game with Club Penguin and Fantage nostalgia, not for children | VISION; online spec | M0, M9 |
-| 2 | GTA meets IMVU meets Fantage | VISION "one-line pitch"; city spec | M1 to M11 |
-| 3 | 3D like Roblox, IMVU-style real 3D | VISION "Renderer" | M0 |
-| 4 | Maximalist design | VISION "What it feels like" | every milestone |
-| 5 | In-game customization; doll-like avatars without an artist | VISION; client spec "Doll and look" | M0, M4 |
-| 6 | Two age tiers | VISION "Age tiers" | M10 |
-| 7 | Scalable stack (Cloudflare, option A), $0 to start | VISION "Platform"; online spec | M0, M9 |
-| 8 | Age verification later | VISION; online spec | M10 |
-| 9 | Anonymous mode, no account needed | online spec "Guests" | M0, M9 |
-| 10 | Games not about mangos: variety, solo and multi, easy and hard, themes | content spec "Intent", "Games roster" | M3, M5, M7, M8 |
-| 11 | A lot of places | content spec "Districts and places" | M1 to M8 |
-| 12 | Amusement park with a ton of rides | Districts table; "Rides" | M1, M7 |
-| 13 | Water park with rides and activities; swimsuit on entry | Districts table; "Water Park swimsuit" | M1, M7 |
-| 14 | Weed and alcohol with drunk and high effects; free | "Drunk and high effects" | M3 (alcohol), M10 (weed) |
-| 15 | Sapphic and lesbian themes | "Sapphic themes" | M3 and throughout |
-| 16 | Race track and bumper cars | Districts table (Speedway); Speedway plan | M2 |
-| 17 | Multiplayer later; I pick names | "Build order" | M9 |
-| 18 | Several clubs, dancing, NPCs (bouncers, cashiers) so it isn't lonely | "Dancing"; "Non-player characters" | M1 (dialogue), M3 |
-| 19 | Female avatars with curvy bust and butt | "Body shape" | M4 |
-| 20 | Jets, yachts, boats, ice rinks, sports, dances | Districts (Marina, Airport, Ice Rink, Sports); "Vehicles"; "Dancing" | M3, M8 |
-| 21 | Zoo and aquarium | Districts (Zoo, Aquarium) | M8 |
-| 22 | Shrooms | "Drunk and high effects" | M10 |
-| 23 | Mermaids, real, in a specific beach | Districts (Mermaid Cove) | M8 |
-| 24 | Lanmaoa asiatica showing little people (elves) | "Drunk and high effects" | M8 (grove), M10 (effect) |
-| 25 | Secret strip club and massage parlor, lesbian-leaning, open to all | "Secret 18+ venues" | M10 |
-| 26 | See progress soon (Water Park screenshots) | — | M1 |
-| 27 | Many restaurants and cafes: Filipino, matcha, boba, ube, a Jollibee-style joint, and more (~100) | "Food and cafes"; Districts (Food Street, Cafes, Restaurants) | M5, M8 |
-| 28 | Malls, variety of stores, thrift shops | "Shopping"; Districts (Malls, Stores, Thrift) | M4, M8 (dead mall) |
-| 29 | Grocery store | Districts (Groceries) | M4 |
-| 30 | DoorDash-style app | "Food and cafes" (delivery) | M5 |
-| 31 | Different neighborhoods | "Neighborhoods"; city spec | M1, M8 |
-| 32 | Diversity in the characters | "Diverse characters" | M4 and NPCs throughout |
-| 33 | Makeup and beauty supply shop | Districts (Stores) | M4 |
-| 34 | Hair salon | "Hair salon and beauty services" | M4 |
-| 35 | Nail salon | "Hair salon and beauty services" | M4 |
-| 36 | Guns, in game zones only | "Guns" | M7 |
-| 37 | Nothing involving zombies | "Guns"; Games roster (alien shooter) | M7 |
-| 38 | Guns at home; break-ins on unlocked doors; shoot or call the police; jail | "Homes, break-ins, police and jail" | M6a, M6b |
-| 39 | Shoplifting with a chance of jail or bail, by place | "Shoplifting" | M6a |
-| 40 | Cars from cheap to expensive, accurate, GTA-style lookalikes | "Cars"; Speedway plan | M2, M4 |
-| 41 | NPCs with a ton of lines per situation, no AI | "Non-player characters" | M1 and every milestone |
-| 42 | Keep developing; progress updates; free resources; cores 6-11 | process rules | all |
-| 43 | Don't push or deploy without asking | process rules | all, M11 |
-| 44 | Existing minigames launched from the world | Games roster | M3 |
-| 45 | Pets and lions, low priority | VISION; Zoo lion pride; pet shop | M4 (pets), M8 (zoo) |
-| 46 | Open city with interiors behind doors; gated venues; Downtown and Nightlife Row first; city next | city spec "Decisions" | M1, M2, M8 |
-| 47 | Name Daydaze; rename Mango Room and Mango Decks | VISION; commits | M0 |
+| #   | User request                                                                                     | Spec section                                                         | Milestone                |
+| --- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ------------------------ |
+| 1   | Multiplayer game with Club Penguin and Fantage nostalgia, not for children                       | VISION; online spec                                                  | M0, M9                   |
+| 2   | GTA meets IMVU meets Fantage                                                                     | VISION "one-line pitch"; city spec                                   | M1 to M11                |
+| 3   | 3D like Roblox, IMVU-style real 3D                                                               | VISION "Renderer"                                                    | M0                       |
+| 4   | Maximalist design                                                                                | VISION "What it feels like"                                          | every milestone          |
+| 5   | In-game customization; doll-like avatars without an artist                                       | VISION; client spec "Doll and look"                                  | M0, M4                   |
+| 6   | Two age tiers                                                                                    | VISION "Age tiers"                                                   | M10                      |
+| 7   | Scalable stack (Cloudflare, option A), $0 to start                                               | VISION "Platform"; online spec                                       | M0, M9                   |
+| 8   | Age verification later                                                                           | VISION; online spec                                                  | M10                      |
+| 9   | Anonymous mode, no account needed                                                                | online spec "Guests"                                                 | M0, M9                   |
+| 10  | Games not about mangos: variety, solo and multi, easy and hard, themes                           | content spec "Intent", "Games roster"                                | M3, M5, M7, M8           |
+| 11  | A lot of places                                                                                  | content spec "Districts and places"                                  | M1 to M8                 |
+| 12  | Amusement park with a ton of rides                                                               | Districts table; "Rides"                                             | M1, M7                   |
+| 13  | Water park with rides and activities; swimsuit on entry                                          | Districts table; "Water Park swimsuit"                               | M1, M7                   |
+| 14  | Weed and alcohol with drunk and high effects; free                                               | "Drunk and high effects"                                             | M3 (alcohol), M10 (weed) |
+| 15  | Sapphic and lesbian themes                                                                       | "Sapphic themes"                                                     | M3 and throughout        |
+| 16  | Race track and bumper cars                                                                       | Districts table (Speedway); Speedway plan                            | M2                       |
+| 17  | Multiplayer later; I pick names                                                                  | "Build order"                                                        | M9                       |
+| 18  | Several clubs, dancing, NPCs (bouncers, cashiers) so it isn't lonely                             | "Dancing"; "Non-player characters"                                   | M1 (dialogue), M3        |
+| 19  | Female avatars with curvy bust and butt                                                          | "Body shape"                                                         | M4                       |
+| 20  | Jets, yachts, boats, ice rinks, sports, dances                                                   | Districts (Marina, Airport, Ice Rink, Sports); "Vehicles"; "Dancing" | M3, M8                   |
+| 21  | Zoo and aquarium                                                                                 | Districts (Zoo, Aquarium)                                            | M8                       |
+| 22  | Shrooms                                                                                          | "Drunk and high effects"                                             | M10                      |
+| 23  | Mermaids, real, in a specific beach                                                              | Districts (Mermaid Cove)                                             | M8                       |
+| 24  | Lanmaoa asiatica showing little people (elves)                                                   | "Drunk and high effects"                                             | M8 (grove), M10 (effect) |
+| 25  | Secret strip club and massage parlor, lesbian-leaning, open to all                               | "Secret 18+ venues"                                                  | M10                      |
+| 26  | See progress soon (Water Park screenshots)                                                       | —                                                                    | M1                       |
+| 27  | Many restaurants and cafes: Filipino, matcha, boba, ube, a Jollibee-style joint, and more (~100) | "Food and cafes"; Districts (Food Street, Cafes, Restaurants)        | M5, M8                   |
+| 28  | Malls, variety of stores, thrift shops                                                           | "Shopping"; Districts (Malls, Stores, Thrift)                        | M4, M8 (dead mall)       |
+| 29  | Grocery store                                                                                    | Districts (Groceries)                                                | M4                       |
+| 30  | DoorDash-style app                                                                               | "Food and cafes" (delivery)                                          | M5                       |
+| 31  | Different neighborhoods                                                                          | "Neighborhoods"; city spec                                           | M1, M8                   |
+| 32  | Diversity in the characters                                                                      | "Diverse characters"                                                 | M4 and NPCs throughout   |
+| 33  | Makeup and beauty supply shop                                                                    | Districts (Stores)                                                   | M4                       |
+| 34  | Hair salon                                                                                       | "Hair salon and beauty services"                                     | M4                       |
+| 35  | Nail salon                                                                                       | "Hair salon and beauty services"                                     | M4                       |
+| 36  | Guns, in game zones only                                                                         | "Guns"                                                               | M7                       |
+| 37  | Nothing involving zombies                                                                        | "Guns"; Games roster (alien shooter)                                 | M7                       |
+| 38  | Guns at home; break-ins on unlocked doors; shoot or call the police; jail                        | "Homes, break-ins, police and jail"                                  | M6a, M6b                 |
+| 39  | Shoplifting with a chance of jail or bail, by place                                              | "Shoplifting"                                                        | M6a                      |
+| 40  | Cars from cheap to expensive, accurate, GTA-style lookalikes                                     | "Cars"; Speedway plan                                                | M2, M4                   |
+| 41  | NPCs with a ton of lines per situation, no AI                                                    | "Non-player characters"                                              | M1 and every milestone   |
+| 42  | Keep developing; progress updates; free resources; cores 6-11                                    | process rules                                                        | all                      |
+| 43  | Don't push or deploy without asking                                                              | process rules                                                        | all, M11                 |
+| 44  | Existing minigames launched from the world                                                       | Games roster                                                         | M3                       |
+| 45  | Pets and lions, low priority                                                                     | VISION; Zoo lion pride; pet shop                                     | M4 (pets), M8 (zoo)      |
+| 46  | Open city with interiors behind doors; gated venues; Downtown and Nightlife Row first; city next | city spec "Decisions"                                                | M1, M2, M8               |
+| 47  | Name Daydaze; rename Mango Room and Mango Decks                                                  | VISION; commits                                                      | M0                       |

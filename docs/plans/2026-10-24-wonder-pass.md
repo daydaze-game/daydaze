@@ -45,7 +45,7 @@ Read, in this order, before Task 1:
   `src/client` draws. Allocate nothing inside `useFrame`. Validate anything
   from the network or `localStorage`.
 - **Commits:** Conventional Commits, small and atomic, pushed to `origin
-  main` after verify and the relevant browser tests pass. Pushes bypass the
+main` after verify and the relevant browser tests pass. Pushes bypass the
   branch protection as admin (expected message "Bypassed rule violations").
   Never commit `CLAUDE.md`, `.claude/`, `.superpowers/`, `.mcp.json`,
   `.env`, `STEPS-FOR-OWNER.md`, `docs/agents/`. Never deploy or log in to
@@ -65,7 +65,7 @@ Read, in this order, before Task 1:
   flake: check `uptime`, rerun it alone once before debugging.
 - **Never run two Playwright runs at once on one port or one log file.** A
   backgrounded run keeps going; check `ps -eo pid,args | grep "[p]laywright
-  test"` and `ss -ltnp | grep 519` and kill by PID before starting another.
+test"` and `ss -ltnp | grep 519` and kill by PID before starting another.
   Never `pkill -f` (it kills your own shell, exit 144).
 - Stale wrangler on 8798 after an aborted online run blocks the next one
   ("is already used"): kill it by PID from `ss -ltnp`.
@@ -82,13 +82,13 @@ Read, in this order, before Task 1:
   `perf.mjs` / `bytes.mjs` measure FCP, LCP, long tasks and transfer via
   Playwright + CDP instead (Fast 4G throttling).
 - Mixamo clips: `./mixamo/<category>/*.fbx`. Useful finds: `talking/
-  Singing_Singing-While-Walking-On-Stage`, `running/Run-To-Dive_...`,
+Singing_Singing-While-Walking-On-Stage`, `running/Run-To-Dive_...`,
   `sports/Goalie-Throw_...` (overhand, spike-like), `sports/Receiver-Catch_
-  ...` (dig-like), `drinking/Bartending_...`. `art/doll/blender/mocap.py`
+...` (dig-like), `drinking/Bartending_...`. `art/doll/blender/mocap.py`
   refuses `weapons/` and `combat/` clips by design, so aiming poses must be
   hand-keyed in `src/game/dance/moves.ts`. Retarget with Blender batch mode
   (`blender --background --factory-startup --python
-  art/doll/blender/mocap.py`), which rewrites `src/game/dance/mocap.ts` and
+art/doll/blender/mocap.py`), which rewrites `src/game/dance/mocap.ts` and
   `mocapKeys.ts`.
 - GitHub Actions can't run: the account's billing is failing (owner item).
   CI (`.github/workflows/ci.yml`) is written and will run once fixed.
