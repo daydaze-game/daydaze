@@ -99,6 +99,66 @@ export const regularBank: RoleBank = {
     "Bienvenida de vuelta! The bartender still remembers your drink.",
   ],
   tapped: [
+    {
+      text: "Pull up a cushion. I always carry a little extra, come see me every day.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Oh, hey, you. Stop by tomorrow too, I like having somebody to share with.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Sit, sit. This couch has seen me through a lot of rainy afternoons.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "I never come in empty-handed. Check your pouch before you go, okay?",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Easy does it, friend. Slow is the whole point in here.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "The sativa's for chatting, the indica's for the couch. Pick your mood.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Careful with the edibles, they take their sweet time. Don't double up.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Jade knows her jars, ask her anything. I just know my cushion.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "You look like you could use a spot. Come back tomorrow, there'll be more.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "I've been on this couch since lunch and I regret nothing.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Hydrate, snack, repeat. That's my whole advice for the day.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
+    {
+      text: "Come by anytime. I'll spot you something, that's what friends do.",
+      weight: 8,
+      when: { venue: "green-haze", tier: "adult" },
+    },
     // The Violet Hour: the sapphic bar on Nightlife Row
     {
       text: "Hey! Pull up a stool, the regulars' corner has room for one more witty person.",
