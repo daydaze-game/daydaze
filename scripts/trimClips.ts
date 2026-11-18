@@ -34,10 +34,25 @@ interface Gltf {
   animations: Animation[];
 }
 
+/** Checks the two arrays this script walks; the rest is the converter's output. */
+function isGltf(v: unknown): v is Gltf {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    "nodes" in v &&
+    Array.isArray(v.nodes) &&
+    "animations" in v &&
+    Array.isArray(v.animations)
+  );
+}
+
 /** Splits a GLB into its JSON and the chunks after it. */
 function split(buf: Buffer): { json: Gltf; rest: Buffer } {
   const jsonLength = buf.readUInt32LE(12);
-  const json: Gltf = JSON.parse(buf.subarray(20, 20 + jsonLength).toString());
+  const json: unknown = JSON.parse(
+    buf.subarray(20, 20 + jsonLength).toString(),
+  );
+  if (!isGltf(json)) throw new Error("not a glTF with nodes and animations");
   return { json, rest: buf.subarray(20 + jsonLength) };
 }
 

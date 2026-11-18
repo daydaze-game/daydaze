@@ -172,7 +172,7 @@ test("validateLook rejects missing, extra and off-catalog fields", () => {
 });
 
 test("validateLook ignores inherited fields", () => {
-  const inherited = Object.create(DEFAULT_LOOK);
+  const inherited: unknown = Object.create(DEFAULT_LOOK);
   assert.equal(validateLook(inherited), false);
 });
 

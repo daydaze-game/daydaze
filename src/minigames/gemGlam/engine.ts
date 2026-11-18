@@ -61,7 +61,9 @@ export function newGame(level: Level, seed: number): Game {
     nextId: 1,
   };
   do {
-    g.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+    g.board = Array.from({ length: SIZE }, () =>
+      Array<Gem | null>(SIZE).fill(null),
+    );
     for (let r = 0; r < SIZE; r++)
       for (let c = 0; c < SIZE; c++) {
         let color: number;

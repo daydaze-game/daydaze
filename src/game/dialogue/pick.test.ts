@@ -203,7 +203,10 @@ test("before the banks load, NPCs say '...'; after, real lines", () => {
     ["--experimental-strip-types", "--input-type=module", "-e", script],
     { encoding: "utf8" },
   );
-  const [before, after]: unknown[] = JSON.parse(out);
+  const parsed: unknown = JSON.parse(out);
+  assert.ok(Array.isArray(parsed));
+  const before: unknown = parsed[0];
+  const after: unknown = parsed[1];
   assert.equal(before, "...");
   assert.ok(typeof after === "string" && after !== "..." && after.length > 3);
 });
@@ -223,7 +226,10 @@ test("a failed bank load is retried on the next call, not cached", async () => {
     ["--experimental-strip-types", "--input-type=module", "-e", script],
     { encoding: "utf8" },
   );
-  const [failed, line]: unknown[] = JSON.parse(out);
+  const parsed: unknown = JSON.parse(out);
+  assert.ok(Array.isArray(parsed));
+  const failed: unknown = parsed[0];
+  const line: unknown = parsed[1];
   assert.equal(failed, true);
   assert.ok(typeof line === "string" && line !== "...");
 });

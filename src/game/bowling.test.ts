@@ -60,11 +60,11 @@ test("throws are held to what a person can bowl", () => {
 });
 
 test("scores: a perfect game, all spares and all gutters", () => {
-  assert.equal(frameTotals(play(Array(12).fill(10)))[9], 300);
-  assert.equal(frameTotals(play(Array(21).fill(5)))[9], 150);
-  assert.equal(frameTotals(play(Array(20).fill(0)))[9], 0);
-  assert.equal(position(play(Array(12).fill(10))).over, true);
-  assert.equal(position(play(Array(20).fill(0))).over, true);
+  assert.equal(frameTotals(play(Array<number>(12).fill(10)))[9], 300);
+  assert.equal(frameTotals(play(Array<number>(21).fill(5)))[9], 150);
+  assert.equal(frameTotals(play(Array<number>(20).fill(0)))[9], 0);
+  assert.equal(position(play(Array<number>(12).fill(10))).over, true);
+  assert.equal(position(play(Array<number>(20).fill(0))).over, true);
 });
 
 test("a strike or spare waits on its bonus balls", () => {
@@ -79,7 +79,7 @@ test("frames rack fresh pins after a strike or the second ball", () => {
   assert.equal(freshRack(play([7, 2])), true);
   assert.equal(freshRack(play([10])), true);
   // the tenth: a strike racks again, and so does a spare
-  const nine = Array(18).fill(0);
+  const nine = Array<number>(18).fill(0);
   assert.equal(freshRack(play([...nine, 10])), true);
   assert.equal(freshRack(play([...nine, 10, 4])), false);
   assert.equal(freshRack(play([...nine, 6, 4])), true);
@@ -98,7 +98,7 @@ test("the scoreboard marks strikes, spares and misses", () => {
     ["7", "/"],
     ["-", "5"],
   ]);
-  const nine = Array(18).fill(0);
+  const nine = Array<number>(18).fill(0);
   assert.deepEqual(marks(play([...nine, 10, 10, 4])).at(-1), ["X", "X", "4"]);
   assert.deepEqual(marks(play([...nine, 6, 4, 10])).at(-1), ["6", "/", "X"]);
 });

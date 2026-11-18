@@ -23,6 +23,26 @@ const typeAware = {
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/no-unnecessary-type-assertion": "error",
     "@typescript-eslint/no-unnecessary-type-conversion": "error",
+    "@typescript-eslint/no-unsafe-assignment": "error",
+    "@typescript-eslint/no-unsafe-argument": "error",
+    "@typescript-eslint/no-unsafe-call": "error",
+    "@typescript-eslint/no-unsafe-member-access": "error",
+    "@typescript-eslint/no-unsafe-return": "error",
+  },
+};
+
+/**
+ * The no-unsafe-* rules are on everywhere except the directories still being
+ * cleaned up (issue #53). Remove an entry when its directory has no hits.
+ */
+const unsafeBacklog = {
+  files: ["server/**/*.ts", "src/client/**/*.{ts,tsx}", "tests/client.spec.ts"],
+  rules: {
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
   },
 };
 
@@ -69,7 +89,7 @@ export default defineConfig(
   // (server/src/worker is typed through server/tsconfig.json). Loading the
   // TypeScript program makes a run about 10x slower, so ESLINT_NO_TYPES=1
   // (set by the pre-commit hook) skips them; CI always runs them.
-  ...(process.env.ESLINT_NO_TYPES === "1" ? [] : [typeAware]),
+  ...(process.env.ESLINT_NO_TYPES === "1" ? [] : [typeAware, unsafeBacklog]),
   {
     // node:test's test() and describe() return promises by design.
     files: ["**/*.test.ts"],

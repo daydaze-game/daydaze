@@ -394,13 +394,20 @@ export function removeFurniture(
 export function validateFurniture(value: unknown): Furniture[] {
   if (!Array.isArray(value)) return [];
   const kept: Furniture[] = [];
-  for (const entry of value) {
+  const entries: unknown[] = value;
+  for (const entry of entries) {
     if (typeof entry !== "object" || entry === null) continue;
-    const { id, cell, rotation, variant } = entry as Record<string, unknown>;
+    const f = new Map<string, unknown>(Object.entries(entry));
+    const id = f.get("id");
+    const cell = f.get("cell");
+    const rotation = f.get("rotation");
+    const variant = f.get("variant");
     if (!isFurnitureId(id)) continue;
     if (!Array.isArray(cell) || cell.length !== 2) continue;
-    const [c, r] = cell;
-    if (!Number.isInteger(c) || !Number.isInteger(r)) continue;
+    const c: unknown = cell[0];
+    const r: unknown = cell[1];
+    if (typeof c !== "number" || !Number.isInteger(c)) continue;
+    if (typeof r !== "number" || !Number.isInteger(r)) continue;
     if (rotation !== 0 && rotation !== 1 && rotation !== 2 && rotation !== 3) {
       continue;
     }
