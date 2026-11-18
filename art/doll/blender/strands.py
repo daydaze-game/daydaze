@@ -7,7 +7,6 @@ a few wide ribbons. The style parameters cover hair types and lengths.
 
 import bpy
 import numpy as np
-from mathutils import Vector
 from mathutils.kdtree import KDTree
 
 import proxies
@@ -125,7 +124,6 @@ def build(
 
     # the body itself, for hair resting on the back and shoulders: a strand
     # point inside the skin (or within the margin) moves out along the normal
-    from mathutils import Vector
     from mathutils.bvhtree import BVHTree
 
     skin = BVHTree.FromPolygons([tuple(p) for p in ctx.PB], [list(f) for f in ctx.FACES["body"]])

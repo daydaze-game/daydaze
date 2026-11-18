@@ -1,0 +1,9 @@
+# Ruff (Python linter and formatter) for the Blender and asset scripts in art/
+# and scripts/. Default rule set: pyflakes (F) plus the E4, E7 and E9 error
+# checks. Vendored skills and agent worktrees are not ours to lint.
+extend-exclude = [".agents", ".claude", ".worktrees", ".venv"]
+target-version = "py311"
+
+[lint]
+# Pinned so a Ruff upgrade that widens its defaults cannot turn CI red.
+select = ["E9", "F"]
