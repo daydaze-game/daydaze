@@ -51,6 +51,24 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
 | `npm run lint`                      | ESLint                                                                                                                                          |
+| `ruff check .`                      | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed)                                        |
+| `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
+| `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
+| `npm run format` / `format:check`   | Prettier                                                                                                                                        |
+| `npm run verify`                    | lint, test, typecheck, format check, build, perf budget: the merge gate                                                                         |
+| `npm run test:e2e:client`           | Playwright client tests (`tests/client.spec.ts`)                                                                                                |
+| `npm run test:e2e` / `test:e2e:sw`  | Playwright minigames / service-worker configs                                                                                                   |
+| `npm run test:e2e:online`           | Two browser players against a local Worker (~7 min)                                                                                             |
+| `npm run dev:server`                | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
+| `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
+| `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
+| Command                             | What it does                                                                                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                       | Client on `http://localhost:5173` (`-- --port 5195` for another)                                                                                |
+| `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
+| `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
+| `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
+| `npm run lint`                      | ESLint                                                                                                                                          |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
 | `npm run format` / `format:check`   | Prettier                                                                                                                                        |
@@ -119,6 +137,10 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Browser tests: `gh workflow run browser-test.yml --ref <branch> -f grep="<test title>"`.
   - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<names>"`,
     then `gh run download <id> -n screenshots`. Look at every screenshot.
+  - Screen recordings of any scene or minigame (MP4):
+    `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
+    `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
+    Options are in `scripts/record.ts`.
     PRs that change room, city, avatar or HUD code get the matching shots
     automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
     comment linking the artifact, kept 7 days.

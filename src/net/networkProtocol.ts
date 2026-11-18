@@ -169,9 +169,8 @@ function homeShape(value: unknown): HomeShape | null {
   )
     return null;
   // detached from the caller's objects, like every other decoded packet
-  const furniture: Record<string, unknown>[] = JSON.parse(
-    JSON.stringify(items),
-  );
+  const copy: unknown = JSON.parse(JSON.stringify(items));
+  const furniture = Array.isArray(copy) ? copy.filter(record) : [];
   return { locked: value.locked, furniture };
 }
 function look(value: unknown): LookShape | null {
@@ -179,10 +178,12 @@ function look(value: unknown): LookShape | null {
 }
 function entity(raw: unknown): EntityDelta | null {
   const value = parse(raw);
-  let id, x, z, yaw, action, timestamp;
+  let id: unknown, x: unknown, z: unknown;
+  let yaw: unknown, action: unknown, timestamp: unknown;
   if (Array.isArray(value)) {
     if (value.length !== 6) return null;
-    [id, x, z, yaw, action, timestamp] = value;
+    const tuple: unknown[] = value;
+    [id, x, z, yaw, action, timestamp] = tuple;
   } else if (record(value)) {
     ({ id, x, z, yaw, action, timestamp } = value);
   } else return null;

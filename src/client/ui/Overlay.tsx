@@ -46,7 +46,6 @@ import {
   encodeMakeup,
   makeupOf,
   type Makeup,
-  BROWS,
   EYE_COLORS,
   EYESHADOWS,
   FACE_SLIDERS,
@@ -132,6 +131,7 @@ import {
   Tiles,
 } from "./controls.tsx";
 import { VenueGames } from "./Minigames.tsx";
+import { BrowPicker } from "./BrowPicker.tsx";
 import { friends } from "../net/friends.ts";
 import { ONLINE } from "../net/online.ts";
 
@@ -523,12 +523,10 @@ function Mirror({
             onPick={(liner) => setMakeup({ ...makeup, liner })}
             tiles="liner"
           />
-          <Chips
-            label="Brows"
-            options={BROWS}
+          <p className="tiles-label">Brows</p>
+          <BrowPicker
             value={look.brows}
             onPick={(brows) => setLook({ ...look, brows })}
-            thumbs
           />
         </section>
         <section>

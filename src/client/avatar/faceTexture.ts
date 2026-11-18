@@ -2,7 +2,8 @@
 // nose, lips), tinted to the look's skin and lip colors.
 import * as THREE from "three";
 import { makeCanvas } from "../canvas.ts";
-import { LIPS } from "../../game/look.ts";
+import { BROWS, DEFAULT_LOOK, LIPS, isColor } from "../../game/look.ts";
+import { BROW_DESIGNS, browRise } from "../../game/brows.ts";
 
 // The face canvas is a window onto the 1024px template's coordinate space.
 // Head UVs are planar-projected into the same window (see Doll.tsx), so
@@ -44,7 +45,9 @@ function lipsImage(id: string): Promise<LipArt> {
   if (ART_LIPS.has(id)) return loadImage(id);
   let p = lipArt.get(id);
   if (!p) {
-    const swatch = LIPS.find((l) => l.id === id)?.swatch ?? "#c98f86";
+    const swatch = isColor(id)
+      ? id
+      : (LIPS.find((l) => l.id === id)?.swatch ?? "#c98f86");
     p = loadImage("lips-nude-pink-gloss").then((base) => {
       const { canvas, ctx } = makeCanvas(base.width, base.height);
       ctx.drawImage(base, 0, 0);
@@ -140,6 +143,39 @@ function inkOnly(img: HTMLImageElement) {
   }
   ctx.putImageData(data, 0, 0);
   return c;
+}
+
+const ART_BROWS = new Set<string>(BROWS.slice(0, 4).map((b) => b.id));
+const browArt = new Map<string, Promise<HTMLCanvasElement>>();
+function browsImage(id: string): Promise<HTMLCanvasElement> {
+  if (ART_BROWS.has(id)) return loadImage(id).then(inkOnly);
+  let image = browArt.get(id);
+  if (!image) {
+    const key = BROWS.find((b) => b.id === id)?.id ?? DEFAULT_LOOK.brows;
+    const design = BROW_DESIGNS[key];
+    const { canvas, ctx } = makeCanvas(452, 130);
+    ctx.strokeStyle = design.color;
+    ctx.lineCap = "round";
+    for (const side of [-1, 1])
+      for (let i = 0; i < 40; i++) {
+        const t = i / 40;
+        const next = (i + 1) / 40;
+        ctx.lineWidth = design.thickness * (1 - 0.65 * t) * 1300;
+        ctx.beginPath();
+        ctx.moveTo(
+          226 + side * (40 + t * 160),
+          80 - (browRise(design, t) - 0.046) * 1300,
+        );
+        ctx.lineTo(
+          226 + side * (40 + next * 160),
+          80 - (browRise(design, next) - 0.046) * 1300,
+        );
+        ctx.stroke();
+      }
+    image = Promise.resolve(canvas);
+    browArt.set(id, image);
+  }
+  return image;
 }
 
 type FaceOpts = { skin: string; lips: string; brows: string; shadow: string };
@@ -333,7 +369,7 @@ async function paint(opts: FaceOpts, closed: boolean) {
   const [features, lips, brows] = await Promise.all([
     featureLayer(skin),
     lipsImage(opts.lips),
-    loadImage(opts.brows).then(inkOnly),
+    browsImage(opts.brows),
   ]);
   const { canvas: c, ctx } = makeCanvas(
     Math.round(FACE_W * SCALE),

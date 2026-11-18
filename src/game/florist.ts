@@ -44,7 +44,7 @@ function isStem(value: unknown): value is Stem {
 
 export function validateBouquet(value: unknown): value is Bouquet {
   if (typeof value !== "object" || value === null) return false;
-  const fields = new Map(Object.entries(value));
+  const fields = new Map<string, unknown>(Object.entries(value));
   const stems = fields.get("stems");
   return (
     Array.isArray(stems) &&

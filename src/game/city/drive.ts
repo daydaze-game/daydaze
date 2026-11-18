@@ -155,7 +155,8 @@ export function cleanParkedCar(
   if (typeof id !== "string" || !known(id)) return null;
   if (typeof color !== "string" || !/^#[0-9a-f]{6}$/i.test(color)) return null;
   if (!Array.isArray(at) || at.length !== 2) return null;
-  const [x, z] = at;
+  const x: unknown = at[0];
+  const z: unknown = at[1];
   if (!isNum(x) || !isNum(z) || !isNum(yaw)) return null;
   // a car saved off the asphalt (an old layout) goes back home
   if (!onRoad([x, z], 0.5)) return null;

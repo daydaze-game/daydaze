@@ -12,6 +12,11 @@ import {
   type Makeup,
 } from "../../../game/look.ts";
 import { beardStrokes } from "../../../game/beard.ts";
+import {
+  BROW_DESIGNS,
+  browRise,
+  type BrowDesign,
+} from "../../../game/brows.ts";
 import { makeCanvas } from "../../canvas.ts";
 import { RefCache } from "./refCache.ts";
 
@@ -115,14 +120,6 @@ function lipInk(id: Look["lips"], skin: Look["skin"]): [string, string] {
   const liner = `#${new THREE.Color(swatch).multiplyScalar(0.72).getHexString()}`;
   return [swatch, liner];
 }
-
-// Brow shapes: thickness (canvas units), arch lift, tail lift, color.
-const BROW: Record<Look["brows"], [number, number, number, string]> = {
-  "brows-y2k-thin": [0.009, 0.024, 0.006, "#24130e"],
-  "brows-fox-snatched": [0.014, 0.014, 0.03, "#26150f"],
-  "brows-sculpted-espresso": [0.019, 0.022, 0.004, "#22120c"],
-  "brows-feathered-honey": [0.02, 0.016, 0.0, "#5e3c22"],
-};
 
 function hexRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
@@ -462,10 +459,10 @@ function paintLiner(
 function paintBrow(
   ctx: CanvasRenderingContext2D,
   lid: readonly [number, number][],
-  shape: [number, number, number, string],
+  shape: BrowDesign,
   rand: () => number,
 ) {
-  const [thick, arch, tail, color] = shape;
+  const { thickness: thick, color } = shape;
   const ink = hexRgb(color);
   const n = lid.length;
   const inner = lid[0];
@@ -475,12 +472,7 @@ function paintBrow(
   const pt = (t: number): [number, number] => {
     const x = inner[0] - out * 0.012 + (outer[0] - inner[0] + out * 0.03) * t;
     const lidY = inner[1] + (outer[1] - inner[1]) * t;
-    const lift =
-      0.046 +
-      arch * Math.sin(Math.PI * Math.min(t / 0.7, 1)) * (t < 0.7 ? 1 : 0) +
-      tail * t;
-    const drop = t > 0.7 ? (t - 0.7) * 0.05 : 0;
-    return [x, lidY - lift + drop];
+    return [x, lidY - browRise(shape, t)];
   };
   ctx.save();
   ctx.lineCap = "round";
@@ -735,8 +727,8 @@ export async function paintFace(look: FaceFields, marks: Marks) {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  paintBrow(ctx, marks.lLidUpper, BROW[look.brows], rand);
-  paintBrow(ctx, marks.rLidUpper, BROW[look.brows], rand);
+  paintBrow(ctx, marks.lLidUpper, BROW_DESIGNS[look.brows], rand);
+  paintBrow(ctx, marks.rLidUpper, BROW_DESIGNS[look.brows], rand);
 
   paintSkinMarks(ctx, marks, skin, makeup);
 

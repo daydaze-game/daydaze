@@ -1,0 +1,10 @@
+# Commits that only reformatted files, so `git blame` skips them and shows the
+# commit that last changed the content. GitHub's blame view reads this file by
+# itself; locally run once:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# chore(format): run Prettier over markdown
+e8e3ac452ee0649b648f010b1019ed73a18b5bc5
+
+# Merge origin/main into chore/format-markdown (re-formatted the files that conflicted)
+b8116968876ee2044531b3b74e5be5ace3694425

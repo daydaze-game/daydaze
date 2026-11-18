@@ -172,7 +172,7 @@ test("validateLook rejects missing, extra and off-catalog fields", () => {
 });
 
 test("validateLook ignores inherited fields", () => {
-  const inherited = Object.create(DEFAULT_LOOK);
+  const inherited: unknown = Object.create(DEFAULT_LOOK);
   assert.equal(validateLook(inherited), false);
 });
 
@@ -506,5 +506,50 @@ test("no eyeshadow round-trips without changing saved glam makeup", () => {
     "halo",
   ].entries()) {
     assert.equal(decodeMakeup(`22101${index}`)?.shadowStyle, style);
+  }
+});
+
+// Removing an appended brow must not silently reject an appearance players saved.
+test("expanded eyebrow choices validate without changing legacy IDs", () => {
+  for (const brows of [
+    "brows-natural-straight",
+    "brows-soft-arch",
+    "brows-full-straight",
+    "brows-rounded",
+    "brows-high-arch",
+    "brows-angled",
+  ])
+    assert.equal(validateLook({ ...DEFAULT_LOOK, brows }), true, brows);
+  assert.deepEqual(
+    BROWS.slice(0, 4).map(({ id }) => id),
+    [
+      "brows-y2k-thin",
+      "brows-fox-snatched",
+      "brows-sculpted-espresso",
+      "brows-feathered-honey",
+    ],
+  );
+});
+
+// Literal codes protect saved appearances from reordered preset catalogs.
+test("legacy and expanded eye and lip shapes keep stable save codes", () => {
+  for (const [code, eyeShape, lipShape] of [
+    ["kkkkkk001040", "round", "wide"],
+    ["kkkkkk005020", "monolid", "thin"],
+    ["kkkkkk006050", "narrow", "rounded"],
+    ["kkkkkk007060", "open", "cupid"],
+    ["kkkkkk008070", "soft-almond", "top-full"],
+    ["kkkkkk008080", "soft-almond", "bottom-full"],
+  ]) {
+    const face = decodeFace(code);
+    assert.ok(face, code);
+    assert.equal(face.eyeShape, eyeShape);
+    assert.equal(face.lipShape, lipShape);
+    assert.equal(encodeFace(face), code);
+    const custom = { ...face, eyeColor: "#12ab34", noseLength: 0.6 };
+    const saved = encodeFace(custom);
+    assert.ok(saved.length <= 32);
+    assert.deepEqual(decodeFace(saved), custom);
+    assert.equal(validateLook({ ...DEFAULT_LOOK, face: saved }), true);
   }
 });

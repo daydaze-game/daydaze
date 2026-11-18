@@ -6,7 +6,11 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 // the first-visit walkthrough would cover the HUD; mark it done
 const ONBOARDED = () => {
   const key = "daydaze-save-v1";
-  const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+  const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+  const save: Record<string, unknown> =
+    typeof parsed === "object" && parsed !== null
+      ? Object.fromEntries(Object.entries(parsed))
+      : {};
   if (!("onboarded" in save))
     localStorage.setItem(key, JSON.stringify({ ...save, onboarded: true }));
 };

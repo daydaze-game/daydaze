@@ -389,7 +389,7 @@ export const CREDITS: readonly {
         title: "Ultimate House Interior Pack",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/ultimatehouseinterior.html",
+        url: "https://quaternius.com/packs/ultimatehomeinterior.html",
         usedFor:
           "Apartment furniture: sofas, beds, tables, kitchen, bath, plants and more, joined into one mesh each; Clay Day stools, glaze table and plants; the Haunted House escape hall's furniture and curtains, the Jail's bunks, desk and toilet, Glow Bowl's lounge couches, plants and bins, and the Skylark's fire-pit loveseats.",
       },
@@ -397,14 +397,14 @@ export const CREDITS: readonly {
         title: "Furniture Pack (March 2019)",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/furniturepack.html",
+        url: "https://quaternius.com/packs/ultimatefurniture.html",
         usedFor: "Apartment furniture: armchair, vase and a few small pieces.",
       },
       {
         title: "Furniture Pack (Oct 2017)",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/furniturepack.html",
+        url: "https://quaternius.com/packs/furniture.html",
         usedFor: "Apartment furniture: bookcase and closet.",
       },
       {
@@ -509,7 +509,7 @@ export const CREDITS: readonly {
         title: "Train Pack",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/trainpack.html",
+        url: "https://quaternius.com/packs/modulartrain.html",
         usedFor:
           "The El's train cars (high-speed front and wagon) and the Amusement Park's kiddie train (steam engine, tender and an open passenger wagon), thinned, recolored and baked to vertex colors.",
       },
@@ -533,7 +533,7 @@ export const CREDITS: readonly {
         title: "Ultimate Nature Pack",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/ultimatenaturepack.html",
+        url: "https://quaternius.com/packs/ultimatenature.html",
         usedFor:
           "Forest Trail pines, birches, autumn trees, willows, bushes, grass, flowers, logs, stumps and mossy rocks (one vertex-colored mesh each).",
       },
@@ -541,7 +541,7 @@ export const CREDITS: readonly {
         title: "Textured Stylized Trees",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/texturedstylizedtrees.html",
+        url: "https://quaternius.com/packs/stylizedtree.html",
         usedFor:
           "Forest Trail textured trees, birches and pines with cutout leaves; the city's five street trees (Tree_1, 5, 6, 8, 10) and two birches for Suburbia and the park (Birch_2, Birch_7; `art/nature/build_trees.py`: leaf color bled into the transparent texels, crown-shaped leaf normals, near and far twins).",
       },
@@ -1177,7 +1177,7 @@ export const CREDITS: readonly {
         title: "Realistic Car Pack",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/realisticcarpack.html",
+        url: "https://quaternius.com/packs/cars.html",
         usedFor:
           "NASCAR stock cars (models 1-4) with canvas liveries for the Speedway oval.",
       },

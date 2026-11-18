@@ -1,5 +1,5 @@
 """Workbench previews (3/4, side, front) of a .blend's visible meshes: BLEND, OUT_DIR, optional HIDE=name,name, KEEP=prefix, TEXTURES=dir."""
-import math, os
+import os
 import bpy
 from mathutils import Vector
 

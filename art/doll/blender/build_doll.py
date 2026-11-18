@@ -384,6 +384,14 @@ KEYS.update(
         + pair("eyes/{s}-eye-height2-decr.target") * 0.3,
         "eye_upturned": pair("eyes/{s}-eye-corner2-up.target") * 0.8,
         "eye_downturned": pair("eyes/{s}-eye-corner2-down.target") * 0.7,
+        "eye_narrow": -pair("eyes/{s}-eye-height1-incr.target") * 0.35
+        + pair("eyes/{s}-eye-height2-decr.target") * 0.4,
+        "eye_open": pair("eyes/{s}-eye-height1-incr.target") * 0.4
+        + pair("eyes/{s}-eye-height2-incr.target") * 0.25
+        + pair("eyes/{s}-eye-eyefold-up.target") * 0.4,
+        "eye_soft-almond": pair("eyes/{s}-eye-corner2-up.target") * 0.3
+        + pair("eyes/{s}-eye-height2-decr.target") * 0.18
+        + pair("eyes/{s}-eye-eyefold-up.target") * 0.2,
         "nose_button": target("nose/nose-point-up.target") * 0.6
         + target("nose/nose-scale-vert-decr.target") * 0.4
         + target("nose/nose-volume-decr.target") * 0.3,
@@ -404,6 +412,16 @@ KEYS.update(
         + target("mouth/mouth-upperlip-volume-incr.target") * 0.35
         + target("mouth/mouth-scale-horiz-decr.target") * 0.3,
         "lips_wide": target("mouth/mouth-scale-horiz-incr.target") * 0.6,
+        "lips_rounded": -target("mouth/mouth-cupidsbow-incr.target") * 0.35
+        + target("mouth/mouth-upperlip-volume-incr.target") * 0.25
+        + target("mouth/mouth-lowerlip-volume-incr.target") * 0.3
+        + target("mouth/mouth-scale-horiz-decr.target") * 0.2,
+        "lips_cupid": target("mouth/mouth-cupidsbow-incr.target") * 0.65
+        + target("mouth/mouth-upperlip-volume-incr.target") * 0.15,
+        "lips_top-full": target("mouth/mouth-upperlip-volume-incr.target") * 0.7
+        + target("mouth/mouth-lowerlip-volume-incr.target") * 0.1,
+        "lips_bottom-full": target("mouth/mouth-lowerlip-volume-incr.target") * 0.7
+        + target("mouth/mouth-upperlip-volume-incr.target") * 0.1,
         "face_round": target("head/head-round.target") * 0.6
         + target("head/head-fat-incr.target") * 0.3,
         "face_heart": target("head/head-invertedtriangular.target") * 0.6

@@ -7,11 +7,12 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
+import type { RoomId } from "../../game/rooms.ts";
 import { DrunkPost } from "../effects/DrunkPost.tsx";
 
 /** The high tier's post stack. Its own chunk, so low-tier players never
  * download postprocessing. */
-export default function Effects() {
+export default function Effects({ room }: { room: RoomId }) {
   // 2x MSAA: at 1.5x resolution 4x samples cost more than they showed
   return (
     <EffectComposer multisampling={2}>
@@ -22,7 +23,7 @@ export default function Effects() {
         intensity={1.15}
         radius={0.72}
       />
-      <DrunkPost />
+      <DrunkPost room={room} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <Vignette offset={0.28} darkness={0.72} />
     </EffectComposer>
