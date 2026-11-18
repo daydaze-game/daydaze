@@ -3,13 +3,18 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { isDocsOnly } from "./docs-only.ts";
 
-test("docs, editor config and Python scripts are docs-only", () => {
+test("docs, editor config, legal text and Python scripts are docs-only", () => {
   assert.equal(
     isDocsOnly([
       "README.md",
       "docs/plans/x.md",
       ".vscode/settings.json",
       "art/a/b.py",
+      "LICENSE",
+      "NOTICE",
+      ".gitleaks.toml",
+      ".lychee.toml",
+      ".git-blame-ignore-revs",
     ]),
     true,
   );

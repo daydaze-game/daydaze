@@ -15,7 +15,8 @@ const DOCS_ONLY: readonly RegExp[] = [
   /^docs\//,
   /^\.vscode\//,
   /^\.github\/(ISSUE_TEMPLATE\/|pull_request_template\.md$|dependabot\.yml$)/,
-  /^\.(gitattributes|npmrc|editorconfig|prettierignore|gitignore)$/,
+  /^\.(gitattributes|git-blame-ignore-revs|npmrc|editorconfig|prettierignore|gitignore|gitleaks\.toml|lychee\.toml|markdownlint-cli2\.jsonc)$/,
+  /^(LICENSE|NOTICE|COPYING)(\..+)?$/,
   /^(cspell\.config\.yaml|cspell-words\.txt|ruff\.toml)$/,
   /\.py$/,
 ];
