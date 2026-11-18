@@ -189,7 +189,7 @@ test("a bad swimsuit falls back without touching the outfit", () => {
     version: 1,
     name: "Kept Name",
     look: customLook,
-    swim: { style: "bikini", color: "#000001" },
+    swim: { style: "bikini", color: "invalid" },
   });
   const save = loadSave(raw, "Fallback");
   assert.deepEqual(save.swim, DEFAULT_SWIM);
@@ -420,7 +420,15 @@ test("owned shop looks are kept and unowned ones are worn as the default", () =>
 test("body-shape sliders round-trip and a bad slider resets alone", () => {
   const shaped = {
     ...createDefaultSave("Kept Name"),
-    body: { bust: 70, hips: 30, waist: 55, height: 50 },
+    body: {
+      ...DEFAULT_BODY,
+      bust: 70,
+      hips: 30,
+      waist: 55,
+      height: 50,
+      weight: 80,
+      muscle: 65,
+    },
   };
   assert.deepEqual(
     loadSave(serializeSave(shaped), "Fallback").body,
@@ -431,6 +439,7 @@ test("body-shape sliders round-trip and a bad slider resets alone", () => {
     body: { bust: 999, hips: 30, waist: 55, height: 50 },
   });
   assert.deepEqual(loadSave(bad, "Fallback").body, {
+    ...DEFAULT_BODY,
     bust: 50,
     hips: 30,
     waist: 55,

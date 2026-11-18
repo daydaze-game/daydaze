@@ -18,7 +18,7 @@ test("a song is a seeded chart of notes, in time order, on the three lanes", () 
   assert.equal(a.length, NOTES);
   assert.deepEqual(a, chart(7, 132, 10));
   assert.notDeepEqual(a, chart(8, 132, 10));
-  for (let i = 1; i < a.length; i++) assert.ok(a[i]!.at > a[i - 1]!.at);
+  for (let i = 1; i < a.length; i++) assert.ok(a[i].at > a[i - 1].at);
   assert.ok(a.every((n) => n.lane >= 0 && n.lane < LANES));
 });
 
@@ -46,7 +46,7 @@ test("every note lands on a beat of the backing track's tempo", () => {
     // joined mid-track: the first note waits for the lead-in after `from`
     const from = startAt + 41.3;
     const notes = chart(5, bpm, startAt, from);
-    assert.ok(notes[0]!.at >= from + 4 * beat - 1e-3, `${bpm}: lead-in`);
+    assert.ok(notes[0].at >= from + 4 * beat - 1e-3, `${bpm}: lead-in`);
     for (const n of notes) {
       const beats = (n.at - startAt) / beat;
       assert.ok(Math.abs(beats - Math.round(beats)) * beat < 0.001, `${bpm}`);

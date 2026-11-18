@@ -77,7 +77,6 @@ export const headGeometry = faceUv(headBase.clone());
 const headGeometryFar = faceUv(headBaseFar.clone());
 
 export const HEAD_TOP = (TY0 - 70) * S;
-export const HEAD_CHIN = -(762 - TY0) * S;
 
 export function lathe(profile: [number, number][], segments = 28) {
   return new THREE.LatheGeometry(
@@ -476,8 +475,8 @@ function buildHair(style: HairStyle, k: number, src: THREE.BufferGeometry) {
   }
   return {
     main: merge(parts.map(strip)),
-    pony,
-    tie: style === "ponytail" ? PONY_ROOT : undefined,
+    ...(pony && { pony }),
+    ...(style === "ponytail" && { tie: PONY_ROOT }),
   };
 }
 

@@ -229,6 +229,7 @@ function Rally({ player }: { player: Player }) {
       b.visible = false;
       return;
     }
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(YOU[0], 0.02, YOU[1]);
     player.seat.yaw = Math.PI;

@@ -7,7 +7,7 @@ when something seems missing; update this file when the owner changes them.
 ## MCP servers
 
 | Server | Use | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `threejs-devtools-mcp` | inspect the live three.js scene: scene tree, draw-call breakdown, materials, textures, instanced meshes, skeletons, perf snapshot | point it at the dev server (`set_dev_port`); LIVE PREVIEW tools change the browser only, never source. Claude, Codex and Antigravity |
 | `chrome-devtools` | live Chrome on 127.0.0.1:9222: perf traces, console, network, screenshots | Claude, Codex and Antigravity |
 | `context7` (plugin + standalone) | library docs (three, drei, R3F, Vite, Playwright…) | duplicate entries, harmless |
@@ -70,9 +70,8 @@ threejs-shaders, threejs-3d-generator (Tripo), threejs-audio-generator
 ## Packages and tools added 2026-10-26
 
 - `@three.ez/instanced-mesh` (MIT): InstancedMesh2 with per-instance frustum culling, LOD and sorting: use it for trees, furniture, crowds and facades instead of plain InstancedMesh with `frustumCulled = false`.
-- `three-mesh-bvh` (MIT): BVH-accelerated raycasts/collisions (walking, cars, pets, camera).
 - `@elevenlabs/elevenlabs-js` (dev): offline sound/music generation (`scripts/gen-sounds.mjs`).
 - KTX-Software 4.4.2 in `~/.local/opt/ktx` (`toktx`, `ktx` on PATH via `~/.local/bin`): KTX2/Basis GPU textures, e.g. `npx -y @gltf-transform/cli@4.5.1 etc1s in.glb out.glb` or `uastc`; three needs `KTX2Loader` with the basis transcoder (drei `useGLTF` accepts it).
 - ffmpeg (Homebrew) for audio transcoding.
-- `cloudflare` SDK: npm (devDependency, 7.3.0) and Python (in the uv `.venv`), owner-installed 2026-10-27, for future R2/infra scripts. Any call that creates, uploads, deploys or changes Cloudflare resources needs the owner's explicit approval first.
+- `cloudflare` SDK: Python only (in the uv `.venv`; the npm package was dropped, use `npx cloudflare@7` if needed), owner-installed 2026-10-27, for future R2/infra scripts. Any call that creates, uploads, deploys or changes Cloudflare resources needs the owner's explicit approval first.
 - `scripts/with-env.sh <command>`: runs a command with the .env keys loaded (owner permission rule in .claude/settings.json).

@@ -21,10 +21,14 @@ export const floristDesk = createStore({
   commit: null as ((next: FloristCoins) => void) | null,
 });
 
+type CounterStatus = "idle" | "bought" | "broke";
+// A function, not a const: a typed const would narrow back to its literal.
+const startStatus = (): CounterStatus => "idle";
+
 /** The bouquet being built at the counter, and how the last purchase went. */
 export const counter = createStore({
   draft: emptyBouquet(),
-  status: "idle" as "idle" | "bought" | "broke",
+  status: startStatus(),
 });
 
 export function pickStem(stem: Stem) {

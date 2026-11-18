@@ -7,7 +7,7 @@ Writes train-front.glb (the nose points to +x) and train-wagon.glb, each
 thinned to a third of its triangles, with every material's color baked into
 vertex colors so the client draws a car with one plain material. Cars are 12 m
 long, 2 m wide and 1.9 m tall, wheels on y = 0, centered on x = 0.
-Run `scripts/import-nyc.sh` to optimize them into public/models/el/.
+Run `scripts/import-el.sh` to optimize them into public/models/el/.
 """
 
 import math

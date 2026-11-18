@@ -9,7 +9,7 @@ the threat model in [docs/security.md](docs/security.md), deployment in
 
 ## The layers
 
-```
+```text
  browser                                              Cloudflare
 ┌──────────────────────────────────────────────┐    ┌──────────────────────────┐
 │ src/client   React + R3F: scenes, HUD, input │    │ server/src/worker        │
@@ -27,7 +27,8 @@ The rule that holds it together: **logic lives in `src/game` (and the pure
 `server/src` cores), with Node tests; React and three.js stay in
 `src/client`, and only draw and wire things up.** Nothing in `src/game`
 imports React or three.js. The server imports the same game modules (room
-floors, looks, saves, chat effects) so both sides agree on the rules.
+floors, looks, saves, chat effects) so both sides agree on the rules. `npm run lint:deps` (dependency-cruiser, config in
+`.dependency-cruiser.cjs`) enforces these layers mechanically.
 
 ## Client (`src/client`)
 
@@ -56,22 +57,10 @@ floors, looks, saves, chat effects) so both sides agree on the rules.
   `Dressing.tsx`, the prize card (`prizeDesk.ts` → `App` grades, pays and
   records bests and daily challenges), the city map, shops, jail.
 - `city/` is the streamed open city: chunks, traffic, your car, the fuel
-  stops, the beach net, events (fireworks, the Pride parade). New York
-  blocks (Downtown, Uptown, Arts District) wear real facades near the player:
-  `game/city/nyc.ts` picks storey-high bays per street face (seeded lots,
-  ground floor, cornice, fire escapes) and `city/NycFacades.tsx` draws them
-  from `public/models/nyc/bays.glb` (`scripts/import-nyc.sh`), one
-  InstancedMesh2 per bay (culled per instance); farther blocks keep the cheap
-  box walls. Little Manila, Chinatown, Koreatown, the Arts District and
-  Uptown wear finished buildings instead (Quaternius' Ultimate Textured
-  Building Pack, `public/models/districts/lots.glb`,
-  `art/city/district_blocks.py`, `scripts/import-districts.sh`):
-  `game/city/districts.ts` tiles each street face with lots (model, palette
-  and made-up shop name from the district's look, `districtNames.ts`),
-  `city/DistrictLots.tsx` draws them with one palette atlas (the pack paints
-  with a 16-swatch palette, so one model wears every district's colors),
-  lit windows by night and a far twin past 24 m; `budget.ts` prices them.
-  Streets are dressed from the same kit
+  stops, the beach net, events (fireworks, the Pride parade). The older
+  facade renderers and their pure logic (`NycFacades`, `DistrictLots`,
+  `CityHouses`, `FarCity`, `nyc.ts`, `districts.ts`, `far.ts`) were deleted when
+  the dream city replaced them. Streets are dressed from the same kit
   (`public/models/street/kit.glb`, `scripts/import-street.sh`):
   `game/city/streetPieces.ts` cuts the sidewalks back from the cross streets
   and places corner blocks, crosswalks, stop and slow words, double yellow
@@ -116,19 +105,13 @@ dev-only hooks the panel calls: `setDevHour` (`city/daylight.ts`),
 `devStartDanceOff` and a WebSocket frame log (`net/devNetLog.ts`). Usage is
 in [docs/dev-tools.md](docs/dev-tools.md).
 
-The far city (`game/city/far.ts`, `client/city/FarCity.tsx`): every building
-the streamed plan does not draw (past the loaded cells, or infill past its
-range) is a `plan.far` box, drawn as one instanced mesh whose shader adds
-windows, a darker roof and lit windows at night from world position, with all
-roads as a second flat mesh. Boxes under 6.5% of their distance, and past the
-fog (560 m), are skipped; both draws are priced in `budget.ts` and the park
-grid test (at most 270k triangles) still holds. Main Avenue under the El wears
+Main Avenue under the El wears
 (`game/city/wear.ts`, `client/city/AvenueWear.tsx`): tire tracks, oil, patches,
 drains and covers from one canvas atlas in one instanced mesh, plus a shade
 band with sun stripes through the deck's ties that follows the sun.
 
 Loading: the city's first picture waits only on what is near. Region parts (the
-band shell, dog yard, market, Ferris wheel, district lots, Suburbia's houses)
+band shell, dog yard, market, Ferris wheel)
 and each street-furniture kind sit in their own `Suspense` and fetch their
 models when the plan or the player first comes near (`city/preloadNear.ts`,
 `CityFurniture.tsx`), not at startup; panels with big static data (the credits
@@ -255,6 +238,8 @@ update prompt (`src/client/ui/UpdatePrompt.tsx`), then deletes the old cache.
 
 - `npm run lint`: ESLint with typescript-eslint and the React hooks rules
   (`eslint.config.mjs`).
+- `npm run lint:md`: markdownlint-cli2 over the root, `docs/` and `.github/`
+  Markdown (`.markdownlint-cli2.jsonc`).
 - `npm test`: Node's test runner over `src/**/*.test.ts` and
   `server/**/*.test.ts` (game rules, protocol, server cores).
 - `npm run typecheck`: strict TypeScript, including the Worker.
@@ -273,7 +258,10 @@ update prompt (`src/client/ui/UpdatePrompt.tsx`), then deletes the old cache.
   preloads, gzipped) passes 600 KB, and prints `dist/` by asset class; CI runs
   it after the build.
 - `npm run test:coverage`: the unit tests with a coverage report
-  (`coverage/lcov.info`, `coverage/summary.txt`).
+  (`coverage/lcov.info`, `coverage/summary.txt`). It fails below the coverage
+  minimums: Node's threshold flags for the whole project, and
+  `scripts/check-coverage.ts` for `src/game/` and `src/net/` (see
+  CONTRIBUTING.md).
 - `npm run verify`: lint, tests, typecheck, format check and build; the
   merge gate, and what CI (`.github/workflows/ci.yml`) runs on every push
   and pull request to `main`.

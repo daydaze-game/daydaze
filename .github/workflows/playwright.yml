@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   browser:
     timeout-minutes: 45
@@ -27,10 +27,28 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      # A change that only touches docs or editor/lint config cannot break a
+      # browser test: report green without the slow steps. The job still runs,
+      # so the required check names (browser (1..4), minigames) always report.
+      - id: scope
+        name: Docs-only change?
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          run=true
+          if [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
+            run=false
+            echo "Docs-only change: skipping the browser tests."
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+      - if: steps.scope.outputs.run == 'true'
+        run: npm ci
+      - if: steps.scope.outputs.run == 'true'
+        run: npx playwright install --with-deps chromium
       # Headless WebGL runs on SwiftShader, so these are slow but real.
-      - run: npm run test:e2e:client -- --shard=${{ matrix.shard }}/4
+      - if: steps.scope.outputs.run == 'true'
+        run: npm run test:e2e:client -- --shard=${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
@@ -46,9 +64,27 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      # A change that only touches docs or editor/lint config cannot break a
+      # browser test: report green without the slow steps. The job still runs,
+      # so the required check names (browser (1..4), minigames) always report.
+      - id: scope
+        name: Docs-only change?
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          run=true
+          if [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
+            run=false
+            echo "Docs-only change: skipping the browser tests."
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+      - if: steps.scope.outputs.run == 'true'
+        run: npm ci
+      - if: steps.scope.outputs.run == 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.scope.outputs.run == 'true'
+        run: npm run test:e2e
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:

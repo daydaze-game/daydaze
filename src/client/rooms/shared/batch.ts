@@ -11,9 +11,9 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
  * a uniform or per-axis scale. All optional.
  */
 export type Pose = {
-  position?: [number, number, number];
-  rotation?: [number, number, number];
-  scale?: number | [number, number, number];
+  position?: [number, number, number] | undefined;
+  rotation?: [number, number, number] | undefined;
+  scale?: number | [number, number, number] | undefined;
 };
 
 /**

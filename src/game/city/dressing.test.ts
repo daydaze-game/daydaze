@@ -9,14 +9,12 @@ import {
   labelUv,
   LABELS,
   glowOf,
-  lotSign,
   FURNITURE,
   PARKED_CARS,
   STREET_DRESS,
   type Buckets,
 } from "./dressing.ts";
 import { BUILDINGS, CITY_SURFACES, PROPS } from "./layout.ts";
-import { isLotBlock, lotRow } from "./districts.ts";
 import { KINDS, type Instance, type Kind } from "./plan.ts";
 
 type Box = { x0: number; z0: number; x1: number; z1: number };
@@ -157,37 +155,6 @@ test("each gate raises two tall arches either side of its door", () => {
   }
 });
 
-test("a district block wearing lots drops its own 10 m board and awning: the lots' shop boards name it", () => {
-  const signed = BUILDINGS.filter((b) => isLotBlock(b) && b.sign);
-  let posters = 0;
-  let tags = 0;
-  assert.ok(signed.length > 5, "district blocks carry their own boards");
-  for (const b of signed) {
-    const plain = emptyBuckets();
-    dressBuilding(b, plain, false, true, false);
-    const lotted = emptyBuckets();
-    dressBuilding(b, lotted, true, true, true);
-    assert.equal(plain.sign.length, 1, b.id);
-    assert.equal(lotted.sign.length, 0, b.id);
-    // nor does the block's one big striped awning cross the lots' doors
-    assert.ok(plain.awning.length > 0, b.id);
-    assert.equal(lotted.awning.length, 0, b.id);
-    // nor do pasted posters (a dark rectangle in a bright frame) or product
-    // shelves hang over the lots' own doors and windows
-    const poster = (i: Instance) => i.sx === 1.1 && i.sy === 1.5;
-    const shelf = (i: Instance) => i.sy === 0.12 && i.sz === 0.5;
-    // spray-paint tags: 0.9 m tall glow slabs low on the wall (no sign is that thin and bright)
-    const tag = (i: Instance) => i.sy === 0.9 && i.sz === 0.05 && i.y < 3.4;
-    posters += plain.glow.filter(poster).length;
-    assert.equal(lotted.glow.filter(poster).length, 0, b.id);
-    assert.equal(lotted.furniture.filter(shelf).length, 0, b.id);
-    tags += plain.glow.filter(tag).length;
-    assert.equal(lotted.glow.filter(tag).length, 0, b.id);
-  }
-  assert.ok(posters > 0, "the plain blocks do carry posters");
-  assert.ok(tags > 0, "and graffiti tags");
-});
-
 test("the blade signs and ads are dressed on their own buildings", () => {
   for (const id of Object.keys(BLADE_SIGNS)) {
     const b = BUILDINGS.find((x) => x.id === id);
@@ -230,53 +197,9 @@ test("string lights are small round bulbs on a thin cord, not big cubes", () => 
 /** The puddle-kind instances standing flat on the ground, and those upright on a wall. */
 const flat = (i: Instance) => i.rot?.[0] === -Math.PI / 2;
 
-test("a lot's shop board spills its color onto the wall below and the pavement in front", () => {
-  const block = BUILDINGS.find(
-    (b) => isLotBlock(b) && lotRow(b).some((l) => l.sign),
-  );
-  assert.ok(block);
-  const lot = lotRow(block).find((l) => l.sign);
-  assert.ok(lot);
-  const out = emptyBuckets();
-  lotSign(out, lot);
-  const board = out.panel[0];
-  assert.ok(board?.color);
-  assert.equal(out.puddle.length, 2);
-  const pool = out.puddle.find(flat);
-  const wash = out.puddle.find((i) => !flat(i));
-  assert.ok(pool && wash);
-  // both are the board's hue, lit up (glowOf)
-  assert.equal(pool.color, glowOf(board.color));
-  assert.equal(wash.color, glowOf(board.color));
-  // out along the lot's front: the wash close to the wall, the pool a few
-  // meters out, on the pavement (its top is 0.14 m up), never past the door zone
-  const nx = Math.sin(lot.yaw);
-  const nz = Math.cos(lot.yaw);
-  const out_ = (i: Instance) => (i.x - lot.x) * nx + (i.z - lot.z) * nz;
-  assert.ok(out_(wash) > 0 && out_(wash) < 0.5, `wash ${out_(wash)} m out`);
-  assert.ok(out_(pool) > 1 && out_(pool) < 4, `pool ${out_(pool)} m out`);
-  assert.ok(pool.y > 0.14 && pool.y < 0.3, `pool at ${pool.y} m`);
-  // the wash hangs under the board's middle and faces out like the board
-  assert.ok(wash.y < board.y, "wash is centered under the board");
-  assert.equal(wash.rot?.[1], lot.yaw);
-  // soft: wider than the board, not tall enough to wash the whole front
-  assert.ok(wash.sx > board.sx && wash.sy < 4.5);
-});
-
-test("a shop with no board spills nothing, and a building's neon sign spills too", () => {
-  const block = BUILDINGS.find(
-    (b) => isLotBlock(b) && lotRow(b).some((l) => !l.sign),
-  );
-  assert.ok(block);
-  const bare = lotRow(block).find((l) => !l.sign);
-  assert.ok(bare);
-  const out = emptyBuckets();
-  lotSign(out, bare);
-  assert.equal(out.puddle.length, 0);
-  // a signed non-storefront building (its own warm puddle is not in this color)
-  const b = BUILDINGS.find(
-    (x) => x.sign && x.style === "club" && !isLotBlock(x),
-  );
+test("a building's neon sign spills its color onto the pavement and wall", () => {
+  // a signed club (its own warm puddle is not in this color)
+  const b = BUILDINGS.find((x) => x.sign && x.style === "club");
   assert.ok(b?.sign);
   const dressedB = emptyBuckets();
   dressBuilding(b, dressedB);

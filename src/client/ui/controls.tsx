@@ -3,7 +3,8 @@
 // the option label as its accessible name. Also augments React's CSSProperties
 // with the `--c` swatch variable.
 
-import { useId, type CSSProperties } from "react";
+import { useId, useState, type CSSProperties } from "react";
+import { isColor } from "../../game/look.ts";
 
 declare module "react" {
   interface CSSProperties {
@@ -51,6 +52,63 @@ export function Swatches<T extends string>({
           />
         );
       })}
+    </div>
+  );
+}
+
+/** Full RGB selection alongside convenient presets; skin uses Swatches. */
+export function ColorPicker({
+  label,
+  options,
+  value,
+  onPick,
+}: PickerProps<string>) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const selected = options.find((o) => o.id === value);
+  const color = isColor(value) ? value : selected?.swatch;
+  return (
+    <div className="color-picker">
+      <Swatches
+        label={label}
+        options={options}
+        value={value}
+        onPick={(id) => {
+          setDraft(null);
+          onPick(id);
+        }}
+      />
+      <div className="custom-color">
+        <label>
+          Any color
+          <input
+            type="color"
+            aria-label={`Custom ${label.toLowerCase()}`}
+            value={color && isColor(color) ? color : "#e890a0"}
+            onChange={(e) => {
+              setDraft(null);
+              onPick(e.target.value);
+            }}
+          />
+        </label>
+        <label>
+          Hex
+          <input
+            type="text"
+            aria-label={`${label} hex`}
+            value={draft ?? (color && isColor(color) ? color : "")}
+            maxLength={7}
+            placeholder="#RRGGBB"
+            spellCheck={false}
+            aria-invalid={draft !== null && !isColor(draft)}
+            onChange={(e) => {
+              const next = e.target.value;
+              setDraft(next);
+              if (isColor(next)) onPick(next);
+            }}
+            onBlur={() => setDraft(null)}
+          />
+        </label>
+      </div>
     </div>
   );
 }

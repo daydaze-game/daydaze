@@ -62,7 +62,7 @@ export const PATH_WIDTH = 2.4;
 export function smoothPath(points: readonly Vec2[], per = 6): Vec2[] {
   const out: Vec2[] = [];
   const at = (i: number): Vec2 =>
-    points[Math.min(points.length - 1, Math.max(0, i))] as Vec2;
+    points[Math.min(points.length - 1, Math.max(0, i))];
   for (let i = 0; i < points.length - 1; i++) {
     const [p0, p1, p2, p3] = [at(i - 1), at(i), at(i + 1), at(i + 2)];
     for (let k = 0; k < per; k++) {
@@ -78,7 +78,7 @@ export function smoothPath(points: readonly Vec2[], per = 6): Vec2[] {
       out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
     }
   }
-  out.push(points[points.length - 1] as Vec2);
+  out.push(points[points.length - 1]);
   return out;
 }
 
@@ -88,8 +88,8 @@ export const PATH: readonly Vec2[] = smoothPath(PATH_POINTS);
 export function distToPath(x: number, z: number): number {
   let best = Infinity;
   for (let i = 0; i < PATH.length - 1; i++) {
-    const [ax, az] = PATH[i] as Vec2;
-    const [bx, bz] = PATH[i + 1] as Vec2;
+    const [ax, az] = PATH[i];
+    const [bx, bz] = PATH[i + 1];
     const dx = bx - ax;
     const dz = bz - az;
     const len = dx * dx + dz * dz;
@@ -170,9 +170,9 @@ export const WILDLIFE: readonly Wildlife[] = [
  * and the yaw that faces back at the path. */
 function beside(frac: number, side: 1 | -1, off: number, along = 0) {
   const i = Math.round(frac * (PATH.length - 1));
-  const a = PATH[Math.max(0, i - 1)] as Vec2;
-  const b = PATH[Math.min(PATH.length - 1, i + 1)] as Vec2;
-  const c = PATH[i] as Vec2;
+  const a = PATH[Math.max(0, i - 1)];
+  const b = PATH[Math.min(PATH.length - 1, i + 1)];
+  const c = PATH[i];
   const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
   const tx = (b[0] - a[0]) / len;
   const tz = (b[1] - a[1]) / len;
@@ -312,9 +312,10 @@ export function forestTrees(): Tree[] {
         continue;
       const bank = distToCreek(x, z) < CREEK.halfWidth + 4.5;
       const list = bank ? BANKSIDE : WOODS;
-      const id = list[
-        Math.min(list.length - 1, Math.floor(hash(gx, gz, 3) * list.length))
-      ] as TreeId;
+      const id =
+        list[
+          Math.min(list.length - 1, Math.floor(hash(gx, gz, 3) * list.length))
+        ];
       // meters tall: 6.5 to 10.5
       const target = 6.5 + hash(gx, gz, 4) * 4;
       const k = target / TREE_KINDS[id].height;
@@ -441,7 +442,7 @@ export const CREEK_STONES: readonly (Spot & { id: PlantId })[] = (() => {
       const k = 0.45 + hash(x, side, 32) * 0.5;
       const sx = x + hash(x, side, 34);
       out.push({
-        id: ids[Math.floor(hash(x, side, 33) * ids.length)] as PlantId,
+        id: ids[Math.floor(hash(x, side, 33) * ids.length)],
         x: sx,
         z:
           creekZ(sx) +

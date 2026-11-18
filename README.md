@@ -92,6 +92,7 @@ GitHub Actions, in `.github/workflows/`:
 | `browser-test.yml` | by hand, `-f grep="<title>"` | the Playwright tests whose titles match |
 | `screenshots.yml` | by hand, `-f shots="<names>"` | screenshots as a downloadable artifact |
 | `profile.yml` | push to `perf/smooth`, by hand | a performance profile |
+| `codeql.yml` | push and pull request to `main`, weekly | CodeQL security scanning of the TypeScript and the workflows; findings in the Security tab |
 | `deploy.yml` | by hand, owner-approved | the Cloudflare deploy |
 
 ## Develop
@@ -102,8 +103,9 @@ Requires Node.js 22.18 or newer (`.nvmrc` pins 24).
 npm install
 npm run dev               # client at http://localhost:5173
 npm run lint              # ESLint (TypeScript and React hooks rules)
+npm run lint:md          # markdownlint-cli2 over the Markdown docs
 npm test                  # unit tests (game rules, protocol, server)
-npm run test:coverage     # the same, with a coverage report in coverage/
+npm run test:coverage     # the same, with a coverage report in coverage/ and coverage minimums enforced
 npm run typecheck         # strict TypeScript, including the Worker
 npm run verify            # lint, tests, typecheck, format check, build, perf budget
 npm run test:e2e:client   # Playwright browser tests (slow: software WebGL)

@@ -201,7 +201,7 @@ export function dreamBuilding(
     return {
       id: `${b.id}:${i}`,
       kind,
-      landmark: m.main ? DETAILED[b.id] : undefined,
+      ...(m.main && DETAILED[b.id] && { landmark: DETAILED[b.id] }),
       x,
       y: 0.14,
       z,

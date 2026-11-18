@@ -35,14 +35,17 @@ export function useCloudSave(save: SaveV1, onSave: (save: SaveV1) => void) {
     if (loadAs === null) return;
     let live = true;
     const load = async () => {
-      const cloud = await onlineSession()?.cloudSave(loadAs);
+      const cloud = await onlineSession()
+        ?.cloudSave(loadAs)
+        // a rejected fetch is retried like a failed one
+        .catch(() => undefined);
       if (!live) return;
       if (cloud?.ok) {
         onSave(cloud.value);
         account.set({ cloudReady: true });
-      } else timer = window.setTimeout(load, RETRY_MS);
+      } else timer = window.setTimeout(() => void load(), RETRY_MS);
     };
-    let timer = window.setTimeout(load, 0);
+    let timer = window.setTimeout(() => void load(), 0);
     return () => {
       live = false;
       window.clearTimeout(timer);

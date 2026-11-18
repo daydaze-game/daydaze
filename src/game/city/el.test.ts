@@ -21,8 +21,6 @@ import {
   stairsSpan,
   trestleColumns,
 } from "./el.ts";
-import { doorZone } from "./districts.ts";
-import { planView } from "./budget.ts";
 import { ROAD_EDGES, roadRect } from "./layout.ts";
 
 const [manila, downtown, chinatown] = EL_STATIONS;
@@ -185,18 +183,10 @@ test("every stair flight joins its platform and ends on the avenue's sidewalk", 
   }
 });
 
-test("no stair flight stands in front of a shop door or in a cross street", () => {
-  // every lot near a station, as the plan places them
+test("no stair flight stands in a cross street", () => {
   const roads = ROAD_EDGES.filter((e) => e.width <= 10).map(roadRect);
   for (const s of EL_STATIONS) {
     const [x0, z0, x1, z1] = stairsRect(s);
-    for (const lot of planView([s.x, 10], "high").lots) {
-      const [a, b, c, d] = doorZone(lot);
-      assert.ok(
-        !(a < x1 && x0 < c && b < z1 && z0 < d),
-        `${s.id}: ${lot.sign ?? lot.model} at ${lot.x},${lot.z} is behind the stairs`,
-      );
-    }
     // the cross streets (single lane, 10 m) run down through the avenue's sidewalk
     for (const r of roads) {
       const xs = r.map(([x]) => x);

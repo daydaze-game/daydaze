@@ -73,9 +73,9 @@ export function StarDome({
   floor,
 }: {
   low: boolean;
-  radius?: number;
+  radius?: number | undefined;
   /** The lowest a star may sit, as the sine of its elevation. */
-  floor?: number;
+  floor?: number | undefined;
 }) {
   const calm = useReducedMotion();
   const px = useThree((s) => s.gl.getPixelRatio());
@@ -127,7 +127,7 @@ export function StarDome({
   );
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    skyMat.uniforms.uTime!.value = t;
+    skyMat.uniforms.uTime.value = t;
     const s = streak.current;
     if (!s) return;
     // reduced motion: no streaks, they are the one fast thing in the sky

@@ -112,13 +112,18 @@ test("locked shop looks fall back to the default until owned", () => {
     lips: "lips-chrome-berry",
     shadow: "#2e7dff",
   };
-  assert.deepEqual(unlockedLook(look, []), DEFAULT_LOOK);
+  assert.deepEqual(unlockedLook(look, []), {
+    ...DEFAULT_LOOK,
+    lips: look.lips,
+    shadow: look.shadow,
+  });
   const owned = ["tracksuit-y2k", "sleek-bob", "lips-chrome-berry"];
   assert.deepEqual(unlockedLook(look, owned), {
     ...DEFAULT_LOOK,
     outfit: "tracksuit-y2k",
     hairStyle: "sleek-bob",
     lips: "lips-chrome-berry",
+    shadow: look.shadow,
   });
 });
 
@@ -127,10 +132,17 @@ test("free catalog looks are never locked", () => {
   assert.deepEqual(unlockedLook(look, []), look);
 });
 
-test("a locked hair color falls back to the default too", () => {
+test("all hair colors are available without a purchase", () => {
   const look: Look = { ...DEFAULT_LOOK, hairColor: "#7ee8a2" };
-  assert.equal(unlockedLook(look, []).hairColor, DEFAULT_LOOK.hairColor);
+  assert.equal(unlockedLook(look, []).hairColor, look.hairColor);
   assert.equal(unlockedLook(look, ["#7ee8a2"]).hairColor, "#7ee8a2");
+});
+
+test("every lipstick color stays available without a wardrobe purchase", () => {
+  for (const { id } of LIPS) {
+    const look = { ...DEFAULT_LOOK, lips: id };
+    assert.equal(unlockedLook(look, []).lips, id);
+  }
 });
 
 test("cleanWardrobe keeps known, unique ids and drops the rest", () => {
@@ -206,7 +218,7 @@ test("the thrift shop's find of the day is a boutique outfit at half price", () 
   assert.ok(finds.size > 1, "the find changes from day to day");
 });
 
-test("buying the find pays the thrift price, and dyes come off unowned", () => {
+test("buying the find pays the thrift price, and dyes stay available", () => {
   const find = thriftFind(3);
   const r = buyItem({ coins: find.price, wardrobe: [] }, find.id, "thrift", 3);
   assert.deepEqual(r, { ok: true, state: { coins: 0, wardrobe: [find.id] } });
@@ -216,7 +228,7 @@ test("buying the find pays the thrift price, and dyes come off unowned", () => {
     "at the boutique it's full price",
   );
   const dyed = { ...DEFAULT_LOOK, outfitColor: "#c9a227" } as const;
-  assert.equal(unlockedLook(dyed, []).outfitColor, DEFAULT_LOOK.outfitColor);
+  assert.equal(unlockedLook(dyed, []).outfitColor, dyed.outfitColor);
   assert.equal(unlockedLook(dyed, ["#c9a227"]).outfitColor, "#c9a227");
 });
 

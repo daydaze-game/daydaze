@@ -26,7 +26,7 @@ const LEAD_MS = 700;
 
 const OFF = {
   phase: "off" as Phase,
-  song: newSong(0) as Song,
+  song: newSong(0),
   since: 0,
   /** The shell lit right now, or -1. */
   lit: -1,

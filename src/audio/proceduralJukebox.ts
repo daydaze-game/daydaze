@@ -4,19 +4,10 @@
 // bus's music output; a controller without a context stays silent and never
 // throws.
 
+import type { TrackId } from "../game/trackId.ts";
 import { getSharedAudioBus } from "./audioBus.ts";
 
-/** Every track the jukebox can play. */
-export type TrackId =
-  | "savanna-nightclub"
-  | "canopy-lofi"
-  | "waterhole-twilight"
-  | "carnival-calliope"
-  | "sugar-rush-pop"
-  | "warehouse-acid"
-  | "player-two-chiptune"
-  | "la-noche-salsa"
-  | "roller-disco";
+export type { TrackId };
 
 /** What the jukebox shows for a track; `bpm` also sets its tempo. */
 export type TrackMetadata = {

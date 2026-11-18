@@ -220,25 +220,25 @@ export type WalkState = {
 type DollProps = {
   look: Look;
   /** Worn instead of the outfit in swimwear rooms; the look is untouched. */
-  swim?: SwimLook | null;
+  swim?: SwimLook | null | undefined;
   /** Closet sliders: a clothed doll scales, it never changes outline shape. */
-  body?: BodyShape;
+  body?: BodyShape | undefined;
   mood: Mood;
   /** The move a dancing doll loops; the two-step when none is given. */
-  dance?: DanceMoveId;
+  dance?: DanceMoveId | undefined;
   /** Set on one partner of a couple dance; the other doll takes the other role. */
-  couple?: CoupleRole;
+  couple?: CoupleRole | undefined;
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
-  hold?: string;
+  hold?: string | undefined;
   /** Wobbles with the local player's buzz. */
-  buzzed?: boolean;
-  walk?: { current: WalkState };
-  seed?: number;
+  buzzed?: boolean | undefined;
+  walk?: { current: WalkState } | undefined;
+  seed?: number | undefined;
   /** The player's own doll: full detail at any distance on the low tier. */
-  own?: boolean;
+  own?: boolean | undefined;
   /** False where sitting down or standing up must not play a clip (a ride
    * that carries her seated: the 3D doll's alone). */
-  joins?: boolean;
+  joins?: boolean | undefined;
 } & Omit<ThreeElements["group"], "children">;
 
 /** The original toon doll, shown while the 3D doll's models load. */

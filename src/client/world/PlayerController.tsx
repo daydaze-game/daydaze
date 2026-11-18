@@ -92,7 +92,7 @@ export type Player = {
   seat: {
     position: THREE.Vector3;
     yaw: number;
-    lie?: boolean;
+    lie?: boolean | undefined;
     /** A ride seat (horse, cup, chair): she sits while it holds her. */
     sit?: boolean;
     /** Head over heels, radians, about her hips: flips and tumbles. */
@@ -103,7 +103,7 @@ export type Player = {
     inside?: boolean;
     /** The clip she holds seated here instead of her own pick (a cafe table's
      * idle, typing at a desk): a chair seat's, see game/seats.ts. */
-    hold?: string;
+    hold?: string | undefined;
   } | null;
   /** Set while seated on a chair (not a ride): the doll sits until she moves. */
   sitting: boolean;
@@ -275,6 +275,7 @@ function worldDirection(local: Vec2, camera: THREE.Camera): Vec2 | null {
 }
 
 export function PlayerController({
+  editing = false,
   player,
   area,
   look,
@@ -288,6 +289,7 @@ export function PlayerController({
   onPortal,
   water = null,
 }: {
+  editing?: boolean;
   player: Player;
   area: WalkArea;
   look: Look;
@@ -343,7 +345,7 @@ export function PlayerController({
 
   // Space jumps, in the city (other rooms give Space to their games)
   useEffect(() => {
-    if (area !== CITY_AREA) return;
+    if (area !== CITY_AREA || editing) return;
     const key = (e: KeyboardEvent) => {
       if (e.code !== "Space" || e.repeat) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -363,10 +365,11 @@ export function PlayerController({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [area, player]);
+  }, [area, player, editing]);
   // leaving the room mid-dive must not leave the next one underwater
   useEffect(() => () => submergedView.set({ on: false }), []);
   useFrame((state, rawDt) => {
+    if (editing) return;
     const dt = rawDt * TIME_SCALE;
     playerSpot.x = player.pos.x;
     playerSpot.z = player.pos.z;

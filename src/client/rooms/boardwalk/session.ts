@@ -8,7 +8,6 @@ import {
   powerAt,
   roll,
   total,
-  type Game,
   type Ring,
 } from "../../../game/skeeBall.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -21,7 +20,7 @@ export const ROLL_TIME = 1.3;
 
 const OFF = {
   phase: "off" as Phase,
-  game: newGame() as Game,
+  game: newGame(),
   /** performance.now() the phase began. */
   since: 0,
   aim: 0,

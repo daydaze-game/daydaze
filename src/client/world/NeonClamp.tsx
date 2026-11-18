@@ -27,6 +27,7 @@ export function NeonClamp() {
   const frame = useRef(0);
   useFrame(({ scene }) => {
     if (frame.current++ % 30 === 0) {
+      // eslint-disable-next-line no-restricted-syntax -- once per 30 frames, to collect scene materials
       const found = new Set<THREE.MeshBasicMaterial>();
       scene.traverse((obj) => {
         if (!(obj instanceof THREE.Mesh)) return;

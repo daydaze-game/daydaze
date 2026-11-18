@@ -474,6 +474,14 @@ export const CREDITS: readonly {
           "Player 2 cabinet bodies, with the original screen removed and materials baked to vertex colors.",
       },
       {
+        title: "Young Female Hairless",
+        author: "bobby_03",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/skins01.html",
+        usedFor:
+          "Skin color detail and approximate surface relief baked into both avatar face projections, neutralized for selectable skin tones beneath optional makeup.",
+      },
+      {
         title: "MakeHuman",
         author: "MakeHuman Community",
         license: "CC0 1.0",
@@ -495,39 +503,7 @@ export const CREDITS: readonly {
         license: "CC0 1.0",
         url: "https://quaternius.com/packs/downtowncitymegakit.html",
         usedFor:
-          "New York walk-up, prewar and loft facades (storefronts, windows, cornices, doors, stoops) merged and thinned into storey-high bays for Downtown, Uptown and the Arts District; the street decals (crosswalks, STOP and SLOW words, double yellow lines on its weathered paint atlas), sidewalk corner blocks, manholes, storm drains and bollards merged into the city's street dressing; other textures replaced by the city's own.",
-      },
-      {
-        title: "Modular Fire Escape",
-        author: "Poly Haven",
-        license: "CC0 1.0",
-        url: "https://polyhaven.com/a/modular_fire_escape",
-        usedFor:
-          "Fire escapes on New York walk-ups: the landing and railing, thinned and painted iron black.",
-      },
-      {
-        title: "City Kit Suburban",
-        author: "Kenney",
-        license: "CC0 1.0",
-        url: "https://kenney.nl/assets/city-kit-suburban",
-        usedFor:
-          "Suburbia's houses near the player, optimized with a small colormap.",
-      },
-      {
-        title: "Ultimate Textured Building Pack",
-        author: "Quaternius",
-        license: "CC0 1.0",
-        url: "https://quaternius.com/packs/ultimatetexturedbuilding.html",
-        usedFor:
-          "Beachside's beach cottages and two Suburbia houses (Palm Court's motels are built from boxes: no motel model exists), kept at the pack's own triangle count. Also the lots of Little Manila, Chinatown, Koreatown, the Arts District and Uptown: eleven buildings thinned, recolored per district and tiled along the blocks.",
-      },
-      {
-        title: "Buildings Pack (Aug 2017)",
-        author: "Quaternius",
-        license: "CC0 1.0",
-        url: "https://quaternius.com/packs/buildings.html",
-        usedFor:
-          "Beachside's wide cottage and four more Suburbia houses, kept at the pack's own triangle count.",
+          "The street decals (crosswalks, STOP and SLOW words, double yellow lines on its weathered paint atlas), sidewalk corner blocks, manholes, storm drains and bollards merged into the city's street dressing; other textures replaced by the city's own.",
       },
       {
         title: "Train Pack",
@@ -1446,6 +1422,14 @@ export const CREDITS: readonly {
         license: "CC0 1.0",
         url: "https://polyhaven.com/a/brushed_concrete",
         usedFor: "Surface textures for the city, venues and furnishings.",
+      },
+      {
+        title: "Patinated city copper",
+        author: "ambientCG",
+        license: "CC0 1.0",
+        url: "https://ambientcg.com/view?id=Metal058B",
+        usedFor:
+          "Shared color, normal and packed roughness/metalness maps for dream architecture roofs and metalwork; converted to 512px WebP.",
       },
       {
         title: "Carpet",
