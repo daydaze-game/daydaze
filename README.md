@@ -39,6 +39,8 @@ All music and sound is synthesized in the browser. NPC lines are handwritten.
 Taken on GitHub's runners (CPU-rendered, low tier) from `main` on
 2026-11-14 with `gh workflow run screenshots.yml`; every shot is listed in
 `scripts/screenshots.ts`, and more live in [`docs/screenshots/`](docs/screenshots/).
+The [latest screenshots of every room and door](https://github.com/dpologdvinity/daydaze/tree/screenshots/main)
+are retaken on each push to `main` that changes the game.
 
 | | |
 | --- | --- |
@@ -90,7 +92,7 @@ GitHub Actions, in `.github/workflows/`:
 | `playwright.yml` | push and pull request to `main`, by hand | `npm run verify`, then the client browser tests in four shards and the minigames suite |
 | `verify.yml` | push to `feat/**`, `fix/**`, `perf/**`, `ci/**` | `npm run verify`, so branches are checked before they merge |
 | `browser-test.yml` | by hand, `-f grep="<title>"` | the Playwright tests whose titles match |
-| `screenshots.yml` | by hand, `-f shots="<names>"` | screenshots as a downloadable artifact |
+| `screenshots.yml` | push to `main` (game files), by hand, `-f shots="<tokens>"` | screenshots in shards, as an artifact and a gallery folder on the `screenshots` branch |
 | `profile.yml` | push to `perf/smooth`, by hand | a performance profile |
 | `codeql.yml` | push and pull request to `main`, weekly | CodeQL security scanning of the TypeScript and the workflows; findings in the Security tab |
 | `deploy.yml` | by hand, owner-approved | the Cloudflare deploy |

@@ -125,6 +125,7 @@ These work in any build, without the panel:
 | --- | --- |
 | `?room=<id>` | Start in a room (ids in `src/game/rooms.ts`). |
 | `?at=x,z&yaw=r` | Start at a spot in that room. |
+| `?spot=<building-id>` | Start in the city in front of that building, facing its door (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
 | `?view=room\|full\|face\|detail` | Start with that camera view. |
 | `?time=HH:MM` | Pin the city's hour. |
 | `?night=<id>` | Start an hour into a club night (ids in `src/game/events.ts`). |
@@ -182,6 +183,32 @@ server (`lineup.tsx`), with its own flags:
 The minigame kit page, `/src/client/rooms/shared/game3d/kit.html`, takes
 `?freeze=1`: it stops drawing two frames after the ball first lands
 (`kit.tsx`).
+
+## Screenshot tokens
+
+`scripts/screenshots.ts` and the Screenshots workflow take a space-separated
+list of tokens (the language is in `scripts/shot-plan.ts`):
+
+| Token | Shots |
+| --- | --- |
+| `yacht` | A named shot from the `SHOTS` registry in `scripts/screenshots.ts`. |
+| `room=city&at=10,5&yaw=1.57&view=full&time=21:00` | Any URL flags above; named by its slug (`room-city-at-10-5-...`). |
+| `spot=pulse&view=full` | In front of a building. |
+| `all-rooms`, `all-spots`, `tour` | Every all-ages room; every building with a door; both. |
+
+A query token can also carry `name=<slug>` (the file name), `turn=N` (N
+headings evenly around, named `-00` to `-NN`; needs `at=` or `spot=`) and
+`w=1920&h=1080` (the viewport; add `quality=high` for docs and store pages).
+An unknown name or a bad token fails the run before a browser starts.
+
+```bash
+gh workflow run screenshots.yml --ref feat/x -f shots="spot=pulse&turn=8 room=pulse&w=1920&h=1080&quality=high"
+```
+
+Each run publishes its branch's folder to the `screenshots` branch, a README
+grid that renders on a phone: `tree/screenshots/main` (refreshed by every push
+to `main` that touches the game), `tree/screenshots/feat-x`, and so on. From a
+phone, Actions > Screenshots > Run workflow in mobile web takes new ones.
 
 ## Browser extensions
 

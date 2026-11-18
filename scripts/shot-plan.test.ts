@@ -61,11 +61,11 @@ test("turn=N gives N evenly spaced headings named -NN", () => {
 
 test("w and h set the viewport and stay out of the page's query", () => {
   const [shot] = expandShots(
-    ["name=hero&room=club-pulse&quality=high&w=1920&h=1080"],
+    ["name=hero&room=pulse&quality=high&w=1920&h=1080"],
     known,
   );
   assert.deepEqual(shot?.viewport, { width: 1920, height: 1080 });
-  assert.equal(shot?.query, "room=club-pulse&quality=high");
+  assert.equal(shot?.query, "room=pulse&quality=high");
 });
 
 test("tour is every all-ages room and every door, with no repeats", () => {
