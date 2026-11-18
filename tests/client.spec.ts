@@ -151,6 +151,27 @@ test("dressing room isolates the character and saves unrestricted colors", async
       }),
     )
     .toEqual(["#7ee8a2", "#c9a227", "#cc1234", "#12ab34", "#aa5678"]);
+  const outfitImages = page
+    .getByRole("radiogroup", { name: "Outfit", exact: true })
+    .locator("img:not([hidden])");
+  await expect(outfitImages).not.toHaveCount(0);
+  await expect
+    .poll(() =>
+      outfitImages.evaluateAll(
+        (items) =>
+          items.length >= 6 &&
+          items
+            .slice(0, 6)
+            .every(
+              (item) =>
+                item instanceof HTMLImageElement &&
+                item.complete &&
+                item.naturalWidth > 0 &&
+                !item.hidden,
+            ),
+      ),
+    )
+    .toBe(true);
   await page.screenshot({ path: "test-results/dressing-studio-desktop.png" });
   await page.reload();
   await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
@@ -165,6 +186,27 @@ test("dressing room isolates the character and saves unrestricted colors", async
   ).toHaveValue("#7ee8a2");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready");
+  const hairImages = page
+    .getByRole("radiogroup", { name: "Hair style", exact: true })
+    .locator("img:not([hidden])");
+  await expect(hairImages).not.toHaveCount(0);
+  await expect
+    .poll(() =>
+      hairImages.evaluateAll(
+        (items) =>
+          items.length >= 4 &&
+          items
+            .slice(0, 4)
+            .every(
+              (item) =>
+                item instanceof HTMLImageElement &&
+                item.complete &&
+                item.naturalWidth > 0 &&
+                !item.hidden,
+            ),
+      ),
+    )
+    .toBe(true);
   await page.screenshot({ path: "test-results/dressing-studio-phone.png" });
   await page
     .getByRole("button", { name: "Close dressing room", exact: true })
