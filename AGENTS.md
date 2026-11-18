@@ -51,6 +51,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
 | `npm run lint`                      | ESLint                                                                                                                                          |
+| `ruff check .`                      | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed)                                        |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
 | `npm run format` / `format:check`   | Prettier                                                                                                                                        |
@@ -126,6 +127,10 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
     PRs that change room, city, avatar or HUD code get the matching shots
     automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
     comment linking the artifact, kept 7 days.
+  - Screen recordings of any scene or minigame (MP4):
+    `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
+    `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
+    Options are in `scripts/record.ts`.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.

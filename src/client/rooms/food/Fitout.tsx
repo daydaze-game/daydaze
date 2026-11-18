@@ -14,6 +14,7 @@ import {
 import { PropSet } from "../shared/Prop.tsx";
 import { PlatedFood } from "../shared/PlatedFood.tsx";
 import type { FoodPalette } from "./FoodRoom.tsx";
+import { isMesh } from "../../world/guards.ts";
 
 /**
  * The fit-out every food room shares: checker floor, tiled backsplash,
@@ -261,7 +262,7 @@ export function Fitout({ palette }: { palette: FoodPalette }) {
   useEffect(
     () => () => {
       built.group.traverse((o) => {
-        if (o instanceof THREE.Mesh && o.geometry !== BOX) o.geometry.dispose();
+        if (isMesh(o) && o.geometry !== BOX) o.geometry.dispose();
       });
       built.dispose.forEach((d) => d.dispose());
     },

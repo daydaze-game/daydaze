@@ -1,0 +1,79 @@
+name: Record
+# A screen recording (MP4) of any scene or minigame, on demand, from any branch:
+#   gh workflow run record.yml --ref main -f scene="room=karaoke" -f seconds=30
+#   gh workflow run record.yml -f game=trivia -f clicks=Play -f seconds=40
+#   gh run download <run-id> -n recording
+# scene is the URL flags after "?" (docs/dev-tools.md): room=<id>, time=23:00,
+# night=<id>, adult=1, ... game opens a minigame from the dev panel; clicks
+# presses buttons by name once it is up ("Play" starts a round).
+# Headless WebGL is the CPU, so the frame rate is low. Set timescale below 1
+# (0.25) to slow the world down and catch the motion; it plays back in slow motion.
+on:
+  workflow_dispatch:
+    inputs:
+      scene:
+        description: "URL flags after ?, e.g. room=karaoke or room=plaza&time=23:00"
+        default: room=plaza
+        type: string
+      game:
+        description: Minigame id to open (blank for none), e.g. trivia
+        default: ""
+        type: string
+      clicks:
+        description: 'Buttons to press once it is up, comma-separated, e.g. "Play"'
+        default: ""
+        type: string
+      seconds:
+        description: Length of the recording, 1-120
+        default: "20"
+        type: string
+      timescale:
+        description: 0.05-1; below 1 slows the world so the slow renderer catches motion
+        default: "1"
+        type: string
+      quality:
+        description: Render quality tier
+        default: low
+        type: choice
+        options: [low, high]
+      mobile:
+        description: Phone-sized touch viewport
+        default: false
+        type: boolean
+concurrency:
+  group: record-${{ github.ref }}-${{ inputs.scene }}-${{ inputs.game }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  record:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get install -y --no-install-recommends ffmpeg
+      # the inputs go in through env vars and are validated by scripts/record.ts
+      - run: |
+          npx vite --port 5195 --strictPort > /tmp/vite.log 2>&1 &
+          for _ in $(seq 1 60); do curl -sf -o /dev/null http://localhost:5195 && break; sleep 1; done
+          node --experimental-strip-types scripts/record.ts
+        env:
+          SCENE: ${{ inputs.scene }}
+          GAME: ${{ inputs.game }}
+          CLICKS: ${{ inputs.clicks }}
+          SECONDS: ${{ inputs.seconds }}
+          TIMESCALE: ${{ inputs.timescale }}
+          QUALITY: ${{ inputs.quality }}
+          MOBILE: ${{ inputs.mobile }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: recording
+          path: recordings/*.mp4
+          retention-days: 14
+          if-no-files-found: error

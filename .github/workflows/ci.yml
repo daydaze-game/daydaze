@@ -53,6 +53,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Ruff (Python scripts in art/ and scripts/)
+        run: pipx run ruff==0.17.2 check .
       - name: Markdownlint (docs)
         run: npm run lint:md
       - name: Dead code (Knip)

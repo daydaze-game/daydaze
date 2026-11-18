@@ -38,6 +38,9 @@ test("every clip the plans can pick is baked, in the pack they say", () => {
   assert.equal(packOfIdle("idle-phone"), "core");
 });
 
+// every gesture runs 3 s here; the real lengths come from the baked clips
+const GESTURE_SECONDS = () => 3;
+
 test("the hash is deterministic and spreads", () => {
   assert.equal(mix(3, 4), mix(3, 4));
   assert.notEqual(mix(3, 4), mix(4, 3));
@@ -47,11 +50,17 @@ test("the hash is deterministic and spreads", () => {
 });
 
 test("the player starts on her breathing and then rotates idles", () => {
-  assert.equal(idlePlan(0, 0, true, true), "idle-breathing");
-  assert.equal(idlePlan(5, 0, true, false), "idle-breathing");
+  assert.equal(
+    idlePlan(0, 0, true, true, 0, GESTURE_SECONDS),
+    "idle-breathing",
+  );
+  assert.equal(
+    idlePlan(5, 0, true, false, 0, GESTURE_SECONDS),
+    "idle-breathing",
+  );
   const seen = new Set<string>();
   for (let slot = 1; slot < 80; slot++) {
-    const id = idlePlan(0, slot, true, true);
+    const id = idlePlan(0, slot, true, true, 0, GESTURE_SECONDS);
     // she never gestures at nobody: only calm and fidget idles
     assert.ok(CALM_IDLES.includes(id) || FIDGET_IDLES.includes(id), id);
     seen.add(id);
@@ -60,7 +69,10 @@ test("the player starts on her breathing and then rotates idles", () => {
   // she mostly stands easy and fidgets now and then, not always and not never
   let fidgets = 0;
   for (let slot = 1; slot <= 400; slot++)
-    if (FIDGET_IDLES.includes(idlePlan(0, slot, true, true))) fidgets += 1;
+    if (
+      FIDGET_IDLES.includes(idlePlan(0, slot, true, true, 0, GESTURE_SECONDS))
+    )
+      fidgets += 1;
   assert.ok(fidgets > 40 && fidgets < 130, `${fidgets} of 400`);
 });
 
@@ -69,7 +81,10 @@ test("a sober doll never plays the busy loops that read as wired", () => {
   for (let seed = 0; seed < 50; seed++)
     for (let slot = 0; slot < 60; slot++)
       for (const own of [true, false])
-        assert.equal(wired.includes(idlePlan(seed, slot, own, true)), false);
+        assert.equal(
+          wired.includes(idlePlan(seed, slot, own, true, 0, GESTURE_SECONDS)),
+          false,
+        );
 });
 
 test("temperaments differ across a crowd and decide how a stranger stands", () => {
@@ -90,7 +105,8 @@ test("temperaments differ across a crowd and decide how a stranger stands", () =
     const seed = pick(t);
     let n = 0;
     for (let slot = 0; slot < 500; slot++)
-      if (pool.includes(idlePlan(seed, slot, false, true))) n += 1;
+      if (pool.includes(idlePlan(seed, slot, false, true, 0, GESTURE_SECONDS)))
+        n += 1;
     return n / 500;
   };
   assert.ok(share("calm", CALM_IDLES) > 0.55);
@@ -101,9 +117,35 @@ test("temperaments differ across a crowd and decide how a stranger stands", () =
   const chatty = pick("chatty");
   for (let slot = 0; slot < 100; slot++)
     assert.equal(
-      GESTURE_IDLES.includes(idlePlan(chatty, slot, false, false)),
+      GESTURE_IDLES.includes(
+        idlePlan(chatty, slot, false, false, 0, GESTURE_SECONDS),
+      ),
       false,
     );
+});
+
+test("a chatty stranger gestures once, then settles into a calm idle", () => {
+  const seed =
+    Array.from({ length: 1000 }, (_, i) => i).find(
+      (n) => temperamentOf(n) === "chatty",
+    ) ?? -1;
+  let gestured = 0;
+  for (let slot = 0; slot < 200; slot++) {
+    const first = idlePlan(seed, slot, false, true, 0, GESTURE_SECONDS);
+    // past the gesture's length the same slot never repeats it
+    const later = idlePlan(seed, slot, false, true, 3, GESTURE_SECONDS);
+    assert.equal(GESTURE_IDLES.includes(later), false, later);
+    if (GESTURE_IDLES.includes(first)) {
+      gestured += 1;
+      assert.ok(CALM_IDLES.includes(later), later);
+      // just inside the clip's length it is still playing
+      assert.equal(
+        idlePlan(seed, slot, false, true, 2.9, GESTURE_SECONDS),
+        first,
+      );
+    } else assert.equal(later, first);
+  }
+  assert.ok(gestured > 40, `${gestured} of 200 slots`);
 });
 
 test("idle slots count whole holds, never negative", () => {

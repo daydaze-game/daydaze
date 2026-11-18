@@ -151,6 +151,27 @@ test("dressing room isolates the character and saves unrestricted colors", async
       }),
     )
     .toEqual(["#7ee8a2", "#c9a227", "#cc1234", "#12ab34", "#aa5678"]);
+  const outfitImages = page
+    .getByRole("radiogroup", { name: "Outfit", exact: true })
+    .locator("img:not([hidden])");
+  await expect(outfitImages).not.toHaveCount(0);
+  await expect
+    .poll(() =>
+      outfitImages.evaluateAll(
+        (items) =>
+          items.length >= 6 &&
+          items
+            .slice(0, 6)
+            .every(
+              (item) =>
+                item instanceof HTMLImageElement &&
+                item.complete &&
+                item.naturalWidth > 0 &&
+                !item.hidden,
+            ),
+      ),
+    )
+    .toBe(true);
   await page.screenshot({ path: "test-results/dressing-studio-desktop.png" });
   await page.reload();
   await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
@@ -165,11 +186,140 @@ test("dressing room isolates the character and saves unrestricted colors", async
   ).toHaveValue("#7ee8a2");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready");
+  const hairImages = page
+    .getByRole("radiogroup", { name: "Hair style", exact: true })
+    .locator("img:not([hidden])");
+  await expect(hairImages).not.toHaveCount(0);
+  await expect
+    .poll(() =>
+      hairImages.evaluateAll(
+        (items) =>
+          items.length >= 4 &&
+          items
+            .slice(0, 4)
+            .every(
+              (item) =>
+                item instanceof HTMLImageElement &&
+                item.complete &&
+                item.naturalWidth > 0 &&
+                !item.hidden,
+            ),
+      ),
+    )
+    .toBe(true);
   await page.screenshot({ path: "test-results/dressing-studio-phone.png" });
   await page
     .getByRole("button", { name: "Close dressing room", exact: true })
     .click();
   await expect(canvasOf(page)).not.toHaveAttribute("data-studio");
+  expect(errors).toEqual([]);
+});
+
+test("expanded face shapes show previews and persist with custom colors", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  const errors = collectErrors(page);
+  await page.goto(VELVET);
+  await page
+    .getByRole("button", { name: "Dressing room", exact: true })
+    .click();
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
+    timeout: 150_000,
+  });
+  const eyes = page.getByRole("radiogroup", { name: "Eye shape", exact: true });
+  const lips = page.getByRole("radiogroup", { name: "Lip shape", exact: true });
+  for (const group of [eyes, lips]) {
+    await group.scrollIntoViewIfNeeded();
+    // New choices must show actual previews, rather than hidden broken images.
+    const images = group.locator("img");
+    await expect
+      .poll(() =>
+        images.evaluateAll((items) =>
+          items.every(
+            (item) =>
+              item instanceof HTMLImageElement &&
+              item.complete &&
+              item.naturalWidth > 0 &&
+              !item.hidden,
+          ),
+        ),
+      )
+      .toBe(true);
+    // Wide native feature previews must keep both outer eye corners visible.
+    await expect
+      .poll(() =>
+        images.evaluateAll((items) =>
+          items.every((item) => {
+            const bounds = item.getBoundingClientRect();
+            return Math.abs(bounds.width / bounds.height - 1.6) < 0.02;
+          }),
+        ),
+      )
+      .toBe(true);
+  }
+  await eyes
+    .getByRole("radio", { name: "Soft almond", exact: true })
+    .press("Enter");
+  await lips
+    .getByRole("radio", { name: "Fuller lower lip", exact: true })
+    .press("Space");
+  await page
+    .getByRole("textbox", { name: "Eye color hex", exact: true })
+    .fill("#12ab34");
+  await page
+    .getByRole("slider", { name: "Nose length", exact: true })
+    .press("End");
+  await page.getByRole("tab", { name: "Makeup", exact: true }).click();
+  const brows = page.getByRole("radiogroup", { name: "Brows", exact: true });
+  await expect(brows.getByRole("radio")).toHaveCount(10);
+  await brows
+    .getByRole("radio", { name: "High arch", exact: true })
+    .press("Enter");
+  await expect(
+    brows.getByRole("radio", { name: "High arch", exact: true }),
+  ).toHaveAttribute("aria-checked", "true");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const look = JSON.parse(
+          localStorage.getItem("daydaze-save-v1") ?? "{}",
+        ).look;
+        return [
+          look?.brows,
+          look?.face?.slice(8, 12),
+          look?.face?.split("|")[1],
+        ];
+      }),
+    )
+    .toEqual(["brows-high-arch", "8080", "#12ab34"]);
+  await page.reload();
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
+    timeout: 150_000,
+  });
+  await expect(
+    eyes.getByRole("radio", { name: "Soft almond", exact: true }),
+  ).toHaveAttribute("aria-checked", "true");
+  await expect(
+    lips.getByRole("radio", { name: "Fuller lower lip", exact: true }),
+  ).toHaveAttribute("aria-checked", "true");
+  await expect(
+    page.getByRole("slider", { name: "Nose length", exact: true }),
+  ).toHaveValue("1");
+  await expect(
+    page.getByRole("textbox", { name: "Eye color hex", exact: true }),
+  ).toHaveValue("#12ab34");
+  await expect(canvasOf(page)).toHaveAttribute("data-frames", "10", {
+    timeout: 150_000,
+  });
+  await expect(page.locator(".loading-veil")).toBeHidden({ timeout: 150_000 });
+  await page.screenshot({ path: "test-results/expanded-face-desktop.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("tab", { name: "Makeup", exact: true }).click();
+  await expect(
+    brows.getByRole("radio", { name: "High arch", exact: true }),
+  ).toHaveAttribute("aria-checked", "true");
+  await page.screenshot({ path: "test-results/expanded-face-phone.png" });
   expect(errors).toEqual([]);
 });
 

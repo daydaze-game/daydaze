@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { bakedGeometry } from "../../world/bakedGeometry.ts";
 import { tintHsl } from "../../../game/home/palette.ts";
+import { isMesh } from "../../world/guards.ts";
 
 // Generated props (Meshy) live in public/models/props/<model>.glb, one mesh
 // each. Wrap users in Suspense, with the old placeholder as the fallback.
@@ -28,7 +29,7 @@ export function useFittedParts(
     }[] = [];
     scene.updateMatrixWorld(true);
     scene.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
+      if (!isMesh(o)) return;
       const material = Array.isArray(o.material) ? o.material[0] : o.material;
       if (!material) return;
       const geometry = bakedGeometry(o);

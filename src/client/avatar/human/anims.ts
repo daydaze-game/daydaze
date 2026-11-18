@@ -12,6 +12,7 @@ import * as THREE from "three";
 import { GLTFLoader, MeshoptDecoder } from "three-stdlib";
 import type { MocapPack } from "../../../game/dance/mocapTypes.ts";
 import type { Rig } from "../pose.ts";
+import { isBone } from "../../world/guards.ts";
 
 /** Bone names as three.js reads them from the doll's GLB (glTF node names
  * lose their "mixamorig:" colon to PropertyBinding.sanitizeNodeName). */
@@ -181,7 +182,7 @@ export class BuiltPose {
     const order: THREE.Bone[] = [];
     const hips = bones.get(BONE.hips) ?? null;
     hips?.traverse((o) => {
-      if (o instanceof THREE.Bone && driverOf(o.name)) order.push(o);
+      if (isBone(o) && driverOf(o.name)) order.push(o);
     });
     for (const b of order) {
       const d = driverOf(b.name);

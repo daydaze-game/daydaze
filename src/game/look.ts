@@ -160,6 +160,12 @@ export const BROWS = [
   { id: "brows-fox-snatched", label: "Fox" },
   { id: "brows-sculpted-espresso", label: "Sculpted" },
   { id: "brows-feathered-honey", label: "Feathered" },
+  { id: "brows-natural-straight", label: "Natural straight" },
+  { id: "brows-soft-arch", label: "Soft arch" },
+  { id: "brows-full-straight", label: "Full straight" },
+  { id: "brows-rounded", label: "Rounded" },
+  { id: "brows-high-arch", label: "High arch" },
+  { id: "brows-angled", label: "Angled" },
 ] as const;
 
 /** Each outfit is its own doll model, `outfit-<id>.glb`. */
@@ -341,6 +347,9 @@ export const EYE_SHAPES = [
   { id: "downturned", label: "Downturned" },
   // a smooth lid with no crease (HumanDoll maps it onto the hooded key)
   { id: "monolid", label: "Monolid" },
+  { id: "narrow", label: "Narrow" },
+  { id: "open", label: "Open" },
+  { id: "soft-almond", label: "Soft almond" },
 ] as const;
 /** Nose presets; see EYE_SHAPES. */
 export const NOSES = [
@@ -357,6 +366,10 @@ export const LIP_SHAPES = [
   { id: "thin", label: "Thin" },
   { id: "heart", label: "Heart" },
   { id: "wide", label: "Wide" },
+  { id: "rounded", label: "Rounded" },
+  { id: "cupid", label: "Defined Cupid’s bow" },
+  { id: "top-full", label: "Fuller upper lip" },
+  { id: "bottom-full", label: "Fuller lower lip" },
 ] as const;
 /** Face shape presets; see EYE_SHAPES. */
 export const FACE_SHAPES = [

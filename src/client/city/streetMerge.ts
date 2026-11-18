@@ -11,6 +11,7 @@ import {
   type StreetPiece,
 } from "../../game/city/streetPieces.ts";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
+import { isMesh } from "../world/guards.ts";
 
 /** One kit piece, float attributes with its node transform baked in. */
 export type PieceModel = {
@@ -47,7 +48,7 @@ export function pieceModels(
   scene.updateMatrixWorld(true);
   const models = new Map<StreetKind, PieceModel>();
   scene.traverse((o) => {
-    if (!(o instanceof THREE.Mesh) || !isKind(o.name)) return;
+    if (!isMesh(o) || !isKind(o.name)) return;
     const geometry = bakedGeometry(o);
     const position = geometry.getAttribute("position");
     const normal = geometry.getAttribute("normal");
