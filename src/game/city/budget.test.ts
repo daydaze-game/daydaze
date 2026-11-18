@@ -7,7 +7,6 @@ import { test } from "node:test";
 import { CHAT_GROUPS, nearestChatGroups } from "./chatGroups.ts";
 import { CHAT_DOLLS, CHAT_RADIUS } from "./tuning.ts";
 import { CITY_SPAWN } from "./layout.ts";
-import { HOUSE_MODELS, HOUSE_MODEL_TRIANGLES } from "./nyc.ts";
 import { DREAM_KINDS, DREAM_LANDMARKS, type DreamSpot } from "./dream.ts";
 import { DREAM_LANDMARK_COST } from "./dreamLandmarkCosts.generated.ts";
 import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
@@ -82,12 +81,6 @@ test("every dream family and its distant twin match generated costs and one draw
     }
 });
 
-test("each house model's triangle count matches the shipped GLB", () => {
-  HOUSE_MODELS.forEach((path, i) =>
-    assert.equal(HOUSE_MODEL_TRIANGLES[i], glbCost(path).tris, path),
-  );
-});
-
 test("the seasonal models' costs match the shipped GLBs", () => {
   for (const [path, cost] of Object.entries(SEASON_MODEL))
     assert.deepEqual(cost, glbCost(path), path);
@@ -129,19 +122,13 @@ test("pulled out to the overview, the low tier draws distant architecture and ya
       if (cost.triangles > worst.tris) worst = { tris: cost.triangles, at };
     }
   assert.ok(worst.tris < 300_000, `${worst.tris} triangles at ${worst.at}`);
-  // Sculpted architecture remains present in the overview without legacy bays.
-  const at = CITY_SPAWN.position;
-  assert.ok(
-    lowTierCost(at, false).planTriangles > 0 &&
-      lowTierCost(at, false).bays === 0,
-  );
+  // Sculpted architecture remains present in the overview.
+  assert.ok(lowTierCost(CITY_SPAWN.position, false).planTriangles > 0);
 });
 
 test("the low tier's cost counts its dream architecture", () => {
   const at = CITY_SPAWN.position;
   const cost = lowTierCost(at);
-  assert.equal(cost.bays, 0);
-  assert.equal(cost.lots, 0);
   assert.ok(cost.parts.dream > 0);
   assert.ok(cost.triangles > cost.planTriangles);
 });

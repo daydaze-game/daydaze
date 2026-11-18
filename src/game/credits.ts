@@ -503,39 +503,7 @@ export const CREDITS: readonly {
         license: "CC0 1.0",
         url: "https://quaternius.com/packs/downtowncitymegakit.html",
         usedFor:
-          "New York walk-up, prewar and loft facades (storefronts, windows, cornices, doors, stoops) merged and thinned into storey-high bays for Downtown, Uptown and the Arts District; the street decals (crosswalks, STOP and SLOW words, double yellow lines on its weathered paint atlas), sidewalk corner blocks, manholes, storm drains and bollards merged into the city's street dressing; other textures replaced by the city's own.",
-      },
-      {
-        title: "Modular Fire Escape",
-        author: "Poly Haven",
-        license: "CC0 1.0",
-        url: "https://polyhaven.com/a/modular_fire_escape",
-        usedFor:
-          "Fire escapes on New York walk-ups: the landing and railing, thinned and painted iron black.",
-      },
-      {
-        title: "City Kit Suburban",
-        author: "Kenney",
-        license: "CC0 1.0",
-        url: "https://kenney.nl/assets/city-kit-suburban",
-        usedFor:
-          "Suburbia's houses near the player, optimized with a small colormap.",
-      },
-      {
-        title: "Ultimate Textured Building Pack",
-        author: "Quaternius",
-        license: "CC0 1.0",
-        url: "https://quaternius.com/packs/ultimatetexturedbuilding.html",
-        usedFor:
-          "Beachside's beach cottages and two Suburbia houses (Palm Court's motels are built from boxes: no motel model exists), kept at the pack's own triangle count. Also the lots of Little Manila, Chinatown, Koreatown, the Arts District and Uptown: eleven buildings thinned, recolored per district and tiled along the blocks.",
-      },
-      {
-        title: "Buildings Pack (Aug 2017)",
-        author: "Quaternius",
-        license: "CC0 1.0",
-        url: "https://quaternius.com/packs/buildings.html",
-        usedFor:
-          "Beachside's wide cottage and four more Suburbia houses, kept at the pack's own triangle count.",
+          "The street decals (crosswalks, STOP and SLOW words, double yellow lines on its weathered paint atlas), sidewalk corner blocks, manholes, storm drains and bollards merged into the city's street dressing; other textures replaced by the city's own.",
       },
       {
         title: "Train Pack",

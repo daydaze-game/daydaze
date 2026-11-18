@@ -3,7 +3,6 @@
 // are loaded. Pure: the client writes these instances into its meshes.
 import type { Vec2 } from "../walk.ts";
 import { YARD_GROUND, YARD_TREES } from "./yards.ts";
-import { FAR_BOX_TRIANGLES, type FarBox } from "./far.ts";
 import { VIEW_RADIUS } from "./tuning.ts";
 import { cellAt, type Cell } from "./cells.ts";
 import {
@@ -14,14 +13,7 @@ import {
   type PropKind,
   type Surface,
 } from "./layout.ts";
-import {
-  BAY_TRIANGLES,
-  HOUSE_MODEL_TRIANGLES,
-  type HouseSpot,
-  type BayInstance,
-} from "./nyc.ts";
 import { facingOf, labelUv, FURNITURE, STREET_DRESS } from "./dressing.ts";
-import { LOT_SPECS, type PlacedLot } from "./districts.ts";
 import { dreamBuilding, type DreamSpot } from "./dream.ts";
 import { dreamTriangles, dreamDrawCalls } from "./dreamCosts.ts";
 import { LAMP_RANGE, type FurnitureSpot } from "./furniture.ts";
@@ -134,16 +126,8 @@ export type CityPlan = {
   trees: TreeSpot[];
   /** Street furniture models (lamps, hydrants, benches, ...), drawn by CityFurniture. */
   furniture: FurnitureSpot[];
-  /** Legacy bays; empty while dream architecture supplies the facades. */
-  bays: BayInstance[];
-  /** Legacy district lots; retained for callers, empty in active plans. */
-  lots: PlacedLot[];
-  /** Legacy house models; replaced by dream modules in active plans. */
-  houses: HouseSpot[];
   /** Crosswalks, corner blocks, center lines and street props (StreetPieces.tsx). */
   street: StreetPiece[];
-  /** Legacy skyline boxes; dream's distant twins replace these. */
-  far: FarBox[];
 };
 
 /** How far off the infill buildings draw, by tier: they fill the blocks, so the
@@ -604,10 +588,6 @@ export function planCity(
   laneDashes(cells, instances.lane);
   streetMarks(cells, instances);
 
-  const bays: BayInstance[] = [];
-  const lots: PlacedLot[] = [];
-  const houses: HouseSpot[] = [];
-  const far: FarBox[] = [];
   const dream: DreamSpot[] = [];
   for (const b of BUILDINGS) {
     const box = boundsOf(b.footprint);
@@ -662,11 +642,7 @@ export function planCity(
     lights: lights.slice(0, Math.max(0, lightCount)),
     trees,
     furniture,
-    bays,
-    lots,
-    houses,
     street: streetPieces(cells),
-    far,
   };
 }
 
@@ -677,18 +653,7 @@ export function trianglesOf(plan: CityPlan): number {
       (sum, kind) => sum + plan.instances[kind].length * TRIANGLES[kind],
       0,
     ) +
-    plan.bays.reduce((sum, bay) => sum + BAY_TRIANGLES[bay.kind], 0) +
-    plan.lots.reduce(
-      (sum, lot) =>
-        sum + (lot.far ? LOT_SPECS[lot.model].lo : LOT_SPECS[lot.model].tris),
-      0,
-    ) +
-    plan.houses.reduce(
-      (sum, h) => sum + (HOUSE_MODEL_TRIANGLES[h.variant] ?? 0),
-      0,
-    ) +
     plan.street.reduce((sum, p) => sum + STREET_TRIANGLES[p.kind], 0) +
-    plan.far.length * FAR_BOX_TRIANGLES +
     plan.dream.reduce((sum, spot) => sum + dreamTriangles(spot), 0)
   );
 }
@@ -698,10 +663,6 @@ export function drawCallsOf(plan: CityPlan): number {
   return (
     KINDS.filter((kind) => plan.instances[kind].length > 0).length +
     (plan.street.length > 0 ? STREET_DRAW_CALLS : 0) +
-    new Set(plan.bays.map((bay) => bay.kind)).size +
-    new Set(plan.lots.map((lot) => `${lot.model}${lot.far}`)).size +
-    // the far city's buildings
-    (plan.far.length > 0 ? 1 : 0) +
     dreamDrawCalls(plan.dream)
   );
 }
