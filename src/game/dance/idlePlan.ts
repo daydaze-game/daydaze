@@ -112,12 +112,16 @@ export function packOfIdle(id: string): MocapPack {
  * stand, for the player; from the clock, for an NPC). The player starts on
  * her breathing and fidgets about one slot in five after; an NPC follows her
  * temperament. `gestures` says whether the social pack has loaded: until it
- * has, a chatty NPC fidgets instead. */
+ * has, a chatty NPC fidgets instead. A gesture (a yawn, a shrug) is one
+ * beat, so it plays once, `into` seconds from the slot's start, and then she
+ * settles into a calm idle; `ready(id)` gives a clip's length in seconds. */
 export function idlePlan(
   seed: number,
   slot: number,
   own: boolean,
   gestures: boolean,
+  into: number,
+  ready: (id: string) => number,
 ): string {
   const h = mix(seed, slot);
   if (own) {
@@ -129,7 +133,11 @@ export function idlePlan(
   if (roll < calm) return pickFrom(CALM_IDLES, h);
   if (roll < calm + fidget) return pickFrom(FIDGET_IDLES, h);
   if (roll < calm + fidget + phone) return pickFrom(PHONE_IDLES, h);
-  return gestures ? pickFrom(GESTURE_IDLES, h) : pickFrom(FIDGET_IDLES, h);
+  if (!gestures) return pickFrom(FIDGET_IDLES, h);
+  const gesture = pickFrom(GESTURE_IDLES, h);
+  return into < ready(gesture)
+    ? gesture
+    : pickFrom(CALM_IDLES, mix(seed, slot + 409));
 }
 
 /** The clip she plays `into` seconds of idle `slot` while a substance shows
