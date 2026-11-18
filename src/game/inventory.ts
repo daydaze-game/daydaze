@@ -48,7 +48,7 @@ export const totalOf = (inv: Readonly<Inventory>): number =>
 export function cleanInventory(raw: unknown): Inventory {
   const out: Inventory = {};
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return out;
-  const stored = new Map(Object.entries(raw));
+  const stored = new Map<string, unknown>(Object.entries(raw));
   let room = MAX_TOTAL;
   for (const { id } of ITEMS) {
     const n = stored.get(id);
