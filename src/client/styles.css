@@ -3065,12 +3065,11 @@ button:focus-visible {
   width: auto;
 }
 
-/* The weed pouch rides low on the left, so a shop panel (top right) never covers it. */
+/* The weed pouch sits at the upper left, mirroring the shop panels on the right
+ * (the dock fills the bottom, so a low spot gets covered). */
 .pouch-panel {
   right: auto;
-  left: 1rem;
-  top: auto;
-  bottom: 5rem;
+  left: 16px;
 }
 
 /* Street counters stay legible over the city, with accessible menu controls. */
