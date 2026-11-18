@@ -820,7 +820,7 @@ export function World({
           <Confetti />
           {!dressing &&
             (tier === "high" ? (
-              <Effects />
+              <Effects room={room} />
             ) : (
               <NeonClamp key={`clamp-${room}`} />
             ))}
