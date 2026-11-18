@@ -248,6 +248,7 @@ deepseek
 defaultnormal
 demersus
 demi
+demuxer
 dequantization
 detuned
 diavola
@@ -293,6 +294,7 @@ ethusiastic
 eyetile
 fagg
 fantage
+faststart
 fattoush
 feely
 fergie
@@ -513,6 +515,7 @@ leron
 lerp
 lerps
 libopus
+libx
 licence
 liempo
 lightformer
@@ -612,6 +615,7 @@ montrose
 montuno
 moorishidol
 morada
+movflags
 mpfb
 mpfb's
 msaa
