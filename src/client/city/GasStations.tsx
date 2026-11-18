@@ -16,6 +16,7 @@ import { Batch } from "../rooms/shared/batch.ts";
 import { canvasTex, hdr } from "../rooms/shared/materials.ts";
 import type { Player } from "../world/PlayerController.tsx";
 import { surface } from "./worldTexture.ts";
+import { isMesh } from "../world/guards.ts";
 
 /** Stations past this distance aren't drawn. */
 const DRAW_DISTANCE = 180;
@@ -214,7 +215,7 @@ export function GasStations({ player }: { player: Player }) {
         b.sign.dispose();
         for (const m of b.materials) m.dispose();
         b.group.traverse((o) => {
-          if (o instanceof THREE.Mesh) o.geometry.dispose();
+          if (isMesh(o)) o.geometry.dispose();
         });
       }
     },

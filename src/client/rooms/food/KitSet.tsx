@@ -2,6 +2,7 @@
 import { useGLTF } from "@react-three/drei";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { isMesh } from "../../world/guards.ts";
 
 type Placement = readonly [number, number, number, number];
 
@@ -53,7 +54,7 @@ export function KitSet({
     scene.updateMatrixWorld(true);
     const meshes: THREE.Mesh[] = [];
     scene.traverse((object) => {
-      if (object instanceof THREE.Mesh) meshes.push(object);
+      if (isMesh(object)) meshes.push(object);
     });
     if (!meshes.length) throw new Error(`${model} has no meshes`);
     const geometries = meshes.map((mesh) =>

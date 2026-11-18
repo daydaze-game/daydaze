@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { BODY_BUCKETS, type BodyBucket } from "../../game/driving/bodies.ts";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
+import { isMesh } from "../world/guards.ts";
 
 /** A body's geometry by bucket; a bucket is missing when the body has none. */
 export type BodyGeometry = Partial<Record<BodyBucket, THREE.BufferGeometry>>;
@@ -48,7 +49,7 @@ export function bodyGeometry(scene: THREE.Object3D): BodyGeometry {
   scene.updateMatrixWorld(true);
   const out: BodyGeometry = {};
   scene.traverse((o) => {
-    if (!(o instanceof THREE.Mesh)) return;
+    if (!isMesh(o)) return;
     const bucket = bucketOf(o);
     if (!bucket) return;
     const g = bakedGeometry(o);

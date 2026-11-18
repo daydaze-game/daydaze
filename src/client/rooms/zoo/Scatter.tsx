@@ -9,6 +9,7 @@ import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Spot } from "../../../game/zoo.ts";
 import { disposeInstanced } from "../../city/dispose.ts";
 import { bakedGeometry } from "../../world/bakedGeometry.ts";
+import { isMesh } from "../../world/guards.ts";
 
 export function Scatter({
   url,
@@ -39,7 +40,7 @@ export function Scatter({
     const s = new THREE.Vector3();
     const out: THREE.InstancedMesh[] = [];
     gltf.scene.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
+      if (!isMesh(o)) return;
       // bakedGeometry: the optimized GLBs store quantized integers, which a baked
       // transform would truncate or clamp (squashed trees, black normals)
       let geometry = bakedGeometry(o);
