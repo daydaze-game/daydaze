@@ -1,13 +1,17 @@
-// Body-shape sliders in the closet. Every trait is a whole 0 to 100 slider
-// and maps to a small, clothed-doll scale: nothing leaves the doll's outline.
+// Body-shape sliders in the closet. Weight and muscle drive fitted morphs;
+// the other traits adjust proportions. All saved values are whole 0 to 100.
+import type { Figure } from "./look.ts";
 
-export const BODY_TRAITS = ["bust", "hips", "waist", "height"] as const;
+export const BODY_SCALE_TRAITS = ["bust", "hips", "waist", "height"] as const;
+export const BODY_TRAITS = ["weight", "muscle", ...BODY_SCALE_TRAITS] as const;
 
 export type BodyTrait = (typeof BODY_TRAITS)[number];
 
 export type BodyShape = Record<BodyTrait, number>;
 
 export const BODY_LABELS: Record<BodyTrait, string> = {
+  weight: "Weight",
+  muscle: "Muscle definition",
   bust: "Bust",
   hips: "Hips and butt",
   waist: "Waist",
@@ -15,7 +19,8 @@ export const BODY_LABELS: Record<BodyTrait, string> = {
 };
 
 // The scale at slider 0 and slider 100. Waist 0 is the slimmest.
-const SCALE_RANGE: Record<BodyTrait, readonly [number, number]> = {
+type ScaleTrait = (typeof BODY_SCALE_TRAITS)[number];
+const SCALE_RANGE: Record<ScaleTrait, readonly [number, number]> = {
   bust: [0.94, 1.06],
   hips: [0.92, 1.08],
   waist: [0.9, 1.1],
@@ -25,6 +30,8 @@ const SCALE_RANGE: Record<BodyTrait, readonly [number, number]> = {
 const MIDDLE = 50;
 
 export const DEFAULT_BODY: BodyShape = {
+  weight: MIDDLE,
+  muscle: 0,
   bust: MIDDLE,
   hips: MIDDLE,
   waist: MIDDLE,
@@ -59,10 +66,30 @@ export function cleanBody(value: unknown): BodyShape {
 
 /** The multiplier each part of the doll is drawn at. */
 export function bodyScales(body: BodyShape): Record<BodyTrait, number> {
-  const scales = {} as Record<BodyTrait, number>;
-  for (const trait of BODY_TRAITS) {
+  const scale = (trait: ScaleTrait) => {
     const [low, high] = SCALE_RANGE[trait];
-    scales[trait] = low + ((high - low) * body[trait]) / 100;
-  }
-  return scales;
+    return low + ((high - low) * body[trait]) / 100;
+  };
+  return {
+    weight: 1,
+    muscle: 1,
+    bust: scale("bust"),
+    hips: scale("hips"),
+    waist: scale("waist"),
+    height: scale("height"),
+  };
+}
+
+/** Shared morph influences for skin, hair, and fitted clothes. Weight blends
+ * from the selected preset toward slim/full endpoints without stacking two
+ * full-weight silhouettes. Muscle can be added to any weight. */
+export function figureMorphs(body: BodyShape, figure: Figure) {
+  const weight = (body.weight - MIDDLE) / MIDDLE;
+  const preset = 1 - Math.abs(weight);
+  return {
+    curvy: figure === "curvy" ? preset : 0,
+    slim: (figure === "slim" ? preset : 0) + Math.max(0, -weight),
+    athletic: Math.max(figure === "athletic" ? preset : 0, body.muscle / 100),
+    plus: (figure === "plus" ? preset : 0) + Math.max(0, weight),
+  };
 }

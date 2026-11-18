@@ -50,14 +50,73 @@ import {
   validateSwim,
 } from "./look.ts";
 
+test("custom colors survive look, face, makeup and swim validation", () => {
+  const face = { ...DEFAULT_FACE, eyeColor: "#123abc" };
+  assert.deepEqual(decodeFace(encodeFace(face)), face);
+  const makeup = { ...DEFAULT_MAKEUP, blush: "#45abcd", highlight: "#123456" };
+  assert.deepEqual(decodeMakeup(encodeMakeup(makeup)), makeup);
+  assert.equal(
+    validateLook({
+      ...DEFAULT_LOOK,
+      hairColor: "#123abc",
+      outfitColor: "#012345",
+      lips: "#000000",
+      shadow: "#ffffff",
+      face: encodeFace(face),
+      makeup: encodeMakeup(makeup),
+    }),
+    true,
+  );
+  assert.equal(validateSwim({ ...DEFAULT_SWIM, color: "#a1b2c3" }), true);
+});
+
+test("individual nose, mouth and chin adjustments round-trip with custom eyes", () => {
+  const face = {
+    ...DEFAULT_FACE,
+    noseLength: 0.7,
+    noseBridge: -0.4,
+    noseTip: 0.3,
+    mouthWidth: -0.8,
+    chinHeight: 0.2,
+    chinDepth: -0.6,
+    eyeColor: "#123abc",
+  };
+  const code = encodeFace(face);
+  assert.deepEqual(decodeFace(code), face);
+  assert.ok(code.length <= 32, "fits the multiplayer field limit");
+  assert.equal(decodeFace(`${encodeFace(DEFAULT_FACE)}~abc`), null);
+  assert.equal(decodeFace(`${encodeFace(DEFAULT_FACE)}~abcdef~abcdef`), null);
+});
+
+test("custom colors reject malformed values and leave skin catalog controlled", () => {
+  for (const color of [
+    "red",
+    "#abc",
+    "#1234567",
+    "url(bad)",
+    "#12345z",
+    "#123456\n",
+  ]) {
+    for (const field of ["hairColor", "outfitColor", "lips", "shadow"]) {
+      assert.equal(validateLook({ ...DEFAULT_LOOK, [field]: color }), false);
+    }
+    assert.equal(validateSwim({ ...DEFAULT_SWIM, color }), false);
+  }
+  assert.equal(validateLook({ ...DEFAULT_LOOK, skin: "#123abc" }), false);
+  assert.equal(decodeFace(`${encodeFace(DEFAULT_FACE)}|red`), null);
+  assert.equal(decodeMakeup(`${encodeMakeup(DEFAULT_MAKEUP)}|red|`), null);
+});
+
 test("the default look and every NPC look use catalog ids", () => {
   assert.equal(validateLook(DEFAULT_LOOK), true);
   for (const npc of NPC_LOOKS) assert.equal(validateLook(npc.look), true);
 });
 
-test("the default look keeps the prototype's lavender shadow and thin brows", () => {
-  assert.equal(DEFAULT_LOOK.shadow, "#d23cff");
-  assert.equal(DEFAULT_LOOK.brows, "brows-y2k-thin");
+test("new characters start with a natural face ready for optional makeup", () => {
+  assert.equal(DEFAULT_LOOK.lips, "lips-bare-balm");
+  assert.equal(DEFAULT_LOOK.hairStyle, "long-waves");
+  assert.equal(makeupOf(DEFAULT_LOOK).shadowStyle, "none");
+  assert.equal(makeupOf(DEFAULT_LOOK).liner, "none");
 });
 
 test("catalogs have unique ids and the outfits from the spec", () => {
@@ -108,11 +167,8 @@ test("validateLook rejects missing, extra and off-catalog fields", () => {
   assert.equal(validateLook({ ...DEFAULT_LOOK, skin: "#000000" }), false);
   assert.equal(validateLook({ ...DEFAULT_LOOK, hairStyle: "mullet" }), false);
   assert.equal(validateLook({ ...DEFAULT_LOOK, outfitColor: 7 }), false);
-  // Mixing catalogs: a hair color is not an outfit color.
-  assert.equal(
-    validateLook({ ...DEFAULT_LOOK, outfitColor: "#1b1014" }),
-    false,
-  );
+  // Colors are shared across the wardrobe.
+  assert.equal(validateLook({ ...DEFAULT_LOOK, outfitColor: "#1b1014" }), true);
 });
 
 test("validateLook ignores inherited fields", () => {
@@ -214,7 +270,7 @@ test("makeup codes round-trip and old looks wear the default", () => {
     validateLook({ ...DEFAULT_LOOK, makeup: encodeMakeup(m) }),
     true,
   );
-  assert.deepEqual(makeupOf(DEFAULT_LOOK), DEFAULT_MAKEUP);
+  assert.deepEqual(makeupOf({}), DEFAULT_MAKEUP);
   for (const bad of ["", "99999", "9999999", "abcdef", 5, null])
     assert.equal(validateLook({ ...DEFAULT_LOOK, makeup: bad }), false);
 });
@@ -291,7 +347,17 @@ test("face presets ride in the code; 8-character codes still decode", () => {
     faceShape: "diamond" as const,
   };
   assert.deepEqual(decodeFace(encodeFace(face)), face);
-  assert.deepEqual(decodeFace("kkkkkk00"), DEFAULT_FACE);
+  // An explicit old face code preserves its original proportions even when
+  // the starting face changes; saved players must not be restyled on reload.
+  assert.deepEqual(decodeFace("kkkkkk00"), {
+    ...DEFAULT_FACE,
+    eyeSize: 0,
+    eyeTilt: 0,
+    nose: 0,
+    lips: 0,
+    cheeks: 0,
+    jaw: 0,
+  });
 });
 
 test("piercings round-trip and old looks have none", () => {
@@ -425,4 +491,20 @@ test("prostheses ride in one more look field, within the wire limit", () => {
     limbs: code,
   };
   assert.ok(Object.keys(full).length <= 24, `${Object.keys(full).length} keys`);
+});
+
+// A bare face must survive saving without reassigning existing shadow styles.
+test("no eyeshadow round-trips without changing saved glam makeup", () => {
+  const bare = { ...DEFAULT_MAKEUP, shadowStyle: "none" as const };
+  const code = encodeMakeup(bare);
+  assert.equal(decodeMakeup(code)?.shadowStyle, "none");
+  assert.equal(validateLook({ ...DEFAULT_LOOK, makeup: code }), true);
+  for (const [index, style] of [
+    "wash",
+    "cut-crease",
+    "smoky",
+    "halo",
+  ].entries()) {
+    assert.equal(decodeMakeup(`22101${index}`)?.shadowStyle, style);
+  }
 });

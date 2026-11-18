@@ -9,8 +9,6 @@ import { ROAD_EDGES, ROAD_NODES } from "./layout.ts";
 export const TAXI_BASE_FARE = 6;
 export const TAXI_STRETCH = 60;
 export const TAXI_MAX_FARE = 30;
-/** Meters per second on the way to the fare and with the fare aboard. */
-export const TAXI_SPEED = 17;
 
 /** Coins for a trip of `meters`. */
 export function fareFor(meters: number): number {

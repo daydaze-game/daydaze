@@ -1,7 +1,7 @@
 // The Velvet Room's materials. Module-level so every piece that uses one
 // batches into a single mesh.
 import * as THREE from "three";
-import { hdr, neonMat } from "../shared/materials.ts";
+import { neonMat } from "../shared/materials.ts";
 
 // Module-level so every piece that uses one of these batches into one mesh.
 
@@ -62,6 +62,3 @@ export const NEON_PINK = neonMat("#ff2f9a", 2.2);
 export const NEON_VIOLET = neonMat("#b14dff", 3);
 export const NEON_AMBER = neonMat("#ffb02e", 4);
 export const NEON_WARM = neonMat("#ffd6a0", 3);
-
-/** Warm glow for the back-bar behind the bottles. */
-export const BOTTLE_LIGHT = hdr("#ff8a30", 1.5);

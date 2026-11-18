@@ -6,9 +6,9 @@ import type * as THREE from "three";
 
 /**
  * Frees instanced meshes built from a downloaded model (CityTrees,
- * CityFurniture, CityPark, NycFacades, the zoo's Scatter): the geometry each
+ * CityFurniture, CityPark, the zoo's Scatter): the geometry each
  * copied, its instance buffers and, when `ownMaterials`, the material copies
- * it made. A shared material (drei's cached one, the bays') stays.
+ * it made. A shared material (drei's cached one) stays.
  */
 export function disposeInstanced(
   meshes: readonly THREE.InstancedMesh[],

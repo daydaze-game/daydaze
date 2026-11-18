@@ -1302,15 +1302,66 @@ button:focus-visible {
 
 /* ------------------------------------------------- the character creator */
 
-/* Open, the dressing room takes over the screen: a dimmed stage on the left
-   where the doll stands in the 3D view, and a tall panel of picture tiles on
-   the right. Everything else on screen hides while she gets ready. */
+/* The dressing room shows a separate, neutrally lit character studio beside
+   the controls. The world and its name tags stay out of the preview. */
 .app:has(.dressing[data-open="true"]) .venue,
 .app:has(.dressing[data-open="true"]) .dock,
 .app:has(.dressing[data-open="true"]) .chat,
 .app:has(.dressing[data-open="true"]) .venue-games,
 .app:has(.dressing[data-open="true"]) .views {
   visibility: hidden;
+}
+
+.app:has(.dressing[data-open="true"]) .tag,
+.app:has(.dressing[data-open="true"]) .peer-tag {
+  visibility: hidden !important;
+}
+
+.dressing-hint {
+  position: fixed;
+  left: 0;
+  bottom: 24px;
+  width: calc(100% - min(620px, 56vw));
+  margin: 0;
+  text-align: center;
+  pointer-events: none;
+  color: #eee7f2;
+  font-size: 13px;
+  z-index: 6;
+}
+
+.custom-color {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.custom-color label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.custom-color input[type="color"] {
+  width: 42px;
+  height: 32px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.custom-color input[type="text"] {
+  width: 96px;
+  padding: 7px;
+  background: rgb(0 0 0 / 0.25);
+  color: var(--champagne);
+  border: 1px solid rgb(255 207 106 / 0.4);
+  border-radius: 6px;
+}
+
+.custom-color input[aria-invalid="true"] {
+  border-color: #ff769b;
 }
 
 .dressing[data-open="true"] {
@@ -1344,9 +1395,9 @@ button:focus-visible {
     -40px 0 80px rgb(0 0 0 / 0.55);
 }
 
-/* a vignette over the rest of the screen frames the doll */
+/* The preview supplies its own neutral background. */
 .app:has(.dressing[data-open="true"])::after {
-  content: "";
+  content: none;
   position: fixed;
   inset: 0 min(620px, 56vw) 0 0;
   z-index: 5;
@@ -1451,6 +1502,11 @@ button:focus-visible {
   }
   .app:has(.dressing[data-open="true"])::after {
     inset: 0 0 62vh 0;
+  }
+  .dressing-hint {
+    width: 100%;
+    bottom: calc(62vh + 10px);
+    font-size: 11px;
   }
   .tiles {
     grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));

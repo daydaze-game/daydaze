@@ -464,6 +464,7 @@ export function App() {
         )}
         <RoomAudio room={here.room} muted={save.settings.muted} />
         <World
+          dressing={save.settings.panelOpen}
           room={here.room}
           arrival={here.arrival}
           look={save.look}

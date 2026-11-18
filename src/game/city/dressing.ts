@@ -38,12 +38,6 @@ import { boardwalkFurniture } from "./boardwalk.ts";
 import { detailBuilding } from "./detail.ts";
 import { YARD_CARS, YARD_FURNITURE } from "./yards.ts";
 import { DISTRICT_NAMES } from "./districtNames.ts";
-import {
-  LOT_SPECS,
-  PALETTES,
-  signBoard,
-  type LotInstance,
-} from "./districts.ts";
 
 export { hash };
 
@@ -420,42 +414,6 @@ function panel(
     rot: [0, f.out1 > 0 ? 0 : Math.PI, 0],
     color: LABEL_INK,
     uv: labelUv(text),
-  });
-}
-
-/** The painted shop board over a district lot's door, named in the district's
- * own language (a panel and its label, on the lot's front plane). */
-export function lotSign(out: Buckets, lot: LotInstance): void {
-  if (!lot.sign) return;
-  const w = LOT_SPECS[lot.model].w * lot.sx;
-  const sx = Math.min(w * 0.8, 3.4);
-  const { y, h } = signBoard(lot.model, lot.sy);
-  // the name is 4:1: as wide as the board allows, no taller than it
-  const lw = Math.min(sx * 0.92, h * 0.8 * 4);
-  const nx = Math.sin(lot.yaw);
-  const nz = Math.cos(lot.yaw);
-  const color = PALETTES[lot.palette].sign;
-  signSpill(out, [lot.x, lot.z], lot.yaw, y, sx, h, glowOf(color));
-  out.panel.push({
-    x: lot.x + nx * 0.16,
-    y,
-    z: lot.z + nz * 0.16,
-    sx,
-    sy: h,
-    sz: 0.2,
-    rot: [0, lot.yaw, 0],
-    color,
-  });
-  out.label.push({
-    x: lot.x + nx * 0.27,
-    y,
-    z: lot.z + nz * 0.27,
-    sx: lw,
-    sy: lw / 4,
-    sz: 1,
-    rot: [0, lot.yaw, 0],
-    color: LABEL_INK,
-    uv: labelUv(lot.sign),
   });
 }
 

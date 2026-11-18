@@ -4,14 +4,17 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   BODY_TRAITS,
+  BODY_SCALE_TRAITS,
   DEFAULT_BODY,
   bodyScales,
   cleanBody,
   clampTrait,
+  figureMorphs,
 } from "./body.ts";
 
 test("the default body sits in the middle of every slider", () => {
-  for (const trait of BODY_TRAITS) assert.equal(DEFAULT_BODY[trait], 50);
+  for (const trait of BODY_TRAITS)
+    assert.equal(DEFAULT_BODY[trait], trait === "muscle" ? 0 : 50);
 });
 
 test("slider values clamp to 0 to 100 in whole steps", () => {
@@ -24,7 +27,7 @@ test("slider values clamp to 0 to 100 in whole steps", () => {
 test("a saved body keeps valid traits and resets the rest", () => {
   assert.deepEqual(
     cleanBody({ bust: 80, hips: "big", waist: 0, height: 101 }),
-    { bust: 80, hips: 50, waist: 0, height: 50 },
+    { ...DEFAULT_BODY, bust: 80, hips: 50, waist: 0, height: 50 },
   );
   assert.deepEqual(cleanBody(undefined), DEFAULT_BODY);
   assert.deepEqual(cleanBody([]), DEFAULT_BODY);
@@ -38,11 +41,49 @@ test("the default body is the identity scale", () => {
 });
 
 test("every trait stays within a doll-sized range, clothed or not", () => {
-  for (const trait of BODY_TRAITS) {
+  for (const trait of BODY_SCALE_TRAITS) {
     const low = bodyScales({ ...DEFAULT_BODY, [trait]: 0 });
     const high = bodyScales({ ...DEFAULT_BODY, [trait]: 100 });
     assert.ok(low[trait] >= 0.9 && low[trait] <= 1.1, `${trait} low`);
     assert.ok(high[trait] >= 0.9 && high[trait] <= 1.1, `${trait} high`);
     assert.ok(high[trait] > low[trait], `${trait} grows with its slider`);
   }
+});
+
+test("weight blends through the selected figure to slim and fuller endpoints", () => {
+  const middle = figureMorphs(DEFAULT_BODY, "curvy");
+  assert.deepEqual(middle, { curvy: 1, slim: 0, athletic: 0, plus: 0 });
+  assert.deepEqual(figureMorphs({ ...DEFAULT_BODY, weight: 0 }, "curvy"), {
+    curvy: 0,
+    slim: 1,
+    athletic: 0,
+    plus: 0,
+  });
+  assert.deepEqual(figureMorphs({ ...DEFAULT_BODY, weight: 100 }, "slim"), {
+    curvy: 0,
+    slim: 0,
+    athletic: 0,
+    plus: 1,
+  });
+  assert.equal(
+    figureMorphs({ ...DEFAULT_BODY, weight: 75 }, "curvy").curvy,
+    0.5,
+  );
+  assert.equal(
+    figureMorphs({ ...DEFAULT_BODY, weight: 75 }, "curvy").plus,
+    0.5,
+  );
+});
+
+test("muscle definition works independently of weight and does not double a preset", () => {
+  const full = { ...DEFAULT_BODY, weight: 100, muscle: 80 };
+  assert.equal(figureMorphs(full, "classic").plus, 1);
+  assert.equal(figureMorphs(full, "classic").athletic, 0.8);
+  assert.equal(
+    figureMorphs({ ...DEFAULT_BODY, muscle: 100 }, "athletic").athletic,
+    1,
+  );
+  assert.equal(cleanBody({ weight: 85, muscle: 60 }).weight, 85);
+  assert.equal(cleanBody({ weight: 85, muscle: 60 }).muscle, 60);
+  assert.deepEqual(cleanBody({ weight: -1, muscle: "strong" }), DEFAULT_BODY);
 });

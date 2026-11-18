@@ -3,7 +3,6 @@
 // each, a grand piano at the back under the moon, and the pass where the
 // server brings out the courses. Its door and spawn are the food
 // interiors' (food/interiors.ts), so the street storefront lands you here.
-import { INTERIOR_EXIT, INTERIOR_SPAWN } from "./food/interiors.ts";
 import type { Vec2 } from "./walk.ts";
 
 export const BOUNDS = { x0: -6, x1: 6, z0: -5, z1: 5.6 } as const;
@@ -35,9 +34,6 @@ export const PIANIST: Vec2 = [0, -3.25];
 /** The pass to the kitchen in the back right corner, the server by it. */
 export const PASS = { x0: 4.2, x1: 6, z0: -5, z1: -4.2 } as const;
 export const SERVER: Vec2 = [4.6, -3.7];
-
-export const SPAWN = INTERIOR_SPAWN;
-export const EXIT = INTERIOR_EXIT;
 
 function box(x0: number, z0: number, x1: number, z1: number): Vec2[] {
   return [

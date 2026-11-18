@@ -5,6 +5,7 @@ import {
   BLUSHES,
   HIGHLIGHTERS,
   LIPS,
+  isColor,
   decodeFace,
   makeupOf,
   type Look,
@@ -103,9 +104,15 @@ const GLOSS: Record<Makeup["gloss"], number> = {
 };
 
 /** A lipstick's base color and its deeper liner, from the closet swatch. */
-function lipInk(id: Look["lips"]): [string, string] {
-  const swatch = LIPS.find((l) => l.id === id)?.swatch ?? "#c98f86";
-  const liner = `#${new THREE.Color(swatch).multiplyScalar(0.55).getHexString()}`;
+function lipInk(id: Look["lips"], skin: Look["skin"]): [string, string] {
+  // Bare balm retains the person's pigmentation instead of painting pink lipstick.
+  const swatch =
+    id === "lips-bare-balm"
+      ? `#${new THREE.Color(skin).multiplyScalar(0.68).lerp(new THREE.Color("#a84f5c"), 0.35).getHexString()}`
+      : isColor(id)
+        ? id
+        : (LIPS.find((l) => l.id === id)?.swatch ?? "#c98f86");
+  const liner = `#${new THREE.Color(swatch).multiplyScalar(0.72).getHexString()}`;
   return [swatch, liner];
 }
 
@@ -126,20 +133,20 @@ const rgba = ([r, g, b]: readonly number[], a = 1) =>
 const mixRgb = (a: readonly number[], b: readonly number[], t: number) =>
   a.map((v, i) => v + (b[i] - v) * t);
 
-// one face mask per doll: the woman's and the man's faces differ
-const masks = new Map<string, Promise<HTMLImageElement>>();
-function loadMask(suffix: string) {
-  let mask = masks.get(suffix);
-  if (!mask) {
-    mask = new Promise((resolve, reject) => {
+// The two face projections share decoded source images across every avatar.
+const images = new Map<string, Promise<HTMLImageElement>>();
+function loadFaceImage(url: string) {
+  let image = images.get(url);
+  if (!image) {
+    image = new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error("Could not load the face mask"));
-      img.src = `/models/doll-face${suffix}.png`;
+      img.onerror = () => reject(new Error(`Could not load ${url}`));
+      img.src = url;
     });
-    masks.set(suffix, mask);
+    images.set(url, image);
   }
-  return mask;
+  return image;
 }
 
 /** Per mask image and channel: that channel as white with the value in alpha.
@@ -242,9 +249,10 @@ function winged(lid: readonly [number, number][], wing: number) {
 // [lift above the lash line, width, opacity] bands per shadow style
 const SHADOW_BANDS: Record<Makeup["shadowStyle"], [number, number, number][]> =
   {
+    none: [],
     wash: [
-      [0.012, 0.03, 0.5],
-      [0.006, 0.016, 0.65],
+      [0.012, 0.03, 0.3],
+      [0.006, 0.016, 0.42],
     ],
     "cut-crease": [
       [0.022, 0.008, 0.85],
@@ -256,7 +264,7 @@ const SHADOW_BANDS: Record<Makeup["shadowStyle"], [number, number, number][]> =
       [0.002, 0.012, 0.9],
     ],
     halo: [
-      [0.012, 0.03, 0.55],
+      [0.012, 0.03, 0.35],
       [0.008, 0.012, 0.0],
     ],
   };
@@ -385,6 +393,7 @@ function paintShadow(
   color: string,
   style: Makeup["shadowStyle"],
 ) {
+  if (style === "none") return;
   const c = hexRgb(color);
   ctx.save();
   ctx.filter = style === "cut-crease" ? "blur(4px)" : "blur(10px)";
@@ -418,7 +427,7 @@ const LINER: Record<
   [number, number, number]
 > = {
   thin: [0.004, 0.006, 1],
-  winged: [0.0085, 0.03, 1],
+  winged: [0.0055, 0.022, 1.5],
   smoky: [0.011, 0.012, 5],
   graphic: [0.012, 0.045, 0.5],
 };
@@ -467,7 +476,7 @@ function paintBrow(
     const x = inner[0] - out * 0.012 + (outer[0] - inner[0] + out * 0.03) * t;
     const lidY = inner[1] + (outer[1] - inner[1]) * t;
     const lift =
-      0.058 +
+      0.046 +
       arch * Math.sin(Math.PI * Math.min(t / 0.7, 1)) * (t < 0.7 ? 1 : 0) +
       tail * t;
     const drop = t > 0.7 ? (t - 0.7) * 0.05 : 0;
@@ -558,12 +567,24 @@ export function releaseFace(key: string): void {
 /** The face texture: skin, contour, blush, shadow, liner, brows, lips, and
  * any beard. */
 export async function paintFace(look: FaceFields, marks: Marks) {
-  const img = await loadMask(look.body === "masculine" ? "-m" : "");
+  const suffix = look.body === "masculine" ? "-m" : "";
+  const [img, detail] = await Promise.all([
+    loadFaceImage(`/models/doll-face${suffix}.png`),
+    loadFaceImage(`/models/doll-skin-detail${suffix}.png`),
+  ]);
   const makeup = makeupOf(look);
   const skin = hexRgb(look.skin);
   const { canvas, ctx } = makeCanvas(SIZE, SIZE);
   ctx.fillStyle = rgba(skin);
   ctx.fillRect(0, 0, SIZE, SIZE);
+
+  // CC0 skin pigmentation and pores, baked from the original body UVs.
+  // Soft light keeps the selected complexion and leaves makeup independent.
+  ctx.save();
+  ctx.globalCompositeOperation = "soft-light";
+  ctx.globalAlpha = 0.8;
+  ctx.drawImage(detail, 0, 0, SIZE, SIZE);
+  ctx.restore();
 
   // living skin is never one flat color: faint mottling everywhere, warmer
   // where blood sits close (nose, cheeks, chin, lips' edge), a cool soft
@@ -584,17 +605,17 @@ export async function paintFace(look: FaceFields, marks: Marks) {
   for (const c of [lc, rc])
     blob(ctx, c[0], c[1] + 0.005, 0.07, 0.05, warm, 0.16);
   blob(ctx, 0.5, marks.mouthL[1] + 0.07, 0.05, 0.03, warm, 0.12);
-  const under = mixRgb(skin, [110, 80, 100], 0.35);
+  const under = mixRgb(skin, [110, 80, 100], 0.2);
   for (const e of [le, re])
-    blob(ctx, e[0], e[1] + 0.035, 0.045, 0.02, under, 0.3);
+    blob(ctx, e[0], e[1] + 0.035, 0.045, 0.02, under, 0.12);
 
   // contour and highlight, faded well before the edge of the square so the
   // face meets the unpainted body skin without a seam
-  const dark = skin.map((v) => v * 0.8);
+  const dark = skin.map((v) => v * 0.88);
   const light = mixRgb(skin, [255, 244, 236], 0.3);
   const { lCheek, rCheek, noseTip, mouthL, mouthR, lEye, rEye } = marks;
-  blob(ctx, 0.5, 0.18, 0.16, 0.08, light, 0.45);
-  blob(ctx, noseTip[0], noseTip[1] - 0.08, 0.012, 0.07, light, 0.55);
+  blob(ctx, 0.5, 0.18, 0.16, 0.08, light, 0.12);
+  blob(ctx, noseTip[0], noseTip[1] - 0.08, 0.012, 0.07, light, 0.12);
   blob(
     ctx,
     noseTip[0],
@@ -602,18 +623,20 @@ export async function paintFace(look: FaceFields, marks: Marks) {
     0.012,
     0.008,
     [255, 255, 255],
-    0.35,
+    0.08,
   );
-  blob(ctx, 0.5, 0.74, 0.03, 0.02, light, 0.45);
+  blob(ctx, 0.5, 0.74, 0.03, 0.02, light, 0.12);
   for (const c of [lCheek, rCheek]) {
     const out = c[0] > 0.5 ? 1 : -1;
-    blob(ctx, c[0] + out * 0.04, c[1] + 0.05, 0.05, 0.11, dark, 0.35);
-    blob(ctx, c[0] - out * 0.01, c[1] - 0.045, 0.04, 0.018, light, 0.5);
+    blob(ctx, c[0] + out * 0.04, c[1] + 0.05, 0.05, 0.08, dark, 0.2);
+    blob(ctx, c[0] - out * 0.01, c[1] - 0.045, 0.04, 0.018, light, 0.12);
   }
 
   // blush in the chosen color, a touch deeper on deeper skin
   const deep = Math.max(0, Math.min(1, (200 - skin[0]) / 110));
-  const blushSwatch = BLUSHES.find((b) => b.id === makeup.blush)?.swatch;
+  const blushSwatch = isColor(makeup.blush)
+    ? makeup.blush
+    : BLUSHES.find((b) => b.id === makeup.blush)?.swatch;
   if (makeup.blush !== "none" && blushSwatch) {
     const tone = mixRgb(hexRgb(blushSwatch), [150, 30, 70], deep * 0.35);
     const cheekMask = channel(
@@ -662,7 +685,9 @@ export async function paintFace(look: FaceFields, marks: Marks) {
   }
 
   // highlighter: cheekbone tops, nose bridge, cupid's bow and brow bone
-  const glow = HIGHLIGHTERS.find((h) => h.id === makeup.highlight)?.swatch;
+  const glow = isColor(makeup.highlight)
+    ? makeup.highlight
+    : HIGHLIGHTERS.find((h) => h.id === makeup.highlight)?.swatch;
   if (makeup.highlight !== "none" && glow) {
     const g = hexRgb(glow);
     for (const c of [lCheek, rCheek]) {
@@ -687,19 +712,21 @@ export async function paintFace(look: FaceFields, marks: Marks) {
       : makeup.shadowStyle;
   paintShadow(ctx, marks.lLidUpper, look.shadow, shadowStyle);
   paintShadow(ctx, marks.rLidUpper, look.shadow, shadowStyle);
-  // lower lash line smudge
-  ctx.save();
-  ctx.filter = "blur(2px)";
-  ctx.strokeStyle = rgba(
-    hexRgb(look.shadow).map((v) => v * 0.7),
-    0.5,
-  );
-  ctx.lineWidth = 0.004 * SIZE;
-  for (const lid of [marks.lLidLower, marks.rLidLower]) {
-    path(ctx, lid);
-    ctx.stroke();
+  if (shadowStyle !== "none") {
+    // lower lash line smudge
+    ctx.save();
+    ctx.filter = "blur(2px)";
+    ctx.strokeStyle = rgba(
+      hexRgb(look.shadow).map((v) => v * 0.7),
+      0.25,
+    );
+    ctx.lineWidth = 0.004 * SIZE;
+    for (const lid of [marks.lLidLower, marks.rLidLower]) {
+      path(ctx, lid);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
-  ctx.restore();
   paintLiner(ctx, marks.lLidUpper, makeup.liner);
   paintLiner(ctx, marks.rLidUpper, makeup.liner);
 
@@ -711,45 +738,26 @@ export async function paintFace(look: FaceFields, marks: Marks) {
   paintBrow(ctx, marks.lLidUpper, BROW[look.brows], rand);
   paintBrow(ctx, marks.rLidUpper, BROW[look.brows], rand);
 
-  // freckles on lighter skin, and a beauty mark on every skin
-  const lum = (skin[0] + skin[1] + skin[2]) / 3;
-  const density = Math.max(0, Math.min(1, (lum - 165) / 50));
-  const freckle = mixRgb(skin, [96, 52, 32], 0.55);
-  for (let i = 0; i < Math.round(density * 40); i++) {
-    const c = i % 2 ? lCheek : rCheek;
-    const x = (c[0] + 0.5) / 2 + (rand() - 0.5) * 0.14;
-    const y = noseTip[1] - 0.04 + rand() * 0.07;
-    blob(ctx, x, y, 0.003, 0.003, freckle, 0.5 * density);
-  }
-  blob(
-    ctx,
-    mouthR[0] - 0.02,
-    mouthR[1] - 0.045,
-    0.0035,
-    0.0035,
-    [64, 32, 26],
-    0.9,
-  );
-
   paintSkinMarks(ctx, marks, skin, makeup);
 
   // lips: color through the sculpted lip mask, a deeper liner edge, gloss
-  const [base, liner] = lipInk(look.lips);
+  const [base, liner] = lipInk(look.lips, look.skin);
   const gloss = GLOSS[makeup.gloss];
+  const bare = look.lips === "lips-bare-balm";
   // the liner is a soft deepening at the lip's edge, not a drawn outline
   ctx.save();
-  ctx.globalAlpha = 0.6;
-  ctx.filter = "blur(1.5px)";
+  ctx.globalAlpha = bare ? 0.08 : 0.35;
+  ctx.filter = "blur(2px)";
   ctx.drawImage(channel(img, 0, liner), 0, 0);
   ctx.restore();
   ctx.save();
   ctx.filter = "blur(2px)";
-  ctx.globalAlpha = 0.85;
+  ctx.globalAlpha = bare ? 0.6 : 0.85;
   const inset = channel(img, 0, base);
   const mx = (mouthL[0] + mouthR[0]) / 2;
   const my = (mouthL[1] + mouthR[1]) / 2;
   ctx.translate(mx * SIZE, my * SIZE);
-  ctx.scale(0.94, 0.88);
+  ctx.scale(0.97, 0.94);
   ctx.translate(-mx * SIZE, -my * SIZE);
   ctx.drawImage(inset, 0, 0);
   ctx.restore();
@@ -810,7 +818,7 @@ export function sharedLashes(): THREE.Texture {
 
 /** Sclera, iris and pupil for the eyeballs' front planar UV. */
 function paintIris(color: string) {
-  const S = 256;
+  const S = 512;
   const { canvas, ctx } = makeCanvas(S, S);
   ctx.fillStyle = "#f4ece8";
   ctx.fillRect(0, 0, S, S);
@@ -825,28 +833,52 @@ function paintIris(color: string) {
   ctx.beginPath();
   ctx.arc(c, c, S * 0.27, 0, Math.PI * 2);
   ctx.fill();
-  // fibers
-  ctx.strokeStyle = rgba(mixRgb(iris, [255, 255, 255], 0.25), 0.35);
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 70; i++) {
-    const a = (i / 70) * Math.PI * 2;
+  // Irregular radial fibers and crypts rather than a flat colored disk.
+  let seed = 37;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  ctx.lineWidth = 0.8;
+  for (let i = 0; i < 420; i++) {
+    const a = ((i + random() * 0.7) / 420) * Math.PI * 2;
+    const inner = S * (0.085 + random() * 0.045);
+    const outer = S * (0.19 + random() * 0.07);
+    const bend = (random() - 0.5) * 0.08;
+    ctx.strokeStyle = rgba(
+      random() < 0.5
+        ? mixRgb(iris, [222, 186, 120], 0.35)
+        : iris.map((v) => v * 0.45),
+      0.25 + random() * 0.35,
+    );
     ctx.beginPath();
-    ctx.moveTo(c + Math.cos(a) * S * 0.08, c + Math.sin(a) * S * 0.08);
-    ctx.lineTo(c + Math.cos(a) * S * 0.18, c + Math.sin(a) * S * 0.18);
+    ctx.moveTo(c + Math.cos(a) * inner, c + Math.sin(a) * inner);
+    ctx.quadraticCurveTo(
+      c + Math.cos(a + bend) * (inner + outer) * 0.5,
+      c + Math.sin(a + bend) * (inner + outer) * 0.5,
+      c + Math.cos(a) * outer,
+      c + Math.sin(a) * outer,
+    );
     ctx.stroke();
   }
   ctx.fillStyle = "#070304";
   ctx.beginPath();
   ctx.arc(c, c, S * 0.085, 0, Math.PI * 2);
   ctx.fill();
-  // catchlights: the sparkle that makes a doll's eyes read as alive
+  // A soft upper shadow seats the iris under the lid. The cornea adds the
+  // actual environment reflection; keep painted catchlights small.
+  const shade = ctx.createLinearGradient(0, S * 0.2, 0, S * 0.6);
+  shade.addColorStop(0, "rgba(45,25,28,0.38)");
+  shade.addColorStop(1, "rgba(45,25,28,0)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, S, S);
   ctx.fillStyle = "rgba(255,255,255,0.95)";
   ctx.beginPath();
-  ctx.arc(c - S * 0.06, c - S * 0.07, S * 0.035, 0, Math.PI * 2);
+  ctx.arc(c - S * 0.06, c - S * 0.07, S * 0.018, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "rgba(255,255,255,0.6)";
   ctx.beginPath();
-  ctx.arc(c + S * 0.07, c + S * 0.06, S * 0.015, 0, Math.PI * 2);
+  ctx.arc(c + S * 0.07, c + S * 0.06, S * 0.008, 0, Math.PI * 2);
   ctx.fill();
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -874,7 +906,7 @@ function paintLashes() {
     const u = (i + rand() * 0.8) / count;
     const x = u * W;
     const len =
-      H * (0.35 + 0.6 * Math.sin(Math.min(1, u * 1.25) * Math.PI * 0.85));
+      H * (0.25 + 0.45 * Math.sin(Math.min(1, u * 1.25) * Math.PI * 0.85));
     const clump = Math.floor(i / 4) * 4 + 1.5;
     const tipX = x + (clump * (W / count) - x) * 0.6 + (u - 0.25) * 26;
     const tipY = H - len * (0.85 + rand() * 0.15);
