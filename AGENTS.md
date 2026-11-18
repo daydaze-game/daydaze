@@ -119,6 +119,10 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Browser tests: `gh workflow run browser-test.yml --ref <branch> -f grep="<test title>"`.
   - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<names>"`,
     then `gh run download <id> -n screenshots`. Look at every screenshot.
+  - Screen recordings of any scene or minigame (MP4):
+    `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
+    `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
+    Options are in `scripts/record.ts`.
     PRs that change room, city, avatar or HUD code get the matching shots
     automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
     comment linking the artifact, kept 7 days.
