@@ -8,14 +8,6 @@ export type CamShot = {
   look: THREE.Vector3;
 };
 
-export type CamOverrideInput =
-  | string
-  | readonly number[]
-  | {
-      eye: THREE.Vector3 | readonly [number, number, number];
-      look: THREE.Vector3 | readonly [number, number, number];
-    };
-
 function initialFromLocation(): CamShot | null {
   if (typeof location === "undefined") return null;
   const raw = new URLSearchParams(location.search).get("cam");
