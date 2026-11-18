@@ -27,6 +27,7 @@ import { naturalPace } from "../../game/dance/clips.ts";
 import { Environment, Lightformer, useGLTF } from "@react-three/drei";
 import { Suspense } from "react";
 import { BODY_TRAITS, cleanBody, DEFAULT_BODY } from "../../game/body.ts";
+import { isMesh } from "../world/guards.ts";
 
 // ?human=1 shows the 3D doll built in Blender instead of the toon doll
 const human = new URLSearchParams(location.search).get("human") === "1";
@@ -613,7 +614,7 @@ function measure(root: THREE.Object3D) {
   let calls = 0;
   let tris = 0;
   root.traverse((o) => {
-    if (!(o instanceof THREE.Mesh)) return;
+    if (!isMesh(o)) return;
     for (let p: THREE.Object3D | null = o; p; p = p.parent)
       if (!p.visible) return;
     const g = o.geometry;
@@ -685,7 +686,7 @@ function Probe({
       const doll = scene.getObjectByName(`doll-${i}`);
       let visible = false;
       doll?.traverse((o) => {
-        if (!(o instanceof THREE.Mesh)) return;
+        if (!isMesh(o)) return;
         let shown = true;
         for (let p: THREE.Object3D | null = o; p; p = p.parent)
           if (!p.visible) shown = false;

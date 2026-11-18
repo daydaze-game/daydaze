@@ -8,6 +8,7 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, type JSX } from "react";
 import * as THREE from "three";
+import { isMesh } from "../../world/guards.ts";
 
 export type PlaceCopy = (k: number, matrix: THREE.Matrix4) => void;
 
@@ -29,7 +30,7 @@ export function InstancedModel({
     gltf.scene.updateMatrixWorld(true);
     const out: THREE.InstancedMesh[] = [];
     gltf.scene.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
+      if (!isMesh(o)) return;
       const geometry = bakedGeometry(o);
       const source = Array.isArray(o.material) ? o.material[0] : o.material;
       const material = source?.clone();

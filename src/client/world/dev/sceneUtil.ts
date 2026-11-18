@@ -1,11 +1,12 @@
 // Scene walks the dev panel needs: wireframe on every material, object and
 // light counts, and the world box of a picked object. Development only.
 import * as THREE from "three";
+import { isMesh, isInstancedMesh } from "../guards.ts";
 
 /** Set wireframe on every material in the scene (new meshes included). */
 export function applyWireframe(scene: THREE.Scene, on: boolean): void {
   scene.traverse((o) => {
-    if (!(o instanceof THREE.Mesh)) return;
+    if (!isMesh(o)) return;
     const mats: THREE.Material[] = Array.isArray(o.material)
       ? o.material
       : [o.material];
@@ -63,7 +64,7 @@ export function objectBox(
   instanceId: number | null,
   out: THREE.Box3,
 ): THREE.Box3 {
-  if (o instanceof THREE.InstancedMesh && instanceId !== null) {
+  if (isInstancedMesh(o) && instanceId !== null) {
     if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
     const local = o.geometry.boundingBox;
     if (local) {

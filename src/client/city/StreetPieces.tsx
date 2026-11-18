@@ -21,6 +21,7 @@ import { createStore } from "../rooms/shared/store.ts";
 import { useDaylight } from "./daylight.ts";
 import { mergePieces, pieceModels } from "./streetMerge.ts";
 import { SIDEWALK_GLOW, sidewalkMaterial } from "./sidewalkLook.ts";
+import { isMesh } from "../world/guards.ts";
 
 const URL = "/models/street/kit.glb";
 
@@ -33,7 +34,7 @@ export const cityStreet = createStore({
 function atlasOf(scene: THREE.Object3D): THREE.Texture | null {
   let map: THREE.Texture | null = null;
   scene.traverse((o) => {
-    if (!(o instanceof THREE.Mesh) || o.name !== "crosswalk") return;
+    if (!isMesh(o) || o.name !== "crosswalk") return;
     const material = Array.isArray(o.material) ? o.material[0] : o.material;
     if (material instanceof THREE.MeshStandardMaterial) map = material.map;
   });

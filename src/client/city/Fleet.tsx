@@ -19,6 +19,7 @@ import {
 } from "../../game/ships.ts";
 import { useReducedMotion } from "../motion.ts";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
+import { isMesh } from "../world/guards.ts";
 
 /** How much of its color a hull keeps at full night (as CityFurniture's 1 - 0.55 * night). */
 const NIGHT_DIM = 0.55;
@@ -36,7 +37,7 @@ function partsOf(scene: THREE.Object3D): Part[] {
   const parts: Part[] = [];
   scene.updateMatrixWorld(true);
   scene.traverse((o) => {
-    if (!(o instanceof THREE.Mesh)) return;
+    if (!isMesh(o)) return;
     const material = Array.isArray(o.material) ? o.material[0] : o.material;
     if (material instanceof THREE.MeshStandardMaterial)
       parts.push({ geometry: bakedGeometry(o), material: material.clone() });

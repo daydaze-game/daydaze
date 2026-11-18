@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { SHELL_SPOTS } from "../../../game/mermaidCove.ts";
 import { useReducedMotion } from "../../motion.ts";
 import { SHELL_COLORS, siren } from "./session.ts";
+import { isMesh } from "../../world/guards.ts";
 
 const URL = "/models/cove/shells.glb";
 /** The shell for each note, pink to violet, left to right. */
@@ -44,7 +45,7 @@ export function Shells() {
       shells: KINDS.map((kind, i) => {
         const node = nodes[kind];
         const color = SHELL_COLORS[i] ?? "#ffffff";
-        if (!(node instanceof THREE.Mesh)) return null;
+        if (!isMesh(node)) return null;
         const source = node.material;
         return {
           node,
