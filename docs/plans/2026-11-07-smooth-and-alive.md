@@ -104,13 +104,13 @@ the blink morph and `data-*` attributes are written only when they change.
 Do not move the face canvas to the GPU (`willReadFrequently: false`): under
 SwiftShader its 22 px blur took 80 s.
 
-| area (low tier) | before: ten frames / stand mean frame / stand long tasks | after |
-| --- | --- | --- |
-| spawn | 11.4 s / 419 ms / 750 ms | 9.6 s / 269 ms / 0 |
-| nightlife | 11.6 s / 210 ms / 1164 ms | 8.5 s / 226 ms / 0 |
-| park | 9.9 s / 413 ms / 2849 ms | 7.5 s / 141 ms / 662 ms |
-| beachside | 9.8 s / 144 ms / 892 ms | 7.4 s / 91 ms / 0 |
-| pulse | 9.2 s / 278 ms / 0 | 6.5 s / 198 ms / 0 |
+| area (low tier) | before: ten frames / stand mean frame / stand long tasks | after                   |
+| --------------- | -------------------------------------------------------- | ----------------------- |
+| spawn           | 11.4 s / 419 ms / 750 ms                                 | 9.6 s / 269 ms / 0      |
+| nightlife       | 11.6 s / 210 ms / 1164 ms                                | 8.5 s / 226 ms / 0      |
+| park            | 9.9 s / 413 ms / 2849 ms                                 | 7.5 s / 141 ms / 662 ms |
+| beachside       | 9.8 s / 144 ms / 892 ms                                  | 7.4 s / 91 ms / 0       |
+| pulse           | 9.2 s / 278 ms / 0                                       | 6.5 s / 198 ms / 0      |
 
 ## Done 2026-11-07
 

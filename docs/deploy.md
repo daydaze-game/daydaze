@@ -142,14 +142,14 @@ Guests have no `users` row, so a guest shows only as their `g_…` id. The chat 
 
 From Cloudflare's pricing and limits pages, checked 2026-10-14. Daily limits reset at 00:00 UTC.
 
-| Service | Free allowance | What happens at the limit | Our usage |
-| --- | --- | --- | --- |
-| Worker requests | 100,000 / day | Error 1027 page until the reset | Each `/api` call and each WebSocket connect is 1. Static assets are free and unlimited. Socket messages are not Worker requests. |
-| Worker CPU | 10 ms per request | Error 1102 when regularly exceeded | Fine except password hashing (see the top of this guide) |
-| Durable Object requests | 100,000 / day | Durable Object calls fail until the reset | Incoming socket messages count 20:1. One player moving at 12 Hz for an hour is about 2,200 requests, so roughly 45 player-hours of movement a day. |
-| Durable Object duration | 13,000 GB-s / day | As above | A busy room copy stays awake; idle ones hibernate. About 28 awake room-hours a day at 128 MB each. |
-| Durable Object SQL | 5M rows read, 100K rows written / day, 5 GB stored | Writes fail until the reset | Rate-limit buckets (one row per sign-in, report or block attempt, plus pruning alarms) and Directory headcounts (one row per join or leave) |
-| D1 | 5M rows read, 100K rows written / day, 5 GB total | Queries fail until the reset | Sessions, saves, reports, blocks, bans |
+| Service                 | Free allowance                                     | What happens at the limit                 | Our usage                                                                                                                                          |
+| ----------------------- | -------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Worker requests         | 100,000 / day                                      | Error 1027 page until the reset           | Each `/api` call and each WebSocket connect is 1. Static assets are free and unlimited. Socket messages are not Worker requests.                   |
+| Worker CPU              | 10 ms per request                                  | Error 1102 when regularly exceeded        | Fine except password hashing (see the top of this guide)                                                                                           |
+| Durable Object requests | 100,000 / day                                      | Durable Object calls fail until the reset | Incoming socket messages count 20:1. One player moving at 12 Hz for an hour is about 2,200 requests, so roughly 45 player-hours of movement a day. |
+| Durable Object duration | 13,000 GB-s / day                                  | As above                                  | A busy room copy stays awake; idle ones hibernate. About 28 awake room-hours a day at 128 MB each.                                                 |
+| Durable Object SQL      | 5M rows read, 100K rows written / day, 5 GB stored | Writes fail until the reset               | Rate-limit buckets (one row per sign-in, report or block attempt, plus pruning alarms) and Directory headcounts (one row per join or leave)        |
+| D1                      | 5M rows read, 100K rows written / day, 5 GB total  | Queries fail until the reset              | Sessions, saves, reports, blocks, bans                                                                                                             |
 
 The tightest limits are Durable Object requests and duration once rooms are busy. Watch them under **Workers & Pages → Durable Objects** in the dashboard. Workers Paid includes far more, from $5/month.
 

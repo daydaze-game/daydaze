@@ -58,15 +58,15 @@ public/doll/              face template, lips and brows images used by the face 
 type Vec2 = readonly [x: number, z: number];
 
 type RoomDefinition = {
-  id: RoomId;                     // "velvet-room" | "plaza"
-  name: string;                   // shown in the HUD
-  walkable: readonly Vec2[];      // floor polygon on the XZ plane
+  id: RoomId; // "velvet-room" | "plaza"
+  name: string; // shown in the HUD
+  walkable: readonly Vec2[]; // floor polygon on the XZ plane
   spawn: { position: Vec2; yaw: number };
   portals: readonly {
     id: string;
     position: Vec2;
     radius: number;
-    label: string;                // "To the Plaza"
+    label: string; // "To the Plaza"
     target: RoomId;
     targetSpawn: { position: Vec2; yaw: number };
   }[];
