@@ -21,7 +21,7 @@ User (2026-10-14): "u dont need control to commit, merge, or push. u are in full
 User (2026-10-15): "it would be faster if u stopped using the agents and did everything in the main chat", then "if ur running a command thats gonna take a long time, make it a task or have an agent do it / but dont have more than 2 agents at once".
 
 **Why:** agent startup, thinking overhead and merge collisions made 4-8 parallel agents slower than one focused thread; blocking foreground commands stall the chat.
-**How to apply:** do feature work inline. Run long commands (verify, Playwright, screenshots, builds) with `run_in_background` and keep working. Agents only for side jobs (setup, long checks), never more than 3 at once ("u can have up to three agents if necessary"). Old feature agents were stopped; their work is wip commits on feat/<name> branches in .worktrees/. No CPU core limit. Full Playwright suite runs in GitHub Actions; locally run only the touched feature's tests. Merge each branch as soon as it passes.
+**How to apply:** do feature work inline. Run long commands (verify, Playwright, screenshots, builds) with `run_in_background` and keep working. Agents only for side jobs (setup, long checks), never more than 3 at once ("u can have up to three agents if necessary"). Old feature agents were stopped; their work is wip commits on feat/`<name>` branches in .worktrees/. No CPU core limit. Full Playwright suite runs in GitHub Actions; locally run only the touched feature's tests. Merge each branch as soon as it passes.
 
 ## 2026-10-16: Keep working between items
 
@@ -103,7 +103,7 @@ Spawn subagents on Sonnet only (not Opus). Save tokens without lowering quality:
 
 **How to apply:** brief every agent with this (docs/agents/agent-rules.md has the commands); keep local browser runs as a last resort; merges via /tmp/land.sh (backup docs/agents/scripts/).
 
-Also 2026-11-07: owner asked for a fix that doesn't require stopping their own work. verify.yml runs `npm run verify` on GitHub (~1.5 min vs ~10 min local) for pushed feat/fix/perf/ci branches; /tmp/land.sh rebases, pushes ci/land-<w>-<sha>, waits for that run, merges. Local heavy work only under `nice -n 19`.
+Also 2026-11-07: owner asked for a fix that doesn't require stopping their own work. verify.yml runs `npm run verify` on GitHub (~1.5 min vs ~10 min local) for pushed feat/fix/perf/ci branches; /tmp/land.sh rebases, pushes ci/land-`<w>`-`<sha>`, waits for that run, merges. Local heavy work only under `nice -n 19`.
 
 Free offloading (owner 2026-11-07: "anything that makes things faster as long as it's FREE"): the owner's downloads are uploaded as release files to the private repo dpologdvinity/daydaze-assets (releases "packs", "hair", "animals"; `gh release download <tag> -R dpologdvinity/daydaze-assets -p '<file>'`); Mixamo FBX library is the private repo dpologdvinity/mixamo. CORRECTION 2026-11-07: Agent `isolation: "remote"` silently falls back to a LOCAL worktree (.claude/worktrees/agent-*) here — it does NOT offload CPU. Keep agents light: renice the session (`renice -n 19 -p <claude pid>`; children inherit), push heavy work (verify, browsers, profiling) to GitHub workflows, local Blender/gltf-transform only under nice -n 19, one Blender at a time.
 

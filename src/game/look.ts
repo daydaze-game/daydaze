@@ -6,13 +6,39 @@
 // ids (shop.ts).
 
 import { isGait } from "./gaits.ts";
+/** A full RGB color, validated at the storage and network boundary. */
+export function isColor(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^#[0-9a-fA-F]{6}$/.test(value) &&
+    value.length === 7
+  );
+}
+
 /** Skin tones; each id is the hex color the doll is tinted. */
 export const SKINS = [
+  { id: "#f8e4dc", label: "Very fair · neutral" },
+  { id: "#f1d8d2", label: "Very fair · cool" },
   { id: "#f3d4c4", label: "Porcelain" },
+  { id: "#efd0b1", label: "Fair · warm" },
+  { id: "#e7bfb0", label: "Fair · cool" },
+  { id: "#dfbba0", label: "Light · neutral" },
   { id: "#e6b48e", label: "Golden" },
+  { id: "#d4ac8a", label: "Light · olive" },
+  { id: "#c99b84", label: "Medium · cool" },
+  { id: "#c49b72", label: "Medium · olive" },
   { id: "#c48d68", label: "Caramel" },
+  { id: "#af7e63", label: "Tan · neutral" },
+  { id: "#a97154", label: "Tan · warm" },
+  { id: "#9c6e60", label: "Brown · cool" },
   { id: "#94603f", label: "Mocha" },
+  { id: "#835b48", label: "Brown · neutral" },
+  { id: "#79513f", label: "Deep · warm" },
+  { id: "#6c5049", label: "Deep · cool" },
   { id: "#633c29", label: "Espresso" },
+  { id: "#523b31", label: "Very deep · neutral" },
+  { id: "#46342e", label: "Very deep · cool" },
+  { id: "#38271f", label: "Very deep · warm" },
 ] as const;
 
 /**
@@ -279,14 +305,30 @@ export const FIGURES = [
   { id: "plus", label: "Plus-size" },
 ] as const;
 
-/** Face sliders, -1..1; ids are the doll model's shape-key names. */
-export const FACE_SLIDERS = [
+/** The original slider order remains stable in saved face codes. */
+const BASE_FACE_SLIDERS = [
   { id: "eyeSize", label: "Eye size" },
   { id: "eyeTilt", label: "Eye tilt" },
   { id: "nose", label: "Nose width" },
   { id: "lips", label: "Lip fullness" },
   { id: "cheeks", label: "Cheekbones" },
   { id: "jaw", label: "Jaw" },
+] as const;
+
+/** Independent anatomy adjustments, stored after the original face code. */
+const FINE_FACE_SLIDERS = [
+  { id: "noseLength", label: "Nose length" },
+  { id: "noseBridge", label: "Nose bridge" },
+  { id: "noseTip", label: "Nose tip angle" },
+  { id: "mouthWidth", label: "Mouth width" },
+  { id: "chinHeight", label: "Chin height" },
+  { id: "chinDepth", label: "Chin depth" },
+] as const;
+
+/** Face sliders, -1..1; ids are the doll model's shape-key names. */
+export const FACE_SLIDERS = [
+  ...BASE_FACE_SLIDERS,
+  ...FINE_FACE_SLIDERS,
 ] as const;
 
 /** Face presets: the first of each group is the base face (no shape key);
@@ -344,21 +386,29 @@ export type Figure = IdOf<typeof FIGURES>;
  */
 export type Face = Record<FaceSlider, number> & {
   figure: Figure;
-  eyeColor: IdOf<typeof EYE_COLORS>;
+  eyeColor: string;
   eyeShape: IdOf<typeof EYE_SHAPES>;
   noseShape: IdOf<typeof NOSES>;
   lipShape: IdOf<typeof LIP_SHAPES>;
   faceShape: IdOf<typeof FACE_SHAPES>;
 };
 
-/** The base face: every slider at 0 and the first option of each preset. */
+/** The base face: gently softened features, with a little definition in the
+ * eyes and cheeks. The closet can take every feature further in either
+ * direction; the starting face should feel polished before makeup. */
 export const DEFAULT_FACE: Face = {
-  eyeSize: 0,
-  eyeTilt: 0,
-  nose: 0,
-  lips: 0,
-  cheeks: 0,
-  jaw: 0,
+  eyeSize: 0.2,
+  eyeTilt: 0.1,
+  nose: -0.1,
+  lips: 0.1,
+  cheeks: 0.1,
+  jaw: -0.1,
+  noseLength: 0,
+  noseBridge: 0,
+  noseTip: 0,
+  mouthWidth: 0,
+  chinHeight: 0,
+  chinDepth: 0,
   figure: "classic",
   eyeColor: "#6b3f22",
   eyeShape: "almond",
@@ -375,27 +425,45 @@ const STEPS = "abcdefghijklmnopqrstu";
 /**
  * Packs a face into its short code: a letter per slider (rounded to 0.1,
  * clamped to -1..1), then single-digit indexes for figure, eye color and each
- * preset. Assumes every catalog stays under 10 options.
+ * preset. Catalog indexes stay single-digit. Optional anatomy adjustments
+ * follow `~`; an RGB iris color follows `|`. Original codes stay readable.
  */
 export function encodeFace(face: Face): string {
   const slider = (v: number) =>
     STEPS[Math.round((Math.max(-1, Math.min(1, v)) + 1) * 10)];
   return (
-    FACE_SLIDERS.map((s) => slider(face[s.id])).join("") +
+    BASE_FACE_SLIDERS.map((s) => slider(face[s.id])).join("") +
     FIGURES.findIndex((b) => b.id === face.figure) +
-    EYE_COLORS.findIndex((c) => c.id === face.eyeColor) +
+    Math.max(
+      0,
+      EYE_COLORS.findIndex((c) => c.id === face.eyeColor),
+    ) +
     FACE_PRESETS.map((g) =>
       Math.max(
         0,
         g.options.findIndex((o) => o.id === face[g.field]),
       ),
-    ).join("")
+    ).join("") +
+    (FINE_FACE_SLIDERS.some((s) => face[s.id] !== 0)
+      ? `~${FINE_FACE_SLIDERS.map((s) => slider(face[s.id])).join("")}`
+      : "") +
+    (EYE_COLORS.some((c) => c.id === face.eyeColor) ? "" : `|${face.eyeColor}`)
   );
 }
 
 /** The face a look's code describes; null when the code is malformed. */
-export function decodeFace(code: unknown): Face | null {
-  const base = FACE_SLIDERS.length + 2;
+export function decodeFace(value: unknown): Face | null {
+  if (typeof value !== "string") return null;
+  const [packed, color, ...extra] = value.split("|");
+  const [code, fine, ...tail] = packed.split("~");
+  if (
+    tail.length ||
+    (fine !== undefined &&
+      (fine.length !== FINE_FACE_SLIDERS.length || !/^[a-u]+$/.test(fine)))
+  )
+    return null;
+  if (extra.length || (color !== undefined && !isColor(color))) return null;
+  const base = BASE_FACE_SLIDERS.length + 2;
   // codes from before the face presets stop after the eye color
   if (
     typeof code !== "string" ||
@@ -404,16 +472,19 @@ export function decodeFace(code: unknown): Face | null {
   )
     return null;
   const face: Face = { ...DEFAULT_FACE };
-  for (const [i, s] of FACE_SLIDERS.entries()) {
+  for (const [i, s] of BASE_FACE_SLIDERS.entries()) {
     const step = STEPS.indexOf(code[i]);
     if (step < 0) return null;
     face[s.id] = (step - 10) / 10;
   }
-  const body = FIGURES[Number(code[FACE_SLIDERS.length])];
-  const eye = EYE_COLORS[Number(code[FACE_SLIDERS.length + 1])];
+  const body = FIGURES[Number(code[BASE_FACE_SLIDERS.length])];
+  const eye = EYE_COLORS[Number(code[BASE_FACE_SLIDERS.length + 1])];
   if (!body || !eye) return null;
+  if (fine)
+    for (const [i, slider] of FINE_FACE_SLIDERS.entries())
+      face[slider.id] = (STEPS.indexOf(fine[i]) - 10) / 10;
   face.figure = body.id;
-  face.eyeColor = eye.id;
+  face.eyeColor = color ?? eye.id;
   for (const [i, g] of FACE_PRESETS.entries()) {
     if (code.length === base) break;
     const option = g.options[Number(code[base + i])];
@@ -438,9 +509,12 @@ export function seededFace(seed: number): Face {
   const pick = <T>(list: readonly T[]): T =>
     list[Math.floor(next() * list.length)];
   const face: Face = { ...DEFAULT_FACE };
-  // gentle variety only: strangers should all look good
-  for (const s of FACE_SLIDERS)
-    face[s.id] = Math.round((next() * 0.6 - 0.3) * 10) / 10;
+  // Keep the range around a softly polished face so random variation does
+  // not produce extreme proportions; the closet still allows the full range.
+  for (const s of FACE_SLIDERS) {
+    const variation = next() * 0.4 - 0.2;
+    face[s.id] = Math.round((DEFAULT_FACE[s.id] + variation) * 10) / 10;
+  }
   face.figure = pick(FIGURES).id;
   // natural eye colors only; violet is a closet pick
   face.eyeColor = pick(EYE_COLORS.filter((c) => c.id !== "#8e4dff")).id;
@@ -451,16 +525,18 @@ export function seededFace(seed: number): Face {
   return face;
 }
 
-/** Makeup for an NPC: a polished look, varied by seed. */
+/** Light makeup for an NPC: a polished look, varied by seed. */
 export function seededMakeup(seed: number): Makeup {
   const n = Math.floor(seed * 7919) >>> 0;
   return {
-    liner: (["thin", "winged", "winged", "smoky"] as const)[n % 4],
-    gloss: (["satin", "glossy", "glass"] as const)[(n >> 2) % 3],
+    liner: (["none", "thin", "thin", "winged"] as const)[n % 4],
+    gloss: (["matte", "satin", "satin", "glossy"] as const)[(n >> 2) % 4],
     blush: (["rose", "peach", "berry", "coral"] as const)[(n >> 4) % 4],
     blushStrength: "soft",
     highlight: (["champagne", "rose-gold", "icy"] as const)[(n >> 6) % 3],
-    shadowStyle: (["wash", "smoky", "halo"] as const)[(n >> 8) % 3],
+    shadowStyle: (["none", "none", "wash", "wash", "halo"] as const)[
+      (n >> 8) % 5
+    ],
     // some strangers have freckles, a few wear glasses
     freckles: (["none", "none", "none", "light", "lots"] as const)[
       (n >> 10) % 5
@@ -547,6 +623,7 @@ export const SHADOW_STYLES = [
   { id: "cut-crease", label: "Cut crease" },
   { id: "smoky", label: "Smoky" },
   { id: "halo", label: "Halo" },
+  { id: "none", label: "No eyeshadow" },
 ] as const;
 
 /** Freckle amounts. */
@@ -600,9 +677,9 @@ export const HEARING_AIDS = [
 export type Makeup = {
   liner: IdOf<typeof LINERS>;
   gloss: IdOf<typeof GLOSSES>;
-  blush: IdOf<typeof BLUSHES>;
+  blush: string;
   blushStrength: IdOf<typeof STRENGTHS>;
-  highlight: IdOf<typeof HIGHLIGHTERS>;
+  highlight: string;
   shadowStyle: IdOf<typeof SHADOW_STYLES>;
   freckles: IdOf<typeof FRECKLES>;
   glasses: IdOf<typeof GLASSES>;
@@ -614,12 +691,12 @@ export type Makeup = {
 
 /** Makeup for looks without a makeup code. */
 export const DEFAULT_MAKEUP: Makeup = {
-  liner: "winged",
-  gloss: "glossy",
-  blush: "rose",
+  liner: "none",
+  gloss: "satin",
+  blush: "none",
   blushStrength: "soft",
-  highlight: "champagne",
-  shadowStyle: "wash",
+  highlight: "none",
+  shadowStyle: "none",
   freckles: "none",
   glasses: "none",
   vitiligo: "none",
@@ -649,16 +726,19 @@ const MAKEUP_PARTS = [
 const MAKEUP_V1 = 6;
 
 /**
- * Packs makeup into its code: one digit per part, the option's catalog index
- * (unknown ids become 0).
+ * Packs makeup into its code: one digit per catalog part, followed by optional
+ * RGB blush and highlighter values. Older catalog-only codes stay readable.
  */
 export function encodeMakeup(m: Makeup): string {
-  return MAKEUP_PARTS.map(([key, list]) =>
+  const code = MAKEUP_PARTS.map(([key, list]) =>
     Math.max(
       0,
       list.findIndex((o) => o.id === m[key]),
     ),
   ).join("");
+  return isColor(m.blush) || isColor(m.highlight)
+    ? `${code}|${isColor(m.blush) ? m.blush : ""}|${isColor(m.highlight) ? m.highlight : ""}`
+    : code;
 }
 
 /**
@@ -666,7 +746,14 @@ export function encodeMakeup(m: Makeup): string {
  * and glasses (6 digits) or before skin marks (8) decode with the missing
  * parts at their defaults.
  */
-export function decodeMakeup(code: unknown): Makeup | null {
+export function decodeMakeup(value: unknown): Makeup | null {
+  if (typeof value !== "string") return null;
+  const [code, ...colors] = value.split("|");
+  if (
+    colors.length !== 0 &&
+    (colors.length !== 2 || colors.some((c) => c !== "" && !isColor(c)))
+  )
+    return null;
   if (
     typeof code !== "string" ||
     code.length < MAKEUP_V1 ||
@@ -680,11 +767,15 @@ export function decodeMakeup(code: unknown): Makeup | null {
     if (!option || !/^[0-9]$/.test(code[i])) return null;
     Object.assign(out, { [key]: option.id });
   }
+  if (colors[0]) out.blush = colors[0];
+  if (colors[1]) out.highlight = colors[1];
   return out;
 }
 
 /** A look's makeup, or the default for looks from before the makeup bag. */
-export function makeupOf(look: Pick<Look, "makeup">): Makeup {
+export function makeupOf(look: {
+  makeup?: Look["makeup"] | undefined;
+}): Makeup {
   return decodeMakeup(look.makeup) ?? DEFAULT_MAKEUP;
 }
 
@@ -755,7 +846,9 @@ export function decodePiercings(code: unknown): Piercings | null {
 }
 
 /** A look's piercings, or none when it has no valid code. */
-export function piercingsOf(look: Pick<Look, "piercings">): Piercings {
+export function piercingsOf(look: {
+  piercings?: Look["piercings"] | undefined;
+}): Piercings {
   return decodePiercings(look.piercings) ?? NO_PIERCINGS;
 }
 
@@ -816,12 +909,12 @@ export function limbsOf(look: Pick<Look, "limbs">): Limbs {
 export type Look = {
   skin: IdOf<typeof SKINS>;
   hairStyle: HairStyle;
-  hairColor: IdOf<typeof HAIR_COLORS>;
-  lips: IdOf<typeof LIPS>;
+  hairColor: string;
+  lips: string;
   brows: IdOf<typeof BROWS>;
   outfit: Outfit;
-  outfitColor: IdOf<typeof OUTFIT_COLORS>;
-  shadow: IdOf<typeof EYESHADOWS>;
+  outfitColor: string;
+  shadow: string;
   /** encodeFace's code for the face sliders, body shape and eye color;
    * looks from before the 3D doll have none and wear DEFAULT_FACE. */
   face?: string;
@@ -946,9 +1039,9 @@ function isId(catalog: readonly Option[], value: unknown): boolean {
 }
 
 /**
- * Whether a value from storage or the network is a valid Look: own fields only,
- * every required field a catalog id, every optional field valid when present,
- * and no extra fields.
+ * Whether storage or network data is a valid Look: own fields only, catalog
+ * entries or RGB colors, valid optional codes, and no extra fields. Skin
+ * remains a catalog entry.
  */
 export function validateLook(value: unknown): value is Look {
   if (typeof value !== "object" || value === null) return false;
@@ -988,7 +1081,12 @@ export function validateLook(value: unknown): value is Look {
     (!hasPiercings || decodePiercings(fields.get("piercings")) !== null) &&
     (!hasFace || decodeFace(fields.get("face")) !== null) &&
     (!hasMakeup || decodeMakeup(fields.get("makeup")) !== null) &&
-    catalogs.every(([key, catalog]) => isId(catalog, fields.get(key)))
+    catalogs.every(
+      ([key, catalog]) =>
+        (["hairColor", "outfitColor", "lips", "shadow"].includes(key) &&
+          isColor(fields.get(key))) ||
+        isId(catalog, fields.get(key)),
+    )
   );
 }
 
@@ -1007,7 +1105,7 @@ export type Swimsuit = IdOf<typeof SWIMSUITS>;
 /** The Water Park look: its own save slot, so the outfit is never touched. */
 export type SwimLook = {
   style: Swimsuit;
-  color: IdOf<typeof OUTFIT_COLORS>;
+  color: string;
 };
 
 /** The swimsuit a new save starts with. */
@@ -1020,7 +1118,7 @@ export function validateSwim(value: unknown): value is SwimLook {
   return (
     fields.size === 2 &&
     isId(SWIMSUITS, fields.get("style")) &&
-    isId(OUTFIT_COLORS, fields.get("color"))
+    isColor(fields.get("color"))
   );
 }
 
@@ -1053,13 +1151,13 @@ export function isMood(value: unknown): value is Mood {
 /** The look a new save starts with; uses only free options. */
 export const DEFAULT_LOOK: Look = {
   skin: "#e6b48e",
-  hairStyle: "waves",
+  hairStyle: "long-waves",
   hairColor: "#1b1014",
-  lips: "lips-hot-pink-glam",
-  brows: "brows-y2k-thin",
+  lips: "lips-bare-balm",
+  brows: "brows-sculpted-espresso",
   outfit: "flares",
   outfitColor: "#ff2f9a",
-  shadow: "#d23cff",
+  shadow: "#8a5a3c",
 };
 
 /**

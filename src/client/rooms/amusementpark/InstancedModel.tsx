@@ -22,7 +22,7 @@ export function InstancedModel({
   /** Called every frame (after the elapsed seconds) to place each copy. */
   update: (place: PlaceCopy, elapsed: number) => void;
   /** Colors that tint the copies in turn (the model's own colors times these). */
-  tints?: readonly string[];
+  tints?: readonly string[] | undefined;
 }): JSX.Element {
   const gltf = useGLTF(url);
   const meshes = useMemo(() => {

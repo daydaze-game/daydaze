@@ -160,7 +160,6 @@ export function Grandstand() {
         length: 46,
         height: 0.5,
         depth: 7,
-        color: undefined,
       },
     ];
     // the fascia under the canopy edge, lit cyan
@@ -186,7 +185,6 @@ export function Grandstand() {
         length: 46,
         height: 0.05,
         depth: 6.6,
-        color: undefined,
       },
     ];
     const posts: Box[] = [-23, 23].map((x) => ({
@@ -208,7 +206,6 @@ export function Grandstand() {
         length: 7.6,
         height: 2.2,
         depth: 0.3,
-        color: undefined,
       },
     ];
     const bannerHangers: Box[] = BANNERS.map((b) => ({

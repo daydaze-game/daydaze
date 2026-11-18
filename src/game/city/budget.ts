@@ -5,7 +5,6 @@
 // it to the low tier's 250 draw calls and 300k triangles and checks every
 // model cost below against the shipped file.
 
-import { FAR_ROADS, FAR_ROAD_TRIANGLES } from "./far.ts";
 import { avenueWear, WEAR_TRIANGLES } from "./wear.ts";
 import { FOOD_CARTS, FOOD_DRAW_RANGE, VENDOR_RANGE } from "./vendors.ts";
 import { cellsWithin } from "./cells.ts";
@@ -39,8 +38,6 @@ import {
   WARM_LIGHTS,
 } from "./seasonSpots.ts";
 import { CITY_FLEET, shipModel } from "../ships.ts";
-import { BAY_TRIANGLES, HOUSE_MODELS, type BayInstance } from "./nyc.ts";
-import { LOT_SPECS, type PlacedLot } from "./districts.ts";
 import type { DreamSpot } from "./dream.ts";
 import { dreamTriangles } from "./dreamCosts.ts";
 import { ALL_GROWTH } from "./growth.ts";
@@ -346,9 +343,6 @@ function costOf(model: string): { tris: number; parts: number } {
  * roofs) and three train cars of about 1,600 triangles each. */
 const EL_TRIANGLES = elBoxes([]).length * 12 + 3 * 1600;
 const EL_DRAW_CALLS = 4 + 3;
-/** The far city's roads (far.ts): one flat strip each, all in one draw. */
-const FAR_ROAD_TOTAL = FAR_ROADS.length * FAR_ROAD_TRIANGLES;
-const FAR_ROAD_DRAW_CALLS = 1;
 /** The avenue's wear marks and the El's shade band (wear.ts): one draw each, always drawn. */
 const WEAR_TOTAL = avenueWear().length * WEAR_TRIANGLES + 2;
 const WEAR_DRAW_CALLS = 2;
@@ -519,34 +513,6 @@ const VIEW_WEDGE = (2 * Math.PI) / 3;
 /** Bays this near are always counted: the camera can swing round them. */
 const ALWAYS_SEEN = 6;
 
-/** The triangles of the bays in the worst view: bays are culled one by one
- * (InstancedMesh2), so only those inside the best wedge of `VIEW_WEDGE` count. */
-export function worstViewBayTriangles(
-  bays: readonly BayInstance[],
-  at: Vec2,
-): number {
-  return worstView(
-    bays.map((bay) => ({ x: bay.x, z: bay.z, cost: BAY_TRIANGLES[bay.kind] })),
-    at,
-  );
-}
-
-/** The same for the district lots (also culled one by one); the far ones
- * draw their twin. */
-export function worstViewLotTriangles(
-  lots: readonly PlacedLot[],
-  at: Vec2,
-): number {
-  return worstView(
-    lots.map((lot) => ({
-      x: lot.x,
-      z: lot.z,
-      cost: lot.far ? LOT_SPECS[lot.model].lo : LOT_SPECS[lot.model].tris,
-    })),
-    at,
-  );
-}
-
 /** Dream meshes use the same per-instance frustum culling as the old bays.
  * Count the most expensive view of their actual near/far geometry. */
 export function worstViewDreamTriangles(
@@ -621,8 +587,6 @@ export function lowTierCost(
   drawCalls: number;
   triangles: number;
   planTriangles: number;
-  bays: number;
-  lots: number;
   /** Triangles by part (plan, dream architecture, bays, lots, models by folder, ships,
    * queues, live, seasons, traffic, kerb cars, the El), to see what to trim. */
   parts: Record<string, number>;
@@ -678,19 +642,7 @@ export function lowTierCost(
     grown.set(g.kind, n + 1);
     add(growthModel(g.kind));
   }
-  // houses are drawn from their models: one draw call per part, 4 at most
-  const houseModels = new Set(plan.houses.map((h) => h.variant)).size;
-  let drawCalls =
-    EL_DRAW_CALLS +
-    FAR_ROAD_DRAW_CALLS +
-    WEAR_DRAW_CALLS +
-    drawCallsOf(plan) +
-    Math.min(houseModels, HOUSE_MODELS.length) * 4;
-  const allBays = plan.bays.reduce((n, b) => n + BAY_TRIANGLES[b.kind], 0);
-  const allLots = plan.lots.reduce(
-    (n, l) => n + (l.far ? LOT_SPECS[l.model].lo : LOT_SPECS[l.model].tris),
-    0,
-  );
+  let drawCalls = EL_DRAW_CALLS + WEAR_DRAW_CALLS + drawCallsOf(plan);
   const allDream = plan.dream.reduce((n, s) => n + dreamTriangles(s), 0);
   // The overview camera can see architecture on every side of the player.
   // Price all of it there, rather than a street camera's directional wedge.
@@ -700,23 +652,11 @@ export function lowTierCost(
   const planTriangles = trianglesOf(plan);
   // Architecture is culled per instance: count only its most expensive view.
   let triangles =
-    planTriangles -
-    allBays -
-    allLots -
-    allDream +
-    visibleDream +
-    worstViewBayTriangles(plan.bays, at) +
-    worstViewLotTriangles(plan.lots, at) +
-    EL_TRIANGLES +
-    FAR_ROAD_TOTAL +
-    WEAR_TOTAL;
+    planTriangles - allDream + visibleDream + EL_TRIANGLES + WEAR_TOTAL;
   const parts: Record<string, number> = {
-    plan: planTriangles - allBays - allLots - allDream,
+    plan: planTriangles - allDream,
     dream: visibleDream,
-    bays: worstViewBayTriangles(plan.bays, at),
-    lots: worstViewLotTriangles(plan.lots, at),
     el: EL_TRIANGLES,
-    farRoads: FAR_ROAD_TOTAL,
     wear: WEAR_TOTAL,
   };
   const tally = (key: string, tris: number) => {
@@ -775,8 +715,6 @@ export function lowTierCost(
     drawCalls,
     triangles,
     planTriangles,
-    bays: plan.bays.length,
-    lots: plan.lots.length,
     parts,
   };
 }

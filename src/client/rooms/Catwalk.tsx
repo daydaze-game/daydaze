@@ -300,6 +300,7 @@ function RunwayShow({ player }: { player: Player }) {
       else if (e.kind === "pose") turn = Math.sin(f * Math.PI) * 0.9;
       else turn = Math.sin(f * Math.PI * 2) * 0.3;
     });
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(0, RUNWAY.height, at.z);
     player.seat.yaw = at.yaw + turn;

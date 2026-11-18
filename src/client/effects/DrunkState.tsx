@@ -44,10 +44,13 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
   // what the canvas attributes last showed: each meter at two decimals
   const shownHigh = useRef({
-    levels: { high: -1, trip: -1, acid: -1, molly: -1 } satisfies Record<
-      Substance,
-      number
-    >,
+    levels: {
+      high: -1,
+      trip: -1,
+      acid: -1,
+      molly: -1,
+      cocaine: -1,
+    } satisfies Record<Substance, number>,
     under: "",
     doses: -1,
   });

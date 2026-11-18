@@ -26,21 +26,34 @@ import { GAIT_LIST } from "../../game/gaits.ts";
 import { naturalPace } from "../../game/dance/clips.ts";
 import { Environment, Lightformer } from "@react-three/drei";
 import { Suspense } from "react";
+import { BODY_TRAITS, cleanBody, DEFAULT_BODY } from "../../game/body.ts";
 
 // ?human=1 shows the 3D doll built in Blender instead of the toon doll
 const human = new URLSearchParams(location.search).get("human") === "1";
 
 const shot = new URLSearchParams(location.search).get("shot") ?? "lineup";
+const portraitLift =
+  new URLSearchParams(location.search).get("men") === "1" ? 0.08 : 0;
 // shots whose dolls walk in place, side on
 const walksInPlace = ["walk", "limbswalk", "trackwalk"].includes(shot);
 // ?still=1 draws 8 frames on demand and stops: SwiftShader queues GPU work,
 // so a live loop leaves a capture minutes behind
 const still = new URLSearchParams(location.search).get("still") === "1";
+// Neutral studio lighting for comparing anatomy and materials with references.
+const studio = new URLSearchParams(location.search).get("studio") === "1";
+const bodyParams = cleanBody(
+  Object.fromEntries(
+    BODY_TRAITS.map((trait) => {
+      const value = new URLSearchParams(location.search).get(trait);
+      return [trait, value === null ? DEFAULT_BODY[trait] : Number(value)];
+    }),
+  ),
+);
 
 /** `?hair=<style>` swaps the face shot's hair, for checking one style. */
 function hairParam(): Look["hairStyle"] {
   const id = new URLSearchParams(location.search).get("hair");
-  return HAIR_STYLES.find((h) => h.id === id)?.id ?? "waves";
+  return HAIR_STYLES.find((h) => h.id === id)?.id ?? DEFAULT_LOOK.hairStyle;
 }
 /** `?makeup=<code>` puts encodeMakeup's code on the face shots' doll. */
 function makeupParam(): Partial<Look> {
@@ -49,7 +62,7 @@ function makeupParam(): Partial<Look> {
   // `?face=<code>` likewise puts encodeFace's code on it (a monolid, say)
   const faceCode = q.get("face");
   // `?skin=<index>` picks a SKINS tone, to see skin marks on each
-  const skin = SKINS[Number(q.get("skin"))]?.id;
+  const skin = q.has("skin") ? SKINS[Number(q.get("skin"))]?.id : undefined;
   // `?men=1` puts the face and portrait shots on the masculine body, with
   // `?beard=` (a BEARDS id)
   const beard = BEARDS.find((b) => b.id === q.get("beard"))?.id;
@@ -275,12 +288,20 @@ const SHOTS = {
     target: [0, 0.85, 0] as const,
     fov: 32,
   },
+  // The same face and outfit at three weights, with shared fitted morphs.
+  builds: {
+    looks: [0, 1, 2].map(() => ({ ...DEFAULT_LOOK, outfit: "jeans" as const })),
+    x: (i: number) => (i - 1) * 1.25,
+    cam: [0, 0.95, 4.5] as const,
+    target: [0, 0.85, 0] as const,
+    fov: 32,
+  },
   face: {
-    looks: [{ ...LINEUP[0], hairStyle: hairParam(), ...makeupParam() }],
+    looks: [{ ...DEFAULT_LOOK, hairStyle: hairParam(), ...makeupParam() }],
     x: () => 0,
-    cam: [0, 1.5, 0.95] as const,
-    target: [0, 1.42, 0] as const,
-    fov: 22,
+    cam: [0, 1.57 + portraitLift, 1.1] as const,
+    target: [0, 1.53 + portraitLift, 0] as const,
+    fov: 25,
   },
   // the closet's eye tile (public/closet/eye-*.webp): the eyes, close up,
   // on a clear background (`?clear=1`)
@@ -599,12 +620,29 @@ function Probe({ count }: { count: number }) {
   const scene = useThree((s) => s.scene);
   const invalidate = useThree((s) => s.invalidate);
   const frames = useRef(0);
+  const settled = useRef(0);
   useFrame(() => {
     frames.current += 1;
-    if (still && frames.current < 8) invalidate();
+    let ready = true;
+    for (let i = 0; i < count; i++) {
+      const doll = scene.getObjectByName(`doll-${i}`);
+      let visible = false;
+      doll?.traverse((o) => {
+        if (!(o instanceof THREE.Mesh)) return;
+        let shown = true;
+        for (let p: THREE.Object3D | null = o; p; p = p.parent)
+          if (!p.visible) shown = false;
+        if (shown) visible = true;
+      });
+      if (!visible) ready = false;
+    }
+    settled.current = ready ? settled.current + 1 : 0;
+    if (still && settled.current < 12) invalidate();
     document.body.dataset.frames = String(frames.current);
-    if (frames.current !== 12) return;
+    document.body.dataset.ready = settled.current >= 10 ? "true" : "false";
+    if (settled.current !== 10) return;
     const dolls = Array.from({ length: count }, (_, i) =>
+      // eslint-disable-next-line no-restricted-syntax -- runs once at frame 12 for the screenshot measure, never in play
       measure(scene.getObjectByName(`doll-${i}`) ?? new THREE.Object3D()),
     );
     const total = measure(scene);
@@ -630,7 +668,7 @@ function Lab() {
         Reflect.set(window, "labScene", scene);
         camera.lookAt(plan.target[0], plan.target[1], plan.target[2]);
         gl.setClearColor(
-          "#07020b",
+          studio ? "#24232a" : "#07020b",
           new URLSearchParams(location.search).get("clear") === "1" ? 0 : 1,
         );
       }}
@@ -640,13 +678,13 @@ function Lab() {
           <Lightformer intensity={2} position={[0, 3, 4]} scale={[6, 3, 1]} />
           <Lightformer
             intensity={1.2}
-            color="#ff74d4"
+            color={studio ? "#ffffff" : "#ff74d4"}
             position={[-4, 1, -2]}
             scale={[3, 3, 1]}
           />
           <Lightformer
             intensity={1}
-            color="#7bdcff"
+            color={studio ? "#ffffff" : "#7bdcff"}
             position={[4, 1, -1]}
             scale={[3, 3, 1]}
           />
@@ -657,7 +695,7 @@ function Lab() {
       <directionalLight
         position={[-2, 1, -2]}
         intensity={0.5}
-        color="#ff74d4"
+        color={studio ? "#ffffff" : "#ff74d4"}
       />
       {plan.looks.map((look, i) => (
         <group
@@ -692,7 +730,12 @@ function Lab() {
                     ? roleMove("piggyback", i === 0 ? "lead" : "follow")
                     : DANCES[i % DANCES.length]
                 }
-                seed={i}
+                seed={shot === "builds" ? 0 : i}
+                body={
+                  shot === "builds"
+                    ? { ...bodyParams, weight: i * 50 }
+                    : bodyParams
+                }
                 // the face shot is a portrait of your own doll: she looks
                 // into the camera, as in the game's close zoom
                 own={shot === "face"}

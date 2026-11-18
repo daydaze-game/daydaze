@@ -24,7 +24,7 @@ test("every closet set is made of real shop items, with a reward", () => {
 });
 
 test("a set counts the pieces you own", () => {
-  const set = CLOSET_SETS[0]!;
+  const set = CLOSET_SETS[0];
   assert.deepEqual(setProgress(set, []), {
     owned: 0,
     total: set.items.length,
@@ -34,7 +34,7 @@ test("a set counts the pieces you own", () => {
 });
 
 test("a complete set pays its reward once; an incomplete one pays nothing", () => {
-  const set = CLOSET_SETS[0]!;
+  const set = CLOSET_SETS[0];
   const half = claimSet({ coins: 10, wardrobe: [], sets: [] }, set.id);
   assert.deepEqual(half, { ok: false, reason: "incomplete" });
   const done = claimSet({ coins: 10, wardrobe: set.items, sets: [] }, set.id);
@@ -71,7 +71,7 @@ test("stored album fields are cleaned: unknown places and sets drop out", () => 
     "karaoke",
   ]);
   assert.deepEqual(cleanVisited("karaoke"), []);
-  assert.deepEqual(cleanSets([CLOSET_SETS[0]!.id, "fake", null]), [
-    CLOSET_SETS[0]!.id,
+  assert.deepEqual(cleanSets([CLOSET_SETS[0].id, "fake", null]), [
+    CLOSET_SETS[0].id,
   ]);
 });

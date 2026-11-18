@@ -36,11 +36,11 @@ test("the showpieces stand inside the showroom, clear of every turntable, the de
   ];
   const plinths = SHOWPIECES.map((s) => rect(s.at, PLINTH));
   plinths.forEach((p, i) => {
-    assert.ok(p.x0 >= BOUNDS.x0 && p.x1 <= BOUNDS.x1, SHOWPIECES[i]!.id);
-    assert.ok(p.z0 >= BOUNDS.z0 && p.z1 <= BOUNDS.z1, SHOWPIECES[i]!.id);
-    others.forEach((o) => assert.ok(!overlap(p, o), SHOWPIECES[i]!.id));
+    assert.ok(p.x0 >= BOUNDS.x0 && p.x1 <= BOUNDS.x1, SHOWPIECES[i].id);
+    assert.ok(p.z0 >= BOUNDS.z0 && p.z1 <= BOUNDS.z1, SHOWPIECES[i].id);
+    others.forEach((o) => assert.ok(!overlap(p, o), SHOWPIECES[i].id));
   });
-  assert.ok(!overlap(plinths[0]!, plinths[1]!));
+  assert.ok(!overlap(plinths[0], plinths[1]));
   // each plinth blocks the floor
   assert.equal(BLOCKERS.length, DISPLAY.length + SHOWPIECES.length + 1);
 });

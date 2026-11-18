@@ -4,4 +4,3 @@
 // is gated on import.meta.env.DEV, so production builds drop all of it.
 export { DevPanel } from "./dev/DevPanel.tsx";
 export { DevProbe } from "./dev/DevProbe.tsx";
-export { useFreeCam } from "./dev/store.ts";

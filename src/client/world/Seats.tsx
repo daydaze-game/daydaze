@@ -97,6 +97,7 @@ export function Seats({
     });
     const start = seatPose(move, rootPose);
     player.seat = {
+      // eslint-disable-next-line no-restricted-syntax -- runs once, when the player takes the seat
       position: new THREE.Vector3(start.x, start.y, start.z),
       yaw: start.yaw,
       lie: seat.lie,

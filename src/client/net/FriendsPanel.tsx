@@ -40,9 +40,10 @@ export function FriendsPanel({
   }, [open]);
   const session = onlineSession();
   if (!open || !session) return null;
-  const act = async (done: Promise<boolean>) => {
-    await done;
-    await refreshFriends();
+  // click handlers can't await: refresh when the call settles, and a failed
+  // call just leaves the list as it was
+  const act = (done: Promise<boolean>): void => {
+    void done.then(() => refreshFriends()).catch(() => undefined);
   };
   return (
     <section className="home-panel friends-panel" aria-label="Friends">

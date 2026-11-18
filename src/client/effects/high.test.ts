@@ -65,3 +65,21 @@ test("a pill does nothing at 13+; at 18+ it reads molly at its peak", () => {
     setActiveTier("teen");
   }
 });
+
+test("a line does nothing at 13+; at 18+ it reads cocaine at its peak", () => {
+  setActiveTier("teen");
+  assert.equal(take("line"), false);
+  setActiveTier("adult");
+  try {
+    assert.equal(take("line"), true);
+    ageHigh(gameSeconds(DOSES.line.peak + 1));
+    assert.equal(getMeters().cocaine.level, DOSES.line.strength);
+    assert.equal(getMeters().cocaine.phase, "peak");
+    assert.equal(getMeters().molly.level, 0);
+    ageHigh(gameSeconds(DOSES.line.end));
+    assert.equal(getMeters().cocaine.level, 0);
+    assert.equal(dosesOnboard(), 0);
+  } finally {
+    setActiveTier("teen");
+  }
+});

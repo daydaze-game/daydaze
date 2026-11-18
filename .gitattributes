@@ -1,0 +1,17 @@
+# Per-path git behavior. Matches .editorconfig (LF everywhere).
+
+# Text is LF in the repo and on checkout, so a Windows or WSL copy never
+# turns scripts into CRLF.
+* text=auto eol=lf
+
+# Binary assets: never diffed, merged or normalized as text.
+*.glb binary
+*.hdr binary
+*.jpg binary
+*.ogg binary
+*.png binary
+*.webp binary
+*.zip binary
+
+# The lockfile is generated: collapse it in GitHub diffs and skip text diffs.
+package-lock.json -diff linguist-generated

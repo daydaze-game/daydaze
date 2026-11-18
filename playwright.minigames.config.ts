@@ -9,6 +9,8 @@ export default defineConfig({
   timeout: 60_000,
   fullyParallel: true,
   workers: 2,
+  // CI retries a failed test once; a pass on the retry is reported as flaky, not green
+  retries: process.env.CI ? 1 : 0,
   reporter: "list",
   outputDir: "/tmp/daydaze-minigames-test-results",
   use: {

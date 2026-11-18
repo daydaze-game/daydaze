@@ -138,7 +138,7 @@ export function useTrafficBodies(capacity: number): TrafficBodies {
       if (!gltf) throw new Error("wheel body not loaded");
       const { tyre, rim } = bodyGeometry(gltf.scene);
       const mesh = new THREE.InstancedMesh(
-        mergedBody({ tyre, rim }),
+        mergedBody({ ...(tyre && { tyre }), ...(rim && { rim }) }),
         material,
         capacity * WHEELS_PER_CAR,
       );

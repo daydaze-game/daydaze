@@ -600,7 +600,7 @@ const SUBURB_BUILDINGS: readonly Building[] = SUBURB_FRONT.map(
       height: b.h,
       style: b.style,
       color: b.color,
-      sign: b.sign,
+      ...(b.sign ? { sign: b.sign } : {}),
       ...(b.door ? { door: b.door } : {}),
     };
   },
@@ -1045,13 +1045,10 @@ const BEACH_FRONT: readonly {
 
 // Beachside, one block back from the boardwalk: pastel motels and beach
 // cottages along Palm Court, a lane behind the beach front. They face south
-// onto it; near the player each lot is one of the Quaternius motel models
-// (houseAt in nyc.ts), far away a pastel box. The runs keep clear of the two
+// onto it; near the player each lot is a pastel box. The runs keep clear of the two
 // cross streets (x = -64 and 64), the Splash Zone gate and the food stalls' strips (x -81 to
 // -74 and 74 to 81).
 const MOTEL_Z0 = SHORE_Z - 72;
-/** The lots' front edge, on the lane's sidewalk. */
-export const MOTEL_Z1 = SHORE_Z - 52;
 /** A motel block's depth, its height (two floors and a parapet) and the room
  * kept at one end for its stair, meters. */
 export const MOTEL_DEPTH = 7;
@@ -1512,7 +1509,7 @@ const ARTS_BUILDINGS: readonly Building[] = ARTS_FRONT.map(
     height: b.h,
     style: b.style,
     color: b.color,
-    sign: b.sign,
+    ...(b.sign ? { sign: b.sign } : {}),
     ...(b.door ? { door: b.door } : {}),
   }),
 );
@@ -1915,7 +1912,7 @@ const UPTOWN_BUILDINGS: readonly Building[] = UPTOWN_FRONT.map(
     height: b.h,
     style: b.style,
     color: b.color,
-    sign: b.sign,
+    ...(b.sign ? { sign: b.sign } : {}),
   }),
 );
 
@@ -2007,7 +2004,7 @@ const BEACH_BUILDINGS: readonly Building[] = [
     height: b.h,
     style: b.style ?? "deck",
     color: b.color,
-    sign: b.sign,
+    ...(b.sign ? { sign: b.sign } : {}),
     ...(b.door ? { door: b.door } : {}),
   })),
   // each motel is a two-story strip at the back of its lot (a stair on one

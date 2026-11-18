@@ -7,7 +7,6 @@ import { test } from "node:test";
 import { CHAT_GROUPS, nearestChatGroups } from "./chatGroups.ts";
 import { CHAT_DOLLS, CHAT_RADIUS } from "./tuning.ts";
 import { CITY_SPAWN } from "./layout.ts";
-import { HOUSE_MODELS, HOUSE_MODEL_TRIANGLES } from "./nyc.ts";
 import { DREAM_KINDS, DREAM_LANDMARKS, type DreamSpot } from "./dream.ts";
 import { DREAM_LANDMARK_COST } from "./dreamLandmarkCosts.generated.ts";
 import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
@@ -82,12 +81,6 @@ test("every dream family and its distant twin match generated costs and one draw
     }
 });
 
-test("each house model's triangle count matches the shipped GLB", () => {
-  HOUSE_MODELS.forEach((path, i) =>
-    assert.equal(HOUSE_MODEL_TRIANGLES[i], glbCost(path).tris, path),
-  );
-});
-
 test("the seasonal models' costs match the shipped GLBs", () => {
   for (const [path, cost] of Object.entries(SEASON_MODEL))
     assert.deepEqual(cost, glbCost(path), path);
@@ -129,20 +122,14 @@ test("pulled out to the overview, the low tier draws distant architecture and ya
       if (cost.triangles > worst.tris) worst = { tris: cost.triangles, at };
     }
   assert.ok(worst.tris < 300_000, `${worst.tris} triangles at ${worst.at}`);
-  // Sculpted architecture remains present in the overview without legacy bays.
-  const at = CITY_SPAWN.position;
-  assert.ok(
-    lowTierCost(at, false).planTriangles > 0 &&
-      lowTierCost(at, false).bays === 0,
-  );
+  // Sculpted architecture remains present in the overview.
+  assert.ok(lowTierCost(CITY_SPAWN.position, false).planTriangles > 0);
 });
 
 test("the low tier's cost counts its dream architecture", () => {
   const at = CITY_SPAWN.position;
   const cost = lowTierCost(at);
-  assert.equal(cost.bays, 0);
-  assert.equal(cost.lots, 0);
-  assert.ok(cost.parts.dream! > 0);
+  assert.ok(cost.parts.dream > 0);
   assert.ok(cost.triangles > cost.planTriangles);
 });
 
@@ -222,8 +209,8 @@ test("traffic is priced from the shipped car bodies, more on a road than on a la
       assert.ok(modelsInBudget().includes(path), path);
   // a distance twin is under 1,500 triangles, a near model under 6,000
   for (const key of BODY_KEYS) {
-    assert.ok(MODEL_COST[`cars/${key}-lo`]!.tris <= 1500, key);
-    assert.ok(MODEL_COST[`cars/${key}`]!.tris <= 6000, key);
+    assert.ok(MODEL_COST[`cars/${key}-lo`].tris <= 1500, key);
+    assert.ok(MODEL_COST[`cars/${key}`].tris <= 6000, key);
   }
   const lawn: Vec2 = [254, -264];
   const crossing: Vec2 = [-144, 0];
@@ -232,7 +219,7 @@ test("traffic is priced from the shipped car bodies, more on a road than on a la
   assert.ok(onRoad.triangles > onLawn.triangles);
   // at the wheel: the dearest road car's near model is in the road price
   const dearestOwn = Math.max(
-    ...Object.values(ROSTER_BODY).map((k) => MODEL_COST[`cars/${k}`]!.tris),
+    ...Object.values(ROSTER_BODY).map((k) => MODEL_COST[`cars/${k}`].tris),
   );
   assert.ok(onRoad.triangles >= dearestOwn);
   assert.ok(onLawn.triangles < dearestOwn);
@@ -324,7 +311,7 @@ test("distant landmark roofs retain the detailed skyline height", () => {
     const entry = metadata[kind];
     assert.ok(entry, kind);
     assert.ok(
-      Math.abs(entry.near.bounds.max[1]! - entry.far.bounds.max[1]!) < 0.3,
+      Math.abs(entry.near.bounds.max[1] - entry.far.bounds.max[1]) < 0.3,
       `${kind} loses its roof or spire when switching detail`,
     );
   }

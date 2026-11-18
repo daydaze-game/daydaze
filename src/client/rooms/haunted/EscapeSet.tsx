@@ -472,7 +472,7 @@ function Scares() {
           <mesh key={x} position={[x, 0.12, 0.035]}>
             <circleGeometry args={[0.025, 10]} />
             <meshBasicMaterial
-              ref={x < 0 ? eyes : undefined}
+              ref={x < 0 ? eyes : null}
               color={DIM}
               toneMapped={false}
             />
@@ -564,6 +564,7 @@ export function EscapeSet({ player }: { player: Player }) {
     }
     if (!took.current) {
       const mine: GameSeat = {
+        // eslint-disable-next-line no-restricted-syntax -- runs once, when the player takes the seat
         position: new THREE.Vector3(...CENTER),
         yaw: Math.PI,
         stride: false,

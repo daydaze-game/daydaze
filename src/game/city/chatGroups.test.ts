@@ -69,7 +69,7 @@ test("the nearest groups come first and never add up to more than the dolls allo
       (CHAT_GROUPS[i]?.at[1] ?? 0) - at[1],
     );
   for (let k = 1; k < picked.length; k++)
-    assert.ok(d(picked[k - 1] as number) <= d(picked[k] as number));
+    assert.ok(d(picked[k - 1]) <= d(picked[k]));
   assert.deepEqual(nearestChatGroups(at, 200, 1).length <= 1, true);
   // a group that is not out is not offered
   assert.deepEqual(

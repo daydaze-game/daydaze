@@ -17,7 +17,7 @@ import { hash, pick } from "./hash.ts";
 import { STAGE_BLANKETS } from "./blankets.ts";
 import { AUDIENCE, BAND_SHELL, GROUND } from "./park.ts";
 
-export { BLANKET_SEATS, STAGE_BLANKETS, type BlanketSeat } from "./blankets.ts";
+export { BLANKET_SEATS, STAGE_BLANKETS } from "./blankets.ts";
 
 /** Sets start every half hour from 10:00 until 17:30, on the player's clock. */
 export const FIRST_SET = 10 * 3600;
@@ -199,9 +199,6 @@ export const BAND: readonly Musician[] = [
     look: lookOf(705),
   },
 ];
-
-/** The bandleader's place, for the chat. */
-export const BANDLEADER = BAND[0];
 
 /** Folding chairs in two rows at the back of the audience, facing the stage. */
 export const CHAIRS: readonly { at: Vec2; yaw: number }[] = [
