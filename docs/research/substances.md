@@ -9,6 +9,10 @@ Primary sources (cited per section by key):
 
 - [PW-ALC] <https://psychonautwiki.org/wiki/Alcohol>
 - [PW-CAN] <https://psychonautwiki.org/wiki/Cannabis>
+- [SPINDLE-2018] <https://pmc.ncbi.nlm.nih.gov/articles/PMC6324384/> (Spindle et al. 2018, JAMA Netw Open: smoked vs vaporized cannabis, 17 infrequent users, 10 and 25 mg THC)
+- [WATTS-2021] Watts et al. 2021, Nature Plants: sativa and indica labels are genetically indistinct (see [PW-CAN])
+- [SMITH-2022] <https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0267498> (Smith et al. 2022, PLOS ONE: 89,923 US flower samples; terpene chemotypes do not map onto the labels)
+- [FARM-BILL] 2018 Farm Bill: hemp is cannabis with no more than 0.3% delta-9 THC by dry weight; delta-8 sold as hemp is a legal gray area, and retailer sources put it at about 50-70% of delta-9's potency (user reports, no clinical trial)
 - [PW-PSI] <https://psychonautwiki.org/wiki/Psilocybin_mushrooms>
 - [PW-LSD] <https://psychonautwiki.org/wiki/LSD>
 - [PW-MDMA] <https://psychonautwiki.org/wiki/MDMA>
@@ -141,6 +145,39 @@ at high dose self-conscious, paranoid, withdrawn. Smoked in a group: passing, la
 ### Comedown
 
 Sleepiness, mild fog, hunger; edible "hangover" grogginess into next morning [PW-CAN].
+
+### Vaporized [SPINDLE-2018] [PW-CAN]
+
+PW-CAN has no vaporized row. Spindle et al.: blood THC peaked at the first sample (10 min) and
+was back to zero within about 4 h; vaporizing gave a higher peak than smoking at the same dose
+(25 mg: 14.4 vs 10.2 ng/mL). Subjective "drug effect" peaked within the first hour (10-30 min)
+and lasted about 6 h at the lab's 10-25 mg doses. Two of 17 vomited at 25 mg, one per method.
+Modeled as smoked-fast: felt in about a minute, peak by 10 min, held to 35 min, gone by 2.5 h.
+The tail is shorter than the lab's because a few puffs from a cart are a smaller dose than a
+joint (user reports; no clinical study of pen-sized doses). No smoke, so no cough.
+
+### Strains: the sativa and indica labels [PW-CAN] [WATTS-2021] [SMITH-2022]
+
+The folk story: sativa is a bright, talkative "head high"; indica is a heavy, sleepy "body
+high" ("in da couch"). Honest status: the labels are **unreliable**. Sativa- and indica-labeled
+samples are genetically indistinct, and the terpene chemotypes do not line up with the labels;
+the labels only loosely track scent (sativa with bergamotene and farnesene). THC %, CBD and the
+terpene profile predict effects better. The game uses the labels anyway, as a **flavor
+modifier** players already know from dispensaries, and keeps them small: a strain scales
+strength and onset (sativa and indica a little, hemp a lot) and picks a body style; it
+never changes the rest of the timeline.
+Hybrid is the unlabeled default.
+
+### Hemp (gas station) versus dispensary [FARM-BILL]
+
+Gas stations and smoke shops sell hemp: flower and pre-rolls at or under 0.3% delta-9, CBD
+products (little or no intoxication), delta-8 gummies and carts (about 50-70% of delta-9's
+potency, user reports) and hemp-derived delta-9 gummies (5-15 mg a serving). Dispensary
+products are tested, labeled with THC %, and stronger. The game models hemp as a weaker
+"strain" (about 0.45 of a hybrid's strength), to be sold at the gas-station counter; the
+dispensary sells every other strain (the inventory work, a later change). A federal hemp redefinition scheduled for November 2026 (a 0.4 mg per container total
+THC limit; retailer sources, not confirmed): the game is fiction and ignores it. Gas-station sales are 18+
+only here.
 
 ### Dangerous combos & hints
 

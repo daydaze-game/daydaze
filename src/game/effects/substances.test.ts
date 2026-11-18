@@ -13,10 +13,15 @@ import {
   gameSeconds,
   highParams,
   isDose,
+  isStrain,
   phaseOf,
+  profileOf,
   readMeters,
   soberMeters,
   spent,
+  STRAIN_BODY,
+  STRAIN_MODS,
+  STRAINS,
   strongest,
   SUBSTANCES,
   type Taken,
@@ -113,12 +118,12 @@ test("the body shows the strongest felt substance, in its phase", () => {
   const m = soberMeters();
   assert.equal(strongest(m), null);
   assert.equal(bodyOf(m), null);
-  m.high = { level: 0.1, phase: "peak" };
+  m.high = { level: 0.1, phase: "peak", strain: "hybrid" };
   assert.equal(strongest(m), null);
-  m.high = { level: 0.3, phase: "peak" };
+  m.high = { level: 0.3, phase: "peak", strain: "hybrid" };
   assert.equal(strongest(m), "high");
   assert.equal(bodyOf(m), BODY.high.peak);
-  m.trip = { level: 0.5, phase: "comeup" };
+  m.trip = { level: 0.5, phase: "comeup", strain: "hybrid" };
   assert.equal(bodyOf(m), BODY.trip.comeup);
   // mushrooms' come-up signature is the yawn
   assert.ok(BODY.trip.comeup.tics.includes("yawn"));
@@ -135,11 +140,21 @@ test("every body clip is baked; loops are core idles, played calmer than sober",
       }
       for (const id of body.tics) assert.ok(clipOf(id), id);
     }
+  for (const [strain, phases] of Object.entries(STRAIN_BODY))
+    for (const [phase, body] of Object.entries(phases)) {
+      assert.ok(body.loops.length > 0 && body.tics.length > 0, strain);
+      assert.ok(body.rate > 0.5 && body.rate <= 1.3, `${strain} ${phase}`);
+      for (const id of body.loops) {
+        assert.equal(clipOf(id)?.kind, "idle", id);
+        assert.equal(clipOf(id)?.pack, "core", id);
+      }
+      for (const id of body.tics) assert.ok(clipOf(id), id);
+    }
 });
 
 test("the trip breathes and cycles color; reduced motion keeps only color", () => {
   const m = soberMeters();
-  m.trip = { level: 1, phase: "peak" };
+  m.trip = { level: 1, phase: "peak", strain: "hybrid" };
   const full = highParams(m, 1, false);
   assert.equal(full.breathe, BREATHE_AMOUNT);
   assert.equal(full.hue, 1);
@@ -148,7 +163,7 @@ test("the trip breathes and cycles color; reduced motion keeps only color", () =
   assert.equal(calm.breathe, 0);
   assert.equal(calm.hue, 1);
   assert.equal(calm.drift, 0);
-  m.high = { level: 1, phase: "peak" };
+  m.high = { level: 1, phase: "peak", strain: "hybrid" };
   assert.deepEqual(highParams(m, 0, false), {
     glow: 0,
     hue: 0,
@@ -191,7 +206,7 @@ test("a tab raises acid and leaves the trip alone", () => {
 
 test("acid is radiant, geometric and leaves tracers; calm keeps only color", () => {
   const m = soberMeters();
-  m.acid = { level: 0.65, phase: "peak" };
+  m.acid = { level: 0.65, phase: "peak", strain: "hybrid" };
   const full = highParams(m, 1, false);
   assert.ok(full.radiance > 0 && full.geometry > 0 && full.tracer > 0);
   assert.ok(full.tracer < full.geometry);
@@ -246,13 +261,13 @@ test("a pill raises molly, leaves acid and the trip alone, and two add up", () =
 
 test("molly glows, leaves faint tracers and wiggles the eyes; no geometry", () => {
   const m = soberMeters();
-  m.molly = { level: 0.6, phase: "peak" };
+  m.molly = { level: 0.6, phase: "peak", strain: "hybrid" };
   const full = highParams(m, 1, false);
   assert.ok(full.glow > 0 && full.radiance > 0);
   assert.ok(full.tracer > 0 && full.wiggle > 0);
   assert.equal(full.geometry, 0);
   const acid = soberMeters();
-  acid.acid = { level: 0.6, phase: "peak" };
+  acid.acid = { level: 0.6, phase: "peak", strain: "hybrid" };
   assert.ok(full.tracer < highParams(acid, 1, false).tracer);
   // reduced motion drops the movement and keeps the color
   const calm = highParams(m, 1, true);
@@ -306,9 +321,119 @@ test("a line raises cocaine, leaves the rest alone, and two add up", () => {
 
 test("cocaine does not bend the screen", () => {
   const m = soberMeters();
-  m.cocaine = { level: 1, phase: "peak" };
+  m.cocaine = { level: 1, phase: "peak", strain: "hybrid" };
   assert.deepEqual(
     highParams(m, 1, false),
     highParams(soberMeters(), 1, false),
   );
+});
+
+test("a vape is felt fast, peaks early and is gone sooner than a joint", () => {
+  const v = DOSES.vape;
+  assert.equal(v.substance, "high");
+  assert.ok(v.onset < v.peak && v.peak < v.peakEnd && v.peakEnd < v.end);
+  // blood THC peaks at 10 min and the effect within the hour [SPINDLE-2018]
+  assert.ok(v.onset <= 2 && v.peak <= 15 && v.peakEnd <= 60);
+  assert.ok(v.end >= 90 && v.end <= DOSES.joint.end);
+  assert.ok(v.strength > 0 && v.strength <= DOSES.joint.strength);
+});
+
+test("strain modifiers stay small and keep every timeline in order", () => {
+  for (const strain of STRAINS) {
+    const m = STRAIN_MODS[strain];
+    assert.ok(m.strength > 0 && m.strength <= 1.1, strain);
+    assert.ok(m.onset >= 0.8 && m.onset <= 1.2, strain);
+    for (const dose of Object.keys(DOSES).filter(isDose)) {
+      const p = profileOf(dose, strain);
+      assert.ok(p.onset < p.peak && p.strength <= 1, `${dose} ${strain}`);
+    }
+  }
+  // only weed doses are scaled
+  assert.equal(profileOf("tab", "hemp"), DOSES.tab);
+  assert.equal(profileOf("joint"), profileOf("joint", "hybrid"));
+});
+
+test("hemp is weaker than hybrid; sativa stands livelier than indica", () => {
+  assert.ok(profileOf("joint", "hemp").strength < 0.6 * DOSES.joint.strength);
+  assert.equal(profileOf("joint", "hybrid").strength, DOSES.joint.strength);
+  const sativa = STRAIN_BODY.sativa;
+  const indica = STRAIN_BODY.indica;
+  assert.ok(sativa && indica);
+  for (const phase of ["comeup", "peak", "comedown"] as const)
+    assert.ok(sativa[phase].rate > indica[phase].rate, phase);
+  assert.ok(indica.comedown.rate <= 0.7);
+  assert.ok(indica.peak.tics.includes("consume"));
+});
+
+test("a strain flows from the dose to the meter and the body", () => {
+  const at = gameSeconds(DOSES.joint.peak) + 1;
+  const hybrid = readMeters([{ dose: "joint", at: 0 }], at, soberMeters());
+  const sativa = readMeters(
+    [{ dose: "joint", at: 0, strain: "sativa" }],
+    at,
+    soberMeters(),
+  );
+  assert.equal(hybrid.high.strain, "hybrid");
+  assert.equal(sativa.high.strain, "sativa");
+  // a Taken without a strain behaves exactly as it always did
+  assert.equal(hybrid.high.level, DOSES.joint.strength);
+  assert.equal(bodyOf(hybrid), BODY.high.peak);
+  assert.equal(bodyOf(sativa), STRAIN_BODY.sativa?.peak);
+  assert.equal(spent({ dose: "joint", at: 0 }, at), false);
+  // hemp stands like hybrid, only fainter
+  const hemp = readMeters(
+    [{ dose: "joint", at: 0, strain: "hemp" }],
+    at,
+    soberMeters(),
+  );
+  assert.ok(hemp.high.level < hybrid.high.level);
+  assert.equal(bodyOf(hemp), BODY.high.peak);
+});
+
+test("indica glows heavier and sativa's color pops; hybrid is unchanged", () => {
+  const look = (strain: "hybrid" | "sativa" | "indica") => {
+    const m = soberMeters();
+    m.high = { level: 0.5, phase: "peak", strain };
+    return highParams(m, 1, false);
+  };
+  const [hybrid, sativa, indica] = [
+    look("hybrid"),
+    look("sativa"),
+    look("indica"),
+  ];
+  assert.ok(indica.glow > hybrid.glow);
+  assert.equal(indica.radiance, hybrid.radiance);
+  assert.ok(sativa.radiance > hybrid.radiance);
+  assert.equal(sativa.glow, hybrid.glow);
+  assert.equal(hybrid.radiance, 0);
+});
+
+test("the meter's strain follows the dose felt most, and resets when sober", () => {
+  const stack: Taken[] = [
+    { dose: "edible", at: 0, strain: "hemp" },
+    { dose: "joint", at: 0 },
+  ];
+  const at = gameSeconds(DOSES.joint.peak) + 1;
+  const m = readMeters(stack, at, soberMeters());
+  assert.equal(m.high.strain, "hybrid");
+  const hempFirst = readMeters(
+    [
+      { dose: "joint", at: 0, strain: "hemp" },
+      { dose: "vape", at: 0 },
+    ],
+    at,
+    soberMeters(),
+  );
+  assert.equal(hempFirst.high.strain, "hybrid");
+  readMeters([], at, m);
+  assert.equal(m.high.strain, "hybrid");
+  const indica = readMeters(
+    [{ dose: "joint", at: 0, strain: "indica" }],
+    at,
+    soberMeters(),
+  );
+  readMeters([], at, indica);
+  assert.equal(indica.high.strain, "hybrid");
+  assert.equal(isStrain("sativa"), true);
+  assert.equal(isStrain("toString"), false);
 });
