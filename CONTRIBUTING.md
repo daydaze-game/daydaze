@@ -34,20 +34,20 @@ the `__dd` console handles and every URL flag.
 Run these before you push; CI (`.github/workflows/ci.yml`) runs the same on
 every push and pull request to `main` and fails fast.
 
-| Command | What it checks |
-| --- | --- |
-| `npm run lint` | ESLint; the rules, and why each is on, are in `eslint.config.mjs` |
-| `npm run lint:md` | markdownlint-cli2 on the Markdown docs (rules in `.markdownlint-cli2.jsonc`) |
-| `npm run lint:dead` | Knip: unused files, exports and dependencies (`knip.jsonc`) |
-| `npm run lint:headers` | every code file starts with a header comment |
-| `npm run lint:deps` | dependency-cruiser: the layer rules in `.dependency-cruiser.cjs` (game is pure, no cycles) |
+| Command                 | What it checks                                                                                                                                                                      |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run lint`          | ESLint; the rules, and why each is on, are in `eslint.config.mjs`                                                                                                                   |
+| `npm run lint:md`       | markdownlint-cli2 on the Markdown docs (rules in `.markdownlint-cli2.jsonc`)                                                                                                        |
+| `npm run lint:dead`     | Knip: unused files, exports and dependencies (`knip.jsonc`)                                                                                                                         |
+| `npm run lint:headers`  | every code file starts with a header comment                                                                                                                                        |
+| `npm run lint:deps`     | dependency-cruiser: the layer rules in `.dependency-cruiser.cjs` (game is pure, no cycles)                                                                                          |
 | `npm run lint:spelling` | cspell, American English only; add a legitimate word (a name, a Tagalog dish) to `cspell-words.txt`, one per line in sorted order, and fix real typos and British spellings instead |
-| `npm run format:check` | Prettier (`npm run format` fixes) |
-| `npm run typecheck` | strict TypeScript for the client, game logic and Worker |
-| `npm test` | unit tests (Node's test runner) |
-| `npm run test:coverage` | the same, with a coverage report in `coverage/` and the [coverage minimums](#coverage-minimums) enforced |
-| `npm run build` | the production bundle in `dist/` |
-| `npm run verify` | every check in this table, then the build and the perf budget: the merge gate |
+| `npm run format:check`  | Prettier (`npm run format` fixes)                                                                                                                                                   |
+| `npm run typecheck`     | strict TypeScript for the client, game logic and Worker                                                                                                                             |
+| `npm test`              | unit tests (Node's test runner)                                                                                                                                                     |
+| `npm run test:coverage` | the same, with a coverage report in `coverage/` and the [coverage minimums](#coverage-minimums) enforced                                                                            |
+| `npm run build`         | the production bundle in `dist/`                                                                                                                                                    |
+| `npm run verify`        | every check in this table, then the build and the perf budget: the merge gate                                                                                                       |
 
 ### Coverage minimums
 
@@ -124,7 +124,7 @@ Browser and server suites are slower; run the parts you touched:
 
 - [Conventional Commits](https://www.conventionalcommits.org/):
   `type(scope): description`, for example `feat(net): add room copy
-  directory` or `fix(audio): resume suspended context`. Types: `feat`,
+directory` or `fix(audio): resume suspended context`. Types: `feat`,
   `fix`, `refactor`, `perf`, `test`, `docs`, `chore`, `ci`.
 - Small, atomic commits: one logical change each.
 - Branches: `feat/<name>`, `fix/<name>` or `docs/<name>`. Rebase on `main`
