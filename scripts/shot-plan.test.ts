@@ -100,7 +100,7 @@ test("shards deal round-robin and never come out empty", () => {
 
 test("the gallery groups images and shows their numbers", () => {
   const md = galleryMarkdown(
-    ["tour-room-city.png", "yacht.png", "stats.jsonl", "tour-spot-pulse.png"],
+    ["tour-room-city.jpg", "yacht.png", "stats.jsonl", "tour-spot-pulse.jpg"],
     parseStats(
       '{"name":"yacht","frames":9,"calls":120,"triangles":45678,"seconds":40}\n{"broken\n',
     ),

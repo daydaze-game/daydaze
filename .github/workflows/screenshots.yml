@@ -19,7 +19,7 @@ on:
       shards:
         description: Parallel browser jobs
         required: false
-        default: 6
+        default: 8
         type: number
   # pr-screenshots.yml calls this with the shots a pull request should show
   workflow_call:
@@ -66,7 +66,7 @@ jobs:
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
         env:
           SHOTS: ${{ inputs.shots || 'tour' }}
-          SHARDS: ${{ inputs.shards || 6 }}
+          SHARDS: ${{ inputs.shards || 8 }}
   shots:
     needs: plan
     timeout-minutes: 90
@@ -154,6 +154,14 @@ jobs:
             fi
             rm -rf "site/$slug" && mkdir -p "site/$slug"
             cp shots/*.png shots/stats.jsonl "site/$slug/" 2>/dev/null || true
+            # JPEGs are a quarter the size, kinder to a phone and to the repo;
+            # the PNG originals stay in the screenshots artifact
+            if command -v ffmpeg > /dev/null; then
+              for png in "site/$slug"/*.png; do
+                [ -e "$png" ] || continue
+                ffmpeg -loglevel error -y -i "$png" -q:v 3 "${png%.png}.jpg" && rm "$png"
+              done
+            fi
             node --experimental-strip-types scripts/shot-plan.ts --gallery "site/$slug" "$REF" "$SHA"
             rm -f "site/$slug/stats.jsonl"
             # drop the folders of branches that are gone

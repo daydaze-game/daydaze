@@ -15,7 +15,7 @@
 // For the workflow, `scripts/screenshots.ts --matrix "<tokens>" <shards>`
 // prints the shards (it owns the registry), and
 //   node --experimental-strip-types scripts/shot-plan.ts --gallery <dir> <ref> <sha>
-//     writes <dir>/README.md: a grid of <dir>/*.png with <dir>/stats.jsonl numbers
+//     writes <dir>/README.md: a grid of <dir>/*.{png,jpg} with <dir>/stats.jsonl numbers
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mayEnter } from "../src/game/age.ts";
 import { BUILDINGS } from "../src/game/city/layout.ts";
@@ -183,7 +183,7 @@ export function galleryMarkdown(
   meta: { ref: string; sha: string; repo: string; time: string },
 ): string {
   const byName = new Map(stats.map((s) => [s.name, s]));
-  const images = files.filter((f) => f.endsWith(".png")).sort();
+  const images = files.filter((f) => /\.(png|jpg)$/.test(f)).sort();
   const lines = [
     `# Screenshots: ${meta.ref}`,
     "",
@@ -202,7 +202,7 @@ export function galleryMarkdown(
       "| --- | --- |",
     );
     const cells = group.map((f) => {
-      const name = f.slice(0, -".png".length);
+      const name = f.replace(/\.(png|jpg)$/, "");
       const s = byName.get(name);
       const numbers = s
         ? `<br>${s.calls} calls, ${Math.round(s.triangles / 1000)}k triangles`
