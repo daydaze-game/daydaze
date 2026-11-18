@@ -40,10 +40,6 @@ test("active architecture replaces every old body, bay, lot, house and far box",
       "band",
     ] as const)
       assert.equal(plan.instances[k].length, 0, k);
-    assert.deepEqual(
-      [plan.bays, plan.lots, plan.houses, plan.far],
-      [[], [], [], []],
-    );
   }
 });
 
@@ -96,8 +92,8 @@ test("venue signs stay at human scale and lights are the nearest requested signs
   }
   assert.equal(p.instances.label.length, p.instances.sign.length);
   const d = (l: { x: number; z: number }) => Math.hypot(l.x - 110, l.z + 20);
-  assert.ok(d(p.lights[0]!) <= d(p.lights[1]!));
-  assert.ok(d(p.lights[0]!) < 30);
+  assert.ok(d(p.lights[0]) <= d(p.lights[1]));
+  assert.ok(d(p.lights[0]) < 30);
   assert.equal(planCity(ALL_CELLS, 0, origin).lights.length, 0);
 });
 

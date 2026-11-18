@@ -3,7 +3,6 @@
 // lechon carving station on the west wall, and a videoke corner in the
 // east. Its door and spawn are the food interiors' (food/interiors.ts), so
 // the street storefront lands you in the same place.
-import { INTERIOR_EXIT, INTERIOR_SPAWN } from "./food/interiors.ts";
 import type { Vec2 } from "./walk.ts";
 
 export const FLOOR_BOUNDS = { x0: -7, x1: 7, z0: -6, z1: 5.6 } as const;
@@ -42,9 +41,6 @@ export const STOVES: readonly { x: number; z: number; cook: Vec2 }[] = [
 ];
 /** Half a stove's width and depth. */
 export const STOVE_HALF = { x: 0.6, z: 0.4 } as const;
-
-export const SPAWN = INTERIOR_SPAWN;
-export const EXIT = INTERIOR_EXIT;
 
 function box(x0: number, z0: number, x1: number, z1: number): Vec2[] {
   return [

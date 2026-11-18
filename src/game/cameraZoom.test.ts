@@ -75,8 +75,8 @@ test("zooming keeps the camera's direction to her", () => {
   const { camera } = zoomAbout([3, 5, 4], [0, 1, 0], focus, 0.5, MIN_ZOOM, 18);
   const before = [3, 4, 4].map((v) => v / Math.hypot(3, 4, 4));
   const after = [camera[0], camera[1] - 1, camera[2]];
-  const len = Math.hypot(after[0]!, after[1]!, after[2]!);
-  after.forEach((v, i) => assert.ok(Math.abs(v / len - before[i]!) < 1e-9));
+  const len = Math.hypot(after[0], after[1], after[2]);
+  after.forEach((v, i) => assert.ok(Math.abs(v / len - before[i]) < 1e-9));
 });
 
 // ---------------------------------------------------------------- portraits
@@ -228,7 +228,7 @@ test("already in front at eye level the camera stays; straight above her it is l
     Math.cos(0.4) * r,
   ];
   const same = swingToFront(front, face, 0.4, 1);
-  assert.ok(same.every((v, i) => Math.abs(v - front[i]!) < 1e-9));
+  assert.ok(same.every((v, i) => Math.abs(v - front[i]) < 1e-9));
   const above: Vec3 = [0, 5, 0];
   assert.deepEqual(swingToFront(above, face, 1, 1), above);
 });

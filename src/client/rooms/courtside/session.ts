@@ -29,7 +29,7 @@ const BETWEEN = 1.6;
 
 const OFF = {
   phase: "off" as Phase,
-  match: NEW_MATCH as Match,
+  match: NEW_MATCH,
   /** performance.now() the phase started. */
   since: 0,
   /** performance.now() the incoming ball reaches you. */

@@ -1,6 +1,6 @@
 // The 3D human doll: loads the skinned glTF body, then drives its clips, face
 // makeup, shoes, piercings and prosthetics from a `Look` and the current mood.
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, useTexture } from "@react-three/drei";
 import { afterSceneReady } from "../../world/ready.ts";
 import { useFrame, useThree, type ThreeElements } from "@react-three/fiber";
 import { HIDDEN_BONES, Prosthetics } from "./Prosthetics.tsx";
@@ -49,6 +49,7 @@ import { useReducedMotion } from "../../motion.ts";
 import {
   DEFAULT_BODY,
   bodyScales,
+  figureMorphs,
   type BodyShape,
 } from "../../../game/body.ts";
 import { pose, type Rig } from "../pose.ts";
@@ -105,9 +106,10 @@ import { HearingAids } from "./HearingAids.tsx";
  */
 
 const MODELS = "/models/doll";
-const REST_LID = 0.12;
-// how far a full molly lifts the upper lid off its rest (wide eyes)
-const MOLLY_LID = 0.08;
+const REST_LID = 0.04;
+// Full effect opens the remaining upper lid; cocaine is 70% as wide.
+const WIDE_LID = REST_LID;
+const COCAINE_STARE = 0.7;
 
 // the baked clips come in their own file (a big one), fetched once the first
 // room shows, so they don't share the bandwidth it loads over; dolls wear
@@ -322,11 +324,23 @@ function setMorph(meshes: THREE.Mesh[], name: string, value: number) {
 /** The iris painted before the look's own eye color is applied. */
 const DEFAULT_EYE = "#6b3f22";
 
+/** Shared source data follows glTF UVs and is never interpreted as color. */
+function prepareSkinSurface(surface: THREE.Texture) {
+  surface.colorSpace = THREE.NoColorSpace;
+  surface.flipY = false;
+  surface.anisotropy = 4;
+  surface.needsUpdate = true;
+}
+
 function useBody(look: Look, eyeColor: Face["eyeColor"]) {
   // women and men are separate dolls, each with its own skeleton
   const m = modelSuffix(look);
   const gltf = useGLTF(`${MODELS}/body${m}.glb`);
   const loGltf = useGLTF(`${MODELS}/body${m}-lo.glb`);
+  const surface = useTexture(
+    `/models/doll-skin-surface${m}.png`,
+    prepareSkinSurface,
+  );
   const invalidate = useThree((s) => s.invalidate);
   const body = useMemo(() => {
     const scene = cloneSkinned(gltf.scene);
@@ -355,12 +369,16 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     scene.traverse((o) => {
       if (typeof o.userData.doll === "string") meta = o.userData.doll;
     });
-    // a little self-glow from the skin's own texture softens harsh room
-    // lighting into the dewy glam finish
+    // Fine skin relief and varied shine keep the face responsive to lighting.
+    // R carries source-derived height and G carries roughness. The maps are
+    // shared per body, independently of complexion and removable makeup.
     const skin = new THREE.MeshStandardMaterial({
-      roughness: 0.58,
+      roughness: 0.95,
+      roughnessMap: surface,
+      bumpMap: surface,
+      bumpScale: 0.00035,
       emissive: "#ffffff",
-      emissiveIntensity: 0.07,
+      emissiveIntensity: 0.035,
     });
     // a prosthetic leg hides the skin skinned to its shin (Prosthetics.tsx):
     // each vertex carries its left and right shin weights as `aShin`
@@ -468,7 +486,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       eye,
       materials: [skin, lashes, eye, cornea],
     };
-  }, [gltf, loGltf, m]);
+  }, [gltf, loGltf, m, surface]);
 
   useEffect(
     () => () => {
@@ -629,8 +647,8 @@ function hairShine<M extends THREE.MeshStandardMaterial>(material: M): M {
           "    vec3 L = directionalLights[i].direction;",
           "    vec3 H = normalize(L + V);",
           "    float lit = smoothstep(-0.25, 0.5, dot(normal, L));",
-          "    float a = hairLobe(T1, H, 36.0) * 0.2 * glint * dim;",
-          "    float b = hairLobe(T2, H, 22.0) * 0.35 * (0.4 + 0.6 * fiber);",
+          "    float a = hairLobe(T1, H, 36.0) * 0.09 * glint * dim;",
+          "    float b = hairLobe(T2, H, 22.0) * 0.22 * (0.4 + 0.6 * fiber);",
           "    reflectedLight.directSpecular += directionalLights[i].color * lit *",
           "      (vec3(a) + b * diffuseColor.rgb * 1.6);",
           "  }",
@@ -664,7 +682,7 @@ function hairMaterial(
     color: color,
     vertexColors: shaded,
     // the shine comes from the bands; the base lighting stays soft
-    roughness: map ? 0.7 : 0.55,
+    roughness: map ? 0.82 : 0.72,
     side: THREE.DoubleSide,
     alphaTest: map && cutout ? (rich ? 0.3 : 0.4) : 0,
     // Strand cards are a few texels wide, so their mips lose alpha unevenly
@@ -980,8 +998,9 @@ export function HumanDoll({
   const shapeKeys = useMemo((): readonly (readonly [string, number])[] => {
     const keys: [string, number][] = [];
     for (const s of FACE_SLIDERS) keys.push([s.id, face[s.id]]);
+    const figure = figureMorphs(shape, face.figure);
     for (const b of FIGURES)
-      if (b.id !== "classic") keys.push([b.id, face.figure === b.id ? 1 : 0]);
+      if (b.id !== "classic") keys.push([b.id, figure[b.id]]);
     for (const g of FACE_PRESETS)
       for (const o of g.options.slice(1))
         keys.push([`${g.key}_${o.id}`, face[g.field] === o.id ? 1 : 0]);
@@ -1333,10 +1352,18 @@ export function HumanDoll({
     // open eyes rest with the upper lid a little lowered, not wide and staring
     // only when it changes (or new meshes mount): a dictionary lookup per
     // worn mesh per doll per frame adds up in a crowd
-    // molly (her own doll only; peers: issue #8) opens the eyes wide, in
-    // fiftieths so the morphs change a few times a second, not every frame
-    const molly = own ? Math.round(getMeters().molly.level * 50) / 50 : 0;
-    const lid = closed ? 1 : REST_LID - molly * MOLLY_LID;
+    // molly and cocaine (her own doll only; peers: issue #8) open the eyes
+    // wide, in fiftieths so the morphs change a few times a second, not every
+    // frame; only molly smiles
+    const meters = own ? getMeters() : null;
+    const molly = meters ? Math.round(meters.molly.level * 50) / 50 : 0;
+    const wide = meters
+      ? Math.max(
+          molly,
+          Math.round(meters.cocaine.level * COCAINE_STARE * 50) / 50,
+        )
+      : 0;
+    const lid = closed ? 1 : REST_LID - wide * WIDE_LID;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;

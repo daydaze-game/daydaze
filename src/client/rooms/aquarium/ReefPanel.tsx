@@ -18,8 +18,11 @@ import { useNow } from "../shared/useNow.ts";
 
 type Phase = "off" | "watching" | "asking" | "over";
 
+// A function, not a const: a typed const would narrow back to its literal.
+const startPhase = (): Phase => "off";
+
 const reef = createStore({
-  phase: "off" as Phase,
+  phase: startPhase(),
   seed: 1,
   round: 0,
   /** performance.now() the parade began. */

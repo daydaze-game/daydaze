@@ -210,6 +210,7 @@ function useRider(
     }
     if (!took.current && st.phase === "sliding") {
       const mine: GameSeat = {
+        // eslint-disable-next-line no-restricted-syntax -- runs once, when the player takes the seat
         position: new THREE.Vector3(),
         yaw: 0,
         sit: true,

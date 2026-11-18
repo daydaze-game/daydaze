@@ -3,6 +3,8 @@
 import type { Bests, Prize, PrizeGame } from "../../game/prizes.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
+const NO_BESTS: Bests = {};
+
 /**
  * Finished games hand their score in here; the app grades it against the
  * saved best, pays out and posts the prize, which the card and the confetti
@@ -14,7 +16,7 @@ export const prizeDesk = createStore({
   /** Coins a daily challenge paid on top, 0 when none was reached. */
   challenge: 0,
   /** The saved personal bests, mirrored here for the scoreboards. */
-  bests: {} as Bests,
+  bests: NO_BESTS,
   /** performance.now() when `shown` was posted. */
   at: 0,
 });

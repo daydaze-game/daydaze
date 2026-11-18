@@ -369,6 +369,7 @@ function Ride({ player }: { player: Player }) {
     }
     const pose = riderAt(runTime(now));
     const [rx, rz] = pipeToRoom(pose.x);
+    // eslint-disable-next-line no-restricted-syntax -- one-time lazy init of the player's seat, not per frame
     player.seat ??= { position: new THREE.Vector3(), yaw: 0 };
     player.seat.position.set(rx, pose.y + 0.12, rz);
     // she rides sideways on the board, chest to the camera, as skaters do

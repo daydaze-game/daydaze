@@ -9,7 +9,6 @@ import {
   spotFor,
   type ShotKind,
   type ShotResult,
-  type Shootout,
 } from "../../../game/hoops.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -24,7 +23,7 @@ export type Phase = "off" | "aim" | "power" | "flying" | "over";
 
 const OFF = {
   phase: "off" as Phase,
-  game: NEW_SHOOTOUT as Shootout,
+  game: NEW_SHOOTOUT,
   /** performance.now() when the clock runs out. */
   endsAt: 0,
   /** When the current sweep, or the shot's flight, started. */

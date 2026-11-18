@@ -10,6 +10,12 @@ on:
         description: Space-separated shot names from scripts/screenshots.ts
         required: true
         type: string
+  # pr-screenshots.yml calls this with the shots a pull request should show
+  workflow_call:
+    inputs:
+      shots:
+        required: true
+        type: string
 concurrency:
   group: screenshots-${{ github.ref }}-${{ inputs.shots }}
   cancel-in-progress: true

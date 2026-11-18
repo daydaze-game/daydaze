@@ -789,6 +789,24 @@ const SHOTS: {
     12,
     8,
   ),
+  // cocaine at its peak (2 min on, before the 183 s it ends): no screen
+  // change, just her wide eyes
+  actionStrip(
+    "cocaine-peak",
+    "quality=high&room=green-haze&adult=1&debug=1",
+    async (page) => {
+      await page
+        .getByRole("button", { name: "Do a line" })
+        .click({ timeout: 150_000 });
+      const later = page.getByRole("button", { name: "Debug: a minute later" });
+      for (let i = 0; i < 1; i++) await later.click();
+    },
+    async (page) => {
+      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+    },
+    12,
+    8,
+  ),
   // the room actions: the ladder climb and the Hot Shots throw
   actionStrip(
     "move-climb",
@@ -1558,7 +1576,7 @@ const SHOTS: {
     ["street-aerial", "12:00", "-60,9", "-110,45,28,-30,0,-4"],
     ["street-shore-far", "12:00", "-100,262", "-190,22,266,-40,0,256"],
   ].map(([name, time, at, cam]) => ({
-    name: String(name),
+    name: name,
     query: `room=city&quality=low&time=${time}&at=${at}&cam=${cam}`,
     act: furnitureReady,
   })),
@@ -1577,7 +1595,7 @@ const SHOTS: {
     ["nature-park-wide", "14:00", "212,-270", "206,7,-262,268,3,-300"],
     ["nature-dunes", "15:00", "-100,300", "-70,1.8,301,-150,1.2,295"],
   ].map(([name, time, at, cam]) => ({
-    name: String(name),
+    name: name,
     query: `room=city&quality=low&time=${time}&at=${at}&cam=${cam}`,
     // Maple Drive and the dunes have no furniture (data-furniture), so wait
     // on the blocks instead
@@ -1602,7 +1620,7 @@ const SHOTS: {
     ["yards-rows-night", "22:00", "64,-100", "58,4,-96,100,6,-140"],
     ["yards-lot", "12:00", "64,-185", "58,3.5,-183,140,1.5,-170"],
   ].map(([name, time, at, cam]) => ({
-    name: String(name),
+    name: name,
     query: `room=city&quality=low&time=${time}&at=${at}&cam=${cam}`,
     act: furnitureReady,
   })),
@@ -1639,7 +1657,7 @@ const SHOTS: {
     ["under-el-wear", "12:00", "140,3", "128,6,2.5,150,0,0.5"],
     ["under-el-wear-night", "22:00", "140,3", "128,6,2.5,150,0,0.5"],
   ].map(([name, time, at, cam]) => ({
-    name: String(name),
+    name: name,
     query: `room=city&quality=low&time=${time}&at=${at}&cam=${cam}`,
     act: furnitureReady,
   })),
@@ -1775,13 +1793,13 @@ const SHOTS: {
     ["spill-downtown-night", "50,-10", "54,2.6,-11,28,3.2,-17"],
     ["spill-manila-day", "-262,10", "-268,2.2,11,-300,4,7.6", "12:00"],
   ].map(([name, at, cam, time = "22:00"]) => ({
-    name: String(name),
+    name: name,
     live: true,
     query: `room=city&view=room&quality=low&time=${time}&at=${at}&cam=${cam}`,
     act: async (page: Page) => {
       await streetReady(page);
       // Downtown has no district lots to wait for
-      if (String(name).includes("manila"))
+      if (name.includes("manila"))
         await page.waitForFunction(
           () =>
             document.querySelector("canvas")?.dataset.architecture === "ready",
@@ -1857,7 +1875,7 @@ const SHOTS: {
       "126,1.8,11.5,110,2.4,13.4",
     ],
   ].map(([name, date, time, quality, at, cam]) => ({
-    name: String(name),
+    name: name,
     query: `room=city&quality=${quality}&date=${date}&time=${time}&at=${at}&cam=${cam}`,
     act: furnitureReady,
   })),
@@ -2098,7 +2116,7 @@ const SHOTS: {
     ["beachside-motel-close", "-168,5,217,-184,3.5,194"],
     ["beachside-motel-wide", "-120,12,236,-165,4,196"],
   ].map(([name, cam]) => ({
-    name: String(name),
+    name: name,
     query: cam
       ? `room=city&view=room&time=15:00&at=-110,213&cam=${cam}`
       : "room=city&time=15:00&at=-182,214",

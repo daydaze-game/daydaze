@@ -7,32 +7,32 @@ Times are typical adult ranges; real people vary widely (weight, tolerance, food
 
 Primary sources (cited per section by key):
 
-- [PW-ALC] https://psychonautwiki.org/wiki/Alcohol
-- [PW-CAN] https://psychonautwiki.org/wiki/Cannabis
-- [PW-PSI] https://psychonautwiki.org/wiki/Psilocybin_mushrooms
-- [PW-LSD] https://psychonautwiki.org/wiki/LSD
-- [PW-MDMA] https://psychonautwiki.org/wiki/MDMA
-- [PW-COC] https://psychonautwiki.org/wiki/Cocaine
-- [PW-KET] https://psychonautwiki.org/wiki/Ketamine
-- [PW-N2O] https://psychonautwiki.org/wiki/Nitrous
-- [ADF-CAN] https://adf.org.au/drug-facts/cannabis/
-- [ADF-COC] https://adf.org.au/drug-facts/cocaine/
-- [ADF-KET] https://adf.org.au/drug-facts/ketamine/
-- [ADF-MDMA] https://adf.org.au/drug-facts/mdma/
-- [TS-KET] https://wiki.tripsit.me/wiki/Ketamine
-- [CDC-EDIBLE] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4584864/ (MMWR, Colorado edible death, 2014)
-- [JHU-EDIBLE] https://cdn.clinicaltrials.gov/large-docs/95/NCT04931095/Prot_SAP_000.pdf (Johns Hopkins oral cannabis protocol; cites Schlienz 2020, Spindle 2018)
-- [MEDSCAPE-BAC] https://emedicine.medscape.com/article/2090019-overview (ethanol level clinical stages)
-- [WIKI-BAC] https://en.wikipedia.org/wiki/Blood_alcohol_content (NHTSA-style BAC table)
-- [ROBERTS-2007] https://www.researchgate.net/publication/6118923 (Roberts & Robinson 2007, J Forensic Leg Med, PMID 17720590: carbonation/dilution and absorption)
-- [HGN-ROMANO] https://physoc.onlinelibrary.wiley.com/doi/full/10.1113/JP273204 (alcohol gaze-evoked nystagmus, J Physiol 2017)
-- [HGN-CITEK] https://cdn.ymaws.com/mcaa-mn.org/resource/resmgr/files/tsrp/Resources/Horizontal_Gaze_Nystagmus_Te.pdf
-- [SWAY-2018] https://www.tandfonline.com/doi/abs/10.1080/15389588.2018.1423561 (BrAC and postural control)
-- [HANGOVER-2020] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7141232/ (Verster et al., updated hangover definition)
-- [DRE-MATRIX] https://www.massdre.org/forms/Drug%20Matrix%202015.pdf and https://www.drugdetection.net/dre-matrix-drug-recognition-seven-categories.htm (police Drug Recognition Expert sign matrix: observable signs per drug class)
-- [ELIM] https://www.bgsu.edu/recwell/wellness-connection/alcohol-education/alcohol-metabolism.html (BAC elimination ~0.015%/h; secondary source citing NIAAA)
-- [LEMON] https://recovered.org/hallucinogens/psilocybin/lemon-tekking (lemon tek: user-reported only, no clinical data)
-- [MDMA-WATER] https://mixmag.asia/feature/high-strength-ecstasy-pills-mdma-dangers-protection (Cranstoun advice: ~500 ml/h dancing, 250 ml/h resting)
+- [PW-ALC] <https://psychonautwiki.org/wiki/Alcohol>
+- [PW-CAN] <https://psychonautwiki.org/wiki/Cannabis>
+- [PW-PSI] <https://psychonautwiki.org/wiki/Psilocybin_mushrooms>
+- [PW-LSD] <https://psychonautwiki.org/wiki/LSD>
+- [PW-MDMA] <https://psychonautwiki.org/wiki/MDMA>
+- [PW-COC] <https://psychonautwiki.org/wiki/Cocaine>
+- [PW-KET] <https://psychonautwiki.org/wiki/Ketamine>
+- [PW-N2O] <https://psychonautwiki.org/wiki/Nitrous>
+- [ADF-CAN] <https://adf.org.au/drug-facts/cannabis/>
+- [ADF-COC] <https://adf.org.au/drug-facts/cocaine/>
+- [ADF-KET] <https://adf.org.au/drug-facts/ketamine/>
+- [ADF-MDMA] <https://adf.org.au/drug-facts/mdma/>
+- [TS-KET] <https://wiki.tripsit.me/wiki/Ketamine>
+- [CDC-EDIBLE] <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4584864/> (MMWR, Colorado edible death, 2014)
+- [JHU-EDIBLE] <https://cdn.clinicaltrials.gov/large-docs/95/NCT04931095/Prot_SAP_000.pdf> (Johns Hopkins oral cannabis protocol; cites Schlienz 2020, Spindle 2018)
+- [MEDSCAPE-BAC] <https://emedicine.medscape.com/article/2090019-overview> (ethanol level clinical stages)
+- [WIKI-BAC] <https://en.wikipedia.org/wiki/Blood_alcohol_content> (NHTSA-style BAC table)
+- [ROBERTS-2007] <https://www.researchgate.net/publication/6118923> (Roberts & Robinson 2007, J Forensic Leg Med, PMID 17720590: carbonation/dilution and absorption)
+- [HGN-ROMANO] <https://physoc.onlinelibrary.wiley.com/doi/full/10.1113/JP273204> (alcohol gaze-evoked nystagmus, J Physiol 2017)
+- [HGN-CITEK] <https://cdn.ymaws.com/mcaa-mn.org/resource/resmgr/files/tsrp/Resources/Horizontal_Gaze_Nystagmus_Te.pdf>
+- [SWAY-2018] <https://www.tandfonline.com/doi/abs/10.1080/15389588.2018.1423561> (BrAC and postural control)
+- [HANGOVER-2020] <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7141232/> (Verster et al., updated hangover definition)
+- [DRE-MATRIX] <https://www.massdre.org/forms/Drug%20Matrix%202015.pdf> and <https://www.drugdetection.net/dre-matrix-drug-recognition-seven-categories.htm> (police Drug Recognition Expert sign matrix: observable signs per drug class)
+- [ELIM] <https://www.bgsu.edu/recwell/wellness-connection/alcohol-education/alcohol-metabolism.html> (BAC elimination ~0.015%/h; secondary source citing NIAAA)
+- [LEMON] <https://recovered.org/hallucinogens/psilocybin/lemon-tekking> (lemon tek: user-reported only, no clinical data)
+- [MDMA-WATER] <https://mixmag.asia/feature/high-strength-ecstasy-pills-mdma-dangers-protection> (Cranstoun advice: ~500 ml/h dancing, 250 ml/h resting)
 
 ---
 

@@ -10,7 +10,6 @@ import {
   scoreOf,
   spot,
   speciesLabel,
-  type Log,
   type SpeciesId,
 } from "../../../game/dive.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -21,7 +20,7 @@ export const dive = createStore({
   on: false,
   air: AIR_SECONDS,
   depth: 0,
-  log: NEW_LOG as Log,
+  log: NEW_LOG,
   /** The last thing she found, for the panel's call-out. */
   last: "",
   /** Set when the tank ran dry: the scene brings her up. */
