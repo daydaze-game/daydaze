@@ -1,4 +1,4 @@
-// The local player's doses (a joint, an edible, mushroom tea, an LSD tab, a
+// The local player's doses (a joint, a vape, an edible, mushroom tea, an LSD tab, a
 // molly pill, a line of cocaine) and the meters they make, in memory like the
 // buzz: a reload sobers the doll up. Drugs exist only on 18+ servers, so at 13+ a dose does
 // nothing. The curves and the body language are in
@@ -12,6 +12,7 @@ import {
   type Dose,
   type HighLook,
   type Meters,
+  type Strain,
   type Taken,
 } from "../../game/effects/substances.ts";
 
@@ -40,10 +41,11 @@ export const liveHigh: HighLook = {
  * reads them every frame, so this is the object itself, not a copy. */
 export const getMeters = (): Readonly<Meters> => meters;
 
-/** Takes one of the lounge's items. Returns whether it was taken. */
-export function take(dose: Dose): boolean {
+/** Takes one of the lounge's items (a weed dose may name its strain; none is
+ * hybrid). Returns whether it was taken. */
+export function take(dose: Dose, strain?: Strain): boolean {
   if (!allows(activeTier(), "drugs")) return false;
-  taken.push({ dose, at: clock });
+  taken.push(strain ? { dose, at: clock, strain } : { dose, at: clock });
   changed();
   return true;
 }

@@ -16,16 +16,16 @@ The screenshots below were generated on GitHub from the final landmark runtime
 and individually inspected, including the deliberately identical near/far camera
 compositions. The player positions differ to force the planner's LOD choice.
 
-| Arrival, day | Arrival, night |
-| --- | --- |
+| Arrival, day                                        | Arrival, night                                              |
+| --------------------------------------------------- | ----------------------------------------------------------- |
 | ![Arrival by day](../screenshots/dream-arrival.png) | ![Arrival by night](../screenshots/dream-arrival-night.png) |
 
-| Palace, detailed | Palace, distant |
-| --- | --- |
+| Palace, detailed                                    | Palace, distant                                        |
+| --------------------------------------------------- | ------------------------------------------------------ |
 | ![Palace detailed](../screenshots/dream-palace.png) | ![Palace distant](../screenshots/dream-palace-far.png) |
 
-| Manor, detailed | Manor, distant |
-| --- | --- |
+| Manor, detailed                                   | Manor, distant                                       |
+| ------------------------------------------------- | ---------------------------------------------------- |
 | ![Manor detailed](../screenshots/dream-manor.png) | ![Manor distant](../screenshots/dream-manor-far.png) |
 
 ## Verification

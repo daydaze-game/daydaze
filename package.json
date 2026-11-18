@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test --test-isolation=none \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\"",
-    "test:coverage": "mkdir -p coverage && node --experimental-strip-types --test --test-isolation=none --experimental-test-coverage --test-coverage-lines=96 --test-coverage-branches=92 --test-coverage-functions=92 --test-coverage-exclude=\"**/*.test.ts\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=coverage/summary.txt --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\" && node --experimental-strip-types scripts/check-coverage.ts",
+    "test": "node --experimental-strip-types --test --experimental-test-isolation=none \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\"",
+    "test:coverage": "mkdir -p coverage && node --experimental-strip-types --test --experimental-test-isolation=none --experimental-test-coverage --test-coverage-lines=96 --test-coverage-branches=92 --test-coverage-functions=92 --test-coverage-exclude=\"**/*.test.ts\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=coverage/summary.txt --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"src/**/*.test.ts\" \"server/**/*.test.ts\" \"scripts/**/*.test.ts\" && node --experimental-strip-types scripts/check-coverage.ts",
     "lint": "eslint . --cache --cache-location .cache/eslint/",
     "lint:spelling": "cspell --no-progress",
     "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile .cache/tsc.tsbuildinfo && npm run typecheck:server",
@@ -44,7 +44,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "cspell": "^10.5.1",
     "dependency-cruiser": "^18.8.0",
-    "eslint": "^10.13.0",
+    "eslint": "^10.15.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
@@ -53,9 +53,9 @@
     "markdownlint-cli2": "^0.24.1",
     "prettier": "^3.9.9",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.72.0",
+    "typescript-eslint": "^8.73.0",
     "vite": "^8.3.3",
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.164.0"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

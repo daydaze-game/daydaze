@@ -83,3 +83,25 @@ test("a line does nothing at 13+; at 18+ it reads cocaine at its peak", () => {
     setActiveTier("teen");
   }
 });
+
+test("a vape of a strain reads that strain; hemp is weaker; none is hybrid", () => {
+  setActiveTier("adult");
+  try {
+    assert.equal(take("vape", "indica"), true);
+    ageHigh(gameSeconds(DOSES.vape.peak + 1));
+    assert.equal(getMeters().high.strain, "indica");
+    assert.equal(getMeters().high.level, DOSES.vape.strength * 1.05);
+    ageHigh(gameSeconds(DOSES.vape.end));
+    assert.equal(dosesOnboard(), 0);
+    take("joint", "hemp");
+    ageHigh(gameSeconds(DOSES.joint.peak + 1));
+    assert.ok(getMeters().high.level < DOSES.joint.strength / 2);
+    ageHigh(gameSeconds(DOSES.joint.end));
+    take("joint");
+    ageHigh(gameSeconds(DOSES.joint.peak + 1));
+    assert.equal(getMeters().high.strain, "hybrid");
+    ageHigh(gameSeconds(DOSES.joint.end));
+  } finally {
+    setActiveTier("teen");
+  }
+});

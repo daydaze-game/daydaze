@@ -146,10 +146,10 @@ test("her body shows the stronger of the drink and a substance", () => {
   const m = soberMeters();
   assert.equal(bodyFor(m, 0, 0), null);
   assert.equal(bodyFor(m, 0.5, 0), DRUNK_BODY.drunk);
-  m.trip = { level: 0.6, phase: "peak" };
+  m.trip = { level: 0.6, phase: "peak", strain: "hybrid" };
   assert.equal(bodyFor(m, 0.5, 0), BODY.trip.peak);
   assert.equal(bodyFor(m, 0.8, 0), DRUNK_BODY.sloppy);
-  m.trip = { level: 0.3, phase: "comeup" };
+  m.trip = { level: 0.3, phase: "comeup", strain: "hybrid" };
   assert.equal(bodyFor(m, 0, 1), BODY.trip.comeup);
 });
 

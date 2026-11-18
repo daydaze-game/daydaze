@@ -9,6 +9,10 @@ Primary sources (cited per section by key):
 
 - [PW-ALC] <https://psychonautwiki.org/wiki/Alcohol>
 - [PW-CAN] <https://psychonautwiki.org/wiki/Cannabis>
+- [SPINDLE-2018] <https://pmc.ncbi.nlm.nih.gov/articles/PMC6324384/> (Spindle et al. 2018, JAMA Netw Open: smoked vs vaporized cannabis, 17 infrequent users, 10 and 25 mg THC)
+- [WATTS-2021] Watts et al. 2021, Nature Plants: sativa and indica labels are genetically indistinct (see [PW-CAN])
+- [SMITH-2022] <https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0267498> (Smith et al. 2022, PLOS ONE: 89,923 US flower samples; terpene chemotypes do not map onto the labels)
+- [FARM-BILL] 2018 Farm Bill: hemp is cannabis with no more than 0.3% delta-9 THC by dry weight; delta-8 sold as hemp is a legal gray area, and retailer sources put it at about 50-70% of delta-9's potency (user reports, no clinical trial)
 - [PW-PSI] <https://psychonautwiki.org/wiki/Psilocybin_mushrooms>
 - [PW-LSD] <https://psychonautwiki.org/wiki/LSD>
 - [PW-MDMA] <https://psychonautwiki.org/wiki/MDMA>
@@ -40,14 +44,14 @@ Primary sources (cited per section by key):
 
 ### Timeline (oral) [PW-ALC] [ELIM] [ROBERTS-2007]
 
-| Phase | Time |
-| --- | --- |
-| Onset | 2-5 min (warmth, first loosening) |
-| Come-up | 15-45 min |
-| Peak BAC | 30-90 min after the last drink (faster on an empty stomach; 97% of fasted subjects peak by 75 min) |
-| Offset | BAC falls ~0.015%/h (range 0.010-0.020); one US standard drink (14 g) is cleared in ~1.3-2 h |
-| Total per drink | 1.5-5 h depending on amount |
-| Hangover | Starts as BAC nears zero; up to ~20-24 h [HANGOVER-2020] |
+| Phase           | Time                                                                                               |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| Onset           | 2-5 min (warmth, first loosening)                                                                  |
+| Come-up         | 15-45 min                                                                                          |
+| Peak BAC        | 30-90 min after the last drink (faster on an empty stomach; 97% of fasted subjects peak by 75 min) |
+| Offset          | BAC falls ~0.015%/h (range 0.010-0.020); one US standard drink (14 g) is cleared in ~1.3-2 h       |
+| Total per drink | 1.5-5 h depending on amount                                                                        |
+| Hangover        | Starts as BAC nears zero; up to ~20-24 h [HANGOVER-2020]                                           |
 
 By drink type (game-relevant): a **shot** is concentrated (40% ABV); diluted drinks
 are absorbed faster than neat spirits in 20/21 subjects, and a **carbonated mixer** sped
@@ -101,13 +105,13 @@ noise sensitivity, fatigue, anxiety ("hangxiety"), sweating; up to ~20-24 h [HAN
 
 ### Timeline [PW-CAN] [ADF-CAN] [CDC-EDIBLE] [JHU-EDIBLE]
 
-| Phase | Smoked joint | Edible |
-| --- | --- | --- |
-| Onset | seconds-10 min | 20-60 min (up to 2 h) |
-| Come-up | 5-10 min | 30-60 min |
-| Peak | 15-45 min (felt ~10 min, blood peak 5-10 min) | 1-2 h per PW; controlled studies ~1.5-3 h; ADF 1-4 h |
-| Total | 2.5-5 h | 4-10 h (some effects to 12 h) |
-| After effects | 45-180 min (sleepy, foggy) | 6-12 h |
+| Phase         | Smoked joint                                  | Edible                                               |
+| ------------- | --------------------------------------------- | ---------------------------------------------------- |
+| Onset         | seconds-10 min                                | 20-60 min (up to 2 h)                                |
+| Come-up       | 5-10 min                                      | 30-60 min                                            |
+| Peak          | 15-45 min (felt ~10 min, blood peak 5-10 min) | 1-2 h per PW; controlled studies ~1.5-3 h; ADF 1-4 h |
+| Total         | 2.5-5 h                                       | 4-10 h (some effects to 12 h)                        |
+| After effects | 45-180 min (sleepy, foggy)                    | 6-12 h                                               |
 
 Key gameplay truth: an edible's delay is the classic trap; people redose before it lands,
 then get far higher than intended [CDC-EDIBLE]. Edible peak strength can be similar to
@@ -142,6 +146,39 @@ at high dose self-conscious, paranoid, withdrawn. Smoked in a group: passing, la
 
 Sleepiness, mild fog, hunger; edible "hangover" grogginess into next morning [PW-CAN].
 
+### Vaporized [SPINDLE-2018] [PW-CAN]
+
+PW-CAN has no vaporized row. Spindle et al.: blood THC peaked at the first sample (10 min) and
+was back to zero within about 4 h; vaporizing gave a higher peak than smoking at the same dose
+(25 mg: 14.4 vs 10.2 ng/mL). Subjective "drug effect" peaked within the first hour (10-30 min)
+and lasted about 6 h at the lab's 10-25 mg doses. Two of 17 vomited at 25 mg, one per method.
+Modeled as smoked-fast: felt in about a minute, peak by 10 min, held to 35 min, gone by 2.5 h.
+The tail is shorter than the lab's because a few puffs from a cart are a smaller dose than a
+joint (user reports; no clinical study of pen-sized doses). No smoke, so no cough.
+
+### Strains: the sativa and indica labels [PW-CAN] [WATTS-2021] [SMITH-2022]
+
+The folk story: sativa is a bright, talkative "head high"; indica is a heavy, sleepy "body
+high" ("in da couch"). Honest status: the labels are **unreliable**. Sativa- and indica-labeled
+samples are genetically indistinct, and the terpene chemotypes do not line up with the labels;
+the labels only loosely track scent (sativa with bergamotene and farnesene). THC %, CBD and the
+terpene profile predict effects better. The game uses the labels anyway, as a **flavor
+modifier** players already know from dispensaries, and keeps them small: a strain scales
+strength and onset (sativa and indica a little, hemp a lot) and picks a body style; it
+never changes the rest of the timeline.
+Hybrid is the unlabeled default.
+
+### Hemp (gas station) versus dispensary [FARM-BILL]
+
+Gas stations and smoke shops sell hemp: flower and pre-rolls at or under 0.3% delta-9, CBD
+products (little or no intoxication), delta-8 gummies and carts (about 50-70% of delta-9's
+potency, user reports) and hemp-derived delta-9 gummies (5-15 mg a serving). Dispensary
+products are tested, labeled with THC %, and stronger. The game models hemp as a weaker
+"strain" (about 0.45 of a hybrid's strength), to be sold at the gas-station counter; the
+dispensary sells every other strain (the inventory work, a later change). A federal hemp redefinition scheduled for November 2026 (a 0.4 mg per container total
+THC limit; retailer sources, not confirmed): the game is fiction and ignores it. Gas-station sales are 18+
+only here.
+
 ### Dangerous combos & hints
 
 - With **alcohol** (drinking first then smoking): nausea, spins, vomiting ("greening out") [PW-CAN].
@@ -155,14 +192,14 @@ Sleepiness, mild fog, hunger; edible "hangover" grogginess into next morning [PW
 
 ### Timeline [PW-PSI] [LEMON]
 
-| Phase | Eaten dried | Tea / lemon tek (user reports) |
-| --- | --- | --- |
-| Onset | 20-45 min | ~10-30 min |
-| Come-up | 1-1.5 h | shorter, more abrupt |
-| Peak | 2-2.5 h | stronger, earlier |
-| Offset | 2.5-3.5 h | |
-| Total | 6-8 h | ~3-6 h |
-| After effects | 4-24 h (afterglow) | similar |
+| Phase         | Eaten dried        | Tea / lemon tek (user reports) |
+| ------------- | ------------------ | ------------------------------ |
+| Onset         | 20-45 min          | ~10-30 min                     |
+| Come-up       | 1-1.5 h            | shorter, more abrupt           |
+| Peak          | 2-2.5 h            | stronger, earlier              |
+| Offset        | 2.5-3.5 h          |                                |
+| Total         | 6-8 h              | ~3-6 h                         |
+| After effects | 4-24 h (afterglow) | similar                        |
 
 Tea/lemon tek effects are anecdotal; no clinical study confirms them [LEMON]. Tea is also
 commonly reported to cause less nausea than chewing dried caps.
@@ -206,13 +243,13 @@ Gentle; catharsis and calm afterglow up to ~24 h; tired [PW-PSI]. Tolerance halv
 
 ### Timeline (sublingual) [PW-LSD]
 
-| Phase | Time |
-| --- | --- |
-| Onset | 15-30 min (some report up to 60 min) |
-| Come-up | 45-90 min |
-| Peak | 3-5 h |
-| Offset | 3-5 h |
-| Total | 8-12 h |
+| Phase         | Time                                  |
+| ------------- | ------------------------------------- |
+| Onset         | 15-30 min (some report up to 60 min)  |
+| Come-up       | 45-90 min                             |
+| Peak          | 3-5 h                                 |
+| Offset        | 3-5 h                                 |
+| Total         | 8-12 h                                |
 | After effects | 12-48 h (often can't sleep for 10+ h) |
 
 ### Dose progression [PW-LSD]
@@ -256,13 +293,13 @@ Long tail: wired-but-tired, can't sleep, slight stimulant-like comedown; next da
 
 ### Timeline (oral) [PW-MDMA] [ADF-MDMA]
 
-| Phase | Time |
-| --- | --- |
-| Onset | 30-45 min (ADF: 20 min-1 h) |
-| Come-up | 15-30 min (the "rush": tingles, nausea, nervous energy) |
-| Peak | 1.5-2.5 h |
-| Offset | 1-1.5 h |
-| Total | 3-6 h |
+| Phase         | Time                                                                   |
+| ------------- | ---------------------------------------------------------------------- |
+| Onset         | 30-45 min (ADF: 20 min-1 h)                                            |
+| Come-up       | 15-30 min (the "rush": tingles, nausea, nervous energy)                |
+| Peak          | 1.5-2.5 h                                                              |
+| Offset        | 1-1.5 h                                                                |
+| Total         | 3-6 h                                                                  |
 | After effects | 12-48 h; low mood can last up to a week (often called "Tuesday blues") |
 
 ### Dose progression [PW-MDMA]
@@ -307,13 +344,13 @@ sometimes up to a week [PW-MDMA] [ADF-MDMA].
 
 ### Timeline (insufflated) [PW-COC] [ADF-COC]
 
-| Phase | Time |
-| --- | --- |
-| Onset | 3-10 min |
-| Come-up | 5-12 min (initial rush 5-10 min) |
-| Peak | ~7-16 min after onset; main effect ~15-30 min |
-| Offset | 10-25 min |
-| Total | ~10-90 min (ADF: about 90 min) |
+| Phase         | Time                                                                     |
+| ------------- | ------------------------------------------------------------------------ |
+| Onset         | 3-10 min                                                                 |
+| Come-up       | 5-12 min (initial rush 5-10 min)                                         |
+| Peak          | ~7-16 min after onset; main effect ~15-30 min                            |
+| Offset        | 10-25 min                                                                |
+| Total         | ~10-90 min (ADF: about 90 min)                                           |
 | After effects | crash and cravings within the hour; comedown days (irritable, exhausted) |
 
 ### Dose progression [PW-COC]
@@ -357,13 +394,13 @@ exhausted, low, mood swings; days of "come down" [ADF-COC].
 
 ### Timeline (insufflated) [PW-KET] [ADF-KET] [TS-KET]
 
-| Phase | Time |
-| --- | --- |
-| Onset | 1-3 min (ADF: 5-15 min) |
-| Come-up | 5-15 min |
-| Peak | 15-45 min |
-| Offset | 30-60 min |
-| Total | 1-2 h (main effect ~1 h) |
+| Phase         | Time                                                            |
+| ------------- | --------------------------------------------------------------- |
+| Onset         | 1-3 min (ADF: 5-15 min)                                         |
+| Come-up       | 5-15 min                                                        |
+| Peak          | 15-45 min                                                       |
+| Offset        | 30-60 min                                                       |
+| Total         | 1-2 h (main effect ~1 h)                                        |
 | After effects | 2-12 h; coordination and senses may be off up to 24 h [ADF-KET] |
 
 ### Dose progression [PW-KET] [TS-KET]
@@ -407,13 +444,13 @@ judgment, irritability, aches [ADF-KET]. Some report a mood afterglow.
 
 ### Timeline (inhaled) [PW-N2O]
 
-| Phase | Time |
-| --- | --- |
-| Onset + come-up | 5-10 s |
-| Peak | 15-30 s |
-| Offset | 1-5 min |
-| Total | 1-5 min |
-| After effects | 15-30 min (possible headache) |
+| Phase           | Time                          |
+| --------------- | ----------------------------- |
+| Onset + come-up | 5-10 s                        |
+| Peak            | 15-30 s                       |
+| Offset          | 1-5 min                       |
+| Total           | 1-5 min                       |
+| After effects   | 15-30 min (possible headache) |
 
 ### Dose progression [PW-N2O]
 
@@ -450,22 +487,22 @@ Back to baseline in minutes; light headache or dizziness; lingering fog at high 
 
 ## Cross-substance animation notes (observed-sign summary from DRE matrix + PW)
 
-| Sign | Who shows it |
-| --- | --- |
-| Horizontal gaze nystagmus (eyes jerk at side gaze) | alcohol, ketamine/dissociatives, nitrous; MDMA "eye wiggles" at high dose |
-| Lack of convergence (can't cross eyes) | alcohol, ketamine, cannabis |
-| Dilated pupils | MDMA (marked), cocaine, LSD, psilocybin |
-| Red eyes | cannabis (strong), alcohol (later) |
-| Jaw clench / grinding | MDMA (strong), cocaine, LSD (mild) |
-| Sniffing / nose rubbing | cocaine, ketamine (insufflated) |
-| Yawning + watery eyes | psilocybin (strong), LSD come-up |
-| Giggling fits | cannabis, nitrous, mushrooms, LSD |
-| Unsteady gait | alcohol (stagger), ketamine (robotic/stiff/high-step), nitrous (sudden fall), cannabis (slow, mild) |
-| Energized / dancing | MDMA, cocaine, LSD |
-| Sedated / slumped | cannabis (couch-lock), ketamine, high-dose alcohol, mushrooms (first half) |
-| Sweating / heat | MDMA, cocaine, LSD (impaired thermoregulation) |
-| Touching skin, hugging | MDMA |
-| Blank stare | ketamine, nitrous, high-dose alcohol |
+| Sign                                               | Who shows it                                                                                        |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Horizontal gaze nystagmus (eyes jerk at side gaze) | alcohol, ketamine/dissociatives, nitrous; MDMA "eye wiggles" at high dose                           |
+| Lack of convergence (can't cross eyes)             | alcohol, ketamine, cannabis                                                                         |
+| Dilated pupils                                     | MDMA (marked), cocaine, LSD, psilocybin                                                             |
+| Red eyes                                           | cannabis (strong), alcohol (later)                                                                  |
+| Jaw clench / grinding                              | MDMA (strong), cocaine, LSD (mild)                                                                  |
+| Sniffing / nose rubbing                            | cocaine, ketamine (insufflated)                                                                     |
+| Yawning + watery eyes                              | psilocybin (strong), LSD come-up                                                                    |
+| Giggling fits                                      | cannabis, nitrous, mushrooms, LSD                                                                   |
+| Unsteady gait                                      | alcohol (stagger), ketamine (robotic/stiff/high-step), nitrous (sudden fall), cannabis (slow, mild) |
+| Energized / dancing                                | MDMA, cocaine, LSD                                                                                  |
+| Sedated / slumped                                  | cannabis (couch-lock), ketamine, high-dose alcohol, mushrooms (first half)                          |
+| Sweating / heat                                    | MDMA, cocaine, LSD (impaired thermoregulation)                                                      |
+| Touching skin, hugging                             | MDMA                                                                                                |
+| Blank stare                                        | ketamine, nitrous, high-dose alcohol                                                                |
 
 ---
 
