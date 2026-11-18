@@ -76,7 +76,7 @@ const WHACK_TUNING: Record<Level, { gap: number; stay: number }> = {
 export function moleSchedule(level: Level, seed: number): Mole[] {
   const rand = seeded(seed);
   const { gap, stay } = WHACK_TUNING[level];
-  const busyUntil: number[] = Array(HOLES).fill(0);
+  const busyUntil: number[] = Array<number>(HOLES).fill(0);
   const moles: Mole[] = [];
   for (let t = 0.6; t < WHACK_SECONDS - 0.5;) {
     // the pace picks up through the round

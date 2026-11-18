@@ -37,13 +37,13 @@ Geometry and texture counts that climb room after room point to a leak.
 
 ### go
 
-| Control | What it does |
-| --- | --- |
-| room | Jumps to any room, by the same path doors use. 18+ rooms need `?adult=1`. |
-| game | Opens a minigame directly. |
-| event night | Skips the club-night clock to a minute into that night's next run, so it's on now. |
-| start event | Skips fireworks, the parade, Pride night or a dance-off to its next start. |
-| hour | Moves the city's clock live: sky, light, neon, the band. **real clock** lets go. |
+| Control       | What it does                                                                           |
+| ------------- | -------------------------------------------------------------------------------------- |
+| room          | Jumps to any room, by the same path doors use. 18+ rooms need `?adult=1`.              |
+| game          | Opens a minigame directly.                                                             |
+| event night   | Skips the club-night clock to a minute into that night's next run, so it's on now.     |
+| start event   | Skips fireworks, the parade, Pride night or a dance-off to its next start.             |
+| hour          | Moves the city's clock live: sky, light, neon, the band. **real clock** lets go.       |
 | teleport here | Puts your doll where the middle of the view meets the floor, inside the walkable area. |
 
 Event skips move that event's clock forward, so its later countdowns stay
@@ -52,14 +52,14 @@ light themselves.
 
 ### view
 
-| Control | What it does |
-| --- | --- |
-| wireframe | Draws every material as wireframe, including meshes that stream in later. |
-| free cam | Swaps the game camera for orbit controls: drag to orbit, right-drag to pan, wheel to zoom. |
-| grid + axes | A 100 m grid and axes at the origin, drawn over everything (red x, green y, blue z). |
-| half res | Renders at half resolution, to tell whether the GPU is fill-rate bound. |
-| pause | Stops rendering, to look at a frozen frame. |
-| screenshot | Downloads a PNG of the 3D view (without the high tier's bloom). |
+| Control     | What it does                                                                               |
+| ----------- | ------------------------------------------------------------------------------------------ |
+| wireframe   | Draws every material as wireframe, including meshes that stream in later.                  |
+| free cam    | Swaps the game camera for orbit controls: drag to orbit, right-drag to pan, wheel to zoom. |
+| grid + axes | A 100 m grid and axes at the origin, drawn over everything (red x, green y, blue z).       |
+| half res    | Renders at half resolution, to tell whether the GPU is fill-rate bound.                    |
+| pause       | Stops rendering, to look at a frozen frame.                                                |
+| screenshot  | Downloads a PNG of the 3D view (without the high tier's bloom).                            |
 
 ### game
 
@@ -105,14 +105,14 @@ message counts by type and the last few messages, without the constant
 
 ## In the console
 
-| Handle | What it is |
-| --- | --- |
-| `__dd.scene`, `__dd.gl`, `__dd.THREE` | The live scene, renderer and three.js. |
-| `__dd.get()` | R3F's state: `camera`, `controls`, `raycaster`, `size` and more. |
-| `__dd.player` | Your doll's state; `__dd.player.pos` is where she stands. |
-| `__dd.pick` | The last shift+clicked object. |
-| `$sel`, `$save` | Set by the inspector's and game section's log buttons. |
-| `__ddNet` | Every online frame logged (the last 300). |
+| Handle                                | What it is                                                       |
+| ------------------------------------- | ---------------------------------------------------------------- |
+| `__dd.scene`, `__dd.gl`, `__dd.THREE` | The live scene, renderer and three.js.                           |
+| `__dd.get()`                          | R3F's state: `camera`, `controls`, `raycaster`, `size` and more. |
+| `__dd.player`                         | Your doll's state; `__dd.player.pos` is where she stands.        |
+| `__dd.pick`                           | The last shift+clicked object.                                   |
+| `$sel`, `$save`                       | Set by the inspector's and game section's log buttons.           |
+| `__ddNet`                             | Every online frame logged (the last 300).                        |
 
 For example, `__dd.scene.getObjectByName("floor")` or
 `__dd.gl.info.render`.
@@ -121,64 +121,64 @@ For example, `__dd.scene.getObjectByName("floor")` or
 
 These work in any build, without the panel:
 
-| Flag | What it does |
-| --- | --- |
-| `?room=<id>` | Start in a room (ids in `src/game/rooms.ts`). |
-| `?at=x,z&yaw=r` | Start at a spot in that room. |
-| `?spot=<building-id>` | Start in the city in front of that building, back to its door so `view=full` frames it (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
-| `?view=room\|full\|face\|detail` | Start with that camera view. |
-| `?time=HH:MM` | Pin the city's hour. |
-| `?night=<id>` | Start an hour into a club night (ids in `src/game/events.ts`). |
-| `?fireworks=<s>`, `?parade=<s>`, `?pride=<s>`, `?danceoff=<s>` | Hold that event's clock `s` seconds into a run. |
-| `?quality=low\|high` | Force a quality tier. |
-| `?still=1` | Render a few frames and stop (for screenshots). |
-| `?timescale=0.1` | Slow the player and every doll (for frame strips). |
-| `?debug=1` | Room jump buttons (used by the Playwright tests). |
-| `?online=1` | Online play (needs `npm run dev:server`). |
-| `?adult=1` | Dev-only preview of the 18+ venues. |
+| Flag                                                           | What it does                                                                                                                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `?room=<id>`                                                   | Start in a room (ids in `src/game/rooms.ts`).                                                                                                                    |
+| `?at=x,z&yaw=r`                                                | Start at a spot in that room.                                                                                                                                    |
+| `?spot=<building-id>`                                          | Start in the city in front of that building, back to its door so `view=full` frames it (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
+| `?view=room\|full\|face\|detail`                               | Start with that camera view.                                                                                                                                     |
+| `?time=HH:MM`                                                  | Pin the city's hour.                                                                                                                                             |
+| `?night=<id>`                                                  | Start an hour into a club night (ids in `src/game/events.ts`).                                                                                                   |
+| `?fireworks=<s>`, `?parade=<s>`, `?pride=<s>`, `?danceoff=<s>` | Hold that event's clock `s` seconds into a run.                                                                                                                  |
+| `?quality=low\|high`                                           | Force a quality tier.                                                                                                                                            |
+| `?still=1`                                                     | Render a few frames and stop (for screenshots).                                                                                                                  |
+| `?timescale=0.1`                                               | Slow the player and every doll (for frame strips).                                                                                                               |
+| `?debug=1`                                                     | Room jump buttons (used by the Playwright tests).                                                                                                                |
+| `?online=1`                                                    | Online play (needs `npm run dev:server`).                                                                                                                        |
+| `?adult=1`                                                     | Dev-only preview of the 18+ venues.                                                                                                                              |
 
 ### Test and screenshot flags
 
 Mostly for Playwright tests and screenshots; each holds something still or previews it.
 
-| Flag | What it does |
-| --- | --- |
-| `?join=karaoke.3` | Opens straight into that room copy, online (an invite link; `flags.ts`). |
-| `?slide=0.4` | Starts on the Water Park's first slide 40% of the way down (`flags.ts`). |
-| `?cam=ex,ey,ez,lx,ly,lz` | Pins the room's overview camera: eye, then look-at point (`CameraRig.tsx`). |
-| `?date=2026-12-25` | Previews the city's seasonal dressings for that date (`season.ts`). |
-| `?band=30` | Holds the band shell's clock 30 s into the day's first set (`BandShell.tsx`). |
-| `?market=1` | Opens the farmers market now; `?market=0` shuts it (`FarmersMarket.tsx`). |
-| `?bays=0` | Turns the New York bays off, to compare budgets (`CityScene.tsx`). |
-| `?elat=69` | Freezes the El train timetable at that second; dev builds only (`elLayout.ts`). |
-| `?elspeed=10` | Runs the El timetable ten times faster (`elLayout.ts`). |
-| `?trip=5` | Brings the first sidewalk trip forward to 5 m of walking (`SidewalkTrips.tsx`). |
-| `?ride=coaster` | Boards that amusement park ride straight away (`AmusementPark.tsx`). |
-| `?siren=hold` | Holds Mermaid Cove's first note lit (`cove/session.ts`). |
-| `?prizehold=1` | Keeps the prize card up until dismissed (`PrizeCard.tsx`). |
-| `?programs=1` | Logs every linked shader program once, for `scripts/perf-profile.ts` (`World.tsx`). |
-| `?lineup=cars` | Shows every roster car in the speedway paddock (`CarLineup.tsx`). |
-| `?wrap=stripes&rims=gold&tint=smoke&glow=pink` | Mods on the `?lineup=cars` cars (`CarLineup.tsx`). |
+| Flag                                           | What it does                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `?join=karaoke.3`                              | Opens straight into that room copy, online (an invite link; `flags.ts`).            |
+| `?slide=0.4`                                   | Starts on the Water Park's first slide 40% of the way down (`flags.ts`).            |
+| `?cam=ex,ey,ez,lx,ly,lz`                       | Pins the room's overview camera: eye, then look-at point (`CameraRig.tsx`).         |
+| `?date=2026-12-25`                             | Previews the city's seasonal dressings for that date (`season.ts`).                 |
+| `?band=30`                                     | Holds the band shell's clock 30 s into the day's first set (`BandShell.tsx`).       |
+| `?market=1`                                    | Opens the farmers market now; `?market=0` shuts it (`FarmersMarket.tsx`).           |
+| `?bays=0`                                      | Turns the New York bays off, to compare budgets (`CityScene.tsx`).                  |
+| `?elat=69`                                     | Freezes the El train timetable at that second; dev builds only (`elLayout.ts`).     |
+| `?elspeed=10`                                  | Runs the El timetable ten times faster (`elLayout.ts`).                             |
+| `?trip=5`                                      | Brings the first sidewalk trip forward to 5 m of walking (`SidewalkTrips.tsx`).     |
+| `?ride=coaster`                                | Boards that amusement park ride straight away (`AmusementPark.tsx`).                |
+| `?siren=hold`                                  | Holds Mermaid Cove's first note lit (`cove/session.ts`).                            |
+| `?prizehold=1`                                 | Keeps the prize card up until dismissed (`PrizeCard.tsx`).                          |
+| `?programs=1`                                  | Logs every linked shader program once, for `scripts/perf-profile.ts` (`World.tsx`). |
+| `?lineup=cars`                                 | Shows every roster car in the speedway paddock (`CarLineup.tsx`).                   |
+| `?wrap=stripes&rims=gold&tint=smoke&glow=pink` | Mods on the `?lineup=cars` cars (`CarLineup.tsx`).                                  |
 
 The doll lab is its own page, `/src/client/avatar/lineup.html` on the dev
 server (`lineup.tsx`), with its own flags:
 
-| Flag | What it does |
-| --- | --- |
-| `?shot=face` | The shot: `lineup` (default), `face`, `body`, `far`, `men`, `hairs`, `pose`, `sit`, `lay`, `dance` or `piggyback`. |
-| `?human=1` | The Blender-built 3D doll instead of the toon doll. |
-| `?men=1` | Face, portrait and pose shots on the masculine body. |
-| `?outfit=suit` | With `?men=1`, dresses the pose, sit and dance dolls in that outfit. |
-| `?outfits=a,b,c` | Dresses the body shot's three dolls. |
-| `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot. |
-| `?hair=waves` | Swaps the face shot's hair. |
-| `?beard=<id>` | Puts a beard (a `BEARDS` id) on the face shot. |
-| `?face=<code>` | Puts an `encodeFace` code on the face shot's doll. |
-| `?makeup=<code>` | Puts an `encodeMakeup` code on the face shot's doll. |
-| `?skin=2` | Picks a skin tone by its index in `SKINS`. |
-| `?holds=a,b` | The held poses for the pose, sit and lay shots. |
-| `?moves=a,b` | The dance shot's moves. |
-| `?clear=1` | A clear background. |
+| Flag                                 | What it does                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `?shot=face`                         | The shot: `lineup` (default), `face`, `body`, `far`, `men`, `hairs`, `pose`, `sit`, `lay`, `dance` or `piggyback`. |
+| `?human=1`                           | The Blender-built 3D doll instead of the toon doll.                                                                |
+| `?men=1`                             | Face, portrait and pose shots on the masculine body.                                                               |
+| `?outfit=suit`                       | With `?men=1`, dresses the pose, sit and dance dolls in that outfit.                                               |
+| `?outfits=a,b,c`                     | Dresses the body shot's three dolls.                                                                               |
+| `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot.                                                                       |
+| `?hair=waves`                        | Swaps the face shot's hair.                                                                                        |
+| `?beard=<id>`                        | Puts a beard (a `BEARDS` id) on the face shot.                                                                     |
+| `?face=<code>`                       | Puts an `encodeFace` code on the face shot's doll.                                                                 |
+| `?makeup=<code>`                     | Puts an `encodeMakeup` code on the face shot's doll.                                                               |
+| `?skin=2`                            | Picks a skin tone by its index in `SKINS`.                                                                         |
+| `?holds=a,b`                         | The held poses for the pose, sit and lay shots.                                                                    |
+| `?moves=a,b`                         | The dance shot's moves.                                                                                            |
+| `?clear=1`                           | A clear background.                                                                                                |
 
 The minigame kit page, `/src/client/rooms/shared/game3d/kit.html`, takes
 `?freeze=1`: it stops drawing two frames after the ball first lands
@@ -189,12 +189,12 @@ The minigame kit page, `/src/client/rooms/shared/game3d/kit.html`, takes
 `scripts/screenshots.ts` and the Screenshots workflow take a space-separated
 list of tokens (the language is in `scripts/shot-plan.ts`):
 
-| Token | Shots |
-| --- | --- |
-| `yacht` | A named shot from the `SHOTS` registry in `scripts/screenshots.ts`. |
-| `room=city&at=10,5&yaw=1.57&view=full&time=21:00` | Any URL flags above; named by its slug (`room-city-at-10-5-...`). |
-| `spot=pulse&view=full` | In front of a building. |
-| `all-rooms`, `all-spots`, `tour` | Every all-ages room; every building with a door; both. |
+| Token                                             | Shots                                                               |
+| ------------------------------------------------- | ------------------------------------------------------------------- |
+| `yacht`                                           | A named shot from the `SHOTS` registry in `scripts/screenshots.ts`. |
+| `room=city&at=10,5&yaw=1.57&view=full&time=21:00` | Any URL flags above; named by its slug (`room-city-at-10-5-...`).   |
+| `spot=pulse&view=full`                            | In front of a building.                                             |
+| `all-rooms`, `all-spots`, `tour`                  | Every all-ages room; every building with a door; both.              |
 
 A query token can also carry `name=<slug>` (the file name), `turn=N` (N
 headings evenly around, named `-00` to `-NN`; needs `at=` or `spot=`) and

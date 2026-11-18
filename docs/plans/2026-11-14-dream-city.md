@@ -55,14 +55,14 @@ Files: art/city/build_dream_city.py, public/models/city-dream/architecture.glb,
 src/game/city/dreamCosts.generated.ts.
 
 - [x] Build twelve distinct families: observatory, conservatory, palazzo,
-  theater, ribbon, pagoda, heritage, shell, sail, storybook, lantern, terrace.
+      theater, ribbon, pagoda, heritage, shell, sail, storybook, lantern, terrace.
 - [x] Model coordinates: x +/-10, z +/-8, ground y=0, body height 16;
-  roof ornaments may reach y=26. Front faces +z. Ground-level center entry.
+      roof ornaments may reach y=26. Front faces +z. Ground-level center entry.
 - [x] Single merged mesh per family, named family and family-lo; COLOR_0
-  holds painted linear colors; TEXCOORD_0.x flags stone=0, metal=.25,
-  glass=.5, foliage=.75, luminous=1. Preserve flags/names in optimization.
+      holds painted linear colors; TEXCOORD_0.x flags stone=0, metal=.25,
+      glass=.5, foliage=.75, luminous=1. Preserve flags/names in optimization.
 - [x] Near target 2k-7k triangles, far target 100-500. Generate exact cost map
-  DREAM_MODEL_COST: Record<family, {tris:number;lo:number}> from exports.
+      DREAM_MODEL_COST: Record<family, {tris:number;lo:number}> from exports.
 - [x] Render a contact sheet and inspect the silhouettes before integration.
 
 ## Task 2: Pure city assignment and budget integration
@@ -70,17 +70,17 @@ src/game/city/dreamCosts.generated.ts.
 Files: src/game/city/dream.ts, dream.test.ts, plan.ts, budget.ts, relevant tests.
 
 - [x] Tests first: complete building coverage, deterministic assignment,
-  distinct district/street signatures, venue overrides, finite transforms,
-  aligned bounds, no old residential bodies under dream meshes, real budgets.
+      distinct district/street signatures, venue overrides, finite transforms,
+      aligned bounds, no old residential bodies under dream meshes, real budgets.
 - [x] Export DREAM_KINDS, DreamKind, DreamSpot and dreamBuilding(b, from,
-  detailRange). Spot contains id, kind, x,y,z,sx,sy,sz,yaw,color,far.
+      detailRange). Spot contains id, kind, x,y,z,sx,sy,sz,yaw,color,far.
 - [x] Select families coherently by district and location, curate spawn and
-  recognizable venue facades. Use deterministic variation between streets.
+      recognizable venue facades. Use deterministic variation between streets.
 - [x] CityPlan.dream holds replacements. Keep visible shop names and sign
-  lights. Remove legacy building instances/bays/lots/houses/far from the
-  active plan when replaced, retaining road/yard/street props.
+      lights. Remove legacy building instances/bays/lots/houses/far from the
+      active plan when replaced, retaining road/yard/street props.
 - [x] trianglesOf/drawCallsOf include actual near/far architecture costs;
-  adjust budget expectations only for intentional rendering changes.
+      adjust budget expectations only for intentional rendering changes.
 - [x] Run focused planner, layout, budget tests and strict typecheck.
 
 ## Task 3: Renderer, visual review and handoff
@@ -89,15 +89,15 @@ Files: src/client/city/DreamBuildings.tsx, CityScene.tsx,
 scripts/screenshots.ts, docs/assets.md, docs/VISION.md.
 
 - [x] Instance each family/LOD with per-instance culling. Texture and weather
-  stone, use metallic trim, sky-colored glass and restrained night emission.
+      stone, use metallic trim, sky-colored glass and restrained night emission.
 - [x] Mount with an independent Suspense boundary. Stream updates from the
-  city plan. Dispose owned geometries/materials and clear canvas readiness.
+      city plan. Dispose owned geometries/materials and clear canvas readiness.
 - [x] Capture arrival and representative streets, day/night, at low tier.
-  Inspect every frame and revise weak silhouettes or blocked views.
+      Inspect every frame and revise weak silhouettes or blocked views.
 - [x] Run relevant browser tests, focused unit tests, lint/typecheck/format;
-  use GitHub verification for the full merge gate.
+      use GitHub verification for the full merge gate.
 - [x] Prepare tested scenery-only merges, preserving the owner's edits; the
-  foundation is on main and the landmark batch is ready with review images.
+      foundation is on main and the landmark batch is ready with review images.
 
 ## Visual review refinement: detailed one-off landmarks
 
@@ -109,11 +109,11 @@ model's authored PBR textures, individual identity and a separate distant mesh.
 Use verified CC-BY 4.0 sources, credit adaptations and retain source hashes.
 
 - [x] Verify one unique address per detailed model and suppress its fallback
-  family, with tests that fail before the replacement is implemented.
+      family, with tests that fail before the replacement is implemented.
 - [x] Convert, inspect, validate and record exact near/far geometry costs.
 - [x] Include replacement triangle and primitive costs in the existing budget.
 - [x] Review arrival day/night and palace screenshots; browser checks must wait
-  for the expected landmarks to load before checking errors and render costs.
+      for the expected landmarks to load before checking errors and render costs.
 
 ## Checkpoint: parked at the owner's request (2026-11-17)
 

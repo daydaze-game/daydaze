@@ -102,11 +102,14 @@ async function fetchSet(id: string, from: Source, srcId = id) {
     if (!res.ok) throw new Error(`${res.status} polyhaven ${srcId}`);
     const j: unknown = await res.json();
     const url = (map: string): string => {
-      const found =
-        typeof j === "object" && j !== null
-          ? Object.entries(j).find(([k]) => k === map)?.[1]
-          : undefined;
-      const u: unknown = found?.["1k"]?.jpg?.url;
+      // walk j[map]["1k"].jpg.url without trusting any level to exist
+      const u = [map, "1k", "jpg", "url"].reduce<unknown>(
+        (node, key) =>
+          typeof node === "object" && node !== null
+            ? Object.entries(node).find(([k]) => k === key)?.[1]
+            : undefined,
+        j,
+      );
       if (typeof u !== "string") throw new Error(`${srcId}: no 1k ${map}`);
       return u;
     };

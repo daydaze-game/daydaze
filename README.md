@@ -42,18 +42,18 @@ Taken on GitHub's runners (CPU-rendered, low tier) from `main` on
 The [latest screenshots of every room and door](https://github.com/dpologdvinity/daydaze/tree/screenshots/main)
 are retaken on each push to `main` that changes the game.
 
-| | |
-| --- | --- |
-| ![Downtown from above: blocks of brick and glass towers](docs/screenshots/city-day-overview.png) | ![Beachside: a custard stand on the boardwalk](docs/screenshots/city-boardwalk.png) |
-| The city from above | The boardwalk at Beachside |
+|                                                                                                                         |                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| ![Downtown from above: blocks of brick and glass towers](docs/screenshots/city-day-overview.png)                        | ![Beachside: a custard stand on the boardwalk](docs/screenshots/city-boardwalk.png)       |
+| The city from above                                                                                                     | The boardwalk at Beachside                                                                |
 | ![The Amusement Park at night: coaster, carousel and Ferris wheel in neon](docs/screenshots/amusement-park-coaster.png) | ![Karaoke Loft: singers on stage and the songbook](docs/screenshots/karaoke-songbook.png) |
-| The Amusement Park | Karaoke Loft and its rhythm game |
-| ![The Water Park: the dive tower, loungers and umbrellas](docs/screenshots/water-park-slide.png) | ![Uptown Aquarium: the seal show](docs/screenshots/aquarium-reefwall.png) |
-| The Water Park | Uptown Aquarium's seal show |
-| ![Your apartment: furniture placed on the decorating grid](docs/screenshots/apartment.png) | ![The Speedway: racing the pack on lap one](docs/screenshots/speedway-racing.png) |
-| Decorating your apartment | The Speedway |
-| ![The action dock at the El stairs with More actions open](docs/screenshots/hud-el-more.png) | ![Zoomed in: a front portrait of the doll's face](docs/screenshots/zoom-room.png) |
-| One action pill and a More menu | Zoom in for a portrait |
+| The Amusement Park                                                                                                      | Karaoke Loft and its rhythm game                                                          |
+| ![The Water Park: the dive tower, loungers and umbrellas](docs/screenshots/water-park-slide.png)                        | ![Uptown Aquarium: the seal show](docs/screenshots/aquarium-reefwall.png)                 |
+| The Water Park                                                                                                          | Uptown Aquarium's seal show                                                               |
+| ![Your apartment: furniture placed on the decorating grid](docs/screenshots/apartment.png)                              | ![The Speedway: racing the pack on lap one](docs/screenshots/speedway-racing.png)         |
+| Decorating your apartment                                                                                               | The Speedway                                                                              |
+| ![The action dock at the El stairs with More actions open](docs/screenshots/hud-el-more.png)                            | ![Zoomed in: a front portrait of the doll's face](docs/screenshots/zoom-room.png)         |
+| One action pill and a More menu                                                                                         | Zoom in for a portrait                                                                    |
 
 Latest progress (2026-11-14): `main`'s CI is green again. The first load is
 568 KB of its 600 KB budget, and `npm run verify` now enforces it. Keyboard and
@@ -86,16 +86,16 @@ next up is [`docs/plans/2026-11-14-next.md`](docs/plans/2026-11-14-next.md).
 
 GitHub Actions, in `.github/workflows/`:
 
-| Workflow | When | What |
-| --- | --- | --- |
-| `ci.yml` | push and pull request to `main`, `v*` tags | install (cached), lint, format and type checks, unit tests with coverage, the production build and perf budget; a tag drafts a release |
-| `playwright.yml` | push and pull request to `main`, by hand | `npm run verify`, then the client browser tests in four shards and the minigames suite |
-| `verify.yml` | push to `feat/**`, `fix/**`, `perf/**`, `ci/**` | `npm run verify`, so branches are checked before they merge |
-| `browser-test.yml` | by hand, `-f grep="<title>"` | the Playwright tests whose titles match |
-| `screenshots.yml` | push to `main` (game files), by hand, `-f shots="<tokens>"` | screenshots in shards, as an artifact and a gallery folder on the `screenshots` branch |
-| `profile.yml` | push to `perf/smooth`, by hand | a performance profile |
-| `codeql.yml` | push and pull request to `main`, weekly | CodeQL security scanning of the TypeScript and the workflows; findings in the Security tab |
-| `deploy.yml` | by hand, owner-approved | the Cloudflare deploy |
+| Workflow           | When                                                        | What                                                                                                                                   |
+| ------------------ | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`           | push and pull request to `main`, `v*` tags                  | install (cached), lint, format and type checks, unit tests with coverage, the production build and perf budget; a tag drafts a release |
+| `playwright.yml`   | push and pull request to `main`, by hand                    | `npm run verify`, then the client browser tests in four shards and the minigames suite                                                 |
+| `verify.yml`       | push to `feat/**`, `fix/**`, `perf/**`, `ci/**`             | `npm run verify`, so branches are checked before they merge                                                                            |
+| `browser-test.yml` | by hand, `-f grep="<title>"`                                | the Playwright tests whose titles match                                                                                                |
+| `screenshots.yml`  | push to `main` (game files), by hand, `-f shots="<tokens>"` | screenshots in shards, as an artifact and a gallery folder on the `screenshots` branch                                                 |
+| `profile.yml`      | push to `perf/smooth`, by hand                              | a performance profile                                                                                                                  |
+| `codeql.yml`       | push and pull request to `main`, weekly                     | CodeQL security scanning of the TypeScript and the workflows; findings in the Security tab                                             |
+| `deploy.yml`       | by hand, owner-approved                                     | the Cloudflare deploy                                                                                                                  |
 
 ## Develop
 

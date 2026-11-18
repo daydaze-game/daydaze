@@ -244,7 +244,7 @@
   - `docs/screenshots/speedway-racing.png`
   - `docs/screenshots/speedway-bumper.png`
   - `docs/screenshots/speedway-mobile.png` (390×844)
-  Look at each one, and fix anything blank or dark.
+    Look at each one, and fix anything blank or dark.
 - [ ] **Step 6:** Commit `feat(client): add the Speedway scene, driving controls and race HUD`.
 
 ### Task 8: Pit crew and Speedway NPCs

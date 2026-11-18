@@ -120,7 +120,14 @@ import { seatsIn } from "../../game/seats.ts";
 import { seatRequest } from "../world/Seats.tsx";
 import { NEIGHBORHOOD_NAMES, useNeighborhood } from "../city/here.ts";
 import { FoodHud } from "./phone/FoodHud.tsx";
-import { Chips, Segmented, Slider, Swatches, Tiles } from "./controls.tsx";
+import {
+  Chips,
+  ColorPicker,
+  Segmented,
+  Slider,
+  Swatches,
+  Tiles,
+} from "./controls.tsx";
 import { VenueGames } from "./Minigames.tsx";
 import { friends } from "../net/friends.ts";
 import { ONLINE } from "../net/online.ts";
@@ -430,7 +437,7 @@ function Mirror({
             onPick={(eyeShape) => setFace({ ...face, eyeShape })}
             tiles="eye"
           />
-          <Swatches
+          <ColorPicker
             label="Eye color"
             options={EYE_COLORS}
             value={face.eyeColor}
@@ -477,9 +484,9 @@ function Mirror({
       <>
         <section>
           <h3>Lipstick</h3>
-          <Swatches
+          <ColorPicker
             label="Lipstick"
-            options={wearable(LIPS, wardrobe)}
+            options={LIPS}
             value={look.lips}
             onPick={(lips) => setLook({ ...look, lips })}
           />
@@ -493,9 +500,9 @@ function Mirror({
         </section>
         <section>
           <h3>Eyes</h3>
-          <Swatches
+          <ColorPicker
             label="Eyeshadow"
-            options={wearable(EYESHADOWS, wardrobe)}
+            options={EYESHADOWS}
             value={look.shadow}
             onPick={(shadow) => setLook({ ...look, shadow })}
           />
@@ -523,7 +530,7 @@ function Mirror({
         </section>
         <section>
           <h3>Cheeks</h3>
-          <Swatches
+          <ColorPicker
             label="Blush"
             options={BLUSHES}
             value={makeup.blush}
@@ -536,7 +543,7 @@ function Mirror({
             onPick={(blushStrength) => setMakeup({ ...makeup, blushStrength })}
             className="strength"
           />
-          <Swatches
+          <ColorPicker
             label="Highlighter"
             options={HIGHLIGHTERS}
             value={makeup.highlight}
@@ -613,9 +620,9 @@ function Mirror({
         </section>
         <section>
           <h3>Color</h3>
-          <Swatches
+          <ColorPicker
             label="Hair color"
-            options={wearable(HAIR_COLORS, wardrobe)}
+            options={HAIR_COLORS}
             value={look.hairColor}
             onPick={(hairColor) => setLook({ ...look, hairColor })}
           />
@@ -719,9 +726,9 @@ function Mirror({
             value={look.outfit}
             onPick={(outfit) => setLook({ ...look, outfit })}
           />
-          <Swatches
+          <ColorPicker
             label="Outfit color"
-            options={wearable(OUTFIT_COLORS, wardrobe)}
+            options={OUTFIT_COLORS}
             value={look.outfitColor}
             onPick={(outfitColor) => setLook({ ...look, outfitColor })}
           />
@@ -750,9 +757,9 @@ function Mirror({
             value={swim.style}
             onPick={(style) => setSwim({ ...swim, style })}
           />
-          <Swatches
+          <ColorPicker
             label="Swimsuit color"
-            options={wearable(OUTFIT_COLORS, wardrobe)}
+            options={OUTFIT_COLORS}
             value={swim.color}
             onPick={(color) => setSwim({ ...swim, color })}
           />

@@ -38,6 +38,7 @@ The pitch is "GTA meets IMVU meets Fantage". The GTA part needs a continuous out
   - no more than 4 real lights
 
   On the high tier, bloom and more lights are allowed. The existing `?quality=` flag picks the tier.
+
 - Interiors and gated venues unload the city completely while the player is inside them.
 
 ## Moving around

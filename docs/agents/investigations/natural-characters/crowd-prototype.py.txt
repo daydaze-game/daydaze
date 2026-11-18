@@ -1,0 +1,141 @@
+"""Prototype: bake the existing human doll into one instanced crowd mesh."""
+import os, math
+from pathlib import Path
+import bpy, bmesh
+import numpy as np
+from mathutils import Vector, Quaternion
+ROOT = Path(__file__).resolve().parents[2]
+SRC = ROOT/'art/doll/blender/.cache/out'
+OUT = ROOT/'tmp/crowd-study/out'
+# body, hair, outfit, skin, hair dye, cloth dye, figure
+LOOKS = {
+ 'male-a': ('-m','crop','denim-shirt','#d4ac8a','#241710','#52708e',{}),
+ 'male-b': ('-m','crew','overalls','#94603f','#171310','#a23934',{'athletic':.5}),
+ 'male-c': ('-m','swept','suit','#f3d4c4','#633e22','#333345',{'slim':.6}),
+ 'male-d': ('-m','coils','white-tee','#633c29','#171310','#d6bb65',{'plus':.8}),
+ 'male-e': ('-m','quiff','striped-shirt','#af7e63','#4c2519','#697a6d',{}),
+ 'female-a': ('','bob','jeans','#e6b48e','#422314','#b85e86',{'plus':.5}),
+ 'female-b': ('','buns','shorts','#c49b72','#201310','#7989b8',{'slim':.4}),
+ 'female-c': ('','afro','white-tee','#633c29','#171310','#5e9d94',{'athletic':.4}),
+ 'female-d': ('','crop','jeans','#f3d4c4','#b47d3d','#8d6eab',{}),
+}
+BUDGET={'body':1200,'eye':120,'hair':800,'outfit':650,'shoes':180}
+def rgba(hex): return np.array([int(hex[i:i+2],16)/255 for i in (1,3,5)]+[1.],np.float32)
+def load(path):
+ before=set(bpy.data.objects)
+ bpy.ops.import_scene.gltf(filepath=str(path))
+ return [o for o in bpy.data.objects if o not in before]
+def trim(ob, allowed):
+ bm=bmesh.new();bm.from_mesh(ob.data)
+ bad=[f for f in bm.faces if not ob.data.materials[f.material_index].name.startswith(allowed)]
+ bmesh.ops.delete(bm,geom=bad,context='FACES');bm.to_mesh(ob.data);bm.free()
+def setpose(arm,pose):
+ def turn(side,bone,angle,axis=(1,0,0)):
+  pb=arm.pose.bones.get('mixamorig:'+side+bone)
+  if pb:
+   local=pb.bone.matrix_local.inverted().to_3x3()@Vector(axis)
+   pb.rotation_mode='QUATERNION';pb.rotation_quaternion=Quaternion(local,math.radians(angle))
+ if pose in ('walk-a','walk-b'):
+  sign=1 if pose=='walk-a' else -1
+  for side,s in [('Left',sign),('Right',-sign)]:
+   turn(side,'UpLeg',s*22);turn(side,'Leg',10 if s>0 else 4)
+   turn(side,'Arm',-s*18);turn(side,'ForeArm',-8)
+ elif pose=='cheer':
+  turn('Left','Arm',-145,(0,1,0));turn('Right','Arm',145,(0,1,0))
+  for side in ('Left','Right'):turn(side,'ForeArm',-25)
+ elif pose in ('crouch','ride'):
+  for side in ('Left','Right'):
+   turn(side,'UpLeg',-78);turn(side,'Leg',100);turn(side,'Arm',-45);turn(side,'ForeArm',-40)
+  arm.location.z-=.5
+ bpy.context.view_layer.update()
+def pixels(image,n):
+ a=np.array(image.pixels[:],np.float32).reshape(image.size[1],image.size[0],4)
+ yi=np.minimum((np.arange(n)*a.shape[0]/n).astype(int),a.shape[0]-1)
+ xi=np.minimum((np.arange(n)*a.shape[1]/n).astype(int),a.shape[1]-1)
+ return a[yi[:,None],xi[None,:]]
+def bake(name,pose):
+ bpy.ops.wm.read_factory_settings(use_empty=True)
+ suffix,hair,outfit,skin,dye,cloth,fig=LOOKS[name]
+ source=load(SRC/f'body{suffix}.glb')
+ arm=next(o for o in source if o.type=='ARMATURE')
+ parts=[]
+ for ob in source:
+  if ob.type!='MESH' or not ob.data.materials: continue
+  kind='body' if ob.name.startswith('Body') else 'eye'
+  trim(ob, 'skin' if kind=='body' else 'eye')
+  parts.append((ob,kind))
+ for kind,file in [('hair',f'hair-{hair}'),('outfit',f'outfit-{outfit}'),('shoes','shoes-sneakers')]:
+  for ob in load(SRC/f'{file}{suffix}.glb'):
+   if ob.type!='MESH' or not ob.data.materials:continue
+   world=ob.matrix_world.copy();ob.parent=arm;ob.matrix_world=world
+   for mod in ob.modifiers:
+    if mod.type=='ARMATURE':mod.object=arm
+   parts.append((ob,kind))
+ for ob,kind in parts:
+  keys=ob.data.shape_keys
+  if keys:
+   for k in keys.key_blocks:
+    k.value=fig.get(k.name,0)
+    if k.name in (f'tuck_{outfit}','tuck_sneakers'):k.value=1
+ setpose(arm,pose)
+ # One tile per source material; all tiles share one opaque PBR material.
+ tile=128; tiles=[]; atlas_data=np.ones((256,1024,4),np.float32)
+ for ob,kind in parts:
+  for mat in ob.data.materials:
+   if mat in tiles:continue
+   tiles.append(mat); i=len(tiles)-1
+   if i>=16:raise ValueError('atlas tile budget exceeded')
+   image=next((n.image for n in mat.node_tree.nodes if n.type=='TEX_IMAGE' and n.image),None) if mat.use_nodes else None
+   if kind in ('body','eye'):
+    image=bpy.data.images.load(str(ROOT/'tmp/crowd-study'/f'{name if kind=="body" else "iris"}.png'),check_existing=True)
+   data=pixels(image,tile) if image else np.ones((tile,tile,4),np.float32)
+   if kind in ('hair','outfit'):data=data*rgba(dye if kind=='hair' else cloth)
+   if kind != 'hair': data[:,:,3]=1
+   x=(i%8)*tile;y=(i//8)*tile;atlas_data[y:y+tile,x:x+tile]=data
+ img=bpy.data.images.new('human-crowd-atlas',width=1024,height=256,alpha=True)
+ img.pixels.foreach_set(atlas_data.ravel());img.pack()
+ mat=bpy.data.materials.new('human-crowd');mat.use_nodes=True
+ bsdf=mat.node_tree.nodes.get('Principled BSDF');bsdf.inputs['Roughness'].default_value=.8
+ tex=mat.node_tree.nodes.new('ShaderNodeTexImage');tex.image=img
+ mat.node_tree.links.new(tex.outputs['Color'],bsdf.inputs['Base Color'])
+ mat.node_tree.links.new(tex.outputs['Alpha'],bsdf.inputs['Alpha'])
+ mat.surface_render_method='DITHERED'
+ baked=[];deps=bpy.context.evaluated_depsgraph_get()
+ for ob,kind in parts:
+  me=bpy.data.meshes.new_from_object(ob.evaluated_get(deps),depsgraph=deps)
+  out=bpy.data.objects.new(kind+'-baked',me);bpy.context.collection.objects.link(out);out.matrix_world=ob.matrix_world
+  print('UV_DIAGNOSTIC',kind,[uv.name for uv in me.uv_layers],me.uv_layers.active_index,[(uv.name,uv.active_render) for uv in me.uv_layers],flush=True)
+  for poly in me.polygons:
+   ti=tiles.index(me.materials[poly.material_index]);x=(ti%8)*tile;y=(ti//8)*tile
+   for li in poly.loop_indices:
+    uv=me.uv_layers.active.data[li].uv
+    uv.x=(x+1+max(0,min(1,uv.x))*(tile-2))/1024
+    uv.y=(y+1+max(0,min(1,uv.y))*(tile-2))/256
+   poly.material_index=0;poly.use_smooth=True
+  me.materials.clear();me.materials.append(mat)
+  bpy.context.view_layer.objects.active=out;out.select_set(True)
+  tri=out.modifiers.new('triangles','TRIANGULATE');bpy.ops.object.modifier_apply(modifier=tri.name)
+  count=len(out.data.polygons)
+  if count>BUDGET[kind]:
+   mod=out.modifiers.new('crowd-budget','DECIMATE');mod.ratio=(BUDGET[kind]-.5)/count
+   bpy.ops.object.modifier_apply(modifier=mod.name)
+  out.select_set(False);baked.append(out)
+ for ob in list(bpy.data.objects):
+  if ob not in baked:bpy.data.objects.remove(ob,do_unlink=True)
+ for ob in baked:ob.select_set(True)
+ bpy.context.view_layer.objects.active=baked[0];bpy.ops.object.join();out=bpy.context.active_object
+ lowest=min((out.matrix_world@v.co).z for v in out.data.vertices);out.location.z-=lowest
+ # Preserve the existing client instance scale of 2.5.
+ out.scale*=.4;bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+ out.name=f'human-{name}-{pose}'
+ # Join can preserve duplicate material slots: collapse them for one primitive.
+ out.data.materials.clear();out.data.materials.append(mat)
+ for poly in out.data.polygons:poly.material_index=0
+ tris=sum(len(p.vertices)-2 for p in out.data.polygons)
+ if tris>3000:raise ValueError(f'{tris} exceeds crowd budget')
+ OUT.mkdir(parents=True,exist_ok=True)
+ path=OUT/f'character-{name}-{pose}.glb'
+ bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,export_animations=False)
+ print('HUMAN_CROWD',name,pose,tris,flush=True)
+for name in os.environ.get('ONLY','female-a').split(','):
+ for pose in os.environ.get('POSES','idle').split(','):bake(name,pose)

@@ -13,7 +13,7 @@ test("downloaded transit has one primitive per model and small distance LODs", (
           import.meta.url,
         ),
       );
-      const doc: {
+      type Doc = {
         meshes: {
           primitives: {
             indices: number;
@@ -27,7 +27,22 @@ test("downloaded transit has one primitive per model and small distance LODs", (
           max: number[];
           normalized?: boolean;
         }[];
-      } = JSON.parse(bytes.toString("utf8", 20, 20 + bytes.readUInt32LE(12)));
+      };
+      const raw: unknown = JSON.parse(
+        bytes.toString("utf8", 20, 20 + bytes.readUInt32LE(12)),
+      );
+      // the fields the checks below index into; the rest is the exporter's
+      const isDoc = (v: unknown): v is Doc =>
+        typeof v === "object" &&
+        v !== null &&
+        "meshes" in v &&
+        Array.isArray(v.meshes) &&
+        "nodes" in v &&
+        Array.isArray(v.nodes) &&
+        "accessors" in v &&
+        Array.isArray(v.accessors);
+      assert.ok(isDoc(raw), kind);
+      const doc = raw;
       assert.equal(doc.meshes.length, 1, kind);
       assert.equal(doc.meshes[0].primitives.length, 1, kind);
       const p = doc.meshes[0].primitives[0];

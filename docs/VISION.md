@@ -28,7 +28,8 @@ The city is the game, not a hallway between rooms. It should feel alive, a littl
 
 - An adult social nightlife hangout in the spirit of IMVU and Habbo: lounges, clubs, bars, VIP rooms, dressed-up avatars, neon interiors, people posing and chatting.
 - Maximalist: dense, layered scenes, rich color, ornament, glow and constant small ambient motion.
-- Avatars are glam fashion dolls: oversized head, huge lined eyes, big glossy lips, slim long-limbed body, platform shoes. Never use the name or logo of the doll brand that inspired them (it is a trademark of MGA Entertainment).
+- Avatars are glamorous people with natural-looking faces and customizable features, hair, bodies, clothes, and optional makeup. Start with an understated face; bold liner, eyeshadow, glossy lips, and platform shoes are style choices. Never use the name or logo of the doll brand that inspired them (it is a trademark of MGA Entertainment).
+- Players should be able to make a likeness of themselves across facial features, natural skin tones and undertones, hair textures, and body builds. Hair, eyes, makeup, and clothing colors accept the full RGB range; skin stays within a natural palette. The dressing room isolates the character in a neutral studio for editing.
 - Places to hang out plus a variety of minigames, with the open city tying them together.
 - Pet lions and a subtle lion theme are optional and low priority.
 - Subtle mango references wherever they fit.
@@ -49,6 +50,7 @@ Decided 2026-10-26 (replaces the 16+ main world of 2026-10-14):
 - Web game.
 - Multiplayer on Cloudflare Workers, Durable Objects and D1. See `docs/specs/2026-10-14-online-foundation-design.md`.
 - $0 hosting until real players arrive. Expected scale is 50 to 500 concurrent players at first.
+- The owner is building this as a passion project for fun, without a profit goal. Include assets offered for noncommercial projects when their specific terms permit the game's intended use and customization.
 - Anonymous guest play, plus optional accounts.
 - Coins and purchases stay client-owned until trading or online leaderboards exist.
 
@@ -57,7 +59,7 @@ Decided 2026-10-26 (replaces the 16+ main world of 2026-10-14):
 Two throwaway prototypes of the same neon lounge were compared: 3D in the style of IMVU, and 2D in the style of Club Penguin and Fantage. The 2D version was polished but felt too flat, so Daydaze is 3D:
 
 - React Three Fiber and three.js world, orbit camera, click-to-walk.
-- Code-built fashion-doll avatar: doll proportions, toon shading with outlines, painted face layers (eyes, brows, lips, makeup) from `art/doll/`, tintable code-built hair and outfits, plus select hair and accessories generated with image-to-3D tools and auto-rigged.
+- Human avatars built from the MakeHuman base in `art/doll/blender/`, with natural-looking faces, tintable hair and outfits, and optional painted makeup. Downloaded hairstyles and accessories complement the reproducible Blender assets.
 - Minigames may stay as 2D overlays launched from the 3D world.
 - The network protocol moves from 2D `x, y, heading` to a 3D position and rotation.
 

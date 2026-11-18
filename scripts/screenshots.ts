@@ -232,10 +232,22 @@ function walkStrip(
       await page.evaluate(
         ([g, look]) => {
           const key = "daydaze-save-v1";
-          const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+          const save: Record<string, unknown> = (() => {
+            const v: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+            return typeof v === "object" && v !== null
+              ? Object.fromEntries(Object.entries(v))
+              : {};
+          })();
+          const base: unknown = JSON.parse(look);
           localStorage.setItem(
             key,
-            JSON.stringify({ ...save, look: { ...JSON.parse(look), gait: g } }),
+            JSON.stringify({
+              ...save,
+              look: {
+                ...(typeof base === "object" ? base : {}),
+                gait: g,
+              },
+            }),
           );
         },
         [
@@ -544,7 +556,11 @@ function wheelSheet(name: string): (typeof SHOTS)[number] {
       // (where the side view stands) looks over open road, not a wall
       await page.evaluate(() => {
         const key = "daydaze-save-v1";
-        const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+        const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+        const save: Record<string, unknown> =
+          typeof parsed === "object" && parsed !== null
+            ? Object.fromEntries(Object.entries(parsed))
+            : {};
         const car = {
           id: "quill-lite",
           color: "#d8d8e4",
@@ -2601,7 +2617,11 @@ if (process.argv[2] === "--matrix") {
     // a fresh save would show the first-visit walkthrough in every shot
     await page.addInitScript(() => {
       const key = "daydaze-save-v1";
-      const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+      const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+      const save: Record<string, unknown> =
+        typeof parsed === "object" && parsed !== null
+          ? Object.fromEntries(Object.entries(parsed))
+          : {};
       if (!("onboarded" in save))
         localStorage.setItem(key, JSON.stringify({ ...save, onboarded: true }));
     });
