@@ -3,9 +3,11 @@
 // its role. Remembers its recent lines so taps rarely repeat; greets once per
 // mount.
 
+import { highSituation } from "../../../game/effects/substances.ts";
 import { eventSituation } from "../../../game/events.ts";
 import { PRIDE_CLUBS, prideNightOn } from "../../../game/prideNight.ts";
 import { isRoomId, type RoomId } from "../../../game/rooms.ts";
+import { getMeters } from "../../effects/high.ts";
 import { nightClock, prideClock } from "../../city/eventClocks.ts";
 import { Html } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
@@ -118,7 +120,15 @@ export function TalkingNpc({
             PRIDE_CLUBS.has(venue) && prideNightOn(prideClock()),
           )
         : null;
-    say(event && Math.random() < 0.7 ? event : situation);
+    // else, when she's high, they notice (roles without lines fall back to tapped)
+    const high = highSituation(getMeters());
+    say(
+      event && Math.random() < 0.7
+        ? event
+        : high && Math.random() < 0.5
+          ? high
+          : situation,
+    );
     onTap?.();
   };
   // a standing NPC gestures while her line is up (the social clip pack)
