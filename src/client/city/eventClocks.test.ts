@@ -10,7 +10,13 @@ import {
   heistSlotWith,
   heistStart,
 } from "../../game/city/heist.ts";
-import { heistPreviewConfig } from "./eventClocks.ts";
+import {
+  CHASE_SLOT,
+  chaseInto,
+  chaseOffset,
+  chaseStart,
+} from "../../game/city/chase.ts";
+import { DEV_EVENTS, heistPreviewConfig } from "./eventClocks.ts";
 
 test("heistPreviewConfig defaults to slot 1000's escape heist", () => {
   const { slot, lead } = heistPreviewConfig("");
@@ -40,4 +46,16 @@ test("heist clock calculations for held preview align with heistInto and outcome
   assert.equal(t, slot * HEIST_SLOT + lead + 30);
   assert.equal(heistInto(t), 30);
   assert.equal(heistOutcome(Math.floor(t / HEIST_SLOT)), "caught");
+});
+
+test("DEV_EVENTS includes chase", () => {
+  assert.ok(DEV_EVENTS.includes("chase"));
+});
+
+test("chase clock calculations for held preview align with chaseInto", () => {
+  const slot = 1000;
+  const lead = chaseOffset(slot);
+  const t = chaseStart(slot) + 20;
+  assert.equal(t, slot * CHASE_SLOT + lead + 20);
+  assert.equal(chaseInto(t), 20);
 });
