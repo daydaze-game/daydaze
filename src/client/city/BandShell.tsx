@@ -48,15 +48,15 @@ import { disposeInstanced } from "./dispose.ts";
 import { propParts, type PropSpot } from "./instancedProps.ts";
 import { usePreloadNear } from "./preloadNear.ts";
 
-const URLS = {
+const KEYS = ["shell", "chair", "trumpet", "sax", "drum", "stand"] as const;
+const URLS: Record<(typeof KEYS)[number], string> = {
   shell: "/models/park/band-shell.glb",
   chair: "/models/park/lawn-chair.glb",
   trumpet: "/models/park/band-trumpet.glb",
   sax: "/models/park/band-sax.glb",
   drum: "/models/park/band-drum.glb",
   stand: "/models/park/band-stand.glb",
-} as const;
-const KEYS = Object.keys(URLS) as (keyof typeof URLS)[];
+};
 const PATHS = KEYS.map((k) => URLS[k]);
 /** Where the shell stands, and how far off its models start to fetch. */
 const SHELL_AT: readonly [number, number] = [BAND_SHELL.x, BAND_SHELL.z];

@@ -7,15 +7,15 @@
 import { newWorld } from "../../game/city/dogPark.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
-export const parkDesk = createStore({
+export const parkDesk = createStore<{
   /** Id of the open market stall within reach, or null. */
-  stall: null as string | null,
+  stall: string | null;
   /** Your pet's name when it is with you, else null. */
-  petName: null as string | null,
+  petName: string | null;
   /** Whether you are inside the dog yard. */
-  inYard: false,
+  inYard: boolean;
   /** Whether your pet is off the leash (it romps while you stand in the yard). */
-  offLeash: false,
-});
+  offLeash: boolean;
+}>({ stall: null, petName: null, inYard: false, offLeash: false });
 
 export const parkWorld = newWorld();

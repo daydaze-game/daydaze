@@ -17,7 +17,9 @@ export type WorkClipId = Extract<
 /** How long a chore's clip plays, seconds. */
 export const WORK_SECONDS = 2.6;
 
-const work = createStore({ move: null as WorkClipId | null });
+const work = createStore<{ move: WorkClipId | null }>({
+  move: null,
+});
 
 /** Starts a chore clip on the player's doll; it hands the doll back after
  * WORK_SECONDS unless another chore has started since. */

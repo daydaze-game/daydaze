@@ -2,6 +2,7 @@
 // grow together and vanish at 0, and the filter hands the bus its nodes.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { toAudioContext } from "./fakeAudioContext.ts";
 import {
   ACID_ECHO_FEEDBACK,
   ACID_ECHO_MIX,
@@ -53,7 +54,7 @@ test("setLevel eases each node's parameter toward the mapped value", () => {
     connect: () => {},
     ...Object.fromEntries(names.map((n) => [n, param(n)])),
   });
-  const ctx = {
+  const ctx = toAudioContext({
     currentTime: 0,
     createGain: () => node(["gain"]),
     createBiquadFilter: () => ({
@@ -62,7 +63,7 @@ test("setLevel eases each node's parameter toward the mapped value", () => {
       frequency: { value: 0 },
     }),
     createDelay: () => ({ ...node(), delayTime: { value: 0 } }),
-  } as unknown as AudioContext;
+  });
   const filter = createAcidFilter(ctx);
   assert.ok(filter.input && filter.output);
   filter.setLevel(1);

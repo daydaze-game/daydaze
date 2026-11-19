@@ -5,6 +5,7 @@ import {
   gameOver,
   landing,
   newGame,
+  type Game,
   powerAt,
   roll,
   total,
@@ -18,14 +19,23 @@ export type Phase = "off" | "aim" | "power" | "rolling" | "over";
 /** Seconds a ball takes up the lane. */
 export const ROLL_TIME = 1.3;
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  game: Game;
+  since: number;
+  aim: number;
+  power: number;
+  last: Ring | null;
+}
+
+const OFF: State = {
+  phase: "off",
   game: newGame(),
   /** performance.now() the phase began. */
   since: 0,
   aim: 0,
   power: 0,
-  last: null as Ring | null,
+  last: null,
 };
 
 export const skee = createStore(OFF);

@@ -54,28 +54,40 @@ const MISS_AFTER = 0.4;
 /** Every this many right notes in a row, the crowd cheers. */
 export const CHEER_STREAK = 4;
 
-const OFF = {
-  phase: "off" as Phase,
-  notes: [] as Note[],
-  song: [] as Song,
+interface State {
+  phase: Phase;
+  notes: Note[];
+  song: Song;
   /** Which clock the chart is on. */
-  clock: "wall" as "audio" | "wall",
+  clock: "audio" | "wall";
   /** Wall seconds the count-in began, or the song ended. */
-  since: 0,
-  last: null as { swing: Swing; lane: boolean } | null,
+  since: number;
+  last: { swing: Swing; lane: boolean } | null;
   /** Wall seconds the crowd last started cheering. */
-  cheerAt: Number.NEGATIVE_INFINITY,
+  cheerAt: number;
   /** The singer has reached the mic (the stage scene says so). */
-  atMic: false,
+  atMic: boolean;
   /** Singing a duet with another player (karaokeDuet.ts): your role, the
    * shared song, and both parts' scores once each is sung. */
-  duet: null as {
+  duet: {
     role: DuetRole;
     partner: { id: string; name: string };
     song: string;
     mine: number | null;
     theirs: number | null;
-  } | null,
+  } | null;
+}
+
+const OFF: State = {
+  phase: "off",
+  notes: [],
+  song: [],
+  clock: "wall",
+  since: 0,
+  last: null,
+  cheerAt: Number.NEGATIVE_INFINITY,
+  atMic: false,
+  duet: null,
 };
 
 /** Set by the online duet module: sends your part when the song ends. */

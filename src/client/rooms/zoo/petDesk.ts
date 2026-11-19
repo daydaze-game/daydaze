@@ -4,8 +4,10 @@
 import type { PetSave } from "../../../game/pet.ts";
 import { createStore } from "../shared/store.ts";
 
-export const petDesk = createStore({
-  pet: null as PetSave | null,
-  act: null as
-    ((change: (pet: PetSave | null) => PetSave | null) => void) | null,
+export const petDesk = createStore<{
+  pet: PetSave | null;
+  act: ((change: (pet: PetSave | null) => PetSave | null) => void) | null;
+}>({
+  pet: null,
+  act: null,
 });

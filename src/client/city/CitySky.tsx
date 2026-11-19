@@ -237,7 +237,7 @@ function disposeSky(root: THREE.Group) {
   for (const child of root.children) {
     if (isMesh(child) || isPoints(child)) {
       child.geometry.dispose();
-      (child.material as THREE.Material).dispose();
+      for (const m of [child.material].flat()) m.dispose();
     }
   }
 }

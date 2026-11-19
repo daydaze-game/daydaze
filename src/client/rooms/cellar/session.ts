@@ -6,16 +6,23 @@ import {
   levelAfter,
   newFlight,
   pour,
+  type Flight,
 } from "../../../game/winePour.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
 
 /** A flight at Cellar 214: `pouring` is when the current hold began
  * (performance.now()), or null between pours. */
-const OFF = {
+interface State {
+  on: boolean;
+  flight: Flight;
+  pouring: number | null;
+}
+
+const OFF: State = {
   on: false,
   flight: newFlight(),
-  pouring: null as number | null,
+  pouring: null,
 };
 
 export const cellar = createStore(OFF);

@@ -24,8 +24,16 @@ const HOLD =
 const NOTE_MS = 650;
 const LEAD_MS = 700;
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  song: Song;
+  since: number;
+  lit: number;
+  litUntil: number;
+}
+
+const OFF: State = {
+  phase: "off",
   song: newSong(0),
   since: 0,
   /** The shell lit right now, or -1. */
