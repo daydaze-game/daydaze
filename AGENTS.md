@@ -134,6 +134,11 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
+    Other PRs run only the browser tests their changes reach: main's full
+    runs record which files each test loads (`tests/test-map.ts`), and
+    `scripts/select-tests.ts` picks the tests from that map, falling back to
+    the full suite for anything it can't vouch for. main always runs the full
+    suite. A new spec file must call `recordTestMap(test)` like the others.
 - Merge gate: nobody pushes to `main`. Branch protection lets a PR merge only
   when it is up to date with `main` and green on the fast checks (`setup`,
   `lint`, `test`, `build`), so two PRs that are green alone cannot merge into
@@ -190,6 +195,29 @@ request. Use the `gh` CLI.
 - **Keep them small and current**: split a PR that mixes unrelated changes,
   close issues that are done or no longer true, and delete the branch after
   the merge.
+
+## Code Review Rules
+
+For reviewers (`@codex review`, `@claude`, people): flag these, most serious
+first. Formatting and lint are CI's job; don't comment on them.
+
+- Age gating: alcohol, drunk effects, drugs or 18+ venues reachable without
+  `ADULT_OK` (`src/client/adult.ts`, `src/game/age.ts`); real alcohol or
+  tobacco brands anywhere.
+- Trust boundaries: data from the network, the server or `localStorage` used
+  without validation; secrets or keys in code, logs or issues.
+- Types: `any`, `as` assertions where a type guard or `as const` works, `!`
+  non-null assertions.
+- Render cost: allocations inside `useFrame`, new real lights past four, or
+  meshes that should be instanced (low-tier budget: 250 draw calls, 300k
+  triangles).
+- Content rules: AI-generated NPC dialogue, or fewer than 10 handwritten lines
+  for a situation; an asset missing from `docs/assets.md` and
+  `src/game/credits.ts`.
+- A new room missing any item of the checklist under Rules.
+- Pure logic in `src/game/` without a test, or a bug fix without a test that
+  failed before it.
+- A code file without its header comment.
 
 ## Asset pipeline
 
