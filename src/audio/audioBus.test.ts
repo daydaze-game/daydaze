@@ -3,6 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createAudioBus } from "./audioBus.ts";
+import { toAudioContext } from "./fakeAudioContext.ts";
 
 function makeFakeAudioContext(): AudioContext {
   const node = () => ({
@@ -19,7 +20,7 @@ function makeFakeAudioContext(): AudioContext {
     resume: () => Promise.resolve(),
     close: () => Promise.resolve(),
   };
-  return fake as unknown as AudioContext;
+  return toAudioContext(fake);
 }
 
 test("master volume defaults to full and clamps to [0, 1]", () => {
@@ -55,11 +56,6 @@ test("master mute zeroes the master gain node and restores on unmute", () => {
   const ctx = makeFakeAudioContext();
   const bus = createAudioBus(ctx);
   bus.setMasterVolume(0.8);
-
-  const masterNode = (
-    ctx as unknown as { createGain: () => { gain: { value: number } } }
-  ).createGain;
-  void masterNode;
 
   bus.setMasterMuted(true);
   assert.equal(bus.isMasterMuted(), true);
