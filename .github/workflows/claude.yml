@@ -1,0 +1,51 @@
+name: Claude
+# Comment `@claude <request>` on an issue or PR (or put it in a new issue or a
+# review) and Claude Code answers or pushes a branch. Runs on the owner's Claude
+# subscription through a CLAUDE_CODE_OAUTH_TOKEN secret, not an API key.
+# The repo is public, so the first gate is the sender: only the owner starts a
+# run. The action also refuses anyone without write access, and it skips PRs
+# from forks (allow_fork_prs). Setup steps: docs/agents/TOOLS.md.
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened]
+# Least privilege: everything is read-only except what Claude needs to push a
+# branch and comment. id-token is how the action trades the run's OIDC token for
+# the Claude GitHub App's short-lived token. actions: read lets it read CI results.
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+jobs:
+  claude:
+    if: |
+      github.event.sender.login == 'dpologdvinity' && (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      )
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # One run per issue or PR; a second comment waits instead of cancelling work in progress.
+    concurrency:
+      group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      # The action reads CLAUDE.md (which imports AGENTS.md) from the checkout.
+      - uses: anthropics/claude-code-action@f431adaf77e0fecf918431e75a2b5b45b85af002 # v1.0.283
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allow_fork_prs: "false"
+          claude_args: |
+            --append-system-prompt "Follow AGENTS.md. Use Conventional Commits for every commit message and pull request title, for example fix(net): stop dropping the first packet. Work on a branch and never push to main."
