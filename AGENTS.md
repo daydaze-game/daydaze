@@ -134,13 +134,24 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
-- Merge gate: GitHub's merge queue. Nobody pushes to `main`; a PR joins the
-  queue with `gh pr merge <n> --auto` once its checks (browser suites
-  included) are green, and the queue merges it only after `ci.yml` passes on
-  it combined with `main` and every PR ahead of it, so two green PRs cannot
-  merge into a red `main`. A PR that fails in the queue is dropped: fix it and
-  queue it again. `docs/agents/scripts/land.sh` rebases, pushes, opens the PR,
-  queues it, and removes the worktree and branch after the merge.
+    Other PRs run only the browser tests their changes reach: main's full
+    runs record which files each test loads (`tests/test-map.ts`), and
+    `scripts/select-tests.ts` picks the tests from that map, falling back to
+    the full suite for anything it can't vouch for. main always runs the full
+    suite. A new spec file must call `recordTestMap(test)` like the others.
+- Merge gate: nobody pushes to `main`. GitHub merges a PR only when it is up
+  to date with `main` and every required check passes (the browser suites
+  included), so two PRs that are green alone cannot merge into a red `main`.
+  To land a PR, turn on auto-merge: `gh pr merge <n> --auto --merge`, or
+  `docs/agents/scripts/land.sh <branch> <worktree> "<message>"`, which pushes,
+  opens the PR, turns auto-merge on, waits for the merge and removes the
+  worktree and branch. The `auto-update` workflow brings the oldest
+  auto-merge PR up to date whenever `main` moves, one at a time; a PR with a
+  failing check or a conflict is skipped until it's fixed. A commit that only
+  merges `main` into a PR whose browser suites already passed re-runs just the
+  fast checks (`scripts/main-merged-only.sh`), so catching up costs minutes.
+  Pull your branch (`git pull --no-rebase`) before pushing: the workflow adds
+  merge commits.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
@@ -170,7 +181,8 @@ request. Use the `gh` CLI.
   Do not fix it in the same branch. Title it like a Conventional Commit subject
   (`fix(net): ...`), say what you saw, how to reproduce it, which files, and
   what you expect. Add labels (`bug`, `enhancement`, `documentation`,
-  `security`, `performance`, and one `area: *`). Never put secrets in an issue.
+  `security`, `performance`, and one `area: *`) and assign it to the owner
+  (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
   reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
   stays open). When you finish something that has no issue, the PR is enough.
@@ -188,6 +200,29 @@ request. Use the `gh` CLI.
 - **Keep them small and current**: split a PR that mixes unrelated changes,
   close issues that are done or no longer true, and delete the branch after
   the merge.
+
+## Code Review Rules
+
+For reviewers (`@codex review`, `@claude`, people): flag these, most serious
+first. Formatting and lint are CI's job; don't comment on them.
+
+- Age gating: alcohol, drunk effects, drugs or 18+ venues reachable without
+  `ADULT_OK` (`src/client/adult.ts`, `src/game/age.ts`); real alcohol or
+  tobacco brands anywhere.
+- Trust boundaries: data from the network, the server or `localStorage` used
+  without validation; secrets or keys in code, logs or issues.
+- Types: `any`, `as` assertions where a type guard or `as const` works, `!`
+  non-null assertions.
+- Render cost: allocations inside `useFrame`, new real lights past four, or
+  meshes that should be instanced (low-tier budget: 250 draw calls, 300k
+  triangles).
+- Content rules: AI-generated NPC dialogue, or fewer than 10 handwritten lines
+  for a situation; an asset missing from `docs/assets.md` and
+  `src/game/credits.ts`.
+- A new room missing any item of the checklist under Rules.
+- Pure logic in `src/game/` without a test, or a bug fix without a test that
+  failed before it.
+- A code file without its header comment.
 
 ## Asset pipeline
 

@@ -60,6 +60,7 @@ light themselves.
 | half res    | Renders at half resolution, to tell whether the GPU is fill-rate bound.                    |
 | pause       | Stops rendering, to look at a frozen frame.                                                |
 | screenshot  | Downloads a PNG of the 3D view (without the high tier's bloom).                            |
+| cam         | Live overview camera override input, `pin` current camera, and `clear` to reset.           |
 
 ### game
 
@@ -111,6 +112,9 @@ message counts by type and the last few messages, without the constant
 | `__dd.get()`                          | R3F's state: `camera`, `controls`, `raycaster`, `size` and more. |
 | `__dd.player`                         | Your doll's state; `__dd.player.pos` is where she stands.        |
 | `__dd.pick`                           | The last shift+clicked object.                                   |
+| `__dd.cam`                            | Active overview camera override string (`ex,ey,ez,lx,ly,lz`).    |
+| `__dd.setCam(...)`, `__dd.clearCam()` | Set live overview camera override (string, array or object).     |
+| `__dd.pinCam()`                       | Pin active overview camera override to current view.             |
 | `$sel`, `$save`                       | Set by the inspector's and game section's log buttons.           |
 | `__ddNet`                             | Every online frame logged (the last 300).                        |
 

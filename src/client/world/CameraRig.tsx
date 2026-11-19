@@ -27,11 +27,13 @@ import { useNight } from "../rooms/useNight.ts";
 import { useReducedMotion } from "../motion.ts";
 import { cameraHold } from "./cameraHold.ts";
 import { driving } from "./driving.ts";
+import { getCamOverride, subscribeCamOverride } from "./camOverride.ts";
 import type { Player } from "./PlayerController.tsx";
 import { readFlags } from "../flags.ts";
+import type { View } from "./view.ts";
+export type { View } from "./view.ts";
 
 /** `detail` is only reachable with `?view=detail`, for close-up screenshots. */
-export type View = "room" | "full" | "face" | "detail";
 
 export const VIEWS: readonly { id: View; label: string }[] = [
   { id: "room", label: "Room" },
@@ -529,19 +531,6 @@ const wallSeen = new THREE.Vector3(NaN, NaN, NaN);
  * Orbit camera that follows the player without fighting the user's orbit,
  * and flies between the room, full-look and face shots.
  */
-/** `?cam=ex,ey,ez,lx,ly,lz` pins the room's overview camera (for screenshots). */
-const CAM_OVERRIDE = (() => {
-  if (typeof location === "undefined") return null;
-  const flags = readFlags(location.search);
-  if (flags.cam?.kind === "world") {
-    return {
-      eye: new THREE.Vector3(...flags.cam.eye),
-      look: new THREE.Vector3(...flags.cam.look),
-    };
-  }
-  return null;
-})();
-
 export function CameraRig({
   player,
   view,
@@ -557,6 +546,7 @@ export function CameraRig({
   const controls = useRef<OrbitImpl>(null);
   const camera = useThree((s) => s.camera);
   const canvas = useThree((s) => s.gl.domElement);
+  const invalidate = useThree((s) => s.invalidate);
   const calm = useReducedMotion();
   const flags = useMemo(
     () => (typeof location !== "undefined" ? readFlags(location.search) : null),
@@ -584,6 +574,13 @@ export function CameraRig({
   useEffect(() => {
     fly.current = { t: 0, snap: calm };
   }, [nightShot, calm]);
+  // runtime cam override changes (?cam=, dev panel or __dd): snap/fly to it
+  useEffect(() => {
+    return subscribeCamOverride((shot) => {
+      fly.current = { t: 0, snap: shot ? true : calm };
+      invalidate();
+    });
+  }, [calm, invalidate]);
   const shown = useRef<{ view: View; player: Player } | null>(null);
   const seated = useRef(false);
   const held = useRef(false);
@@ -702,10 +699,11 @@ export function CameraRig({
     // watching the ride from where she boarded
     const overview = view === "room" || view === "detail";
     const at = (!overview && player.seat?.position) || player.pos;
+    const camOverride = getCamOverride();
     moved.subVectors(at, last.current);
     last.current.copy(at);
     // a pinned screenshot camera (?cam=) stays where it was put
-    if (!(CAM_OVERRIDE && overview)) {
+    if (!(camOverride && overview)) {
       camera.position.add(moved);
       c.target.add(moved);
     }
@@ -713,7 +711,7 @@ export function CameraRig({
     if (f) {
       if (view === "room" || view === "detail") {
         const shot =
-          CAM_OVERRIDE ??
+          camOverride ??
           (view === "room" ? nightShotRef.current : undefined) ??
           ((view === "detail" && DETAIL_SHOTS[room]) || ROOM_SHOTS[room]);
         goalPos.copy(shot.eye);
@@ -731,7 +729,7 @@ export function CameraRig({
           .add(at);
         goalTarget.copy(at).setY(at.y + v.look);
       }
-      const k = f.snap || CAM_OVERRIDE ? 1 : 1 - Math.exp(-dt * 5);
+      const k = f.snap || camOverride ? 1 : 1 - Math.exp(-dt * 5);
       camera.position.lerp(goalPos, k);
       c.target.lerp(goalTarget, k);
       f.t += dt;
