@@ -16,6 +16,7 @@ import {
   type PlaceholderId,
   type RoleBank,
 } from "./types.ts";
+import { isOneOf } from "../typed.ts";
 
 /**
  * How many recently said line keys pickLine remembers, and so avoids repeating.
@@ -204,5 +205,5 @@ function weightedPick(lines: readonly Line[], rng: Rng): Line {
 }
 
 function isPlaceholderId(id: string): id is PlaceholderId {
-  return (PLACEHOLDER_IDS as readonly string[]).includes(id);
+  return isOneOf(PLACEHOLDER_IDS, id);
 }

@@ -26,8 +26,8 @@ import { isMesh } from "../world/guards.ts";
 const URL = "/models/street/kit.glb";
 
 /** The pieces in view; set by CityScene. */
-export const cityStreet = createStore({
-  pieces: [] as readonly StreetPiece[],
+export const cityStreet = createStore<{ pieces: readonly StreetPiece[] }>({
+  pieces: [],
 });
 
 /** The decal atlas, from the crosswalk's material. */

@@ -7,9 +7,12 @@ import type { GameClipId } from "../../../../game/dance/moves.ts";
 import { createStore } from "../store.ts";
 
 /** The clip playing now and which game set it, or nothing. */
-export const gameClip = createStore({
-  move: null as GameClipId | null,
-  by: null as string | null,
+export const gameClip = createStore<{
+  move: GameClipId | null;
+  by: string | null;
+}>({
+  move: null,
+  by: null,
 });
 
 /**

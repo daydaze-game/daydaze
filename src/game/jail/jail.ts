@@ -1,6 +1,7 @@
 // Jail sentences and bail, saved as an end time on the wall clock so the
 // countdown survives a reload.
 import { spend } from "../wallet.ts";
+import { isRecord } from "../typed.ts";
 
 // Sentences run on the wall clock and are saved as an end time, so the
 // countdown survives a reload. Times are epoch milliseconds.
@@ -52,8 +53,8 @@ export function bailOut(
 
 // Saved jail times are untrusted: anything that is not a finite time is dropped.
 export function validateJail(value: unknown): JailSave {
-  if (typeof value !== "object" || value === null) return DEFAULT_JAIL;
-  const endsAt = (value as Record<string, unknown>).endsAt;
+  if (!isRecord(value)) return DEFAULT_JAIL;
+  const endsAt = value.endsAt;
   return typeof endsAt === "number" && Number.isFinite(endsAt)
     ? { endsAt }
     : DEFAULT_JAIL;

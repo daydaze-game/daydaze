@@ -32,6 +32,24 @@ export type Hall = {
 /** A light the grade has dimmed: what the room set, and what we set. */
 type Dimmed = { light: THREE.Light; base: number; set: number };
 
+/** What NightGrade keeps between frames: what it has dimmed, patched and
+ * squashed so far, and the scene's own look to restore. */
+interface GradeState {
+  frame: number;
+  dimmed: Dimmed[];
+  seen: Set<THREE.Light>;
+  shaded: { material: THREE.MeshBasicMaterial; base: THREE.Color }[];
+  shadedSeen: Set<THREE.Material>;
+  squashed: { mesh: THREE.Object3D; scale: number; y: number }[];
+  backdrop: THREE.Color;
+  saved: {
+    background: THREE.Color | null;
+    bg: number;
+    fog: THREE.Fog | THREE.FogExp2 | null;
+    fogHex: number;
+  } | null;
+}
+
 /** A cold blue the shaded sky and scenery are multiplied by. */
 const COOL = new THREE.Color(0.6, 0.72, 1);
 
@@ -48,20 +66,15 @@ const SWEEP_EVERY = 15;
 export function NightGrade({ look }: { look: NightLook }) {
   const scene = useThree((s) => s.scene);
   const state = useMemo(
-    () => ({
+    (): GradeState => ({
       frame: 0,
-      dimmed: [] as Dimmed[],
-      seen: new Set<THREE.Light>(),
-      shaded: [] as { material: THREE.MeshBasicMaterial; base: THREE.Color }[],
-      shadedSeen: new Set<THREE.Material>(),
-      squashed: [] as { mesh: THREE.Object3D; scale: number; y: number }[],
+      dimmed: [],
+      seen: new Set(),
+      shaded: [],
+      shadedSeen: new Set(),
+      squashed: [],
       backdrop: new THREE.Color(),
-      saved: null as null | {
-        background: THREE.Color | null;
-        bg: number;
-        fog: THREE.Fog | THREE.FogExp2 | null;
-        fogHex: number;
-      },
+      saved: null,
     }),
     [],
   );

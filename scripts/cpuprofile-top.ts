@@ -8,10 +8,26 @@ type Node = {
 };
 type Profile = { nodes: Node[]; samples: number[]; timeDeltas: number[] };
 
+/** Shallow shape check: the three arrays this script reads (nodes are trusted). */
+function isProfile(value: unknown): value is Profile {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "nodes" in value &&
+    Array.isArray(value.nodes) &&
+    "samples" in value &&
+    Array.isArray(value.samples) &&
+    "timeDeltas" in value &&
+    Array.isArray(value.timeDeltas)
+  );
+}
+
 const file = process.argv[2];
 if (!file) throw new Error("usage: cpuprofile-top.ts file.cpuprofile [count]");
 const top = Number(process.argv[3] ?? 25);
-const profile = JSON.parse(readFileSync(file, "utf8")) as Profile;
+const parsed: unknown = JSON.parse(readFileSync(file, "utf8"));
+if (!isProfile(parsed)) throw new Error(`${file} is not a .cpuprofile`);
+const profile = parsed;
 const byId = new Map(profile.nodes.map((n) => [n.id, n]));
 const self = new Map<string, number>();
 let total = 0;

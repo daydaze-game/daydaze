@@ -103,7 +103,7 @@ export function CityTransit({ player }: { player: Player }) {
     return () => {
       for (const mesh of stopMeshes) {
         mesh.geometry.dispose();
-        (mesh.material as THREE.Material).dispose();
+        for (const m of [mesh.material].flat()) m.dispose();
         mesh.dispose();
       }
     };

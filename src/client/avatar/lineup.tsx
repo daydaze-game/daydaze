@@ -327,7 +327,7 @@ const SHOTS = {
       { ...LINEUP[0], outfit: "shorts", limbs: "10" },
       { ...LINEUP[5], outfit: "jeans", limbs: "11" },
       { ...LINEUP[2], outfit: "mini", limbs: "01" },
-    ] as Look[],
+    ] satisfies Look[],
     x: (i: number) => (i - 1) * 1.1,
     cam: [0.6, 0.8, 4.2] as const,
     target: [0, 0.6, 0] as const,
@@ -339,7 +339,7 @@ const SHOTS = {
       { ...LINEUP[0], outfit: "shorts", limbs: "11" },
       { ...LINEUP[5], outfit: "jeans", limbs: "11" },
       { ...LINEUP[2], outfit: "mini", limbs: "11" },
-    ] as Look[],
+    ] satisfies Look[],
     x: (i: number) => (i - 1) * 1.1,
     cam: [0.6, 0.8, 4.2] as const,
     target: [0, 0.6, 0] as const,
@@ -352,7 +352,7 @@ const SHOTS = {
       { ...LINEUP[0], outfit: "tracksuit-y2k" },
       { ...LINEUP[5], outfit: "flares" },
       { ...LINEUP[2], outfit: "jeans" },
-    ] as Look[],
+    ] satisfies Look[],
     x: (i: number) => (i - 1) * 1.1,
     cam: [0.6, 0.6, 3.2] as const,
     target: [0, 0.5, 0] as const,
@@ -364,7 +364,7 @@ const SHOTS = {
       { ...LINEUP[0], gait: "wheelchair" },
       { ...LINEUP[5], gait: "wheelchair" },
       { ...LINEUP[2], outfit: "corset-maxi", gait: "wheelchair" },
-    ] as Look[],
+    ] satisfies Look[],
     x: (i: number) => (i - 1) * 1.3,
     cam: [0.8, 1.1, 4.4] as const,
     target: [0, 0.7, 0] as const,
@@ -496,7 +496,7 @@ const SHOTS = {
         gait: "wheelchair",
         face: encodeFace({ ...DEFAULT_FACE, figure: "plus" }),
       },
-    ] as Look[],
+    ] satisfies Look[],
     x: (i: number) => (i - 1) * 1.1,
     cam: [0.6, 1.0, 4.6] as const,
     target: [0, 0.8, 0] as const,
@@ -599,7 +599,8 @@ const SHOTS = {
   },
 };
 type ShotName = keyof typeof SHOTS;
-const plan = SHOTS[shot as ShotName] ?? SHOTS.lineup;
+const isShotName = (s: string): s is ShotName => Object.hasOwn(SHOTS, s);
+const plan = isShotName(shot) ? SHOTS[shot] : SHOTS.lineup;
 // `?cam=x,y,z` moves the shot's camera, to look at a pose from another side
 const camAt = new URLSearchParams(location.search)
   .get("cam")

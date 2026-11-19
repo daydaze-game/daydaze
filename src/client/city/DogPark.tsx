@@ -38,15 +38,23 @@ import { parkWorld } from "./parkDesk.ts";
 import { DOG_PARK } from "../../game/city/park.ts";
 import { usePreloadNear } from "./preloadNear.ts";
 
-const URLS = {
+const KEYS = [
+  "fence",
+  "agility-tunnel",
+  "agility-ramp",
+  "agility-seesaw",
+  "dog-bowl",
+  "ball",
+] as const;
+type Key = (typeof KEYS)[number];
+const URLS: Record<Key, string> = {
   fence: "/models/farm/fence.glb",
   "agility-tunnel": "/models/park/agility-tunnel.glb",
   "agility-ramp": "/models/park/agility-ramp.glb",
   "agility-seesaw": "/models/park/agility-seesaw.glb",
   "dog-bowl": "/models/park/dog-bowl.glb",
   ball: "/models/park/tennis-ball.glb",
-} as const;
-const KEYS = Object.keys(URLS) as (keyof typeof URLS)[];
+};
 const PATHS = KEYS.map((k) => URLS[k]);
 /** The yard's middle, and how far off its models start to fetch. */
 const DOG_PARK_AT: readonly [number, number] = [
@@ -75,7 +83,7 @@ function Yard(): JSX.Element {
   const gltfs = useGLTF(PATHS);
   const { neon } = useDaylight();
   const parts = useMemo(() => {
-    const by = new Map<keyof typeof URLS, THREE.InstancedMesh[]>();
+    const by = new Map<Key, THREE.InstancedMesh[]>();
     const spotOf = (x: number, z: number, yaw: number): PropSpot => ({
       x,
       y: DOG_Y,

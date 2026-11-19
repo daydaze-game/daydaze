@@ -27,14 +27,22 @@ export type Phase = "off" | "incoming" | "outgoing" | "between" | "over";
 export const OUTGOING = 0.9;
 const BETWEEN = 1.6;
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  match: Match;
+  since: number;
+  arrives: number;
+  last: { swing: Swing; outcome: Outcome } | null;
+}
+
+const OFF: State = {
+  phase: "off",
   match: NEW_MATCH,
   /** performance.now() the phase started. */
   since: 0,
   /** performance.now() the incoming ball reaches you. */
   arrives: 0,
-  last: null as { swing: Swing; outcome: Outcome } | null,
+  last: null,
 };
 
 export const tennis = createStore(OFF);

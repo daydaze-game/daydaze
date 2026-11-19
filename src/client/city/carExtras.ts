@@ -5,7 +5,10 @@ import { createStore } from "../rooms/shared/store.ts";
 
 /** The station on in your car (RoomAudio plays it while you drive) and
  * whether the headlights are on. Both reset when you get out. */
-export const carExtras = createStore({
-  station: null as TrackId | null,
+export const carExtras = createStore<{
+  station: TrackId | null;
+  lights: boolean;
+}>({
+  station: null,
   lights: false,
 });
