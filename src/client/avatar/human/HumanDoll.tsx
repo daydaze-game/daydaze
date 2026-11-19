@@ -44,6 +44,7 @@ import {
 } from "../../../game/look.ts";
 import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
+import { heavyLid } from "../../../game/effects/substances.ts";
 import { bodyFor } from "../../../game/effects/buzz.ts";
 import { useReducedMotion } from "../../motion.ts";
 import {
@@ -1360,7 +1361,9 @@ export function HumanDoll({
           Math.round(meters.cocaine.level * COCAINE_STARE * 50) / 50,
         )
       : 0;
-    const lid = closed ? 1 : REST_LID - wide * WIDE_LID;
+    // weed lowers the lids (heavyLid), quantized like the rest
+    const heavy = meters ? Math.round(heavyLid(meters) * 50) / 50 : 0;
+    const lid = closed ? 1 : REST_LID - wide * WIDE_LID + heavy;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;

@@ -7,8 +7,32 @@ name: codeql
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "art/**"
+      - "public/**"
+      - "prototypes/**"
+      - ".vscode/**"
+      - "LICENSE*"
+      - "NOTICE*"
+      - ".gitleaks.toml"
+      - ".lychee.toml"
+      - "cspell*"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "art/**"
+      - "public/**"
+      - "prototypes/**"
+      - ".vscode/**"
+      - "LICENSE*"
+      - "NOTICE*"
+      - ".gitleaks.toml"
+      - ".lychee.toml"
+      - "cspell*"
   schedule:
     # Mondays 06:17 UTC: off the hour, when scheduled runs pile up
     - cron: "17 6 * * 1"

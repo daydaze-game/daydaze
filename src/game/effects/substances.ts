@@ -265,6 +265,16 @@ export function strongest(meters: Readonly<Meters>): Substance | null {
   return best;
 }
 
+/** The most a line quickens her walk, as a multiple of her pace: the meter
+ * tops out at 1 (two lines), a single line at its peak is about +9%. */
+export const COCAINE_PACE = 0.15;
+
+/** How much faster she walks while cocaine is felt (1 = her own pace). It
+ * follows the meter, so it builds with the rush and fades through the crash
+ * back to normal with no step. The other substances don't change her pace. */
+export const paceBoost = (meters: Readonly<Meters>): number =>
+  1 + COCAINE_PACE * clamp01(meters.cocaine.level);
+
 /** How she stands: `loops` play on repeat at `rate`; about half the idle
  * slots open with one of the `tics`, played once (a yawn, a laugh). */
 export type Body = {
@@ -290,9 +300,10 @@ export const BODY: Record<Substance, Record<Phase, Body>> = {
       rate: 0.85,
     },
     // sleepy and foggy
+    // sleepy and foggy; the munchies hit as it fades
     comedown: {
       loops: ["idle-bored", "idle-breathing"],
-      tics: ["yawn", "sigh"],
+      tics: ["yawn", "sigh", "consume"],
       rate: 0.85,
     },
   },
@@ -407,7 +418,7 @@ export const STRAIN_BODY: Partial<Record<Strain, Record<Phase, Body>>> = {
     },
     comedown: {
       loops: ["idle-breathing", "idle-weight-shift"],
-      tics: ["yawn", "sigh"],
+      tics: ["yawn", "sigh", "consume"],
       rate: 0.95,
     },
   },
@@ -467,6 +478,37 @@ export type HighLook = {
    * Zero under reduced motion. About 1 Hz, no brightness change. */
   wiggle: number;
 };
+
+/** The most weed lowers the upper lid, as a share of a full blink (0 open,
+ * 1 shut): heavy-lidded, never closed. */
+export const HEAVY_LID_MAX = 0.5;
+
+// how heavy the lids sit at full weed, by phase and by strain: sleepiest on
+// the way down, indica heaviest, sativa brightest (docs/research: "heavy
+// eyelids, squinting, slow blinking")
+const LID_PHASE: Record<Phase, number> = {
+  comeup: 0.25,
+  peak: 0.4,
+  comedown: 0.5,
+};
+const LID_STRAIN: Record<Strain, number> = {
+  hybrid: 1,
+  sativa: 0.75,
+  indica: 1.25,
+  hemp: 1,
+};
+
+/** How far weed lowers her upper lid, 0 to HEAVY_LID_MAX, added to the lid's
+ * rest. Zero sober and for every other substance. Pure and cheap: the doll
+ * reads it each frame (own doll only). */
+export function heavyLid(meters: Readonly<Meters>): number {
+  const { level, phase, strain } = meters.high;
+  if (!phase) return 0;
+  return Math.min(
+    HEAVY_LID_MAX,
+    clamp01(level) * LID_PHASE[phase] * LID_STRAIN[strain],
+  );
+}
 
 export const BREATHE_AMOUNT = 0.006;
 export const BREATHE_HZ = 0.25;

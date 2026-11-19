@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import * as THREE from "three";
 import { cityHour, setDevHour } from "../../city/daylight.ts";
 import {
   DEV_EVENTS,
@@ -25,6 +26,13 @@ import { devStartDanceOff } from "../../rooms/pulse/danceOffClock.ts";
 import { CLUB_NIGHTS } from "../../../game/events.ts";
 import { MINIGAME_IDS, type MinigameId } from "../../../game/hotspots.ts";
 import { ROOMS, isRoomId, type RoomId } from "../../../game/rooms.ts";
+import {
+  clearCamOverride,
+  formatCamOverride,
+  getCamOverride,
+  setCamOverride,
+  subscribeCamOverride,
+} from "../camOverride.ts";
 import { Inspector } from "./Inspector.tsx";
 import { RenderSection } from "./RenderSection.tsx";
 import { SceneTree } from "./SceneTree.tsx";
@@ -239,6 +247,86 @@ function GameSection({
   );
 }
 
+/** Runtime overview camera override controls. */
+function CamOverrideControl() {
+  const [override, setOverride] = useState(() => getCamOverride());
+  const [text, setText] = useState(() => formatCamOverride(override));
+
+  useEffect(() => {
+    return subscribeCamOverride((shot) => {
+      setOverride(shot);
+      setText(formatCamOverride(shot));
+    });
+  }, []);
+
+  const pinCurrent = () => {
+    const camera = canvas.camera();
+    if (!camera) return;
+    const eye = camera.position;
+    const dd = (
+      window as unknown as {
+        __dd?: { get?: () => { controls?: { target?: THREE.Vector3 } } };
+      }
+    ).__dd;
+    const controls = dd?.get?.()?.controls;
+    const look = controls?.target ?? new THREE.Vector3(0, 0, 0);
+    setCamOverride({ eye, look });
+  };
+
+  const submit = () => {
+    if (!text.trim()) {
+      clearCamOverride();
+    } else {
+      setCamOverride(text);
+    }
+  };
+
+  return (
+    <div
+      style={{ marginTop: 4, display: "flex", gap: 6, alignItems: "center" }}
+    >
+      <label style={{ display: "flex", gap: 4, alignItems: "center", flex: 1 }}>
+        <span style={{ color: "#aaa" }}>cam:</span>
+        <input
+          value={text}
+          placeholder="ex,ey,ez,lx,ly,lz"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            background: "#111",
+            color: "#0f0",
+            border: "1px solid #333",
+            borderRadius: 3,
+            padding: "2px 4px",
+            font: "inherit",
+          }}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") submit();
+          }}
+          onBlur={submit}
+        />
+      </label>
+      <button
+        type="button"
+        onClick={pinCurrent}
+        title="Pin current camera framing"
+      >
+        pin
+      </button>
+      {override && (
+        <button
+          type="button"
+          onClick={() => clearCamOverride()}
+          title="Clear camera override"
+        >
+          clear
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function DevPanel({
   onGo,
   onGame,
@@ -316,6 +404,7 @@ export function DevPanel({
         <button type="button" onClick={screenshot}>
           screenshot
         </button>
+        <CamOverrideControl />
       </Section>
       <GameSection coins={save.coins} save={save} onCoins={onCoins} />
       <RenderSection />

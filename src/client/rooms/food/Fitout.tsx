@@ -13,7 +13,7 @@ import {
 } from "../shared/details.ts";
 import { PropSet } from "../shared/Prop.tsx";
 import { PlatedFood } from "../shared/PlatedFood.tsx";
-import type { FoodPalette } from "./FoodRoom.tsx";
+import type { FoodPalette } from "./palette.ts";
 import { isMesh } from "../../world/guards.ts";
 
 /**
