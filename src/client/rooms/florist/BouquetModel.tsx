@@ -13,6 +13,7 @@ import {
   type StemPose,
 } from "../../../game/florist.ts";
 import { useFittedParts } from "../shared/Prop.tsx";
+import { STEM_IDS } from "./session.ts";
 
 /** Which downloaded model draws each stem, and how tall it stands (meters). */
 const LOOK: Record<Stem, { model: string; height: number }> = {
@@ -104,8 +105,6 @@ export function StemCluster({
     </>
   );
 }
-
-const STEM_IDS = Object.keys(STEMS) as Stem[];
 
 /**
  * The bouquet as a whole: its stems fanned from the base (see arrange) with

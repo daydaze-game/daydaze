@@ -110,13 +110,13 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
   // console handles, and the hook the Three.js Developer Tools extension
   // listens for, so it can see this R3F scene and renderer
   useEffect(() => {
-    const dd = {
+    const dd: Record<string, unknown> & { pick: THREE.Object3D | null } = {
       THREE,
       scene,
       gl,
       get,
       player,
-      pick: null as THREE.Object3D | null,
+      pick: null,
       get cam() {
         return formatCamOverride(getCamOverride());
       },
@@ -126,7 +126,8 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
       pinCam: () => {
         const { camera, controls } = get();
         const eye = camera.position;
-        const target = (controls as { target?: THREE.Vector3 } | null)?.target;
+        const target =
+          controls instanceof OrbitControlsImpl ? controls.target : undefined;
         const look = target ?? new THREE.Vector3(0, 0, 0);
         return setCamOverride({ eye, look });
       },
@@ -135,6 +136,10 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
     canvas.scene = scene;
     canvas.gl = gl;
     canvas.camera = () => get().camera;
+    canvas.lookTarget = () => {
+      const { controls } = get();
+      return controls instanceof OrbitControlsImpl ? controls.target : null;
+    };
     // the extension's hook is an EventTarget on window; it takes the object
     const hook: unknown = Reflect.get(window, "__THREE_DEVTOOLS__");
     if (hook instanceof EventTarget) {

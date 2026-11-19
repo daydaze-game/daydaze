@@ -5,6 +5,7 @@
 import { ARENA } from "../../../game/laserTag.ts";
 import {
   drillOver,
+  type Drill,
   DRILL_SECONDS,
   fireAt,
   newDrill,
@@ -17,20 +18,28 @@ import { createStore } from "../shared/store.ts";
 
 export type Phase = "off" | "playing" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
-  drill: newDrill("pistol", 1),
+interface State {
+  phase: Phase;
+  drill: Drill;
   /** performance.now() the drill began. */
-  since: 0,
+  since: number;
   /** Where the beam will hit: [x, y] on the wall. */
-  aim: [0, RAIL_Y[1]] as [number, number],
+  aim: [number, number];
   /** The last shot: where, when, what it lit; `n` counts shots. */
-  shot: null as {
+  shot: {
     at: [number, number];
     when: number;
     lit: Target | null;
     n: number;
-  } | null,
+  } | null;
+}
+
+const OFF: State = {
+  phase: "off",
+  drill: newDrill("pistol", 1),
+  since: 0,
+  aim: [0, RAIL_Y[1]],
+  shot: null,
 };
 
 export const range = createStore(OFF);

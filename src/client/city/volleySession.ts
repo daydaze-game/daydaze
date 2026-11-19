@@ -23,33 +23,43 @@ export type Phase = "off" | "incoming" | "away" | "between" | "over";
 const AWAY = 0.9;
 const BETWEEN = 1.4;
 
-const OFF = {
-  phase: "off" as Phase,
-  match: NEW_RALLY,
-  since: 0,
+type VolleyState = {
+  phase: Phase;
+  match: Rally;
+  since: number;
   /** performance.now() the ball is there to hit. */
-  arrives: 0,
-  last: null as {
+  arrives: number;
+  last: {
     swing: Swing;
     outcome: Outcome;
     /** Which touch it was. */
     touch: Rally["touch"];
-  } | null,
+  } | null;
   /** The ball's flight now: the shot, its lane across the court (-1..1),
    * performance.now() it was hit and its seconds in the air; `n` counts
    * flights, so a scene can tell a new one from the last. */
-  flight: null as {
+  flight: {
     shot: Shot;
     lane: number;
     at: number;
     seconds: number;
     n: number;
-  } | null,
+  } | null;
   /** Which court: the beach net or the pool. */
-  prize: "volleyball" as PrizeGame,
+  prize: PrizeGame;
 };
 
-export const volley = createStore(OFF);
+const OFF: VolleyState = {
+  phase: "off",
+  match: NEW_RALLY,
+  since: 0,
+  arrives: 0,
+  last: null,
+  flight: null,
+  prize: "volleyball",
+};
+
+export const volley = createStore<VolleyState>(OFF);
 
 function fly(shot: Shot, now: number, seconds: number, lane: number) {
   const n = (volley.get().flight?.n ?? 0) + 1;

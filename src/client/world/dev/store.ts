@@ -164,7 +164,9 @@ export const canvas: {
   scene: THREE.Scene | null;
   gl: THREE.WebGLRenderer | null;
   camera: () => THREE.Camera | null;
-} = { scene: null, gl: null, camera: () => null };
+  /** Where the orbit controls look, when the rig has them. */
+  lookTarget: () => THREE.Vector3 | null;
+} = { scene: null, gl: null, camera: () => null, lookTarget: () => null };
 
 /** Panel buttons that act inside the Canvas; the probe fills them in. */
 export const actions: {
