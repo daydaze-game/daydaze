@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import { playCanDrop } from "../../audio/worldSounds.ts";
 import { DRINKS, buyDrink } from "../../game/vending.ts";
-import { relieve } from "../effects/drunk.ts";
+import { consumeFood } from "../food/store.ts";
 import { vendingNear } from "./vendingNear.ts";
 
 export function VendingPanel({
@@ -46,7 +46,7 @@ export function VendingPanel({
               if (pending.current || buyDrink(coins, d.id) === null) return;
               pending.current = true;
               if (onSpend(d.price)) {
-                relieve("drink");
+                consumeFood("drink");
                 playCanDrop();
                 setReceipt(`${d.name} dropped`);
               } else {

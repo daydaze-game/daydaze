@@ -94,7 +94,8 @@ import {
   type BodyShape,
 } from "../../game/body.ts";
 import { wearable, type PurchaseResult, type ShopId } from "../../game/shop.ts";
-import { drink, relieve } from "../effects/drunk.ts";
+import { drink } from "../effects/drunk.ts";
+import { consumeFood } from "../food/store.ts";
 import { PRICES } from "../../game/market.ts";
 import { take } from "../effects/high.ts";
 import type { MinigameId } from "../../game/hotspots.ts";
@@ -1123,7 +1124,7 @@ export function Overlay({
                   type="button"
                   className="drink"
                   onClick={() => {
-                    if (onSpend(PRICES.snack)) relieve("food");
+                    if (onSpend(PRICES.snack)) consumeFood("food");
                   }}
                 >
                   Buy a snack ({PRICES.snack} coins)
@@ -1132,7 +1133,7 @@ export function Overlay({
                   type="button"
                   className="drink"
                   onClick={() => {
-                    if (onSpend(PRICES.water)) relieve("drink");
+                    if (onSpend(PRICES.water)) consumeFood("drink");
                   }}
                 >
                   Buy a water ({PRICES.water} coins)

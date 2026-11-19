@@ -106,3 +106,36 @@
 .food-held p {
   margin: 0;
 }
+
+/* Gentle needs prompts, above the held tray and clear of the center toast. */
+.food-needs {
+  position: fixed;
+  left: 1rem;
+  bottom: 7rem;
+  width: min(16rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #b5d990;
+  border-radius: 12px;
+  background: rgba(26, 11, 46, 0.92);
+  color: #fff;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.food-needs label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+.food-needs meter {
+  width: 60%;
+}
+
+.food-needs p {
+  margin: 0.5rem 0 0;
+  line-height: 1.4;
+  color: #e5d8f1;
+}

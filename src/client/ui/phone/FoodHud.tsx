@@ -3,12 +3,16 @@
 // while the phone is closed.
 
 import { useEffect, useSyncExternalStore } from "react";
+import "./phone.css";
+import { ADULT_OK } from "../../adult.ts";
+import { NEED_NOTICE } from "../../../game/food/needs.ts";
 import {
   clearToast,
   eatHeld,
   getFoodState,
   onFoodChange,
   tickDeliveries,
+  tickNeeds,
 } from "../../food/store.ts";
 
 const TOAST_MS = 4000;
@@ -23,7 +27,17 @@ export function FoodHud() {
 
   // Couriers land while the phone is closed too, so the clock runs here.
   useEffect(() => {
-    const id = window.setInterval(() => tickDeliveries(Date.now()), TICK_MS);
+    let previous = performance.now();
+    const id = window.setInterval(() => {
+      tickDeliveries(Date.now());
+      const now = performance.now();
+      // A sleeping/background tab adds no backlog of hunger or thirst.
+      const seconds = document.hidden
+        ? 0
+        : Math.min(1, (now - previous) / 1000);
+      previous = now;
+      tickNeeds(seconds);
+    }, TICK_MS);
     return () => window.clearInterval(id);
   }, []);
 
@@ -34,11 +48,40 @@ export function FoodHud() {
   }, [food.toast]);
 
   const held = food.held;
+  const showNeeds =
+    ADULT_OK &&
+    (food.needs.hunger >= NEED_NOTICE || food.needs.thirst >= NEED_NOTICE);
   return (
     <>
       <p className="food-toast" role="status" aria-live="polite">
         {food.toast ?? ""}
       </p>
+      {showNeeds && (
+        <section className="food-needs" aria-label="Food and water needs">
+          <strong>
+            {food.needs.hunger >= NEED_NOTICE ? "The munchies" : "Cotton mouth"}
+          </strong>
+          <label>
+            Hunger{" "}
+            <meter
+              aria-label="Hunger"
+              min={0}
+              max={1}
+              value={food.needs.hunger}
+            />
+          </label>
+          <label>
+            Thirst{" "}
+            <meter
+              aria-label="Thirst"
+              min={0}
+              max={1}
+              value={food.needs.thirst}
+            />
+          </label>
+          <p>Grab a snack and a soft drink, or order Plate Rush from Menu.</p>
+        </section>
+      )}
       {held && (
         <section className="food-held" aria-label="Held food">
           <p>

@@ -3622,6 +3622,103 @@ test("Plate Rush orders a dish and the courier drops it in hand", async ({
   expect(errors).toEqual([]);
 });
 
+test("weed munchies: delivered food and water relieve needs only at 18+", async ({
+  page,
+}) => {
+  const errors = collectErrors(page);
+  // Advance the existing dev modules, without waiting through a whole joint.
+  const call = async (
+    source: string,
+    name: string,
+    args: readonly unknown[],
+  ) => {
+    await page.evaluate(
+      async ({ source, name, args }) => {
+        const mod: unknown = await import(/* @vite-ignore */ source);
+        if (typeof mod !== "object" || mod === null)
+          throw new Error("Missing module");
+        const fn: unknown = Reflect.get(mod, name);
+        if (typeof fn !== "function") throw new Error(`Missing ${name}`);
+        Reflect.apply(fn, undefined, args);
+      },
+      { source, name, args },
+    );
+  };
+  const high = "/src/client/effects/high.ts";
+  const food = "/src/client/food/store.ts";
+  await page.goto(`${VELVET}&adult=1`);
+  await expect(canvasOf(page)).toHaveAttribute(
+    "data-frames",
+    /^(?:[1-9]\d{1,}|10)$/,
+  );
+  await call(high, "take", ["joint"]);
+  await call(high, "ageHigh", [110]);
+  await call(food, "tickNeeds", [90]);
+  const needs = page.getByRole("region", { name: "Food and water needs" });
+  await expect(needs).toBeVisible();
+  await expect(needs.getByRole("meter", { name: "Hunger" })).toHaveAttribute(
+    "value",
+    /0\.[3-9]/,
+  );
+  const hunger = needs.getByRole("meter", { name: "Hunger" });
+  const initialHunger = Number(await hunger.getAttribute("value"));
+  await expect
+    .poll(async () => Number(await hunger.getAttribute("value")))
+    .toBeGreaterThan(initialHunger);
+  await page.screenshot({
+    path: test.info().outputPath("weed-needs-desktop.png"),
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(needs).toBeInViewport();
+  await page.screenshot({
+    path: test.info().outputPath("weed-needs-mobile.png"),
+  });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await (await fromMenu(page, "Plate Rush")).click();
+  const app = page.getByRole("dialog", { name: "Plate Rush" });
+  await app.getByRole("button", { name: /Point and Eat Kitchen/ }).click();
+  await app
+    .getByRole("button", {
+      name: "Order Adobo rice bowl from Point and Eat Kitchen",
+    })
+    .click();
+  await page.keyboard.press("Escape");
+  await call(food, "tickDeliveries", [Date.now() + 120_000]);
+  const held = page.getByRole("region", { name: "Held food" });
+  await held.getByRole("button", { name: "Eat it" }).click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "That snack really hit the spot." }),
+  ).toBeVisible();
+  await expect
+    .poll(async () =>
+      Number(
+        await needs
+          .getByRole("meter", { name: "Hunger" })
+          .getAttribute("value"),
+      ),
+    )
+    .toBeLessThan(0.1);
+  await call(food, "holdItem", [
+    { id: "test-water", name: "Water", price: 0, kind: "drink" },
+  ]);
+  await page.getByRole("button", { name: "Sip it", exact: true }).click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "A cool drink feels extra refreshing." }),
+  ).toBeVisible();
+  await expect(needs).toHaveCount(0);
+  await page.goto(VELVET);
+  await expect(roomTitle(page)).toHaveText("The Velvet Room");
+  await call(high, "take", ["joint"]);
+  await call(high, "ageHigh", [110]);
+  await call(food, "tickNeeds", [90]);
+  await expect(needs).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
 test("the food rooms open from a query and show their counter staff", async ({
   page,
 }) => {
