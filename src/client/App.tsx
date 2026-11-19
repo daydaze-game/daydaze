@@ -71,7 +71,6 @@ import { ReducedMotionContext, usePrefersReducedMotion } from "./motion.ts";
 import { ApartmentPanel } from "./ui/ApartmentPanel.tsx";
 import { ArrestSequence } from "./ui/ArrestSequence.tsx";
 import { ChatBar } from "./ui/ChatBar.tsx";
-import { DebugPanel } from "./ui/DebugPanel.tsx";
 import { JailHud } from "./ui/JailHud.tsx";
 import { GameOverlay } from "./ui/Minigames.tsx";
 import { Overlay } from "./ui/Overlay.tsx";
@@ -130,6 +129,11 @@ const DevPanel = import.meta.env.DEV
       import("./world/DevTools.tsx").then((m) => ({ default: m.DevPanel })),
     )
   : null;
+
+/** Room jumps for `?debug=1` only, so other visits never download them. */
+const DebugPanel = lazy(() =>
+  import("./ui/DebugPanel.tsx").then((m) => ({ default: m.DebugPanel })),
+);
 
 /**
  * The whole game: the 3D World, the overlay UI and the panels around it. Travel
@@ -687,7 +691,9 @@ export function App() {
           </Suspense>
         )}
         {flags.debug && (
-          <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
+          <Suspense fallback={null}>
+            <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
+          </Suspense>
         )}
       </main>
     </ReducedMotionContext.Provider>
