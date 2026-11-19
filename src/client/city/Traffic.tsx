@@ -30,7 +30,8 @@ import {
 } from "../../game/driving/wheels.ts";
 import { NEAR_BODY, useTrafficBodies } from "./trafficBodies.ts";
 import { blankHeist, COPS, heistFrame } from "../../game/city/heist.ts";
-import { heistClock } from "./eventClocks.ts";
+import { blankChase, CHASE_COPS, chaseFrame } from "../../game/city/chase.ts";
+import { chaseClock, heistClock } from "./eventClocks.ts";
 import { useQuality } from "../world/quality.ts";
 import {
   JEEPNEY_CHROME,
@@ -208,6 +209,14 @@ export function Traffic({ player }: { player: Player }) {
     () => Array.from({ length: COPS + 1 }, (): [number, number] => [0, 0]),
     [],
   );
+  // the police chase cars: fleeing sports car and squad cars
+  const chase = useMemo(blankChase, []);
+  const chaseTravel = useMemo(() => new Float64Array(CHASE_COPS + 1), []);
+  const chasePoints = useMemo(
+    () =>
+      Array.from({ length: CHASE_COPS + 1 }, (): [number, number] => [0, 0]),
+    [],
+  );
 
   // Capacity stays fixed; each frame packs only the visible jeepneys (cars
   // and heavy vehicles are the downloaded bodies, drawn by useTrafficBodies).
@@ -351,6 +360,30 @@ export function Traffic({ player }: { player: Player }) {
         true,
       );
     }
+    // the police chase cars: fleeing sports car and squad cars
+    chaseFrame(chaseClock(), chase);
+    let chaseCars = 0;
+    for (let k = 0; k <= CHASE_COPS; k++) {
+      const car = k < CHASE_COPS ? chase.cops[k] : chase.fleeing;
+      if (!car.visible) continue;
+      chaseTravel[k] += car.speed * dt;
+      const point = chasePoints[chaseCars++];
+      point[0] = car.x;
+      point[1] = car.z;
+      const distance = Math.hypot(car.x - player.pos.x, car.z - player.pos.z);
+      if (distance > (tier === "low" ? 80 : 180)) continue;
+      bodies.put(
+        k < CHASE_COPS ? "cop" : "sports",
+        color.set(k < CHASE_COPS ? COP_PAINT : chase.fleeingColor),
+        car.x,
+        car.z,
+        car.yaw,
+        tier === "low" || distance > NEAR_BODY,
+        chaseTravel[k],
+        0,
+        true,
+      );
+    }
     let jeepCount = 0;
     let probe = "";
     for (let i = 0; i < traffic.cars.length; i++) {
@@ -459,6 +492,9 @@ export function Traffic({ player }: { player: Player }) {
       const heistAt = city.traffic.length;
       for (let k = 0; k < heistCars; k++)
         city.traffic[heistAt + k] = heistPoints[k];
+      const chaseAt = city.traffic.length;
+      for (let k = 0; k < chaseCars; k++)
+        city.traffic[chaseAt + k] = chasePoints[k];
     }
     shell.count = trim.count = chrome.count = dark.count = jeepCount;
     wheels.count = lamps.count = jeepCount * PER_VEHICLE;
