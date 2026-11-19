@@ -265,6 +265,16 @@ export function strongest(meters: Readonly<Meters>): Substance | null {
   return best;
 }
 
+/** The most a line quickens her walk, as a multiple of her pace: the meter
+ * tops out at 1 (two lines), a single line at its peak is about +9%. */
+export const COCAINE_PACE = 0.15;
+
+/** How much faster she walks while cocaine is felt (1 = her own pace). It
+ * follows the meter, so it builds with the rush and fades through the crash
+ * back to normal with no step. The other substances don't change her pace. */
+export const paceBoost = (meters: Readonly<Meters>): number =>
+  1 + COCAINE_PACE * clamp01(meters.cocaine.level);
+
 /** How she stands: `loops` play on repeat at `rate`; about half the idle
  * slots open with one of the `tics`, played once (a yawn, a laugh). */
 export type Body = {
