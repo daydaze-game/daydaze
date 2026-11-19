@@ -191,6 +191,29 @@ request. Use the `gh` CLI.
   close issues that are done or no longer true, and delete the branch after
   the merge.
 
+## Code Review Rules
+
+For reviewers (`@codex review`, `@claude`, people): flag these, most serious
+first. Formatting and lint are CI's job; don't comment on them.
+
+- Age gating: alcohol, drunk effects, drugs or 18+ venues reachable without
+  `ADULT_OK` (`src/client/adult.ts`, `src/game/age.ts`); real alcohol or
+  tobacco brands anywhere.
+- Trust boundaries: data from the network, the server or `localStorage` used
+  without validation; secrets or keys in code, logs or issues.
+- Types: `any`, `as` assertions where a type guard or `as const` works, `!`
+  non-null assertions.
+- Render cost: allocations inside `useFrame`, new real lights past four, or
+  meshes that should be instanced (low-tier budget: 250 draw calls, 300k
+  triangles).
+- Content rules: AI-generated NPC dialogue, or fewer than 10 handwritten lines
+  for a situation; an asset missing from `docs/assets.md` and
+  `src/game/credits.ts`.
+- A new room missing any item of the checklist under Rules.
+- Pure logic in `src/game/` without a test, or a bug fix without a test that
+  failed before it.
+- A code file without its header comment.
+
 ## Asset pipeline
 
 - glTF: `npx -y @gltf-transform/cli@4.5.1 optimize in.glb out.glb --compress meshopt --texture-compress webp`
