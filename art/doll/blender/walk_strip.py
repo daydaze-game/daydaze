@@ -3,7 +3,7 @@ cycles, a row per take with the source Mixamo character on top and our baked
 doll rig under it (same scale, in leg lengths), so a gait that reads wrong
 shows up by eye. Left leg red, right leg blue.
 
-    blender --background --factory-startup --python art/doll/blender/walk_strip.py -- walk-normal walk-relaxed
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/walk_strip.py -- walk-normal walk-relaxed
 
 Needs the doll's rig (build_doll.py) and the Mixamo library, like mocap.py.
 """

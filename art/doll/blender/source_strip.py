@@ -2,7 +2,7 @@
 on, at the same clip phases anim_strip.py uses, so a retarget can be
 checked against its source by eye.
 
-    blender --background --factory-startup --python art/doll/blender/source_strip.py -- \
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/source_strip.py -- \
         walking/Walk_Female-Walk /tmp/src [frames=4]
 
 Writes /tmp/src_0.png ... (one per frame).

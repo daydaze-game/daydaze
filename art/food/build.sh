@@ -4,7 +4,7 @@ set -euo pipefail
 root=${1:-/tmp/food-kit}
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-blender --background --factory-startup --python art/food/build.py -- "$root" "$tmp"
+blender --background --factory-startup --python-exit-code 1 --python art/food/build.py -- "$root" "$tmp"
 for input in "$tmp"/*.glb; do
   npx -y @gltf-transform/cli@4.5.1 optimize "$input" "public/models/props/$(basename "$input")" --compress meshopt --texture-compress webp --flatten false --palette false --prune-attributes false
 done

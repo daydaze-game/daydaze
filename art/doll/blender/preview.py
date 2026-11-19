@@ -1,6 +1,6 @@
 """Dev-only: renders the built doll GLB in Blender for a quick look.
 
-    blender --background --factory-startup --python art/doll/blender/preview.py -- face out.png
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/preview.py -- face out.png
 Views: face, profile, head, headback, head3q, chest, body, back, side, eye.
 """
 

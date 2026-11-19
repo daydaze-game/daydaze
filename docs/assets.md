@@ -303,7 +303,8 @@ the Ultimate Nature Pack) and compressed by `scripts/import-forest.sh` into
 - Skeleton `rig.mixamo.json` (52 bones named `mixamorig:*`) and skin weights `weights.mixamo.json`: MPFB2 `src/mpfb/data/rigs/standard/`, commit `6ff1eb35`. CC0 1.0: MPFB's rigs and weights are assets (its `LICENSE.md`, section C); only its program code is GPL, and none of it is used.
 
 `art/doll/blender/build_doll.py` shapes the mesh, fits the MPFB2 skeleton to
-it and writes the GLB parts; `scripts/optimize-doll.sh` compresses them into
+it and writes the GLB parts (run with `blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/build_doll.py`
+so build errors exit nonzero); `scripts/optimize-doll.sh` validates and compresses them into
 `public/models/doll/`. Eye and lip presets reuse the same CC0 morph targets;
 `scripts/face-previews.ts` renders their closet previews from the runtime meshes.
 

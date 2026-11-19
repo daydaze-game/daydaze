@@ -209,7 +209,8 @@ request. Use the `gh` CLI.
   `--flatten false --palette false --prune-attributes false` when node names,
   material names or UVs matter. Set Blender shape keys to `value = 0` before
   export.
-- Blender runs headless: `blender --background --factory-startup --python <script>`.
+- Blender runs headless:
+  `blender --background --factory-startup --python-exit-code 1 --python <script>`.
   Dolls: `build_doll.py` (add `DOLL_SEX=male` for the `-m` files), then
   `bash scripts/optimize-doll.sh`; mocap clips: `art/doll/blender/mocap.py`
   (Mixamo FBX in the git-ignored `mixamo/`).

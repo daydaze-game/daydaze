@@ -35,7 +35,7 @@ threejs-shaders, threejs-3d-generator (Tripo), threejs-audio-generator
 
 - `.venv/bin/polydown`: Poly Haven downloads (`hdris`, `textures`,
   `models -mf gltf`, `-s 1k`, `-f <folder>`).
-- `blender` 5.x at `blender` (batch: `--background --factory-startup --python`).
+- `blender` 5.x at `blender` (batch: `--background --factory-startup --python-exit-code 1 --python`).
 - gltf-transform via `npx -y @gltf-transform/cli@4.5.1` (flags in CLAUDE.md).
 - Downloads: Kenney, ambientCG, Poly Haven direct; itch.io (Quaternius) blocks
   scripts — ask the owner. Owner zips: `/home/kaitlyn/git/daydaze/local-assets/downloads/game/`.

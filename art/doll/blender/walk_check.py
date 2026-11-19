@@ -1,7 +1,7 @@
 """Gait check: compares a walk's knee flexion, thigh swing and foot height in
 the source Mixamo FBX against our clip as mocap.py bakes it onto the doll's rig.
 
-    blender --background --factory-startup --python art/doll/blender/walk_check.py -- walk-normal walk-easy
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/walk_check.py -- walk-normal walk-easy
 
 Per frame, from world joint positions (so bone axes and roll don't matter):
   knee   flexion = 180 - angle(hip-knee, ankle-knee), degrees (0 = straight)

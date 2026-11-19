@@ -14,11 +14,29 @@ mkdir -p "$OUT"
 OPTS=(--compress meshopt --texture-compress webp --texture-size 1024
   --simplify false --join false --instance false --flatten false --palette false --prune-attributes false)
 LO="$(mktemp -d)"
+trap 'rm -rf "$LO"' EXIT
+
+shopt -s nullglob
+files=("$IN"/*.glb)
+if [ ${#files[@]} -eq 0 ]; then
+  echo "Error: No .glb files found in $IN. Did the Blender build fail?" >&2
+  exit 1
+fi
+
+if [ -z "${ONLY:-}" ] && [ -z "${HAIR_ONLY:-}" ] && [ -z "${OUTFIT_ONLY:-}" ]; then
+  if [ ! -f "$IN/body.glb" ] && [ ! -f "$IN/body-m.glb" ]; then
+    echo "Error: Incomplete doll build: neither body.glb nor body-m.glb found in $IN." >&2
+    exit 1
+  fi
+fi
+
+matched=0
 # ONLY="hair-locs*" rebuilds just the parts that match (default: every part)
-for src in "$IN"/*.glb; do
+for src in "${files[@]}"; do
   name="$(basename "$src" .glb)"
   # ONLY='hair-(buzz|edges)' rebuilds just the parts whose names match
   if [ -n "${ONLY:-}" ] && ! echo "$name" | grep -Eq "^($ONLY)"; then continue; fi
+  matched=$((matched + 1))
   f="$LO/$name-pruned.glb"
   # the baked clips (art/doll/blender/mocap.py; anims.glb and one anims-<pack>
   # file per pack, each with a -m twin for the man): no meshes to prune; keys
@@ -54,5 +72,10 @@ for src in "$IN"/*.glb; do
       ;;
   esac
 done
-rm -rf "$LO"
+
+if [ "$matched" -eq 0 ]; then
+  echo "Error: No .glb files in $IN matched ONLY=${ONLY:-}." >&2
+  exit 1
+fi
+
 ls -la "$OUT"
