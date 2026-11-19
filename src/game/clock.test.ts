@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { heldClock, shiftedClock, toNextStart } from "./clock.ts";
+import { heldClock, secondsSince, shiftedClock, toNextStart } from "./clock.ts";
 
 /** A fake wall clock in seconds the test moves by hand. */
 function fakeNow(start: number) {
@@ -53,4 +53,11 @@ test("toNextStart moves a clock to the start of an event's next run", () => {
   assert.equal((1_000 + toNextStart(1_000, 240)) % 240, 0);
   assert.equal(toNextStart(960, 240), 0); // a run starting right now
   assert.equal(toNextStart(-10, 240), 10); // negative times wrap the same way
+});
+
+test("secondsSince drops float jitter from large wall-clock bases", () => {
+  const start = 2_400_000;
+  assert.notEqual(start + 74.9 - start, 74.9); // the raw subtraction jitters
+  assert.equal(secondsSince(start + 74.9, start), 74.9);
+  assert.equal(secondsSince(start - 3.25, start), -3.25);
 });

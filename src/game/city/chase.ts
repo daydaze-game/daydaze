@@ -4,6 +4,7 @@
 // minute each time, timed so it never clashes with the bank heist. Pure and
 // deterministic on the clock.
 import type { Vec2 } from "../walk.ts";
+import { secondsSince } from "../clock.ts";
 import { hash } from "./hash.ts";
 import { heistOffset } from "./heist.ts";
 import { ROAD_NODES } from "./layout.ts";
@@ -150,7 +151,7 @@ export function chaseStart(slot: number): number {
 /** Seconds into the chase under way at `t`, or null when none is. */
 export function chaseInto(t: number): number | null {
   const slot = Math.floor(t / CHASE_SLOT);
-  const into = t - chaseStart(slot);
+  const into = secondsSince(t, chaseStart(slot));
   return into >= 0 && into < CHASE_LENGTH ? into : null;
 }
 
