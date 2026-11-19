@@ -38,6 +38,14 @@ test("camera overrides dist, pitch, fov, height pass through query", () => {
   assert.equal(shot?.query, "spot=pulse&dist=12&pitch=15&fov=45&height=2.5");
 });
 
+test("heist and heistend pass through query", () => {
+  const [shot] = expandShots(
+    ["room=city&heist=30&heistend=caught&at=-170,9"],
+    known,
+  );
+  assert.equal(shot?.query, "room=city&heist=30&heistend=caught&at=-170,9");
+});
+
 test("a bad query is rejected before any browser starts", () => {
   for (const bad of [
     "room=city;rm",

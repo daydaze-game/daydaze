@@ -102,3 +102,10 @@ test("?cam= parses 3 relative or 6 world coordinates", () => {
   assert.equal(readFlags("?cam=1,2,3,4").cam, null);
   assert.equal(readFlags("?cam=1,2,a").cam, null);
 });
+
+test("?heistend= parses caught or escape, falls back to null", () => {
+  assert.equal(readFlags("?heistend=caught").heistend, "caught");
+  assert.equal(readFlags("?heistend=escape").heistend, "escape");
+  assert.equal(readFlags("?heistend=other").heistend, null);
+  assert.equal(readFlags("").heistend, null);
+});
