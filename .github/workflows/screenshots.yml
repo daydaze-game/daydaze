@@ -19,6 +19,8 @@ on:
 concurrency:
   group: screenshots-${{ github.ref }}-${{ inputs.shots }}
   cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   shots:
     timeout-minutes: 45

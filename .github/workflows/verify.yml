@@ -9,6 +9,8 @@ on:
 concurrency:
   group: verify-${{ github.ref }}
   cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   verify:
     timeout-minutes: 25
