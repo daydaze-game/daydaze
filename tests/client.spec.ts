@@ -4,6 +4,7 @@ import { GAS_STATIONS, counterOf } from "../src/game/city/gasStations.ts";
 import { BUS_STOPS } from "../src/game/city/transit.ts";
 import { SONGS } from "../src/game/karaokeSongs.ts";
 import { dockAction } from "./dock.ts";
+import { recordTestMap } from "./test-map.ts";
 
 // Every test forces the low tier: headless WebGL is SwiftShader on the CPU.
 // Most also use still=1 so the scene renders a few frames and then idles.
@@ -25,6 +26,9 @@ function collectErrors(page: Page) {
 }
 
 const SAVE = "daydaze-save-v1";
+
+// on main, record which files each test loads (scripts/select-tests.ts)
+recordTestMap(test);
 
 // A fresh save would open the first-visit walkthrough over every test; mark
 // it done (only if the save doesn't say otherwise), except in the

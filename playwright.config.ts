@@ -8,6 +8,8 @@ const PORT = Number(process.env.PORT ?? 5195);
 export default defineConfig({
   testDir: "tests",
   testMatch: ["client.spec.ts", "dream-city.spec.ts"],
+  // a pull request runs only the tests its changes reach (scripts/select-tests.ts)
+  ...(process.env.PW_GREP ? { grep: new RegExp(process.env.PW_GREP) } : {}),
   // tests are independent pages, so CI's shards can split the one file
   fullyParallel: true,
   workers: 2,
