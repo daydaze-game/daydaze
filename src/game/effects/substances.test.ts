@@ -16,6 +16,7 @@ import {
   highParams,
   isDose,
   isStrain,
+  paceBoost,
   phaseOf,
   profileOf,
   readMeters,
@@ -319,6 +320,27 @@ test("a line raises cocaine, leaves the rest alone, and two add up", () => {
     soberMeters(),
   );
   assert.equal(two.cocaine.level, 1);
+});
+
+test("cocaine quickens her walk with the meter, nothing else does", () => {
+  assert.equal(paceBoost(soberMeters()), 1);
+  const peak = readMeters(
+    [{ dose: "line", at: 0 }],
+    gameSeconds(DOSES.line.peak + 1),
+    soberMeters(),
+  );
+  const boost = paceBoost(peak);
+  assert.ok(boost > 1 && boost <= 1.25, `${boost}`);
+  // the crash and the end bring her back to her own pace
+  const over = readMeters(
+    [{ dose: "line", at: 0 }],
+    gameSeconds(DOSES.line.end),
+    soberMeters(),
+  );
+  assert.equal(paceBoost(over), 1);
+  const molly = soberMeters();
+  molly.molly = { level: 1, phase: "peak", strain: "hybrid" };
+  assert.equal(paceBoost(molly), 1);
 });
 
 test("cocaine does not bend the screen", () => {
