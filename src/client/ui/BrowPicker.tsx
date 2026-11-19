@@ -23,9 +23,11 @@ const previews = BROWS.map((option) => ({
 
 export function BrowPicker({
   value,
+  color,
   onPick,
 }: {
   value: Look["brows"];
+  color?: string | undefined;
   onPick: (brows: Look["brows"]) => void;
 }) {
   const selectedIndex = BROWS.findIndex((o) => o.id === value);
@@ -44,7 +46,7 @@ export function BrowPicker({
           onKeyDown={(e) => onRadioKeyDown(e, BROWS, idx, onPick)}
         >
           <svg viewBox="0 0 120 48" aria-hidden="true">
-            <path d={option.path} fill={option.color} />
+            <path d={option.path} fill={color ?? option.color} />
           </svg>
           <span>{option.label}</span>
         </button>

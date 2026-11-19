@@ -95,6 +95,8 @@ import { Jewelry, readAnchors } from "./Jewelry.tsx";
 import { Glasses } from "./Glasses.tsx";
 import { HearingAids } from "./HearingAids.tsx";
 import { isBone, isMesh, isSkinnedMesh } from "../../world/guards.ts";
+import { setData } from "../../world/dataset.ts";
+import { isDollReady } from "./dollReady.ts";
 
 /**
  * The 3D doll: a skinned, shape-keyed body built in Blender from MakeHuman's
@@ -505,6 +507,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     hairColor,
     body: build,
     face: faceCode,
+    browColor,
   } = look;
   // the man's clip file loads only once a man is in the scene
   useEffect(() => {
@@ -534,6 +537,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
         hairColor,
         body: build,
         face: faceCode,
+        browColor,
       },
       marks,
       body.key,
@@ -567,6 +571,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     hairColor,
     build,
     faceCode,
+    browColor,
     invalidate,
   ]);
   useEffect(() => {
@@ -923,6 +928,8 @@ export function HumanDoll({
   ...rest
 }: Props) {
   // NPC looks carry no face, so their seed picks one
+  const gl = useThree((s) => s.gl);
+  const invalidate = useThree((s) => s.invalidate);
   const heightScale = bodyScales(shape).height;
   const lowTierNpc = useQuality() === "low" && !own;
   const lodNear = lowTierNpc ? LOW_TIER_NEAR : LOD_NEAR;
@@ -1028,15 +1035,23 @@ export function HumanDoll({
   const smileMeshes = useRef<THREE.Mesh[] | null>(null);
   // a far doll's skeleton updates every third frame (thinned): the time owed
   const owed = useRef({ dt: 0, tick: 0 });
+  useEffect(() => {
+    if (own) setData(gl.domElement.dataset, "avatar", "loading");
+    return () => {
+      if (own) delete gl.domElement.dataset.avatar;
+    };
+  }, [own, gl]);
+
   const track = useMemo(() => {
     const make = (key: string) => (meshes: THREE.Mesh[] | null, up: number) => {
       if (meshes) worn.current.set(key, meshes);
       else worn.current.delete(key);
       if (key === "shoes") lift.current = up;
       wornList.current = [...bodyMeshes, ...[...worn.current.values()].flat()];
+      invalidate();
     };
     return { hair: make("hair"), outfit: make("outfit"), shoes: make("shoes") };
-  }, [bodyMeshes]);
+  }, [bodyMeshes, invalidate]);
 
   useEffect(() => {
     wornList.current = [...bodyMeshes, ...[...worn.current.values()].flat()];
@@ -1050,11 +1065,16 @@ export function HumanDoll({
 
   useFrame((state, rawDt) => {
     const dt = rawDt * TIME_SCALE;
-    // never show the body before its outfit (or swimsuit) and hair have
+    // never show the body before its outfit (or swimsuit), hair and shoes have
     // loaded: a doll stays hidden while they're still downloading
-    if (root.current)
-      root.current.visible =
-        worn.current.has("outfit") && (!parts.hair || worn.current.has("hair"));
+    const ready = isDollReady(worn.current, parts);
+    if (root.current) root.current.visible = ready;
+    if (own)
+      setData(
+        state.gl.domElement.dataset,
+        "avatar",
+        ready ? "ready" : "loading",
+      );
     // far dolls swap to the low-poly body; the gap is hysteresis
     if (root.current && body.far) {
       // last frame's world matrix is close enough for picking a LOD, and

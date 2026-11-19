@@ -20,6 +20,7 @@ import {
   liveHigh,
   onHighChange,
 } from "./high.ts";
+import { getSharedAudioBus } from "../../audio/audioBus.ts";
 import { useReducedMotion } from "../motion.ts";
 import {
   ageBuzz,
@@ -39,6 +40,7 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
   const invalidate = useThree((s) => s.invalidate);
   const calm = useReducedMotion();
   const shown = useRef({ buzz: -1, calm, intensity });
+  const acidHeard = useRef(0);
 
   useEffect(() => onBuzzChange(() => invalidate()), [invalidate]);
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
@@ -67,6 +69,11 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
     liveDrunk.glare = look.glare;
     ageHigh(dt);
     const meters = getMeters();
+    // the filter eases itself; skip the call while the level hasn't moved
+    if (meters.acid.level !== acidHeard.current) {
+      acidHeard.current = meters.acid.level;
+      getSharedAudioBus().setAcidLevel(acidHeard.current);
+    }
     const lifted = highParams(meters, intensityFactor(intensity), calm);
     liveHigh.glow = lifted.glow;
     liveHigh.hue = lifted.hue;
