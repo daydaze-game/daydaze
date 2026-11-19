@@ -7,6 +7,7 @@
 // meter the rest of the game reads is `buzzLevel` (BAC / 0.25, where 0.25 is
 // needing help to walk).
 
+import type { DialogueSituation } from "../dialogue/types.ts";
 import {
   bodyOf,
   gameSeconds,
@@ -170,6 +171,27 @@ export function bodyFor(
   const drug = s ? meters[s].level : 0;
   if (drug > 0 && drug >= clamp01(level)) return bodyOf(meters);
   return drunkBody(level, hangover) ?? bodyOf(meters);
+}
+
+/** What NPCs react to: the stronger of the drink and the strongest substance,
+ * once her body shows it (the `drunk` stage, or a substance past FELT); null
+ * when she's sober enough to be talked to normally. Molly and cocaine have no
+ * lines yet, so they pass for whatever else she is. */
+export function stateSituation(
+  meters: Readonly<Meters>,
+  level: number,
+): DialogueSituation | null {
+  const l = clamp01(level);
+  const s = strongest(meters);
+  const drug = s ? meters[s].level : 0;
+  const drugState =
+    s === "high"
+      ? "state-high"
+      : s === "trip" || s === "acid"
+        ? "state-tripping"
+        : null;
+  if (drugState && drug >= l) return drugState;
+  return l >= at(0.06) ? "state-drunk" : drugState;
 }
 
 export function drunkBody(level: number, hangover: number): Body | null {

@@ -12,6 +12,7 @@ import {
   startEngineHum,
   playFanfare,
   playFireworkBoom,
+  playCrashBoom,
   playHorn,
   playPurr,
   playShellNote,
@@ -38,6 +39,7 @@ test("world sounds stay silent and never throw without Web Audio", () => {
   assert.equal(playClick(), false);
   assert.equal(playFanfare(1), false);
   assert.equal(playFireworkBoom(1), false);
+  assert.equal(playCrashBoom(1), false);
   assert.equal(playShellNote(2), false);
   assert.equal(playPurr(2), false);
   assert.equal(playHorn(), false);
