@@ -82,6 +82,33 @@ test("an up-to-date PR stuck with nothing running doesn't hold the line", () => 
   assert.equal(nextUpdate([pr(1, "BLOCKED", [pass]), pr(2, "BEHIND")]), 2);
 });
 
+test("when every PR is UNKNOWN, lookupStatus resolves their real merge states", () => {
+  const lookup = (n: number) =>
+    n === 2 ? "BEHIND" : n === 1 ? "CLEAN" : "UNKNOWN";
+  // PR 1 is CLEAN (in-flight/about to merge), so PR 2 waits
+  assert.equal(nextUpdate([pr(1, "UNKNOWN"), pr(2, "UNKNOWN")], lookup), null);
+  // When PR 1 has merged and only PR 2 and PR 3 remain UNKNOWN, both behind:
+  const lookupBehind = (n: number) =>
+    n === 2 || n === 3 ? "BEHIND" : "UNKNOWN";
+  assert.equal(
+    nextUpdate([pr(3, "UNKNOWN"), pr(2, "UNKNOWN")], lookupBehind),
+    2,
+  );
+});
+
+test("an UNKNOWN PR whose real state is DIRTY gets skipped after lookup", () => {
+  const lookup = (n: number) => (n === 1 ? "DIRTY" : "BEHIND");
+  assert.equal(nextUpdate([pr(1, "UNKNOWN"), pr(2, "UNKNOWN")], lookup), 2);
+});
+
+test("an unresolved UNKNOWN PR does not hold the line as in-flight", () => {
+  // without lookup or when lookup returns UNKNOWN, checks running on an UNKNOWN PR do not block the queue
+  assert.equal(
+    nextUpdate([pr(1, "UNKNOWN", [pass, running]), pr(2, "BEHIND")]),
+    2,
+  );
+});
+
 test("nothing to do returns null", () => {
   assert.equal(nextUpdate([]), null);
   assert.equal(nextUpdate([pr(1, "BLOCKED", [failed])]), null);
