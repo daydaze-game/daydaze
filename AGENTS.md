@@ -62,23 +62,6 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run dev:server`                | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
 | `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
 | `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
-| Command                             | What it does                                                                                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                       | Client on `http://localhost:5173` (`-- --port 5195` for another)                                                                                |
-| `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
-| `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
-| `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
-| `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
-| `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
-| `npm run format` / `format:check`   | Prettier                                                                                                                                        |
-| `npm run verify`                    | lint, test, typecheck, format check, build, perf budget: the merge gate                                                                         |
-| `npm run test:e2e:client`           | Playwright client tests (`tests/client.spec.ts`)                                                                                                |
-| `npm run test:e2e` / `test:e2e:sw`  | Playwright minigames / service-worker configs                                                                                                   |
-| `npm run test:e2e:online`           | Two browser players against a local Worker (~7 min)                                                                                             |
-| `npm run dev:server`                | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
-| `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
-| `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
 
 Client URL flags: `?quality=low|high`, `?still=1` (render a few frames and
 stop, for screenshots), `?debug=1` (room jump buttons), `?time=HH:MM` (pin the
@@ -135,15 +118,19 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Pushing `feat/**`, `fix/**`, `perf/**` or `ci/**` runs `npm run verify`
     (`verify.yml`). Locally, run single checks under `nice -n 19`.
   - Browser tests: `gh workflow run browser-test.yml --ref <branch> -f grep="<test title>"`.
-  - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<names>"`,
-    then `gh run download <id> -n screenshots`. Look at every screenshot.
+  - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<tokens>"`
+    (registry names, raw queries like `room=city&at=10,5&turn=4`, `spot=<building>`,
+    or `tour`; see `docs/dev-tools.md`), then `gh run download <id> -n screenshots`
+    or open `https://github.com/dpologdvinity/daydaze/tree/screenshots/<branch-with-dashes>`.
+    Look at every screenshot. `tree/screenshots/main` is the whole game as of
+    the last game-affecting push to `main`.
+    PRs that change room, city, avatar or HUD code get the matching shots
+    automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
+    comment linking the artifact, kept 7 days.
   - Screen recordings of any scene or minigame (MP4):
     `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
     `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
     Options are in `scripts/record.ts`.
-    PRs that change room, city, avatar or HUD code get the matching shots
-    automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
-    comment linking the artifact, kept 7 days.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
@@ -208,6 +195,29 @@ request. Use the `gh` CLI.
 - **Keep them small and current**: split a PR that mixes unrelated changes,
   close issues that are done or no longer true, and delete the branch after
   the merge.
+
+## Code Review Rules
+
+For reviewers (`@codex review`, `@claude`, people): flag these, most serious
+first. Formatting and lint are CI's job; don't comment on them.
+
+- Age gating: alcohol, drunk effects, drugs or 18+ venues reachable without
+  `ADULT_OK` (`src/client/adult.ts`, `src/game/age.ts`); real alcohol or
+  tobacco brands anywhere.
+- Trust boundaries: data from the network, the server or `localStorage` used
+  without validation; secrets or keys in code, logs or issues.
+- Types: `any`, `as` assertions where a type guard or `as const` works, `!`
+  non-null assertions.
+- Render cost: allocations inside `useFrame`, new real lights past four, or
+  meshes that should be instanced (low-tier budget: 250 draw calls, 300k
+  triangles).
+- Content rules: AI-generated NPC dialogue, or fewer than 10 handwritten lines
+  for a situation; an asset missing from `docs/assets.md` and
+  `src/game/credits.ts`.
+- A new room missing any item of the checklist under Rules.
+- Pure logic in `src/game/` without a test, or a bug fix without a test that
+  failed before it.
+- A code file without its header comment.
 
 ## Asset pipeline
 
