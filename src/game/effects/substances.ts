@@ -514,6 +514,18 @@ export function heavyLid(meters: Readonly<Meters>): number {
   );
 }
 
+/** The reddest the whites of the eyes get at full weed (0..1 blend). */
+export const RED_EYES_MAX = 0.6;
+
+/** How red the sclera is from weed (dilated conjunctival vessels, docs/research
+ * /substances.md section 2), 0 to RED_EYES_MAX. Scales with the high level and
+ * is zero sober and for every other substance. Own doll only. */
+export function redEyes(meters: Readonly<Meters>): number {
+  const { level, phase } = meters.high;
+  if (!phase) return 0;
+  return Math.min(RED_EYES_MAX, clamp01(level) * RED_EYES_MAX);
+}
+
 export const BREATHE_AMOUNT = 0.006;
 export const BREATHE_HZ = 0.25;
 
