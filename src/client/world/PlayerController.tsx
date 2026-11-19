@@ -71,6 +71,8 @@ import { groundAt, type Ground } from "../../game/city/ground.ts";
 import { playStepFile } from "../../audio/soundFiles.ts";
 import { submergedView } from "./submerged.ts";
 import { stick } from "./joystick.ts";
+import { getMeters } from "../effects/high.ts";
+import { paceBoost } from "../../game/effects/substances.ts";
 
 /** Frame time the simulation may catch up on; longer gaps (a hidden tab) are dropped. */
 const MAX_CATCH_UP = 0.25;
@@ -442,6 +444,7 @@ export function PlayerController({
         };
     }
     let moving = false;
+    let quick = 1;
     if (rideMood) {
       // the slide drew the pose; the walker waits for the splash to end
       player.acc = 0;
@@ -458,6 +461,8 @@ export function PlayerController({
       player.acc = 0;
       player.walk.target = null;
     } else {
+      // cocaine quickens her, legs and all (1 when sober)
+      quick = paceBoost(getMeters());
       // short trips stroll in her walk style; long ones ramp up to the jog
       const target = player.walk.target;
       stepPace(
@@ -489,7 +494,9 @@ export function PlayerController({
           area,
           intent,
           SIM_STEP,
-          (skates.get().on ? SKATE_SPEED : pace.current.pace / WALK_SPEED) *
+          (skates.get().on
+            ? SKATE_SPEED
+            : (pace.current.pace * quick) / WALK_SPEED) *
             paceIn(stateIn(water, player.walk.pos)),
         );
         moving = moving || step.moved;
@@ -550,7 +557,7 @@ export function PlayerController({
       moving || player.seat?.stride
         ? skates.get().on
           ? WALK_SPEED * 0.3
-          : pace.current.pace
+          : pace.current.pace * quick
         : 0,
       18,
       dt,
