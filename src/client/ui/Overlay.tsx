@@ -132,6 +132,7 @@ import {
 } from "./controls.tsx";
 import { VenueGames } from "./Minigames.tsx";
 import { BrowPicker } from "./BrowPicker.tsx";
+import { BROW_COLORS, browColor } from "../../game/brows.ts";
 import { friends } from "../net/friends.ts";
 import { ONLINE } from "../net/online.ts";
 
@@ -526,7 +527,14 @@ function Mirror({
           <p className="tiles-label">Brows</p>
           <BrowPicker
             value={look.brows}
+            color={browColor(look)}
             onPick={(brows) => setLook({ ...look, brows })}
+          />
+          <ColorPicker
+            label="Brow color"
+            options={BROW_COLORS}
+            value={browColor(look)}
+            onPick={(color) => setLook({ ...look, browColor: color })}
           />
         </section>
         <section>

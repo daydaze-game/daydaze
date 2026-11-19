@@ -215,6 +215,15 @@ grid that renders on a phone: `tree/screenshots/main` (refreshed by every push
 to `main` that touches the game), `tree/screenshots/feat-x`, and so on. From a
 phone, Actions > Screenshots > Run workflow in mobile web takes new ones.
 
+The gallery keeps only each live branch's latest shots, as JPEGs, and the
+`screenshots` artifact expires after 7 days. The PNG originals of every run
+(pull requests included) and every `record.yml` MP4 also go to a permanent
+release on
+[`dpologdvinity/daydaze-artifacts`](https://github.com/dpologdvinity/daydaze-artifacts/releases),
+tagged `<screenshots|recording>-<branch>-<sha>-<run>-<attempt>`
+(`scripts/archive-run.sh`). The upload needs the `ARTIFACTS_TOKEN` repo
+secret; without it, the step warns and skips.
+
 ## Browser extensions
 
 The panel registers the scene with the

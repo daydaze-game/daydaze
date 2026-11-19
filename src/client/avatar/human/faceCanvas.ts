@@ -14,6 +14,7 @@ import {
 import { beardStrokes } from "../../../game/beard.ts";
 import {
   BROW_DESIGNS,
+  browColor,
   browRise,
   type BrowDesign,
 } from "../../../game/brows.ts";
@@ -461,9 +462,10 @@ function paintBrow(
   lid: readonly [number, number][],
   shape: BrowDesign,
   rand: () => number,
+  colorOverride?: string,
 ) {
   const { thickness: thick, color } = shape;
-  const ink = hexRgb(color);
+  const ink = hexRgb(colorOverride ?? color);
   const n = lid.length;
   const inner = lid[0];
   const outer = lid[n - 1];
@@ -518,6 +520,7 @@ type FaceFields = Pick<
   Look,
   "skin" | "lips" | "brows" | "shadow" | "hairColor"
 > & {
+  browColor?: Look["browColor"] | undefined;
   makeup?: Look["makeup"] | undefined;
   beard?: Look["beard"] | undefined;
   body?: Look["body"] | undefined;
@@ -727,8 +730,9 @@ export async function paintFace(look: FaceFields, marks: Marks) {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  paintBrow(ctx, marks.lLidUpper, BROW_DESIGNS[look.brows], rand);
-  paintBrow(ctx, marks.rLidUpper, BROW_DESIGNS[look.brows], rand);
+  const browInk = browColor(look);
+  paintBrow(ctx, marks.lLidUpper, BROW_DESIGNS[look.brows], rand, browInk);
+  paintBrow(ctx, marks.rLidUpper, BROW_DESIGNS[look.brows], rand, browInk);
 
   paintSkinMarks(ctx, marks, skin, makeup);
 

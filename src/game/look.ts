@@ -931,6 +931,8 @@ export type Look = {
   /** encodeFace's code for the face sliders, body shape and eye color;
    * looks from before the 3D doll have none and wear DEFAULT_FACE. */
   face?: string;
+  /** Custom RGB eyebrow color; looks without one use the brow design's ink. */
+  browColor?: string;
   /** encodeMakeup's code; looks without one wear DEFAULT_MAKEUP. */
   makeup?: string;
   /** encodePiercings' code; looks without one have none. */
@@ -1022,6 +1024,7 @@ const LOOK_CATALOGS: {
     K in Exclude<
       keyof Look,
       | "face"
+      | "browColor"
       | "makeup"
       | "piercings"
       | "gait"
@@ -1062,6 +1065,7 @@ export function validateLook(value: unknown): value is Look {
   const fields = new Map<string, unknown>(Object.entries(value));
   const catalogs = Object.entries(LOOK_CATALOGS);
   const hasFace = fields.has("face");
+  const hasBrowColor = fields.has("browColor");
   const hasMakeup = fields.has("makeup");
   const hasPiercings = fields.has("piercings");
   const hasGait = fields.has("gait");
@@ -1075,6 +1079,7 @@ export function validateLook(value: unknown): value is Look {
     fields.size ===
       catalogs.length +
         (hasFace ? 1 : 0) +
+        (hasBrowColor ? 1 : 0) +
         (hasMakeup ? 1 : 0) +
         (hasPiercings ? 1 : 0) +
         (hasGait ? 1 : 0) +
@@ -1084,6 +1089,7 @@ export function validateLook(value: unknown): value is Look {
         (hasBody ? 1 : 0) +
         (hasBeard ? 1 : 0) +
         (hasLimbs ? 1 : 0) &&
+    (!hasBrowColor || isColor(fields.get("browColor"))) &&
     (!hasLimbs || decodeLimbs(fields.get("limbs")) !== null) &&
     (!hasBody || isId(BODIES, fields.get("body"))) &&
     (!hasBeard || isId(BEARDS, fields.get("beard"))) &&

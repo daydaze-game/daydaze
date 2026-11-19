@@ -127,10 +127,17 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
     PRs that change room, city, avatar or HUD code get the matching shots
     automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
     comment linking the artifact, kept 7 days.
+    Every screenshot and recording run is also kept forever as a release on
+    `dpologdvinity/daydaze-artifacts` (`scripts/archive-run.sh`; the PR
+    comment and the run summary link it).
   - Screen recordings of any scene or minigame (MP4):
     `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
     `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
     Options are in `scripts/record.ts`.
+  - Artifacts expire, so `archive-sweep.yml` copies screenshots, recordings,
+    Playwright reports and profiles to permanent releases on
+    `dpologdvinity/daydaze-artifacts` daily (`scripts/archive-sweep.ts`);
+    builds and coverage come back from any commit and are left to expire.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
