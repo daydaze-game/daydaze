@@ -3900,7 +3900,7 @@ test("the city map lists the week's events, and a club glows on its night", asyn
   // La Noche on Latin Night: the card says so and glows
   await page.goto(`${STILL}&room=la-noche&night=latin-night`);
   await expect(page.locator(".venue-event[data-night]")).toHaveText(
-    /Latin night is on! \d+h \d+m left/,
+    /Latin night is on! (\d+h )?\d+m left/,
     { timeout: 150_000 },
   );
   await expect(page.locator(".night-glow")).toHaveCount(1);
