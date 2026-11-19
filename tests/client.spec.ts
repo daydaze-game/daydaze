@@ -27,6 +27,61 @@ function collectErrors(page: Page) {
 
 const SAVE = "daydaze-save-v1";
 
+/** The fields of the save that the tests read back; every one is optional. */
+interface SavedGame {
+  coins?: number;
+  garage?: string[];
+  records?: string[];
+  bouquet?: unknown;
+  car?: { id: string; rims: string; glow: string; wrap: string; at: number[] };
+  look?: Partial<
+    Record<
+      | "hairColor"
+      | "outfitColor"
+      | "lips"
+      | "face"
+      | "makeup"
+      | "brows"
+      | "gait"
+      | "limbs",
+      string
+    >
+  >;
+  farm?: { groceries: Record<string, number> };
+  pottery?: { score: number; target: string; glaze: string };
+  bests?: Record<string, number>;
+}
+
+/** Narrows parsed JSON to a save: only "is an object", since each test
+ * asserts the fields it cares about (a missing one fails that assertion). */
+function isSavedGame(value: unknown): value is SavedGame {
+  return typeof value === "object" && value !== null;
+}
+
+/** The save the game wrote to localStorage, parsed. */
+async function readSave(page: Page): Promise<SavedGame> {
+  const raw = await page.evaluate((key) => localStorage.getItem(key), SAVE);
+  const parsed: unknown = JSON.parse(raw ?? "{}");
+  if (!isSavedGame(parsed)) throw new Error("the save is not an object");
+  return parsed;
+}
+
+/** Sets the live driving session's passenger, as a second online player would. */
+async function setPassenger(page: Page, passenger: string | null) {
+  await page.evaluate(async (who) => {
+    const source = "/src/client/world/driving.ts";
+    const mod: unknown = await import(/* @vite-ignore */ source);
+    if (
+      typeof mod === "object" &&
+      mod !== null &&
+      "driving" in mod &&
+      typeof mod.driving === "object" &&
+      mod.driving !== null
+    )
+      Reflect.set(mod.driving, "passenger", who);
+  }, passenger);
+}
+
 // on main, record which files each test loads (scripts/select-tests.ts)
 recordTestMap(test);
 
@@ -35,7 +90,11 @@ recordTestMap(test);
 // walkthrough's own tests, which use a context of their own.
 test.beforeEach(async ({ page }) => {
   await page.addInitScript((key) => {
-    const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const save: Record<string, unknown> =
+      typeof parsed === "object" && parsed !== null
+        ? Object.fromEntries(Object.entries(parsed))
+        : {};
     if (!("onboarded" in save))
       localStorage.setItem(key, JSON.stringify({ ...save, onboarded: true }));
   }, SAVE);
@@ -48,7 +107,11 @@ async function seedSave(page: Page, fields: Record<string, unknown>) {
     ([key, seed]) => {
       if (sessionStorage.getItem("seeded")) return;
       sessionStorage.setItem("seeded", "1");
-      const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+      const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+      const save: Record<string, unknown> =
+        typeof parsed === "object" && parsed !== null
+          ? Object.fromEntries(Object.entries(parsed))
+          : {};
       localStorage.setItem(key, JSON.stringify({ ...save, ...seed }));
     },
     [SAVE, fields] as const,
@@ -80,22 +143,10 @@ test("passenger rides close the dressing room and block reopening", async ({
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   // Inject a passenger transition without requiring a second online browser.
-  await page.evaluate(async () => {
-    const source = "/src/client/world/driving.ts";
-    const { driving }: { driving: { passenger: string | null } } = await import(
-      source
-    );
-    driving.passenger = "test-driver";
-  });
+  await setPassenger(page, "test-driver");
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(toggle).toBeDisabled();
-  await page.evaluate(async () => {
-    const source = "/src/client/world/driving.ts";
-    const { driving }: { driving: { passenger: string | null } } = await import(
-      source
-    );
-    driving.passenger = null;
-  });
+  await setPassenger(page, null);
   await expect(toggle).toBeEnabled();
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
@@ -142,10 +193,7 @@ test("dressing room isolates the character and saves unrestricted colors", async
     .fill("#c9a227");
   await expect
     .poll(() =>
-      page.evaluate(() => {
-        const look = JSON.parse(
-          localStorage.getItem("daydaze-save-v1") ?? "{}",
-        ).look;
+      readSave(page).then(({ look }) => {
         return [
           look?.hairColor,
           look?.outfitColor,
@@ -286,10 +334,7 @@ test("expanded face shapes show previews and persist with custom colors", async 
   ).toHaveAttribute("aria-checked", "true");
   await expect
     .poll(() =>
-      page.evaluate(() => {
-        const look = JSON.parse(
-          localStorage.getItem("daydaze-save-v1") ?? "{}",
-        ).look;
+      readSave(page).then(({ look }) => {
         return [
           look?.brows,
           look?.face?.slice(8, 12),
@@ -563,14 +608,12 @@ test("the player drives their car down the avenue and parks it", async ({
   await expect(canvas).toHaveAttribute("data-city-car", "parked");
   await expect(dressing).toBeEnabled();
   // parked where it stopped: the save remembers the car and the spot
-  const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-  );
-  expect(saved.car.id).toBe("quill-lite");
-  expect(saved.car.rims).toBe("gold");
-  expect(saved.car.glow).toBe("pink");
-  expect(saved.car.wrap).toBe("stripes");
-  expect(Math.abs(saved.car.at[0] - 14)).toBeGreaterThan(0.2);
+  const saved = await readSave(page);
+  expect(saved.car?.id).toBe("quill-lite");
+  expect(saved.car?.rims).toBe("gold");
+  expect(saved.car?.glow).toBe("pink");
+  expect(saved.car?.wrap).toBe("stripes");
+  expect(Math.abs((saved.car?.at[0] ?? 14) - 14)).toBeGreaterThan(0.2);
   expect(errors).toEqual([]);
 });
 
@@ -1151,12 +1194,10 @@ test("Daydaze Motors sells a car into your garage", async ({ page }) => {
   await expect(
     list.getByRole("button", { name: "Pebble: owned" }),
   ).toBeDisabled();
-  const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-  );
+  const saved = await readSave(page);
   expect(saved.coins).toBe(360);
   expect(saved.garage).toContain("pebble");
-  expect(saved.car.id).toBe("pebble");
+  expect(saved.car?.id).toBe("pebble");
   expect(errors).toEqual([]);
 });
 
@@ -1189,9 +1230,7 @@ test("Vinyl Vault sells a record that plays at home", async ({ page }) => {
   await page
     .getByRole("combobox", { name: "Record" })
     .selectOption({ label: "Roller Disco" }, { timeout: 150_000 });
-  const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-  );
+  const saved = await readSave(page);
   expect(saved.records).toEqual(["roller-disco"]);
   expect(saved.coins).toBe(70);
   expect(errors).toEqual([]);
@@ -1539,12 +1578,7 @@ test("Petal & Stem: build and buy a bouquet", async ({ page }) => {
   );
   await expect(page.getByText("82 coins", { exact: true })).toBeVisible();
   await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").bouquet,
-      ),
-    )
+    .poll(() => readSave(page).then((save) => save.bouquet))
     .toEqual({
       stems: ["rose", "tulip", "daisy"],
       wrap: "cream",
@@ -1555,9 +1589,7 @@ test("Petal & Stem: build and buy a bouquet", async ({ page }) => {
   await expect(canvasOf(page)).toHaveAttribute("data-bouquet-vase", "3", {
     timeout: 150_000,
   });
-  const coins = await page.evaluate(
-    () => JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").coins,
-  );
+  const coins = await readSave(page).then((save) => save.coins);
   expect(coins).toBe(82);
   expect(errors).toEqual([]);
 });
@@ -1813,23 +1845,11 @@ test("natural faces can add and remove eyeshadow and keep that choice after relo
   await expect(none).toHaveAttribute("aria-checked", "true");
   await styles.getByRole("radio", { name: "Smoky", exact: true }).click();
   await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").look
-            ?.makeup?.[5],
-      ),
-    )
+    .poll(() => readSave(page).then((save) => save.look?.makeup?.[5]))
     .toBe("2");
   await none.click();
   await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").look
-            ?.makeup?.[5],
-      ),
-    )
+    .poll(() => readSave(page).then((save) => save.look?.makeup?.[5]))
     .toBe("4");
   await page.reload();
   await openMakeup();
@@ -1866,10 +1886,8 @@ test("glasses, freckles, a bindi and hearing aids from the closet go into the sa
   // (cat-eye = 2), bindi (gold = 2), hearing aids (teal = 3)
   await expect
     .poll(async () => {
-      const save = await page.evaluate(() =>
-        JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-      );
-      const code = String(save.look?.makeup ?? "");
+      const save = await readSave(page);
+      const code = save.look?.makeup ?? "";
       return code.slice(6, 8) + code.slice(10, 12);
     })
     .toBe("2223");
@@ -1898,10 +1916,8 @@ test("vitiligo, a birthmark and the monolid from the closet go into the saved lo
   // makeup code digits 9-10: vitiligo (patchy = 2), birthmark (port-wine = 1)
   await expect
     .poll(async () => {
-      const save = await page.evaluate(() =>
-        JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-      );
-      return `${String(save.look?.makeup ?? "").slice(8, 10)} ${String(save.look?.face ?? "")[8]}`;
+      const save = await readSave(page);
+      return `${(save.look?.makeup ?? "").slice(8, 10)} ${(save.look?.face ?? "")[8]}`;
     })
     // ...and the face code's eye shape digit (monolid = 5)
     .toBe("21 5");
@@ -1954,9 +1970,7 @@ test("a wheelchair and a prosthetic leg from the closet go into the saved look",
     .click();
   await expect
     .poll(async () => {
-      const save = await page.evaluate(() =>
-        JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-      );
+      const save = await readSave(page);
       return `${save.look?.gait} ${save.look?.limbs}`;
     })
     .toBe("wheelchair 01");
@@ -3463,7 +3477,11 @@ test("jail: the sentence counts down, push-ups shorten it, cards deal a hand, an
   await page.addInitScript((key) => {
     if (sessionStorage.getItem("seeded")) return;
     sessionStorage.setItem("seeded", "1");
-    const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const save: Record<string, unknown> =
+      typeof parsed === "object" && parsed !== null
+        ? Object.fromEntries(Object.entries(parsed))
+        : {};
     localStorage.setItem(
       key,
       JSON.stringify({
@@ -3792,8 +3810,17 @@ test("the Karaoke Loft: notes on the beat light up the stage", async ({
   await page.evaluate(async () => {
     // the dev server's own copy of the module, so it's the live session
     const path = "/src/client/rooms/karaoke/session.ts";
-    const s: typeof import("../src/client/rooms/karaoke/session.ts") =
-      await import(/* @vite-ignore */ path);
+    type Session = typeof import("../src/client/rooms/karaoke/session.ts");
+    const mod: unknown = await import(/* @vite-ignore */ path);
+    const isSession = (m: unknown): m is Session =>
+      typeof m === "object" &&
+      m !== null &&
+      "karaoke" in m &&
+      "nextNote" in m &&
+      "songNow" in m &&
+      "singOn" in m;
+    if (!isSession(mod)) throw new Error("no karaoke session module");
+    const s = mod;
     const id = window.setInterval(() => {
       const state = s.karaoke.get();
       if (state.phase === "off" || state.phase === "over")
@@ -3967,9 +3994,7 @@ test("the walkthrough names you, dresses you and shows you around", async ({
   await welcome.getByRole("button", { name: "Let's go" }).click();
   await expect(welcome).toHaveCount(0);
   await expect(page.locator(".nametag").first()).toHaveText("Velvet Kat");
-  const saved = JSON.parse(
-    (await page.evaluate((k) => localStorage.getItem(k), SAVE)) ?? "{}",
-  );
+  const saved = await readSave(page);
   expect(saved).toMatchObject({
     name: "Velvet Kat",
     onboarded: true,
@@ -4209,11 +4234,9 @@ test("farmers market: open on a weekend, a vendor greets you and a bunch of carr
   await expect(stall.locator(".park-line")).not.toContainText("...");
   await stall.getByRole("button", { name: /^Buy carrot: 18 coins$/ }).click();
   await expect(stall).toContainText("In your groceries: 1");
-  const save = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-  );
+  const save = await readSave(page);
   expect(save.coins).toBe(82);
-  expect(save.farm.groceries.carrot).toBe(1);
+  expect(save.farm?.groceries.carrot).toBe(1);
   expect(errors).toEqual([]);
 });
 
@@ -4325,13 +4348,7 @@ test("ice-cream truck sells treats at its park stop and closes on departure", as
   await page.clock.runFor(200);
   await expect(canvas).toHaveAttribute("data-ice-cream-stop", "-1");
   await expect(truck).toHaveCount(0);
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").coins,
-      ),
-    )
-    .toBe(95);
+  await expect.poll(() => readSave(page).then((save) => save.coins)).toBe(95);
   await page.goto(`${LOW}&room=city&time=12:00&at=246,-267.4`);
   await expect
     .poll(
@@ -4479,37 +4496,21 @@ test.describe("Clay Day studio", () => {
     await expect(panel.getByRole("status")).toContainText("Firing");
     await expect(panel).toContainText("Fired!", { timeout: 60_000 });
     await expect
-      .poll(() =>
-        page.evaluate(
-          () =>
-            JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").pottery
-              ?.glaze,
-        ),
-      )
+      .poll(() => readSave(page).then((save) => save.pottery?.glaze))
       .toBe("#68b5a4");
     await expect
-      .poll(() =>
-        page.evaluate(
-          () =>
-            JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}").bests
-              ?.pottery,
-        ),
-      )
+      .poll(() => readSave(page).then((save) => save.bests?.pottery))
       .toBeGreaterThanOrEqual(0);
-    const first = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-    );
-    expect(first.bests.pottery).toBe(first.pottery.score);
-    expect(first.pottery.target).toBe("bowl");
+    const first = await readSave(page);
+    expect(first.bests?.pottery).toBe(first.pottery?.score);
+    expect(first.pottery?.target).toBe("bowl");
     // Reloading a completed kiln cannot award the same piece again.
     await page.reload();
     await expect(roomTitle(page)).toHaveText("Clay Day");
     await expect(
       panel.getByRole("button", { name: "Throw a pot", exact: true }),
     ).toBeVisible();
-    const reloaded = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
-    );
+    const reloaded = await readSave(page);
     expect(reloaded.coins).toBe(first.coins);
     expect(reloaded.pottery).toEqual(first.pottery);
     await page.goto(`${STILL}&room=apartment`);
