@@ -442,6 +442,10 @@ export function bodyOf(meters: Readonly<Meters>): Body | null {
   return BODY[s][phase];
 }
 
+/** How a peer's doll stands under a substance: its peak, since the phase
+ * isn't sent (the strain isn't either, so weed is the plain hybrid). */
+export const peakBody = (s: Substance): Body => BODY[s].peak;
+
 export type HighLook = {
   /** Soft glow and lifted saturation, 0..1. Kept under reduced motion. */
   glow: number;
