@@ -16,7 +16,6 @@ import {
 import type { Look } from "../../game/look.ts";
 import { ROOMS } from "../../game/rooms.ts";
 import { surface } from "../city/worldTexture.ts";
-import { Doll } from "../avatar/Doll.tsx";
 import { useReducedMotion } from "../motion.ts";
 import { Batch } from "./shared/batch.ts";
 import { CrowdFigure } from "./shared/CrowdFigure.tsx";
@@ -25,6 +24,7 @@ import { canvasTex, GOLD, hdr } from "./shared/materials.ts";
 import { MARQUEE, Neon, NeonText, SCRIPT } from "./shared/Neon.tsx";
 import { PortalPads } from "./shared/PortalPads.tsx";
 import { Sparkles } from "./shared/Sparkles.tsx";
+import { takeGift } from "../inventory/pouchDesk.ts";
 import { TalkingNpc } from "./shared/TalkingNpc.tsx";
 
 const GREEN = "#7dff6b";
@@ -502,17 +502,21 @@ export function GreenHaze({ onPick }: { onPick: PickHandler }): JSX.Element {
         greet
         context={{ venue: "green-haze", neighborhood: "arts-district" }}
       />
-      {/* a regular stretched out on the west couch */}
-      <group
-        position={[
-          NOOKS[0].table[0] - 1.4,
-          0.45 - 0.48,
-          NOOKS[0].table[1] + 0.4,
-        ]}
-        rotation-y={Math.PI / 2}
-      >
-        <Doll look={LOUNGER} mood="sit" hold="sit-reclined" seed={392} />
-      </group>
+      {/* a regular stretched out on the west couch: she gives a free item a day */}
+      <TalkingNpc
+        name="Sage"
+        role="regular"
+        look={LOUNGER}
+        mood="sit"
+        hold="sit-reclined"
+        at={[NOOKS[0].table[0] - 1.4, 0.45 - 0.48, NOOKS[0].table[1] + 0.4]}
+        rot={Math.PI / 2}
+        seed={392}
+        context={{ venue: "green-haze", neighborhood: "arts-district" }}
+        onTap={() => {
+          takeGift();
+        }}
+      />
       {REGULARS.map((r, i) => (
         <group key={i} position={r.at} rotation-y={r.rot}>
           <CrowdFigure look={r.look} move="chatting" seed={393 + i} />

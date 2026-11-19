@@ -95,6 +95,7 @@ import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
 import { floristDesk } from "./rooms/florist/session.ts";
 import { gardenDesk } from "./rooms/garden/gardenSession.ts";
+import { pouchDesk } from "./inventory/pouchDesk.ts";
 import { World } from "./world/World.tsx";
 
 const FADE_MS = 300;
@@ -262,9 +263,10 @@ export function App() {
   const [chat, setChat] = useState<{ text: string; at: number } | null>(null);
   useEffect(() => {
     if (!chat) return;
-    const id = window.setTimeout(() => setChat(null), BUBBLE_MS);
+    const bubbleMs = flags.still || flags.debug ? 60_000 : BUBBLE_MS;
+    const id = window.setTimeout(() => setChat(null), bubbleMs);
     return () => window.clearTimeout(id);
-  }, [chat]);
+  }, [chat, flags.still, flags.debug]);
 
   const setLook = (look: Look) => setSave((s) => ({ ...s, look }));
   const setSwim = (swim: SwimLook) => setSave((s) => ({ ...s, swim }));
@@ -339,6 +341,30 @@ export function App() {
       gardenDesk.set({
         commit: (next) =>
           setSave((s) => ({ ...s, garden: next.garden, coins: next.coins })),
+      }),
+    [],
+  );
+  // The weed pouch, the gift day and coins: the pouch panels, shops and the
+  // lounger read them from pouchDesk and write back through `commit`
+  useEffect(
+    () =>
+      pouchDesk.set({
+        inventory: save.inventory,
+        giftDay: save.giftDay,
+        coins: save.coins,
+      }),
+    [save.inventory, save.giftDay, save.coins],
+  );
+  useEffect(
+    () =>
+      pouchDesk.set({
+        commit: (next) =>
+          setSave((s) => ({
+            ...s,
+            inventory: next.inventory,
+            giftDay: next.giftDay,
+            coins: next.coins,
+          })),
       }),
     [],
   );
@@ -490,7 +516,7 @@ export function App() {
           onPark={setCar}
           pet={save.pet}
         />
-        <div className="tag" ref={tag}>
+        <div className="tag" ref={tag} data-chat={chat?.text}>
           {chat && (
             <p className="bubble" role="status">
               {chat.text}

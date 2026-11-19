@@ -10,6 +10,7 @@ import {
   ZOOM_STEP,
   faceHeightOf,
   focusHeight,
+  followCameraShot,
   keyZoomNotches,
   portraitFov,
   portraitTarget,
@@ -26,10 +27,13 @@ import { useNight } from "../rooms/useNight.ts";
 import { useReducedMotion } from "../motion.ts";
 import { cameraHold } from "./cameraHold.ts";
 import { driving } from "./driving.ts";
+import { getCamOverride, subscribeCamOverride } from "./camOverride.ts";
 import type { Player } from "./PlayerController.tsx";
+import { readFlags } from "../flags.ts";
+import type { View } from "./view.ts";
+export type { View } from "./view.ts";
 
 /** `detail` is only reachable with `?view=detail`, for close-up screenshots. */
-export type View = "room" | "full" | "face" | "detail";
 
 export const VIEWS: readonly { id: View; label: string }[] = [
   { id: "room", label: "Room" },
@@ -509,12 +513,6 @@ const MAX_DISTANCE: Record<RoomId, number> = {
   city: 300,
 };
 
-// Close-ups orbit with the player: offsets are in the player's frame.
-const CLOSE: Record<"full" | "face", { off: THREE.Vector3; look: number }> = {
-  full: { off: new THREE.Vector3(0.6, 1.2, 4.1), look: 0.9 },
-  face: { off: new THREE.Vector3(0.12, 1.6, 0.85), look: 1.53 },
-};
-
 /** Closer than this to her (meters), the camera keeps out of the room's walls. */
 const CLOSE_RANGE = 4;
 /** How long after a zoom in the camera keeps coming round to her front. */
@@ -533,20 +531,6 @@ const wallSeen = new THREE.Vector3(NaN, NaN, NaN);
  * Orbit camera that follows the player without fighting the user's orbit,
  * and flies between the room, full-look and face shots.
  */
-/** `?cam=ex,ey,ez,lx,ly,lz` pins the room's overview camera (for screenshots). */
-const CAM_OVERRIDE = (() => {
-  if (typeof location === "undefined") return null;
-  const n = new URLSearchParams(location.search)
-    .get("cam")
-    ?.split(",")
-    .map(Number);
-  if (!n || n.length !== 6 || n.some((x) => !Number.isFinite(x))) return null;
-  return {
-    eye: new THREE.Vector3(n[0], n[1], n[2]),
-    look: new THREE.Vector3(n[3], n[4], n[5]),
-  };
-})();
-
 export function CameraRig({
   player,
   view,
@@ -562,7 +546,18 @@ export function CameraRig({
   const controls = useRef<OrbitImpl>(null);
   const camera = useThree((s) => s.camera);
   const canvas = useThree((s) => s.gl.domElement);
+  const invalidate = useThree((s) => s.invalidate);
   const calm = useReducedMotion();
+  const flags = useMemo(
+    () => (typeof location !== "undefined" ? readFlags(location.search) : null),
+    [],
+  );
+  useEffect(() => {
+    if (flags?.fov && camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = flags.fov;
+      camera.updateProjectionMatrix();
+    }
+  }, [flags?.fov, camera]);
   // a night may swap the room's overview for one that shows what it's about
   const nightId = useNight(room)?.id;
   const nightShot = useMemo(() => {
@@ -579,6 +574,13 @@ export function CameraRig({
   useEffect(() => {
     fly.current = { t: 0, snap: calm };
   }, [nightShot, calm]);
+  // runtime cam override changes (?cam=, dev panel or __dd): snap/fly to it
+  useEffect(() => {
+    return subscribeCamOverride((shot) => {
+      fly.current = { t: 0, snap: shot ? true : calm };
+      invalidate();
+    });
+  }, [calm, invalidate]);
   const shown = useRef<{ view: View; player: Player } | null>(null);
   const seated = useRef(false);
   const held = useRef(false);
@@ -697,10 +699,11 @@ export function CameraRig({
     // watching the ride from where she boarded
     const overview = view === "room" || view === "detail";
     const at = (!overview && player.seat?.position) || player.pos;
+    const camOverride = getCamOverride();
     moved.subVectors(at, last.current);
     last.current.copy(at);
     // a pinned screenshot camera (?cam=) stays where it was put
-    if (!(CAM_OVERRIDE && overview)) {
+    if (!(camOverride && overview)) {
       camera.position.add(moved);
       c.target.add(moved);
     }
@@ -708,20 +711,25 @@ export function CameraRig({
     if (f) {
       if (view === "room" || view === "detail") {
         const shot =
-          CAM_OVERRIDE ??
+          camOverride ??
           (view === "room" ? nightShotRef.current : undefined) ??
           ((view === "detail" && DETAIL_SHOTS[room]) || ROOM_SHOTS[room]);
         goalPos.copy(shot.eye);
         goalTarget.copy(shot.look);
       } else {
-        const v = CLOSE[view];
+        const v = followCameraShot(view, {
+          dist: flags?.dist,
+          pitch: flags?.pitch,
+          height: flags?.height,
+          relCam: flags?.cam?.kind === "relative" ? flags.cam.off : null,
+        });
         goalPos
-          .copy(v.off)
+          .set(v.off[0], v.off[1], v.off[2])
           .applyAxisAngle(Y, player.seat?.yaw ?? player.yaw)
           .add(at);
         goalTarget.copy(at).setY(at.y + v.look);
       }
-      const k = f.snap || CAM_OVERRIDE ? 1 : 1 - Math.exp(-dt * 5);
+      const k = f.snap || camOverride ? 1 : 1 - Math.exp(-dt * 5);
       camera.position.lerp(goalPos, k);
       c.target.lerp(goalTarget, k);
       f.t += dt;
@@ -840,9 +848,9 @@ export function CameraRig({
       camera.position.fromArray(pulled);
     }
     wallSeen.copy(wallKey);
-    // a face wants a longer lens than the room does
+    // a face wants a longer lens than the room does; ?fov overrides both
     if (camera instanceof THREE.PerspectiveCamera) {
-      const fov = portraitFov(away);
+      const fov = flags?.fov ?? portraitFov(away);
       if (Math.abs(camera.fov - fov) > 0.05) {
         camera.fov = fov;
         camera.updateProjectionMatrix();
