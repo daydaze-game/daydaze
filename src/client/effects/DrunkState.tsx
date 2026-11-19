@@ -60,6 +60,11 @@ export function DrunkState({
 
   useEffect(() => onBuzzChange(() => invalidate()), [invalidate]);
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
+  useEffect(() => {
+    return () => {
+      getSharedAudioBus().setHighLevel(0);
+    };
+  }, []);
   // what the canvas attributes last showed: each meter at two decimals
   const shownHigh = useRef({
     levels: {
