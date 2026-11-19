@@ -95,9 +95,9 @@ function festoons(): { bulbs: Vec3[]; wires: Float32Array } {
 }
 
 const FESTOONS = festoons();
-const POSTS: Vec3[] = POST_ZS.flatMap((z) => [
-  [-RAIL_X, 1.8, z] as Vec3,
-  [RAIL_X, 1.8, z] as Vec3,
+const POSTS: Vec3[] = POST_ZS.flatMap((z): Vec3[] => [
+  [-RAIL_X, 1.8, z],
+  [RAIL_X, 1.8, z],
 ]);
 const BULB_COLORS = ["#ffc878", "#ffb45a", "#ffd9a0"];
 // a plum-stained walnut bar under a white marble top, a stone fire bowl

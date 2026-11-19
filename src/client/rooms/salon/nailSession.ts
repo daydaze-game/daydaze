@@ -6,16 +6,24 @@ import {
   paint,
   sessionOver,
   type Nail,
+  type Session,
 } from "../../../game/nails.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
 
 /** A shift at the nail station: the session, and when this client sat. */
-const OFF = {
+interface State {
+  on: boolean;
+  session: Session;
+  since: number;
+  last: { right: number; tip: number } | null;
+}
+
+const OFF: State = {
   on: false,
   session: newSession(0),
   since: 0,
-  last: null as { right: number; tip: number } | null,
+  last: null,
 };
 
 export const nails = createStore(OFF);

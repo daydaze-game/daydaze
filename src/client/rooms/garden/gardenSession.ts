@@ -19,11 +19,16 @@ import { doWork } from "../shared/game3d/workClip.ts";
 
 type GardenCoins = { garden: GardenSave; coins: number };
 
-export const gardenDesk = createStore({
+export const gardenDesk = createStore<{
+  garden: GardenSave;
+  coins: number;
+  wateringPlot: number | null;
+  commit: ((next: GardenCoins) => void) | null;
+}>({
   garden: createDefaultGarden(),
   coins: 0,
-  wateringPlot: null as number | null,
-  commit: null as ((next: GardenCoins) => void) | null,
+  wateringPlot: null,
+  commit: null,
 });
 
 /** Hook providing the latest GardenSave, coin balance, and mutating garden actions. */
