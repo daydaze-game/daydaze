@@ -59,13 +59,15 @@ async function friends(browser: Browser) {
   const a = await player(browser);
   const b = await player(browser);
   logErrors(a, b);
+  // the test-only debug bar can sit over a name tag at this viewport, so
+  // click the tag itself (dispatchEvent) rather than whatever covers its spot
   const tagOnA = a.locator(".peer-tag .nametag");
   const tagOnB = b.locator(".peer-tag .nametag");
   await expect(tagOnA).toHaveCount(1, { timeout: 120_000 });
   await expect(tagOnB).toHaveCount(1, { timeout: 120_000 });
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a.getByRole("button", { name: "Add friend" }).click();
-  await tagOnB.click({ timeout: 60_000 });
+  await tagOnB.dispatchEvent("click");
   await b
     .getByRole("button", { name: "Accept friend request" })
     .click({ timeout: 60_000 });
@@ -103,7 +105,7 @@ test("two players meet in the Plaza, talk, become friends and play cards", async
     .getByRole("radio", { name: "she/they" })
     .click();
   await b.getByRole("button", { name: "Close dressing room" }).click();
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await expect(
     a.getByRole("region", { name: /'s card$/ }).getByText("she/they"),
   ).toBeVisible({ timeout: 60_000 });
@@ -111,7 +113,7 @@ test("two players meet in the Plaza, talk, become friends and play cards", async
   await expect(
     a.getByRole("button", { name: "Friend request sent (take back)" }),
   ).toBeVisible();
-  await tagOnB.click();
+  await tagOnB.dispatchEvent("click");
   await b.getByRole("button", { name: "Accept friend request" }).click();
   await expect(b.getByRole("button", { name: "Unfriend" })).toBeVisible();
   await b.getByRole("button", { name: "Close" }).click();
@@ -133,7 +135,7 @@ test("two players meet in the Plaza, talk, become friends and play cards", async
   });
 
   // a hand of Crazy Eights: A deals and goes first
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a.getByRole("button", { name: "Play Crazy Eights" }).click();
   const invite = b.getByRole("region", { name: "Card game invite" });
   await invite.getByRole("button", { name: "Play" }).click({ timeout: 60_000 });
@@ -150,7 +152,7 @@ test("two players meet in the Plaza, talk, become friends and play cards", async
   await expect(tableB).toContainText("holds 6");
 
   // a hug: A asks, B says yes and steps in; each sees the other in the pose
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a
     .getByRole("group", { name: "Do something together" })
     .getByRole("button", { name: "Hug" })
@@ -178,7 +180,7 @@ test("two players meet in the Plaza, talk, become friends and play cards", async
   );
 
   // a piggyback: B climbs on A's back and is carried as A walks
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a
     .getByRole("group", { name: "Do something together" })
     .getByRole("button", { name: "Piggyback" })
@@ -218,7 +220,7 @@ test("two players meet in the Plaza, talk, become friends and play cards", async
   );
 
   // a cook-off challenge: B takes it, and both are sent to the kitchen
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a.getByRole("button", { name: "Challenge to a cook-off" }).click();
   await b
     .getByRole("region", { name: "Cook-off invite" })
@@ -258,7 +260,7 @@ test("friends party through doors, ride in a car and race at the Speedway", asyn
   const { a, b, tagOnA, tagOnB } = await friends(browser);
   // A invites B (a friend now) to a party; when A goes through to the
   // Velvet Room, B follows into the same copy
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a.getByRole("button", { name: "Invite to your party" }).click();
   await b
     .getByRole("region", { name: "Party invite" })
@@ -297,7 +299,7 @@ test("friends party through doors, ride in a car and race at the Speedway", asyn
     "driving",
     { timeout: 120_000 },
   );
-  await tagOnA.click();
+  await tagOnA.dispatchEvent("click");
   await a.getByRole("button", { name: "Offer a ride" }).click();
   await b
     .getByRole("region", { name: "Ride offer" })
@@ -336,7 +338,7 @@ test("friends party through doors, ride in a car and race at the Speedway", asyn
       "walk",
       { timeout: 240_000 },
     );
-  await tagOnA.click({ timeout: 120_000 });
+  await tagOnA.dispatchEvent("click");
   await a.getByRole("button", { name: "Race on the Neon Oval" }).click();
   await b
     .getByRole("region", { name: "Race invite" })
