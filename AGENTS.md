@@ -154,6 +154,12 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   merge into a red `main`. A PR that fails in the queue is dropped: fix it and
   queue it again. `docs/agents/scripts/land.sh` rebases, pushes, opens the PR,
   queues it, and removes the worktree and branch after the merge.
+  - **`git pull` your own branch before you push it.** Merge commits from
+    `main` are added to PR branches on GitHub, so a push without a pull is
+    rejected. `land.sh` pulls first.
+  - **Merge with `gh pr merge <n> --auto`, never by pushing to `main`**, which
+    is blocked. For an emergency, the bypass checkbox on a PR still works;
+    only the owner uses it.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
