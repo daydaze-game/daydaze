@@ -4439,16 +4439,18 @@ test("closet radio groups support arrow-key navigation and single-tab roving foc
   const checked = brows.locator('button[role="radio"][aria-checked="true"]');
   await checked.focus();
   await expect(checked).toBeFocused();
+  const initialText = (await checked.innerText()).trim();
 
   // Arrow keys compare choices with wrap
   await page.keyboard.press("ArrowRight");
   const next = brows.locator('button[role="radio"][aria-checked="true"]');
   await expect(next).toBeFocused();
-  await expect(next).not.toHaveText(await checked.innerText());
+  await expect(next).not.toHaveText(initialText);
 
   await page.keyboard.press("ArrowLeft");
-  await expect(checked).toBeFocused();
-  await expect(checked).toHaveAttribute("aria-checked", "true");
+  const reverted = brows.locator('button[role="radio"][aria-checked="true"]');
+  await expect(reverted).toBeFocused();
+  await expect(reverted).toHaveText(initialText);
 
   // Tab leaves the group in a single step
   await page.keyboard.press("Tab");

@@ -1,0 +1,17 @@
+Copyright (c) 2026 Kaitlyn Bassford. All rights reserved.
+
+Daydaze (the source code, original art, audio, text and other original
+content in this repository) is proprietary. It is published on GitHub so that
+it can be viewed and so that GitHub Actions can build it. Publishing it does
+not grant any license.
+
+You may view the repository and fork it on GitHub, as GitHub's Terms of
+Service allow. Beyond that, you may not copy, modify, distribute, sublicense,
+host, sell or use any part of it, or make derivative works from it, without
+the written permission of the copyright holder.
+
+Third-party assets and dependencies are not covered by this notice. They remain
+under their own licenses and belong to their authors, as listed in
+docs/assets.md, src/game/credits.ts, .agents/skills/NOTICE.md and the package manifests.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
