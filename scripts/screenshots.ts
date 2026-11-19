@@ -54,9 +54,23 @@ const fleetReady = async (page: Page) => {
     { timeout: 300_000 },
   );
 };
-/** Waits for the authored architecture and street furniture. */
+/** Waits for the player's avatar to resolve its outfit, hair, and footwear. */
+const avatarReady = async (page: Page) => {
+  await page.waitForFunction(
+    () => {
+      const canvas = document.querySelector("canvas");
+      return (
+        canvas?.dataset.avatar === "ready" && Number(canvas.dataset.frames) >= 6
+      );
+    },
+    null,
+    { timeout: 300_000 },
+  );
+};
+/** Waits for the authored architecture, street furniture, and player avatar. */
 const cityReady = async (page: Page) => {
   await furnitureReady(page);
+  await avatarReady(page);
   await page.waitForFunction(
     () => {
       const canvas = document.querySelector("canvas");
@@ -2213,6 +2227,13 @@ const SHOTS: {
     act: furnitureReady,
   },
   {
+    // the bust: robbers boxed in by squad cars at the getaway car
+    name: "city-heist-bust",
+    query:
+      "room=city&view=room&time=22:00&heist=30&heistend=caught&at=-170,9&cam=-150,4,8,-180,1,-10",
+    act: furnitureReady,
+  },
+  {
     // straight down on the planks: the boards run north-south, across the walk
     name: "city-deck-top",
     query: "room=city&time=15:00&at=-34,286&cam=-34,14,283,-34,0,283.5",
@@ -2341,7 +2362,12 @@ const SHOTS: {
   },
   // the dock's contextual actions (ui/ActionDock.tsx) and the close zoom:
   // before and after the HUD declutter, on the same shots
-  { name: "hud-city", query: "room=city&view=full&time=12:00", live: true },
+  {
+    name: "hud-city",
+    query: "room=city&view=full&time=12:00",
+    live: true,
+    act: cityReady,
+  },
   {
     name: "hud-el",
     live: true,
@@ -2638,6 +2664,13 @@ if (process.argv[2] === "--matrix") {
     await expect(canvas).toHaveAttribute("data-frames", /\d+/, {
       timeout: 600_000,
     });
+    if (await page.locator("canvas[data-avatar]").count()) {
+      await expect(page.locator("canvas")).toHaveAttribute(
+        "data-avatar",
+        "ready",
+        { timeout: 300_000 },
+      );
+    }
     // wait until the demand loop has rendered and then gone quiet for 8 s
     let last = "";
     let quietSince = Date.now();

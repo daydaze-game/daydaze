@@ -60,6 +60,7 @@ light themselves.
 | half res    | Renders at half resolution, to tell whether the GPU is fill-rate bound.                    |
 | pause       | Stops rendering, to look at a frozen frame.                                                |
 | screenshot  | Downloads a PNG of the 3D view (without the high tier's bloom).                            |
+| cam         | Live overview camera override input, `pin` current camera, and `clear` to reset.           |
 
 ### game
 
@@ -111,6 +112,9 @@ message counts by type and the last few messages, without the constant
 | `__dd.get()`                          | R3F's state: `camera`, `controls`, `raycaster`, `size` and more. |
 | `__dd.player`                         | Your doll's state; `__dd.player.pos` is where she stands.        |
 | `__dd.pick`                           | The last shift+clicked object.                                   |
+| `__dd.cam`                            | Active overview camera override string (`ex,ey,ez,lx,ly,lz`).    |
+| `__dd.setCam(...)`, `__dd.clearCam()` | Set live overview camera override (string, array or object).     |
+| `__dd.pinCam()`                       | Pin active overview camera override to current view.             |
 | `$sel`, `$save`                       | Set by the inspector's and game section's log buttons.           |
 | `__ddNet`                             | Every online frame logged (the last 300).                        |
 
@@ -121,21 +125,22 @@ For example, `__dd.scene.getObjectByName("floor")` or
 
 These work in any build, without the panel:
 
-| Flag                                                           | What it does                                                                                                                                                     |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `?room=<id>`                                                   | Start in a room (ids in `src/game/rooms.ts`).                                                                                                                    |
-| `?at=x,z&yaw=r`                                                | Start at a spot in that room.                                                                                                                                    |
-| `?spot=<building-id>`                                          | Start in the city in front of that building, back to its door so `view=full` frames it (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
-| `?view=room\|full\|face\|detail`                               | Start with that camera view.                                                                                                                                     |
-| `?time=HH:MM`                                                  | Pin the city's hour.                                                                                                                                             |
-| `?night=<id>`                                                  | Start an hour into a club night (ids in `src/game/events.ts`).                                                                                                   |
-| `?fireworks=<s>`, `?parade=<s>`, `?pride=<s>`, `?danceoff=<s>` | Hold that event's clock `s` seconds into a run.                                                                                                                  |
-| `?quality=low\|high`                                           | Force a quality tier.                                                                                                                                            |
-| `?still=1`                                                     | Render a few frames and stop (for screenshots).                                                                                                                  |
-| `?timescale=0.1`                                               | Slow the player and every doll (for frame strips).                                                                                                               |
-| `?debug=1`                                                     | Room jump buttons (used by the Playwright tests).                                                                                                                |
-| `?online=1`                                                    | Online play (needs `npm run dev:server`).                                                                                                                        |
-| `?adult=1`                                                     | Dev-only preview of the 18+ venues.                                                                                                                              |
+| Flag                                                                         | What it does                                                                                                                                                     |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `?room=<id>`                                                                 | Start in a room (ids in `src/game/rooms.ts`).                                                                                                                    |
+| `?at=x,z&yaw=r`                                                              | Start at a spot in that room.                                                                                                                                    |
+| `?spot=<building-id>`                                                        | Start in the city in front of that building, back to its door so `view=full` frames it (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
+| `?view=room\|full\|face\|detail`                                             | Start with that camera view.                                                                                                                                     |
+| `?time=HH:MM`                                                                | Pin the city's hour.                                                                                                                                             |
+| `?night=<id>`                                                                | Start an hour into a club night (ids in `src/game/events.ts`).                                                                                                   |
+| `?fireworks=<s>`, `?parade=<s>`, `?pride=<s>`, `?danceoff=<s>`, `?heist=<s>` | Hold that event's clock `s` seconds into a run.                                                                                                                  |
+| `?heistend=caught\|escape`                                                   | Selects how a held preview heist ends (`eventClocks.ts`).                                                                                                        |
+| `?quality=low\|high`                                                         | Force a quality tier.                                                                                                                                            |
+| `?still=1`                                                                   | Render a few frames and stop (for screenshots).                                                                                                                  |
+| `?timescale=0.1`                                                             | Slow the player and every doll (for frame strips).                                                                                                               |
+| `?debug=1`                                                                   | Room jump buttons (used by the Playwright tests).                                                                                                                |
+| `?online=1`                                                                  | Online play (needs `npm run dev:server`).                                                                                                                        |
+| `?adult=1`                                                                   | Dev-only preview of the 18+ venues.                                                                                                                              |
 
 ### Test and screenshot flags
 
@@ -209,6 +214,15 @@ Each run publishes its branch's folder to the `screenshots` branch, a README
 grid that renders on a phone: `tree/screenshots/main` (refreshed by every push
 to `main` that touches the game), `tree/screenshots/feat-x`, and so on. From a
 phone, Actions > Screenshots > Run workflow in mobile web takes new ones.
+
+The gallery keeps only each live branch's latest shots, as JPEGs, and the
+`screenshots` artifact expires after 7 days. The PNG originals of every run
+(pull requests included) and every `record.yml` MP4 also go to a permanent
+release on
+[`dpologdvinity/daydaze-artifacts`](https://github.com/dpologdvinity/daydaze-artifacts/releases),
+tagged `<screenshots|recording>-<branch>-<sha>-<run>-<attempt>`
+(`scripts/archive-run.sh`). The upload needs the `ARTIFACTS_TOKEN` repo
+secret; without it, the step warns and skips.
 
 ## Browser extensions
 

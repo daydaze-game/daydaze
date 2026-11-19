@@ -719,10 +719,10 @@ export const CREDITS: readonly {
           "Zoo fence panels and rocks; dirt crop rows at Sunny Acres Farm.",
       },
       {
-        title: "Street Pack",
+        title: "Modular Streets Pack (March 2018)",
         author: "Quaternius",
         license: "CC0 1.0",
-        url: "https://quaternius.com/packs/streetpack.html",
+        url: "https://quaternius.com/packs/modularstreets.html",
         usedFor:
           "Street lamp and stop and no-parking signs (Streetlight_Single, Sign_Stop, Sign_NoParking); lantern made see-through.",
       },

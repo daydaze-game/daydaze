@@ -10,7 +10,7 @@ import { validateHome, type HomeSave } from "../../game/home/home.ts";
 import type { Look } from "../../game/look.ts";
 import { CLOSE_CODES } from "../../net/networkProtocol.ts";
 import { createStore } from "../rooms/shared/store.ts";
-import { onlineSession } from "./online.ts";
+import { onlineSession } from "./session.ts";
 
 type Who = { id: string; name: string };
 

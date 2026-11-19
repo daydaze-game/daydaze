@@ -10,6 +10,8 @@ export type Rgb = readonly [number, number, number];
 export type Daylight = {
   /** 0 at night to 1 in full day. */
   sun: number;
+  /** 0 by day to 1 at night. */
+  moon: number;
   /** How gold the light is (dawn and dusk). */
   golden: number;
   /** 0 by day to 1 at night: neon, signs and lit windows. */
@@ -26,9 +28,15 @@ export type Daylight = {
   /** The sun: unit direction toward it ([x east, y up, z]) and its height. */
   sunDirection: Rgb;
   sunElevation: number;
+  /** The moon: unit direction toward it ([x east, y up, z]) and its height. */
+  moonDirection: Rgb;
+  moonElevation: number;
 };
 
-type Key = Omit<Daylight, "sunDirection" | "sunElevation">;
+type Key = Omit<
+  Daylight,
+  "sunDirection" | "sunElevation" | "moonDirection" | "moonElevation"
+>;
 
 const hex = (h: string): Rgb => [
   parseInt(h.slice(1, 3), 16) / 255,
@@ -38,6 +46,7 @@ const hex = (h: string): Rgb => [
 
 const NIGHT: Key = {
   sun: 0,
+  moon: 1,
   golden: 0,
   neon: 1,
   zenith: hex("#07041a"),
@@ -50,6 +59,7 @@ const NIGHT: Key = {
 };
 const DAWN: Key = {
   sun: 0.35,
+  moon: 0,
   golden: 0.7,
   neon: 0.4,
   zenith: hex("#4a5a9a"),
@@ -62,6 +72,7 @@ const DAWN: Key = {
 };
 const DAY: Key = {
   sun: 1,
+  moon: 0,
   golden: 0,
   neon: 0,
   zenith: hex("#3d7fd6"),
@@ -74,6 +85,7 @@ const DAY: Key = {
 };
 const DUSK: Key = {
   sun: 0.4,
+  moon: 0,
   golden: 1,
   neon: 0.5,
   zenith: hex("#2b2f6e"),
@@ -118,8 +130,15 @@ export function daylightAt(hour: number): Daylight {
   const up = Math.sin(arc);
   const sunDirection: Rgb = [Math.cos(arc), Math.max(0.05, up), -0.35];
   const len = Math.hypot(...sunDirection);
+  // the moon's arc: rising in the east at 18, overhead at midnight, down in the west at 6
+  const moonHour = (h + 6) % 24;
+  const moonArc = (Math.PI * moonHour) / 12;
+  const moonUp = Math.sin(moonArc);
+  const moonDirection: Rgb = [Math.cos(moonArc), Math.max(0.15, moonUp), -0.35];
+  const moonLen = Math.hypot(...moonDirection);
   return {
     sun: mix(a.sun, b.sun, t),
+    moon: mix(a.moon, b.moon, t),
     golden: mix(a.golden, b.golden, t),
     neon: mix(a.neon, b.neon, t),
     zenith: mixRgb(a.zenith, b.zenith, t),
@@ -135,6 +154,12 @@ export function daylightAt(hour: number): Daylight {
       sunDirection[2] / len,
     ],
     sunElevation: up,
+    moonDirection: [
+      moonDirection[0] / moonLen,
+      moonDirection[1] / moonLen,
+      moonDirection[2] / moonLen,
+    ],
+    moonElevation: moonUp,
   };
 }
 

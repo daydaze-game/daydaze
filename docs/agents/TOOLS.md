@@ -75,3 +75,12 @@ threejs-shaders, threejs-3d-generator (Tripo), threejs-audio-generator
 - ffmpeg (Homebrew) for audio transcoding.
 - `cloudflare` SDK: Python only (in the uv `.venv`; the npm package was dropped, use `npx cloudflare@7` if needed), owner-installed 2026-10-27, for future R2/infra scripts. Any call that creates, uploads, deploys or changes Cloudflare resources needs the owner's explicit approval first.
 - `scripts/with-env.sh <command>`: runs a command with the .env keys loaded (owner permission rule in .claude/settings.json).
+
+## Claude Code GitHub Action (`@claude`)
+
+`.github/workflows/claude.yml` runs `anthropics/claude-code-action` (pinned to a commit SHA, v1.0.283). Comment `@claude <request>` on an issue or PR, in a PR review, or in a new issue's title or body, and Claude answers in a comment or pushes a `claude/` branch with a link to open the PR. It reads `CLAUDE.md` and `AGENTS.md` from the checkout and is told to use Conventional Commits.
+
+- Free: it signs in with the owner's Claude subscription (`CLAUDE_CODE_OAUTH_TOKEN`), not an API key, so runs count against the subscription's usage limits. Jobs time out at 30 minutes, one run per issue or PR.
+- Public repo: only `dpologdvinity` can trigger it (`github.event.sender.login` check); the action also needs write access, and skips PRs from forks.
+- Owner setup, once: install the Claude GitHub App (<https://github.com/apps/claude>) on the repo, run `claude setup-token` locally, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN -R dpologdvinity/daydaze` and paste the token.
+- Update the pin by looking up the new tag's commit SHA (`gh api repos/anthropics/claude-code-action/commits/<tag> -q .sha`); an annotated tag's ref SHA is the tag object, not the commit.

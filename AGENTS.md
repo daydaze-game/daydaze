@@ -50,7 +50,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
+| `npm run lint`                      | ESLint (first regenerates `server/worker-configuration.d.ts`, which the type-aware rules need to resolve Worker types)                          |
 | `ruff check .`                      | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed)                                        |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
@@ -127,21 +127,38 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
     PRs that change room, city, avatar or HUD code get the matching shots
     automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
     comment linking the artifact, kept 7 days.
+    Every screenshot and recording run is also kept forever as a release on
+    `dpologdvinity/daydaze-artifacts` (`scripts/archive-run.sh`; the PR
+    comment and the run summary link it).
   - Screen recordings of any scene or minigame (MP4):
     `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
     `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
     Options are in `scripts/record.ts`.
+  - Artifacts expire, so `archive-sweep.yml` copies screenshots, recordings,
+    Playwright reports and profiles to permanent releases on
+    `dpologdvinity/daydaze-artifacts` daily (`scripts/archive-sweep.ts`);
+    builds and coverage come back from any commit and are left to expire.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
-- Merge gate: nobody pushes to `main`. Branch protection lets a PR merge only
-  when it is up to date with `main` and green on the fast checks (`setup`,
-  `lint`, `test`, `build`), so two PRs that are green alone cannot merge into
-  a red `main`. The browser suites must pass once on the PR; catching up with
-  `main` afterwards (`gh pr update-branch <n>`) re-runs only what blocks the
-  merge. `docs/agents/scripts/land.sh` does all of it: pushes, opens the PR,
-  waits for the browser suites, updates the branch whenever `main` moves,
-  merges, and removes the worktree and branch.
+    Other PRs run only the browser tests their changes reach: main's full
+    runs record which files each test loads (`tests/test-map.ts`), and
+    `scripts/select-tests.ts` picks the tests from that map, falling back to
+    the full suite for anything it can't vouch for. main always runs the full
+    suite. A new spec file must call `recordTestMap(test)` like the others.
+- Merge gate: nobody pushes to `main`. GitHub merges a PR only when it is up
+  to date with `main` and every required check passes (the browser suites
+  included), so two PRs that are green alone cannot merge into a red `main`.
+  To land a PR, turn on auto-merge: `gh pr merge <n> --auto --merge`, or
+  `docs/agents/scripts/land.sh <branch> <worktree> "<message>"`, which pushes,
+  opens the PR, turns auto-merge on, waits for the merge and removes the
+  worktree and branch. The `auto-update` workflow brings the oldest
+  auto-merge PR up to date whenever `main` moves, one at a time; a PR with a
+  failing check or a conflict is skipped until it's fixed. A commit that only
+  merges `main` into a PR whose browser suites already passed re-runs just the
+  fast checks (`scripts/main-merged-only.sh`), so catching up costs minutes.
+  Pull your branch (`git pull --no-rebase`) before pushing: the workflow adds
+  merge commits.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
@@ -190,6 +207,29 @@ request. Use the `gh` CLI.
 - **Keep them small and current**: split a PR that mixes unrelated changes,
   close issues that are done or no longer true, and delete the branch after
   the merge.
+
+## Code Review Rules
+
+For reviewers (`@codex review`, `@claude`, people): flag these, most serious
+first. Formatting and lint are CI's job; don't comment on them.
+
+- Age gating: alcohol, drunk effects, drugs or 18+ venues reachable without
+  `ADULT_OK` (`src/client/adult.ts`, `src/game/age.ts`); real alcohol or
+  tobacco brands anywhere.
+- Trust boundaries: data from the network, the server or `localStorage` used
+  without validation; secrets or keys in code, logs or issues.
+- Types: `any`, `as` assertions where a type guard or `as const` works, `!`
+  non-null assertions.
+- Render cost: allocations inside `useFrame`, new real lights past four, or
+  meshes that should be instanced (low-tier budget: 250 draw calls, 300k
+  triangles).
+- Content rules: AI-generated NPC dialogue, or fewer than 10 handwritten lines
+  for a situation; an asset missing from `docs/assets.md` and
+  `src/game/credits.ts`.
+- A new room missing any item of the checklist under Rules.
+- Pure logic in `src/game/` without a test, or a bug fix without a test that
+  failed before it.
+- A code file without its header comment.
 
 ## Asset pipeline
 
