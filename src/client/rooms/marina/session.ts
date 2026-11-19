@@ -15,6 +15,7 @@ import {
   type Catch,
 } from "../../../game/fishing.ts";
 import { award } from "../../ui/prizeDesk.ts";
+import { driving } from "../../world/driving.ts";
 import { createStore } from "../shared/store.ts";
 
 /**
@@ -61,8 +62,16 @@ export function powerAt(now: number, since: number): number {
   return 0.5 - Math.cos(((now - since) / 1000) * Math.PI * 0.9) * 0.5;
 }
 
-export function start(now: number, spot: "marina" | "boardwalk" = "marina") {
+export function start(
+  now: number,
+  spot: "marina" | "boardwalk" = "marina",
+): boolean {
+  if (spot === "boardwalk") {
+    if (driving.session || driving.passenger) return false;
+    if (driving.request === "city-drive") driving.request = null;
+  }
   fishing.set({ ...OFF, spot, phase: "power", since: now });
+  return true;
 }
 
 export function leave() {

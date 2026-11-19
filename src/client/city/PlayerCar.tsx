@@ -23,6 +23,7 @@ import {
   stepSession,
   type CitySession,
 } from "../../game/speedway/session.ts";
+import { fishing, leave as leaveFishing } from "../rooms/marina/session.ts";
 import { CarMesh } from "../rooms/speedway/CarMesh.tsx";
 import { ChaseCamera } from "../rooms/speedway/ChaseCamera.tsx";
 import { driving, releaseControls } from "../world/driving.ts";
@@ -114,6 +115,13 @@ export function PlayerCar({
         player.walk.pos[1] - parked.at[1],
       ) <= REACH;
     const request = driving.request;
+    if (fishing.get().phase !== "off") {
+      heading.current = false;
+      if (request === "city-drive") {
+        leaveFishing();
+        return;
+      }
+    }
     if (request === "city-drive" || request === "leave") {
       driving.request = null;
       if (request === "leave") {

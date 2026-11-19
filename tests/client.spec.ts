@@ -2850,6 +2850,36 @@ test("the boardwalk pier: cast and leave fishing", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("city fishing and driving do not take the player at the same time", async ({
+  page,
+}) => {
+  test.setTimeout(600_000);
+  await page.goto(`${LOW}&room=city`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-city-car", "parked", {
+    timeout: 180_000,
+  });
+  await (await dockAction(page, "Drive your car")).click();
+  await expect(canvas).toHaveAttribute("data-city-car", "driving", {
+    timeout: 120_000,
+  });
+  await page.getByRole("button", { name: "Fishing", exact: true }).click();
+  const panel = page.getByRole("region", { name: "Fishing" });
+  await panel.getByRole("button", { name: "Go fishing" }).click();
+  await expect(panel).toContainText("Leave the car before fishing");
+  await panel.getByRole("button", { name: "Leave the car" }).click();
+  await expect(canvas).toHaveAttribute("data-city-car", "parked");
+  await panel.getByRole("button", { name: "Go fishing" }).click();
+  await expect(
+    panel.getByRole("button", { name: "Reel in and leave" }),
+  ).toBeVisible();
+  await (await dockAction(page, "Drive your car")).click();
+  await expect(panel.getByRole("button", { name: "Go fishing" })).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-city-car", "driving", {
+    timeout: 120_000,
+  });
+});
+
 test("Starlight yacht: board at the marina, cruise, dance and return", async ({
   page,
 }) => {
