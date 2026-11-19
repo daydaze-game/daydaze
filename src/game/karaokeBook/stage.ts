@@ -6,7 +6,7 @@
 // compared across independent transcriptions), moved to a singable key and
 // cut at a cadence; the `source:` comments name where each came from.
 
-import type { KaraokeSong } from "../karaokeSongs.ts";
+import type { KaraokeSong } from "../karaokeTypes.ts";
 
 export const STAGE: readonly KaraokeSong[] = [
   // source: tunearch.org/wiki/Ain%27t_that_Trouble_in_Mind.no-ext/0001
