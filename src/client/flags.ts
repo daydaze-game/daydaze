@@ -13,6 +13,17 @@ import { loadSave } from "../game/save.ts";
 import type { View } from "./world/CameraRig.tsx";
 import type { QualityTier } from "./world/quality.ts";
 
+export type CamFlag =
+  | {
+      kind: "world";
+      eye: readonly [number, number, number];
+      look: readonly [number, number, number];
+    }
+  | {
+      kind: "relative";
+      off: readonly [number, number, number];
+    };
+
 /** Every URL flag, already validated. */
 export type Flags = {
   /** `?quality=low|high` forces a tier. */
@@ -36,6 +47,16 @@ export type Flags = {
   /** `?join=karaoke.3` opens straight into that room copy, online (an
    * invite link from inviteLink). */
   join: { room: RoomId; copy: number } | null;
+  /** `?fov=45` overrides the camera field of view in degrees (15..120). */
+  fov: number | null;
+  /** `?dist=10` pulls the follow camera back to that distance in meters (0.5..100). */
+  dist: number | null;
+  /** `?pitch=15` tilts the follow camera up (+) or down (-) in degrees (-85..85). */
+  pitch: number | null;
+  /** `?height=2` sets camera eye height above player feet in meters (-20..60). */
+  height: number | null;
+  /** `?cam=ex,ey,ez,lx,ly,lz` (world) or `?cam=dx,dy,dz` (relative). */
+  cam: CamFlag | null;
 };
 
 /** Room copies are numbered 1 to 99 (OnlineSession's MAX_COPY). */
@@ -54,6 +75,24 @@ export function readFlags(search: string): Flags {
   const spot = spotFor(q.get("spot") ?? "");
   if (spot && yaw !== null && Number.isFinite(Number(yaw)))
     spot.yaw = Number(yaw);
+  const fovNum = Number(q.get("fov") ?? Number.NaN);
+  const fov =
+    Number.isFinite(fovNum) && fovNum >= 15 && fovNum <= 120 ? fovNum : null;
+  const distNum = Number(q.get("dist") ?? Number.NaN);
+  const dist =
+    Number.isFinite(distNum) && distNum >= 0.5 && distNum <= 100
+      ? distNum
+      : null;
+  const pitchNum = Number(q.get("pitch") ?? Number.NaN);
+  const pitch =
+    Number.isFinite(pitchNum) && pitchNum >= -85 && pitchNum <= 85
+      ? pitchNum
+      : null;
+  const heightNum = Number(q.get("height") ?? Number.NaN);
+  const height =
+    Number.isFinite(heightNum) && heightNum >= -20 && heightNum <= 60
+      ? heightNum
+      : null;
   return {
     quality: quality === "low" || quality === "high" ? quality : null,
     still: q.get("still") === "1",
@@ -64,7 +103,29 @@ export function readFlags(search: string): Flags {
     at: spot ?? spawnAt(q.get("at"), Number(yaw ?? 0)),
     adult: q.get("adult") === "1",
     join: joinAt(q.get("join")),
+    fov,
+    dist,
+    pitch,
+    height,
+    cam: parseCamFlag(q.get("cam")),
   };
+}
+
+export function parseCamFlag(value: string | null): CamFlag | null {
+  if (!value) return null;
+  const parts = value.split(",").map(Number);
+  if (parts.some((n) => !Number.isFinite(n))) return null;
+  if (parts.length === 3) {
+    return { kind: "relative", off: [parts[0], parts[1], parts[2]] };
+  }
+  if (parts.length === 6) {
+    return {
+      kind: "world",
+      eye: [parts[0], parts[1], parts[2]],
+      look: [parts[3], parts[4], parts[5]],
+    };
+  }
+  return null;
 }
 
 function joinAt(value: string | null): Flags["join"] {
