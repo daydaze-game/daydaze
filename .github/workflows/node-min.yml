@@ -11,6 +11,14 @@ on:
       - "**.md"
       - "docs/**"
       - "art/**"
+      - "public/**"
+      - "prototypes/**"
+      - ".vscode/**"
+      - "LICENSE*"
+      - "NOTICE*"
+      - ".gitleaks.toml"
+      - ".lychee.toml"
+      - "cspell*"
 concurrency:
   group: node-min-${{ github.ref }}
   cancel-in-progress: true

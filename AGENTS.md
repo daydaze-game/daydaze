@@ -62,23 +62,6 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run dev:server`                | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
 | `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
 | `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
-| Command                             | What it does                                                                                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                       | Client on `http://localhost:5173` (`-- --port 5195` for another)                                                                                |
-| `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
-| `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
-| `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
-| `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
-| `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
-| `npm run format` / `format:check`   | Prettier                                                                                                                                        |
-| `npm run verify`                    | lint, test, typecheck, format check, build, perf budget: the merge gate                                                                         |
-| `npm run test:e2e:client`           | Playwright client tests (`tests/client.spec.ts`)                                                                                                |
-| `npm run test:e2e` / `test:e2e:sw`  | Playwright minigames / service-worker configs                                                                                                   |
-| `npm run test:e2e:online`           | Two browser players against a local Worker (~7 min)                                                                                             |
-| `npm run dev:server`                | Build, then local `wrangler dev` on 8787 (apply migrations first: `npx wrangler d1 migrations apply DB --local --config server/wrangler.jsonc`) |
-| `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
-| `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
 
 Client URL flags: `?quality=low|high`, `?still=1` (render a few frames and
 stop, for screenshots), `?debug=1` (room jump buttons), `?time=HH:MM` (pin the
@@ -135,25 +118,30 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Pushing `feat/**`, `fix/**`, `perf/**` or `ci/**` runs `npm run verify`
     (`verify.yml`). Locally, run single checks under `nice -n 19`.
   - Browser tests: `gh workflow run browser-test.yml --ref <branch> -f grep="<test title>"`.
-  - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<names>"`,
-    then `gh run download <id> -n screenshots`. Look at every screenshot.
+  - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<tokens>"`
+    (registry names, raw queries like `room=city&at=10,5&turn=4`, `spot=<building>`,
+    or `tour`; see `docs/dev-tools.md`), then `gh run download <id> -n screenshots`
+    or open `https://github.com/dpologdvinity/daydaze/tree/screenshots/<branch-with-dashes>`.
+    Look at every screenshot. `tree/screenshots/main` is the whole game as of
+    the last game-affecting push to `main`.
+    PRs that change room, city, avatar or HUD code get the matching shots
+    automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
+    comment linking the artifact, kept 7 days.
   - Screen recordings of any scene or minigame (MP4):
     `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
     `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
     Options are in `scripts/record.ts`.
-    PRs that change room, city, avatar or HUD code get the matching shots
-    automatically (`pr-screenshots.yml`, picked by `scripts/pr-shots.ts`) and a
-    comment linking the artifact, kept 7 days.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
-- Merge gate: GitHub's merge queue. Nobody pushes to `main`; a PR joins the
-  queue with `gh pr merge <n> --auto` once its checks (browser suites
-  included) are green, and the queue merges it only after `ci.yml` passes on
-  it combined with `main` and every PR ahead of it, so two green PRs cannot
-  merge into a red `main`. A PR that fails in the queue is dropped: fix it and
-  queue it again. `docs/agents/scripts/land.sh` rebases, pushes, opens the PR,
-  queues it, and removes the worktree and branch after the merge.
+- Merge gate: nobody pushes to `main`. Branch protection lets a PR merge only
+  when it is up to date with `main` and green on the fast checks (`setup`,
+  `lint`, `test`, `build`), so two PRs that are green alone cannot merge into
+  a red `main`. The browser suites must pass once on the PR; catching up with
+  `main` afterwards (`gh pr update-branch <n>`) re-runs only what blocks the
+  merge. `docs/agents/scripts/land.sh` does all of it: pushes, opens the PR,
+  waits for the browser suites, updates the branch whenever `main` moves,
+  merges, and removes the worktree and branch.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
@@ -183,7 +171,8 @@ request. Use the `gh` CLI.
   Do not fix it in the same branch. Title it like a Conventional Commit subject
   (`fix(net): ...`), say what you saw, how to reproduce it, which files, and
   what you expect. Add labels (`bug`, `enhancement`, `documentation`,
-  `security`, `performance`, and one `area: *`). Never put secrets in an issue.
+  `security`, `performance`, and one `area: *`) and assign it to the owner
+  (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
   reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
   stays open). When you finish something that has no issue, the PR is enough.

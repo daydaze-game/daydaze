@@ -1,7 +1,8 @@
-// URL flags: the boot quality tier (flag, then saved setting), and ?join=<room>.<copy>
-// parsing, including ignoring bad or out-of-range values and building invite links.
+// URL flags: the boot quality tier (flag, then saved setting), ?join=<room>.<copy>
+// parsing, invite links, and ?spot=<building> spawns in the city.
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { spotFor } from "../game/city/spots.ts";
 import { bootTier, inviteLink, readFlags } from "./flags.ts";
 
 const saveWith = (quality: string) =>
@@ -49,4 +50,14 @@ test("an invite link points at the room copy", () => {
     inviteLink("https://daydaze.example", "karaoke", 3),
     "https://daydaze.example/?join=karaoke.3",
   );
+});
+
+test("?spot=<building> starts in the city in front of it; ?yaw still turns", () => {
+  const flags = readFlags("?spot=pulse&room=plaza");
+  assert.equal(flags.room, "city");
+  assert.deepEqual(flags.at, spotFor("pulse"));
+  assert.equal(readFlags("?spot=pulse&yaw=1.5").at?.yaw, 1.5);
+  // an unknown building leaves room and spot alone
+  assert.equal(readFlags("?spot=nowhere").at, null);
+  assert.equal(readFlags("?spot=nowhere").room, null);
 });
