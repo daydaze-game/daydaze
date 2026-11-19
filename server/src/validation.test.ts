@@ -117,9 +117,9 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
 
 test("saves over 64 KB are rejected by UTF-8 size", () => {
   const save = serializeSave(createDefaultSave("Kai"));
-  const padded = save.replace("{", `{${" ".repeat(MAX_SAVE_BYTES)}`);
+  const padded = `{${" ".repeat(MAX_SAVE_BYTES)}${save.slice(1)}`;
   assert.equal(parseSave(padded, "Kai"), null);
-  const multibyte = save.replace("{", `{${" ".repeat(MAX_SAVE_BYTES / 2)}`);
+  const multibyte = `{${" ".repeat(MAX_SAVE_BYTES / 2)}${save.slice(1)}`;
   assert.ok(multibyte.length < MAX_SAVE_BYTES);
   assert.equal(parseSave(multibyte, "Kai"), null);
 });
