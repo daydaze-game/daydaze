@@ -10,15 +10,27 @@ import {
   type Playing,
   type ReactionId,
 } from "../../game/reactions.ts";
-import { TIME_SCALE } from "../timeScale.ts";
 
 /** The play under way, if any. A plain module value, read each frame. */
 export const reaction: { playing: Playing | null } = { playing: null };
 
-/** The clock reactions run on: seconds, scaled like the dolls' (`?timescale`), so a
- * fall's get-up follows the fall on the doll's own clock in a slowed frame strip. */
-export const reactionClock = (): number =>
-  (performance.now() / 1000) * TIME_SCALE;
+/** The longest a single frame may advance the reaction clock, seconds: the
+ * walker's catch-up cap, so a long frame (a cold shader compile on a slow
+ * renderer) cannot end a reaction before any frame has drawn it. */
+export const MAX_FRAME_SECONDS = 0.25;
+
+let clock = 0;
+
+/** Advances the reaction clock by one rendered frame: `dt` seconds, already
+ * scaled like the dolls' (`?timescale`, so a fall's get-up follows the fall on
+ * the doll's own clock in a slowed frame strip). PlayerController calls it
+ * once a frame. */
+export function tickReactionClock(dt: number): void {
+  if (dt > 0) clock += Math.min(dt, MAX_FRAME_SECONDS);
+}
+
+/** The clock reactions run on: seconds of rendered frames. */
+export const reactionClock = (): number => clock;
 
 /** Starts a reaction unless one is playing; says whether it began. */
 export function react(id: ReactionId, now = reactionClock()): boolean {

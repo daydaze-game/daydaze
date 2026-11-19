@@ -30,6 +30,22 @@ test("a raw query is named by its slug and keeps its flags", () => {
   assert.equal(shot?.query, "room=city&at=10,5&yaw=1.57&view=full&time=21:00");
 });
 
+test("camera overrides dist, pitch, fov, height pass through query", () => {
+  const [shot] = expandShots(
+    ["spot=pulse&dist=12&pitch=15&fov=45&height=2.5"],
+    known,
+  );
+  assert.equal(shot?.query, "spot=pulse&dist=12&pitch=15&fov=45&height=2.5");
+});
+
+test("heist and heistend pass through query", () => {
+  const [shot] = expandShots(
+    ["room=city&heist=30&heistend=caught&at=-170,9"],
+    known,
+  );
+  assert.equal(shot?.query, "room=city&heist=30&heistend=caught&at=-170,9");
+});
+
 test("a bad query is rejected before any browser starts", () => {
   for (const bad of [
     "room=city;rm",

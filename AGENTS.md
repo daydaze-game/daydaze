@@ -50,7 +50,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
+| `npm run lint`                      | ESLint (first regenerates `server/worker-configuration.d.ts`, which the type-aware rules need to resolve Worker types)                          |
 | `ruff check .`                      | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed)                                        |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
@@ -143,14 +143,19 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
     `scripts/select-tests.ts` picks the tests from that map, falling back to
     the full suite for anything it can't vouch for. main always runs the full
     suite. A new spec file must call `recordTestMap(test)` like the others.
-- Merge gate: nobody pushes to `main`. Branch protection lets a PR merge only
-  when it is up to date with `main` and green on the fast checks (`setup`,
-  `lint`, `test`, `build`), so two PRs that are green alone cannot merge into
-  a red `main`. The browser suites must pass once on the PR; catching up with
-  `main` afterwards (`gh pr update-branch <n>`) re-runs only what blocks the
-  merge. `docs/agents/scripts/land.sh` does all of it: pushes, opens the PR,
-  waits for the browser suites, updates the branch whenever `main` moves,
-  merges, and removes the worktree and branch.
+- Merge gate: nobody pushes to `main`. GitHub merges a PR only when it is up
+  to date with `main` and every required check passes (the browser suites
+  included), so two PRs that are green alone cannot merge into a red `main`.
+  To land a PR, turn on auto-merge: `gh pr merge <n> --auto --merge`, or
+  `docs/agents/scripts/land.sh <branch> <worktree> "<message>"`, which pushes,
+  opens the PR, turns auto-merge on, waits for the merge and removes the
+  worktree and branch. The `auto-update` workflow brings the oldest
+  auto-merge PR up to date whenever `main` moves, one at a time; a PR with a
+  failing check or a conflict is skipped until it's fixed. A commit that only
+  merges `main` into a PR whose browser suites already passed re-runs just the
+  fast checks (`scripts/main-merged-only.sh`), so catching up costs minutes.
+  Pull your branch (`git pull --no-rebase`) before pushing: the workflow adds
+  merge commits.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
