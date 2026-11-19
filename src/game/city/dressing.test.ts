@@ -15,7 +15,7 @@ import {
   type Buckets,
 } from "./dressing.ts";
 import { BUILDINGS, CITY_SURFACES, PROPS } from "./layout.ts";
-import { KINDS, type Instance, type Kind } from "./plan.ts";
+import { emptyInstances, type Instance, type Kind } from "./plan.ts";
 
 type Box = { x0: number; z0: number; x1: number; z1: number };
 
@@ -39,7 +39,7 @@ function inRoad(x: number, z: number): boolean {
 }
 
 function emptyBuckets(): Buckets {
-  return Object.fromEntries(KINDS.map((k) => [k, [] as Instance[]])) as Buckets;
+  return emptyInstances();
 }
 
 function dressed(id: string): Buckets {
@@ -174,7 +174,10 @@ test("street furniture models stand on the pavement and face the street", () => 
   }
   const kinds = new Set(FURNITURE.map((f) => f.kind));
   for (const k of ["hydrant", "trashcan", "bench", "mailbox", "busstop"])
-    assert.ok(kinds.has(k as never), `no ${k}`);
+    assert.ok(
+      [...kinds].some((kind) => kind === k),
+      `no ${k}`,
+    );
 });
 
 test("string lights are small round bulbs on a thin cord, not big cubes", () => {

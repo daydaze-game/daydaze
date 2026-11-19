@@ -6,6 +6,7 @@
 // the room's floor and blockers (rooms.ts), its seats and the client.
 import type { ShopId } from "./shop.ts";
 import type { Vec2 } from "./walk.ts";
+import { vec2 } from "./typed.ts";
 
 export const FLOOR_BOUNDS = { x0: -14, x1: 14, z0: -9.4, z1: 9.6 } as const;
 export const NORTH_Z = -10;
@@ -80,8 +81,8 @@ export const TABLES: readonly Vec2[] = [
 export const TABLE_SEATS: readonly { at: Vec2; facing: Vec2 }[] =
   TABLES.flatMap(([x, z]) =>
     [-0.75, 0.75].map((dx) => ({
-      at: [x + dx, z] as Vec2,
-      facing: [x, z] as Vec2,
+      at: vec2(x + dx, z),
+      facing: vec2(x, z),
     })),
   );
 /** Food court chairs shoppers already sit in, kept from the player. */

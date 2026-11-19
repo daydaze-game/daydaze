@@ -3,17 +3,29 @@
 // performance.now() milliseconds; the round itself counts seconds. The score
 // goes to the prize desk once, when time runs out.
 
-import { grab, newRound, PLATES, roundOver } from "../../../game/sushiCatch.ts";
+import {
+  grab,
+  newRound,
+  PLATES,
+  roundOver,
+  type Round,
+} from "../../../game/sushiCatch.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
 
-const OFF = {
-  on: false,
+const OFF: {
+  on: boolean;
   /** performance.now() the round began. */
+  start: number;
+  round: Round;
+  /** What the last grab got, for the call line. */
+  last: { label: string; right: boolean } | null;
+  over: boolean;
+} = {
+  on: false,
   start: 0,
   round: newRound(0),
-  /** What the last grab got, for the call line. */
-  last: null as { label: string; right: boolean } | null,
+  last: null,
   over: false,
 };
 

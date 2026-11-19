@@ -444,6 +444,17 @@ function stopRoom(car: TrafficCar): number {
   return trip.stop.s - car.s;
 }
 
+/**
+ * Sets the simulation clock to the shared wall time (seconds), so the lights,
+ * which read `t.time`, agree between players. The client calls it every frame:
+ * dropped frames would otherwise let the lights drift.
+ * shortcut: the cars are not synced, only the lights; each client steps its own
+ * cars (they also dodge their own player), so they differ between players.
+ */
+export function syncClock(t: Traffic, wall: number): void {
+  t.time = wall;
+}
+
 /** Advances every car by dt seconds at simulation time t.time + dt. */
 export function stepTraffic(
   t: Traffic,

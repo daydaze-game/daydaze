@@ -189,7 +189,7 @@ export class BuiltPose {
       if (!d) continue;
       this.bones.push(b);
       this.driver.push(d);
-      this.parent.push(b.parent ? order.indexOf(b.parent as THREE.Bone) : -1);
+      this.parent.push(isBone(b.parent) ? order.indexOf(b.parent) : -1);
       const q = new THREE.Quaternion();
       b.getWorldQuaternion(q).premultiply(this.rootInv);
       this.restModel.push(q);

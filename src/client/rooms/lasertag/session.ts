@@ -8,6 +8,7 @@ import {
   shoot,
   stepRound,
   type Field,
+  type Round,
   type Shot,
 } from "../../../game/laserTag.ts";
 import { PAINT_FIELD } from "../../../game/paintball.ts";
@@ -24,11 +25,15 @@ export function createTagGame(
   names: readonly string[],
   colors: readonly string[],
 ) {
-  const off = {
-    phase: "off" as "off" | "playing" | "over",
-    round: newRound(1, field),
+  const off: {
+    phase: "off" | "playing" | "over";
+    round: Round;
     /** Your last shot: at whom, how it went and when (round seconds). */
-    shot: null as { rival: number; result: Shot; t: number } | null,
+    shot: { rival: number; result: Shot; t: number } | null;
+  } = {
+    phase: "off",
+    round: newRound(1, field),
+    shot: null,
   };
   const store = createStore(off);
   /** Where you stand, kept by the scene each frame for the panel's shots. */

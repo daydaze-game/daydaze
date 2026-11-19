@@ -3,6 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { playBarSound, type BarSound } from "./barSynths.ts";
+import { toAudioContext } from "./fakeAudioContext.ts";
 
 const SOUNDS: BarSound[] = ["pour", "shake", "ding"];
 
@@ -17,12 +18,12 @@ function makeFakeAudioContext(): AudioContext {
     frequency: param(),
     Q: param(),
     gain: param(),
-    buffer: null as unknown,
+    buffer: null,
     connect: () => {},
     start: () => {},
     stop: () => {},
   });
-  return {
+  return toAudioContext({
     currentTime: 0,
     sampleRate: 8000,
     state: "running",
@@ -35,7 +36,7 @@ function makeFakeAudioContext(): AudioContext {
       getChannelData: () => new Float32Array(length),
     }),
     resume: () => Promise.resolve(),
-  } as unknown as AudioContext;
+  });
 }
 
 test("every bar sound plays on a working audio context", () => {
@@ -49,10 +50,10 @@ test("bar sounds report false without audio and never throw", () => {
     // Node has no Web Audio, so the shared bus has no context either.
     assert.equal(playBarSound(sound), false);
   }
-  const broken = {
+  const broken = toAudioContext({
     get currentTime(): number {
       throw new Error("boom");
     },
-  } as unknown as AudioContext;
+  });
   assert.equal(playBarSound("ding", broken), false);
 });

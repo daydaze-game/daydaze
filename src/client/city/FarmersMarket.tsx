@@ -334,7 +334,7 @@ function Market({ player }: { player: Player }): JSX.Element {
 
   // everything that only exists while it is open
   const wares = useMemo(() => {
-    if (!open) return { meshes: [] as THREE.InstancedMesh[], items: 0 };
+    if (!open) return { meshes: [], items: 0 };
     const meshes: THREE.InstancedMesh[] = [];
     let items = 0;
     const { crates, loaves, piles } = shelfSpots(low);

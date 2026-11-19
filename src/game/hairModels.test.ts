@@ -22,7 +22,7 @@ test("every hair style has all four model files", () => {
 });
 
 test("the textured styles are in the closet", () => {
-  const ids = HAIR_STYLES.map((h) => h.id) as string[];
+  const ids: string[] = HAIR_STYLES.map((h) => h.id);
   for (const id of [
     "locs",
     "box-braids",
@@ -39,7 +39,7 @@ test("every pack hair the Blender build makes is in the closet", () => {
   const block = src.slice(src.indexOf("STYLES = {"), src.indexOf("# pieces"));
   const built = [...block.matchAll(/^ {4}"([a-z-]+)": \(/gm)].map((m) => m[1]);
   assert.ok(built.length >= 20, `found ${built.length} pack styles`);
-  const ids = HAIR_STYLES.map((h) => h.id) as string[];
+  const ids: string[] = HAIR_STYLES.map((h) => h.id);
   assert.deepEqual(
     built.filter((id) => !ids.includes(id)),
     [],

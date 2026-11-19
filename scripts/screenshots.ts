@@ -26,6 +26,13 @@ import {
 import { expandShots, shard } from "./shot-plan.ts";
 import { waitForFrames } from "./wait-for-frames.ts";
 
+// `?debug=1` puts this on the page (src/client/world/reaction.ts).
+declare global {
+  interface Window {
+    daydazeReact: (id: string) => void;
+  }
+}
+
 const BASE = process.env.BASE_URL ?? "http://localhost:5195";
 /** Waits for the street furniture models and street pieces (CityFurniture sets data-furniture, StreetPieces data-street). */
 const furnitureReady = async (page: Page) => {
@@ -1006,13 +1013,7 @@ const SHOTS: {
     ] as const
   ).map(([name, id]) => {
     const play = (page: Page, r: string) =>
-      page.evaluate(
-        (r) =>
-          (
-            window as unknown as { daydazeReact: (id: string) => void }
-          ).daydazeReact(r),
-        r,
-      );
+      page.evaluate((r) => window.daydazeReact(r), r);
     const fall = id === "trip-fall";
     return actionStrip(
       name,
