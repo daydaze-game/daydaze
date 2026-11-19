@@ -77,3 +77,11 @@ jobs:
           path: recordings/*.mp4
           retention-days: 14
           if-no-files-found: error
+      # the artifact above expires; this copy, a release on the artifacts
+      # repo, does not (scripts/archive-run.sh)
+      - env:
+          ARTIFACTS_TOKEN: ${{ secrets.ARTIFACTS_TOKEN }}
+          ARCHIVE_REF: ${{ github.ref_name }}
+          ARCHIVE_SHA: ${{ github.sha }}
+          ARCHIVE_NOTES: "Scene: ${{ inputs.scene }} | game: ${{ inputs.game }} | clicks: ${{ inputs.clicks }} | ${{ inputs.seconds }}s, timescale ${{ inputs.timescale }}, ${{ inputs.quality }}, mobile ${{ inputs.mobile }}"
+        run: shopt -s nullglob && bash scripts/archive-run.sh recording recordings/*.mp4

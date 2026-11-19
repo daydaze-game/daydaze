@@ -178,7 +178,9 @@ for (const role of ROLE_IDS) {
             `${role}/${situation} has a ${label}: ${text}`,
           );
         }
-        if (!DRUG_SITUATIONS.has(situation)) {
+        // 18+ lines may talk about weed (the Green Haze lounger does)
+        const adult = typeof entry !== "string" && entry.when?.tier === "adult";
+        if (!DRUG_SITUATIONS.has(situation) && !adult) {
           assert.doesNotMatch(
             text,
             DRUG_PATTERN,

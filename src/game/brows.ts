@@ -75,6 +75,28 @@ export const BROW_DESIGNS: Record<Look["brows"], BrowDesign> = {
   },
 };
 
+/** Natural eyebrow shade presets. Custom RGB colors are also supported. */
+export const BROW_COLORS = [
+  { id: "#1a120e", label: "Jet" },
+  { id: "#24130e", label: "Espresso" },
+  { id: "#35231d", label: "Dark brown" },
+  { id: "#4a2d1d", label: "Chestnut" },
+  { id: "#5e3c22", label: "Honey" },
+  { id: "#7c4826", label: "Auburn" },
+  { id: "#9e6c38", label: "Caramel" },
+  { id: "#c29b63", label: "Blonde" },
+  { id: "#d8c5a4", label: "Platinum" },
+  { id: "#827d79", label: "Silver" },
+] as const;
+
+/** Resolves brow color: uses custom browColor if provided, else design default ink. */
+export function browColor(look: {
+  brows: Look["brows"];
+  browColor?: string | undefined;
+}): string {
+  return look.browColor ?? BROW_DESIGNS[look.brows]?.color ?? "#302019";
+}
+
 /** Height above the eyelid, in the face painter's normalized coordinates. */
 export function browRise(brow: BrowDesign, t: number): number {
   const peak = brow.peak;

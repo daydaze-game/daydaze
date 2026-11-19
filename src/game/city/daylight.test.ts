@@ -10,18 +10,21 @@ import {
   parseTimeFlag,
 } from "./daylight.ts";
 
-test("noon is full day: sun up, no neon, a blue sky", () => {
+test("midnight is night: no sun, the neon at full, moon is up", () => {
+  const d = daylightAt(0);
+  assert.equal(d.sun, 0);
+  assert.equal(d.moon, 1);
+  assert.equal(d.neon, 1);
+  assert.ok(d.moonElevation > 0, "moon overhead at midnight");
+});
+
+test("noon is full day: sun up, no moon or neon, a blue sky", () => {
   const d = daylightAt(12);
   assert.equal(d.sun, 1);
+  assert.equal(d.moon, 0);
   assert.equal(d.neon, 0);
   const [r, , b] = d.zenith;
   assert.ok(b > r, "a blue zenith");
-});
-
-test("midnight is night: no sun, the neon at full", () => {
-  const d = daylightAt(0);
-  assert.equal(d.sun, 0);
-  assert.equal(d.neon, 1);
 });
 
 test("the evening glows gold, between day and night", () => {
@@ -46,6 +49,24 @@ test("the sun rises in the east, peaks at noon and sets in the west", () => {
   assert.ok(daylightAt(12).sunElevation > daylightAt(9).sunElevation);
   assert.ok(daylightAt(9).sunDirection[0] > 0, "morning sun in the east (+x)");
   assert.ok(daylightAt(16).sunDirection[0] < 0, "afternoon sun in the west");
+});
+
+test("the moon peaks at midnight and arcs across the night sky", () => {
+  assert.ok(daylightAt(0).moonElevation > daylightAt(21).moonElevation);
+  assert.ok(daylightAt(21).moonDirection[0] > 0, "evening moon in east (+x)");
+  assert.ok(daylightAt(3).moonDirection[0] < 0, "late night moon in west");
+});
+
+test("directional celestial light never reaches zero intensity", () => {
+  for (let m = 0; m < 24 * 60; m++) {
+    const d = daylightAt(m / 60);
+    // Even at dusk/dawn transition, combined celestial light maintains presence
+    const celestialPresence = d.sun + d.moon;
+    assert.ok(
+      celestialPresence > 0.2,
+      `low celestial light at ${m} min: ${celestialPresence}`,
+    );
+  }
 });
 
 test("the hour comes from the local clock, or ?time=HH:MM for screenshots", () => {

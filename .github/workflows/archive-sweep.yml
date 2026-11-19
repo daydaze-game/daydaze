@@ -1,0 +1,31 @@
+# Copy every artifact that cannot be rebuilt (screenshots, recordings,
+# Playwright reports, profiles) to a permanent release on
+# dpologdvinity/daydaze-artifacts before it expires (scripts/archive-sweep.ts).
+# Daily, since the shortest-lived of them are kept 7 days; by hand:
+#   gh workflow run archive-sweep.yml
+# It skips runs already archived, so a sweep that times out resumes next time.
+name: Archive sweep
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+concurrency:
+  group: archive-sweep
+  cancel-in-progress: false
+permissions:
+  actions: read
+  contents: read
+jobs:
+  sweep:
+    runs-on: ubuntu-24.04
+    # the first sweep paces ~900 uploads under GitHub's hourly limit
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: node --experimental-strip-types scripts/archive-sweep.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACTS_TOKEN: ${{ secrets.ARTIFACTS_TOKEN }}
