@@ -13,15 +13,11 @@ import {
   heistInto,
   heistOutcome,
   heistStart,
+  heistSlotWith,
   nextHeistIn,
 } from "./heist.ts";
 
-/** The first slot from `from` whose heist ends `outcome`. */
-function slotWith(outcome: "escape" | "caught", from = 1000): number {
-  for (let s = from; s < from + 200; s++)
-    if (heistOutcome(s) === outcome) return s;
-  throw new Error(`no ${outcome} heist`);
-}
+const slotWith = heistSlotWith;
 
 test("a heist starts somewhere in its slot and ends before the next slot", () => {
   const starts = new Set<number>();
@@ -39,6 +35,13 @@ test("both endings come up", () => {
   const outcomes = new Set<string>();
   for (let slot = 0; slot < 40; slot++) outcomes.add(heistOutcome(slot));
   assert.deepEqual([...outcomes].sort(), ["caught", "escape"]);
+});
+
+test("heistSlotWith finds the first matching slot", () => {
+  assert.equal(heistSlotWith("escape", 1000), 1000);
+  assert.equal(heistSlotWith("caught", 1000), 1005);
+  assert.equal(heistOutcome(heistSlotWith("caught", 1000)), "caught");
+  assert.equal(heistOutcome(heistSlotWith("escape", 1000)), "escape");
 });
 
 test("the countdown reads 0 during a heist and counts to the next", () => {
