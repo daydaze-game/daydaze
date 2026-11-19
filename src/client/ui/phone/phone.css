@@ -89,10 +89,28 @@
   display: none;
 }
 
-.food-held {
+/* Stack needs and held items above the action dock; long dish names wrap. */
+.food-tray {
   position: fixed;
   left: 1rem;
-  bottom: 1rem;
+  bottom: 8rem;
+  z-index: 4;
+  width: min(18rem, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .food-tray {
+    bottom: 14rem;
+  }
+}
+
+.food-held {
+  pointer-events: auto;
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -107,12 +125,8 @@
   margin: 0;
 }
 
-/* Gentle needs prompts, above the held tray and clear of the center toast. */
+/* Gentle needs prompts share the tray stack. */
 .food-needs {
-  position: fixed;
-  left: 1rem;
-  bottom: 7rem;
-  width: min(16rem, calc(100vw - 2rem));
   padding: 0.7rem 0.9rem;
   border: 1px solid #b5d990;
   border-radius: 12px;

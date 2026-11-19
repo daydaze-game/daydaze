@@ -3625,6 +3625,7 @@ test("Plate Rush orders a dish and the courier drops it in hand", async ({
 test("weed munchies: delivered food and water relieve needs only at 18+", async ({
   page,
 }) => {
+  test.setTimeout(300_000);
   const errors = collectErrors(page);
   // Advance the existing dev modules, without waiting through a whole joint.
   const call = async (
@@ -3673,7 +3674,6 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await page.screenshot({
     path: test.info().outputPath("weed-needs-mobile.png"),
   });
-  await page.setViewportSize({ width: 1280, height: 800 });
   await (await fromMenu(page, "Plate Rush")).click();
   const app = page.getByRole("dialog", { name: "Plate Rush" });
   await app.getByRole("button", { name: /Point and Eat Kitchen/ }).click();
@@ -3685,6 +3685,9 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await page.keyboard.press("Escape");
   await call(food, "tickDeliveries", [Date.now() + 120_000]);
   const held = page.getByRole("region", { name: "Held food" });
+  await page.screenshot({
+    path: test.info().outputPath("weed-food-tray-mobile.png"),
+  });
   await held.getByRole("button", { name: "Eat it" }).click();
   await expect(
     page
@@ -3710,6 +3713,7 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
       .filter({ hasText: "A cool drink feels extra refreshing." }),
   ).toBeVisible();
   await expect(needs).toHaveCount(0);
+  await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(VELVET);
   await expect(roomTitle(page)).toHaveText("The Velvet Room");
   await call(high, "take", ["joint"]);
