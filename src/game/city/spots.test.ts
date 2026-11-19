@@ -58,3 +58,25 @@ test("an unknown building has no spot", () => {
   assert.equal(spotFor("nowhere"), null);
   assert.equal(spotFor(""), null);
 });
+
+test("spot and full camera have clearance from props, furniture and parked cars", () => {
+  const pulse = spotFor("pulse");
+  assert.ok(pulse);
+  // Pulse's full camera must not be blocked by the parked taxi at [113, 5.2]
+  const pulseCamX =
+    pulse.position[0] + 0.6 * Math.cos(pulse.yaw) + 4.1 * Math.sin(pulse.yaw);
+  const pulseCamZ =
+    pulse.position[1] - 0.6 * Math.sin(pulse.yaw) + 4.1 * Math.cos(pulse.yaw);
+  assert.ok(
+    Math.hypot(pulseCamX - 113, pulseCamZ - 5.2) >= 1.8,
+    `Pulse camera too close to taxi: ${Math.hypot(pulseCamX - 113, pulseCamZ - 5.2).toFixed(2)}m`,
+  );
+
+  const museum = spotFor("museum");
+  assert.ok(museum);
+  // Museum player spot must clear the mailbox at [-261, 9.9]
+  assert.ok(
+    Math.hypot(museum.position[0] - -261, museum.position[1] - 9.9) >= 1.5,
+    `Museum spot too close to mailbox: ${Math.hypot(museum.position[0] - -261, museum.position[1] - 9.9).toFixed(2)}m`,
+  );
+});
