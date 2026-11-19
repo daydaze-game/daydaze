@@ -106,8 +106,12 @@ test("lanes take focus, notes meet the hit line, the booth passes axe, and Escap
     .locator(".md-lane")
     .first()
     .evaluate((lane) => {
-      const note = lane.querySelector(".md-note")!.getBoundingClientRect();
-      const line = lane.querySelector(".md-hit-line")!.getBoundingClientRect();
+      // runs in the page, so no imported helper: check inline
+      const noteEl = lane.querySelector(".md-note");
+      const lineEl = lane.querySelector(".md-hit-line");
+      if (!noteEl || !lineEl) throw new Error("lane lacks a note or hit line");
+      const note = noteEl.getBoundingClientRect();
+      const line = lineEl.getBoundingClientRect();
       return { note: note.y + note.height / 2, line: line.y + line.height / 2 };
     });
   expect(Math.abs(centers.note - centers.line)).toBeLessThan(3);

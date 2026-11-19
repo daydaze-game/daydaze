@@ -92,8 +92,24 @@ export type DanceMoveId = (typeof DANCE_MOVE_IDS)[number];
 const ZERO: Vec3 = [0, 0, 0];
 
 export function createPose(): Pose {
-  const joints = {} as Record<Joint, Vec3>;
-  for (const j of JOINTS) joints[j] = [0, 0, 0];
+  // one fresh vector per joint (the sampler writes into them); a literal keeps
+  // the type checker verifying that every joint is present
+  const z = (): Vec3 => [0, 0, 0];
+  const joints: Record<Joint, Vec3> = {
+    body: z(),
+    head: z(),
+    pony: z(),
+    lArm: z(),
+    lFore: z(),
+    rArm: z(),
+    rFore: z(),
+    lLeg: z(),
+    lShin: z(),
+    rLeg: z(),
+    rShin: z(),
+    lFoot: z(),
+    rFoot: z(),
+  };
   return { root: [0, 0, 0], joints, captured: false, groove: true };
 }
 

@@ -8,8 +8,13 @@ import { stillReady } from "../../net/client/saveSync.ts";
 import { onlineSession } from "./session.ts";
 
 /** Who you're playing as online: a guest, or a signed-in account. */
-export const account = createStore({
-  me: null as Identity | null,
+export const account = createStore<{
+  me: Identity | null;
+  cloudReady: boolean;
+  busy: boolean;
+  note: string;
+}>({
+  me: null,
   /** The account's save has loaded (or it's a brand-new account), so local
    * changes may go up. */
   cloudReady: false,

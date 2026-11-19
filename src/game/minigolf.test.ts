@@ -16,6 +16,7 @@ import {
   type Round,
   type Vec2,
 } from "./minigolf.ts";
+import { vec2 } from "./typed.ts";
 
 /** The best single putt from `from`, by a coarse search over aim and power. */
 function bestPutt(hole: Hole, from: Vec2) {
@@ -78,7 +79,7 @@ test("a putt that's too hard runs over the cup", () => {
 
 test("a round scores strokes, picks up at the limit and totals against par", () => {
   let round: Round = NEW_ROUND;
-  const miss = { rest: [0, -1] as Vec2, holed: false, frames: [] };
+  const miss = { rest: vec2(0, -1), holed: false, frames: [] };
   const hit = { rest: HOLES[0].cup, holed: true, frames: [] };
   round = scorePutt(round, miss);
   round = scorePutt(round, hit);

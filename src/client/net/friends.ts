@@ -5,8 +5,8 @@ import { createStore } from "../rooms/shared/store.ts";
 import { onlineSession } from "./session.ts";
 
 /** The friends list as last fetched, and whether its panel is open. */
-export const friends = createStore({
-  list: null as Friends | null,
+export const friends = createStore<{ list: Friends | null; open: boolean }>({
+  list: null,
   open: false,
 });
 

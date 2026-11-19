@@ -71,6 +71,12 @@ export default defineConfig(
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+      // no `as` or `!`: narrow with type guards and checks (`as const` is fine)
+      "@typescript-eslint/consistent-type-assertions": [
+        "error",
+        { assertionStyle: "never" },
+      ],
+      "@typescript-eslint/no-non-null-assertion": "error",
     },
   },
   // Type-aware rules: the project service finds each file's tsconfig

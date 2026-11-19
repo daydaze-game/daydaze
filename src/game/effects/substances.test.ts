@@ -10,6 +10,7 @@ import {
   BREATHE_AMOUNT,
   DOSES,
   doseLevel,
+  dryMouthHint,
   gameSeconds,
   heavyLid,
   HEAVY_LID_MAX,
@@ -497,4 +498,27 @@ test("dry mouth and the munchies: every weed style has a consume tic after the c
         body.comedown.tics.includes("consume"),
     );
   assert.ok(BODY.high.comedown.tics.includes("consume"));
+});
+
+test("weed stretches time: faint tracers, fainter than molly's, none under reduced motion", () => {
+  const weed = soberMeters();
+  weed.high = { level: 1, phase: "peak", strain: "hybrid" };
+  const full = highParams(weed, 1, false);
+  assert.ok(full.tracer > 0);
+  const molly = soberMeters();
+  molly.molly = { level: 1, phase: "peak", strain: "hybrid" };
+  assert.ok(full.tracer < highParams(molly, 1, false).tracer);
+  assert.equal(highParams(weed, 1, true).tracer, 0);
+  assert.equal(highParams(weed, 0, false).tracer, 0);
+  assert.equal(highParams(soberMeters(), 1, false).tracer, 0);
+});
+
+test("the dry-mouth hint shows once, as the weed peaks", () => {
+  const m = soberMeters();
+  m.high = { level: 0.5, phase: "peak", strain: "hybrid" };
+  assert.match(dryMouthHint("comeup", m) ?? "", /water/i);
+  assert.equal(dryMouthHint("peak", m), null);
+  m.high = { level: 0.5, phase: "comedown", strain: "hybrid" };
+  assert.equal(dryMouthHint("peak", m), null);
+  assert.equal(dryMouthHint(null, soberMeters()), null);
 });

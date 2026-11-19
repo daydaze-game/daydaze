@@ -234,14 +234,14 @@ function path(ctx: CanvasRenderingContext2D, pts: readonly [number, number][]) {
 }
 
 /** The lid line, inner corner first, with a wing flicked up and out. */
-function winged(lid: readonly [number, number][], wing: number) {
+function winged(
+  lid: readonly [number, number][],
+  wing: number,
+): [number, number][] {
   const a = lid[lid.length - 2];
   const b = lid[lid.length - 1];
   const out = Math.sign(b[0] - a[0]) || 1;
-  return [...lid, [b[0] + out * wing, b[1] - wing * 0.75]] as [
-    number,
-    number,
-  ][];
+  return [...lid, [b[0] + out * wing, b[1] - wing * 0.75]];
 }
 
 // [lift above the lash line, width, opacity] bands per shadow style
@@ -400,9 +400,10 @@ function paintShadow(
   // smoky goes deeper near the lashes
   const ink = style === "smoky" ? c.map((v) => v * 0.55) : c;
   for (const [lift, width, alpha] of SHADOW_BANDS[style]) {
-    const raised = winged(lid, 0.018).map(
-      ([x, y]) => [x, y - lift] as [number, number],
-    );
+    const raised = winged(lid, 0.018).map(([x, y]): [number, number] => [
+      x,
+      y - lift,
+    ]);
     ctx.strokeStyle = rgba(lift < 0.005 ? ink : c, alpha);
     ctx.lineWidth = width * SIZE;
     path(ctx, raised);
@@ -450,7 +451,7 @@ function paintLiner(
     ctx.lineWidth = 0.004 * SIZE;
     path(
       ctx,
-      winged(lid, wing).map(([x, y]) => [x, y - 0.03] as [number, number]),
+      winged(lid, wing).map(([x, y]): [number, number] => [x, y - 0.03]),
     );
     ctx.stroke();
   }

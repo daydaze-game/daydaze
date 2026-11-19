@@ -11,11 +11,16 @@ type Ask = { id: string; name: string; seed: number };
 
 /** A cook-off with another player: an invite either way, then a match both
  * cook at Kamayan Hall with the same seed, swapping final scores. */
-export const cookOff = createStore({
-  invite: null as Ask | null,
-  asked: null as Ask | null,
+export const cookOff = createStore<{
+  invite: Ask | null;
+  asked: Ask | null;
+  match: (Ask & { theirs: number | null }) | null;
+  note: string;
+}>({
+  invite: null,
+  asked: null,
   /** `theirs` is their final score, once it comes in. */
-  match: null as (Ask & { theirs: number | null }) | null,
+  match: null,
   note: "",
 });
 

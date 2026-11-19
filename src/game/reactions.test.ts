@@ -17,8 +17,9 @@ import {
   TRIP_MIN_METERS,
   type ReactionId,
 } from "./reactions.ts";
+import { typedKeys } from "./typed.ts";
 
-const IDS = Object.keys(REACTIONS) as ReactionId[];
+const IDS = typedKeys(REACTIONS);
 
 test("every reaction is a baked one-shot of the moves pack", () => {
   assert.ok(IDS.length >= 8);
