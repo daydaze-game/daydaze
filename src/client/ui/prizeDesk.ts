@@ -10,9 +10,15 @@ const NO_BESTS: Bests = {};
  * saved best, pays out and posts the prize, which the card and the confetti
  * show.
  */
-export const prizeDesk = createStore({
-  pending: null as { game: PrizeGame; score: number } | null,
-  shown: null as Prize | null,
+export const prizeDesk = createStore<{
+  pending: { game: PrizeGame; score: number } | null;
+  shown: Prize | null;
+  challenge: number;
+  bests: Bests;
+  at: number;
+}>({
+  pending: null,
+  shown: null,
   /** Coins a daily challenge paid on top, 0 when none was reached. */
   challenge: 0,
   /** The saved personal bests, mirrored here for the scoreboards. */

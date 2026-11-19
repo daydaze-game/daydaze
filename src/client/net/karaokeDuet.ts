@@ -21,11 +21,15 @@ import { peerCard } from "./peerCard.ts";
 
 type Who = { id: string; name: string };
 
-export const duetAsk = createStore({
+export const duetAsk = createStore<{
+  ask: (Who & { song: string }) | null;
+  asked: (Who & { song: string }) | null;
+  note: string;
+}>({
   /** Someone asked you to sing with them. */
-  ask: null as (Who & { song: string }) | null,
+  ask: null,
   /** You asked; waiting for an answer, with the song you picked. */
-  asked: null as (Who & { song: string }) | null,
+  asked: null,
   note: "",
 });
 

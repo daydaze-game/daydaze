@@ -25,12 +25,32 @@ const browser = await chromium.launch({
     "--enable-unsafe-swiftshader",
   ],
 });
-type Win = {
-  __long: number[];
-  __ft: number[];
-  __links: string[];
-  __all: { flags: string; src: string }[];
-};
+/** One linked shader program, as the client's `programs` console line lists it. */
+type Program = { name: string; key: string; uses: number; defines: string };
+function isProgram(p: unknown): p is Program {
+  return (
+    typeof p === "object" &&
+    p !== null &&
+    "name" in p &&
+    typeof p.name === "string" &&
+    "key" in p &&
+    typeof p.key === "string" &&
+    "uses" in p &&
+    typeof p.uses === "number" &&
+    "defines" in p &&
+    typeof p.defines === "string"
+  );
+}
+
+// The page-side buffers the init script below fills (read back by evaluate).
+declare global {
+  interface Window {
+    __long: number[];
+    __ft: number[];
+    __links: string[];
+    __all: { flags: string; src: string }[];
+  }
+}
 for (const name of names) {
   const query = AREAS[name];
   if (!query) continue;
@@ -46,7 +66,7 @@ for (const name of names) {
       "daydaze-save-v1",
       JSON.stringify({ onboarded: true }),
     );
-    const w = window as unknown as Win;
+    const w = window;
     w.__long = [];
     w.__ft = [];
     w.__links = [];
@@ -107,12 +127,9 @@ for (const name of names) {
     // the client lists its linked programs when asked (`programs`, World.tsx)
     const t = m.text();
     if (!t.startsWith("programs ")) return;
-    const list = JSON.parse(t.slice(9)) as {
-      name: string;
-      key: string;
-      uses: number;
-      defines: string;
-    }[];
+    const parsed: unknown = JSON.parse(t.slice(9));
+    if (!Array.isArray(parsed)) return;
+    const list: Program[] = parsed.filter(isProgram);
     const dir = process.env.PROFILE?.split("/").slice(0, -1).join("/");
     if (dir) {
       const { writeFileSync } = await import("node:fs");
@@ -136,9 +153,13 @@ for (const name of names) {
   const assets = await page.evaluate(() => {
     const list = performance
       .getEntriesByType("resource")
+      .filter(
+        (e): e is PerformanceResourceTiming =>
+          e instanceof PerformanceResourceTiming,
+      )
       .map((e) => ({
         name: new URL(e.name).pathname,
-        bytes: (e as PerformanceResourceTiming).encodedBodySize,
+        bytes: e.encodedBodySize,
       }))
       .sort((a, b) => b.bytes - a.bytes);
     return {
@@ -181,7 +202,7 @@ for (const name of names) {
   const rows: string[] = [];
   for (const phase of phases) {
     await page.evaluate(() => {
-      const w = window as unknown as Win;
+      const w = window;
       w.__long = [];
       w.__ft = [];
       w.__links = [];
@@ -207,7 +228,7 @@ for (const name of names) {
     }
     if (phase === "walk") await page.keyboard.up("w");
     const { long, ft, calls, tris, links } = await page.evaluate(() => {
-      const w = window as unknown as Win;
+      const w = window;
       const c = document.querySelector("canvas")?.dataset;
       return {
         long: w.__long,
@@ -243,7 +264,7 @@ for (const name of names) {
   );
   for (const r of rows) console.log(r);
   const all = await page.evaluate(() => {
-    const w = window as unknown as Win;
+    const w = window;
     return w.__all;
   });
   const flagGroups = new Map<string, Set<string>>();

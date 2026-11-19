@@ -9,9 +9,12 @@ const firstStation = (): Station => "piano";
 
 /** The instrument picked on the panel (the scene picks the one you walk up
  * to), and the last note played, so the scene can light it. */
-export const studio = createStore({
+export const studio = createStore<{
+  station: Station;
+  last: { station: Station; note: number; at: number } | null;
+}>({
   station: firstStation(),
-  last: null as { station: Station; note: number; at: number } | null,
+  last: null,
 });
 
 export function pick(station: Station) {

@@ -247,7 +247,7 @@ const PRODUCE_GOODS = [
   "food-Broccoli",
 ] as const;
 const shelfStock = SHELF_GOODS.map(
-  () => [] as (readonly [number, number, number, number])[],
+  (): (readonly [number, number, number, number])[] => [],
 );
 for (const [aisleIndex, aisle] of AISLES.entries())
   for (const side of [-1, 1])

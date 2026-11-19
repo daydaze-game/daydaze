@@ -6,7 +6,10 @@ import assert from "node:assert/strict";
 import { claimSeat, releaseSeat } from "./seatClaim.ts";
 
 type Seat = { tag: string };
-const holder = () => ({ seat: null as Seat | null, sitting: false });
+const holder = (): { seat: Seat | null; sitting: boolean } => ({
+  seat: null,
+  sitting: false,
+});
 
 test("a game takes a free seat and releases only its own", () => {
   const p = holder();

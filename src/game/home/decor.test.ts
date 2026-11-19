@@ -18,12 +18,13 @@ import {
   validateFurniture,
   type Furniture,
 } from "./decor.ts";
+import { typedKeys } from "../typed.ts";
 
 test("the starter catalog has named pieces with sizes in grid cells", () => {
-  const ids = Object.keys(FURNITURE_CATALOG);
+  const ids = typedKeys(FURNITURE_CATALOG);
   assert.ok(ids.length >= 6, "at least six starter pieces");
   for (const id of ids) {
-    const item = FURNITURE_CATALOG[id as keyof typeof FURNITURE_CATALOG];
+    const item = FURNITURE_CATALOG[id];
     assert.ok(item.name.length > 0);
     assert.ok(item.width >= 1 && item.depth >= 1);
   }

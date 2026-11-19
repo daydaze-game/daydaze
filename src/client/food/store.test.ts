@@ -13,6 +13,7 @@ import {
   tickDeliveries,
   tickNeeds,
   consumeFood,
+  showToast,
 } from "./store.ts";
 import { take, ageHigh, getMeters } from "../effects/high.ts";
 import { FOOD_VENUES, foodVenuesFor } from "../../game/food/venues.ts";
@@ -89,6 +90,8 @@ test("food and water satisfy weed needs, including a delivered meal, without sob
   const before = getFoodState().needs;
   assert.ok(before.hunger > 0);
   assert.ok(before.thirst > 0);
+  showToast("Cotton mouth: a snack or water might help.");
+  assert.deepEqual(getFoodState().needs, before);
   orderItem(item.id, 0);
   tickDeliveries(DELIVERY_SECONDS * 1000);
   eatHeld();

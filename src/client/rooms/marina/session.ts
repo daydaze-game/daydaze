@@ -9,6 +9,7 @@ import {
   strike,
   tripKg,
   tripOver,
+  type Trip,
   type Catch,
 } from "../../../game/fishing.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -26,8 +27,19 @@ export type Phase =
 export const FLIGHT = 1.1;
 const SHOW = 2.4;
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  trip: Trip;
+  since: number;
+  power: number;
+  distance: number;
+  seed: number;
+  biteAt: number;
+  last: Catch | null;
+}
+
+const OFF: State = {
+  phase: "off",
   trip: NEW_TRIP,
   /** performance.now() the current phase started. */
   since: 0,
@@ -36,7 +48,7 @@ const OFF = {
   seed: 0,
   /** performance.now() the fish bites. */
   biteAt: 0,
-  last: null as Catch | null,
+  last: null,
 };
 
 export const fishing = createStore(OFF);
