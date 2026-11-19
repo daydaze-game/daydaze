@@ -78,6 +78,9 @@ import { GameMenu, closeMenu } from "./GameMenu.tsx";
 import type { CrimeSave } from "../../game/crime/record.ts";
 import type { Caught } from "./ShopliftPanel.tsx";
 import { VendingPanel } from "../vending/VendingPanel.tsx";
+import { GasMartPanel } from "../inventory/GasMartPanel.tsx";
+import { PouchPanel } from "../inventory/PouchPanel.tsx";
+import { WeedShopPanel } from "../inventory/WeedShopPanel.tsx";
 import { TaxiPanel } from "../city/TaxiPanel.tsx";
 import { driverSays, taxiRide } from "../city/taxiStore.ts";
 import { fareFor, planRoute, routeLength } from "../../game/city/taxi.ts";
@@ -1005,6 +1008,11 @@ export function Overlay({
         </Suspense>
       )}
       <VendingPanel coins={coins} onSpend={onSpend} />
+      <PouchPanel />
+      {room === "city" && <GasMartPanel />}
+      {room === "green-haze" && (
+        <WeedShopPanel shop="dispensary" title="Dispensary" />
+      )}
       <Suspense fallback={null}>
         {room === "vinyl-vault" && (
           <RecordsPanel coins={coins} records={records} onBuy={onBuyRecord} />

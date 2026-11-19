@@ -95,6 +95,7 @@ import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
 import { floristDesk } from "./rooms/florist/session.ts";
 import { gardenDesk } from "./rooms/garden/gardenSession.ts";
+import { pouchDesk } from "./inventory/pouchDesk.ts";
 import { World } from "./world/World.tsx";
 
 const FADE_MS = 300;
@@ -340,6 +341,30 @@ export function App() {
       gardenDesk.set({
         commit: (next) =>
           setSave((s) => ({ ...s, garden: next.garden, coins: next.coins })),
+      }),
+    [],
+  );
+  // The weed pouch, the gift day and coins: the pouch panels, shops and the
+  // lounger read them from pouchDesk and write back through `commit`
+  useEffect(
+    () =>
+      pouchDesk.set({
+        inventory: save.inventory,
+        giftDay: save.giftDay,
+        coins: save.coins,
+      }),
+    [save.inventory, save.giftDay, save.coins],
+  );
+  useEffect(
+    () =>
+      pouchDesk.set({
+        commit: (next) =>
+          setSave((s) => ({
+            ...s,
+            inventory: next.inventory,
+            giftDay: next.giftDay,
+            coins: next.coins,
+          })),
       }),
     [],
   );

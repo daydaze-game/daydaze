@@ -386,6 +386,7 @@ hdyeah
 headspin
 heelflip
 heerden
+heistend
 hemi
 herre
 heyo
@@ -831,6 +832,7 @@ sampaguita
 sangiovese
 santacruzan
 sarangbang
+sarif
 sariwa
 savva
 scand
