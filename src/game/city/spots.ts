@@ -63,11 +63,11 @@ function clearSpot(base: Vec2, yaw: number): Vec2 {
   for (const f of FWD_NUDGES) {
     for (const s of SIDE_NUDGES) {
       if (f === 0 && s === 0) continue;
-      const cand: Vec2 = [
+      const pos: Vec2 = [
         base[0] + right[0] * s + fwd[0] * f,
         base[1] + right[1] * s + fwd[1] * f,
       ];
-      if (isClear(cand, yaw)) return cand;
+      if (isClear(pos, yaw)) return pos;
     }
   }
   return base;
