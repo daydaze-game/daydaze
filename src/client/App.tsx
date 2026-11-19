@@ -275,6 +275,8 @@ export function App() {
     setSave((s) => ({ ...s, settings: { ...s.settings, muted } }));
   const setEffects = (effects: Intensity) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, effects } }));
+  const setHighAudio = (highAudio: boolean) =>
+    setSave((s) => ({ ...s, settings: { ...s.settings, highAudio } }));
   // signed in, every change goes up to the account a few seconds later
   useCloudSave(save, setSave);
   // the strict chat filter: set in the Friends panel, read by the chat
@@ -503,6 +505,7 @@ export function App() {
           dance={dance}
           holds={holds}
           effects={save.settings.effects}
+          highAudio={save.settings.highAudio}
           // walking ends a dance, so the Dance mood drops back to idle
           onMove={() => setMood((m) => (m === "dance" ? "idle" : m))}
           view={view}
@@ -599,6 +602,8 @@ export function App() {
           setHolds={setHolds}
           effects={save.settings.effects}
           setEffects={setEffects}
+          highAudio={save.settings.highAudio}
+          setHighAudio={setHighAudio}
           view={view}
           setView={setView}
           panelOpen={save.settings.panelOpen}

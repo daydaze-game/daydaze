@@ -611,6 +611,8 @@ export type WorldProps = {
   holds: Holds;
   /** The local player's drunk setting; off, low or full. */
   effects: Intensity;
+  /** Whether the high audio lift in music rooms is enabled. */
+  highAudio?: boolean;
   /** Called when the player starts walking. */
   onMove: () => void;
   view: View;
@@ -648,6 +650,7 @@ export function World({
   dance,
   holds,
   effects,
+  highAudio = true,
   onMove,
   view,
   tag,
@@ -730,7 +733,7 @@ export function World({
             sitHold={holds.sit}
           />
         </Suspense>
-        <DrunkState intensity={effects} />
+        <DrunkState intensity={effects} room={room} highAudio={highAudio} />
         <Dancing mood={mood} move={dance} />
         <Wearing style={swimFor(def, swim)?.style ?? "outfit"} />
         {/* the key light, shared so a doll looks the same in every room */}

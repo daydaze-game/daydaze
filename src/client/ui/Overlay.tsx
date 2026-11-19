@@ -378,6 +378,8 @@ function Mirror({
   setBody,
   effects,
   setEffects,
+  highAudio = true,
+  setHighAudio,
 }: {
   tab: MirrorTab;
   setTab: (tab: MirrorTab) => void;
@@ -390,6 +392,8 @@ function Mirror({
   setBody: (body: BodyShape) => void;
   effects: Intensity;
   setEffects: (effects: Intensity) => void;
+  highAudio?: boolean;
+  setHighAudio?: ((highAudio: boolean) => void) | undefined;
 }) {
   const face = faceOf(look);
   const makeup = makeupOf(look);
@@ -784,6 +788,20 @@ function Mirror({
             />
           </section>
         )}
+        {allows(activeTier(), "drugs") && setHighAudio && (
+          <section>
+            <h3>High audio bloom</h3>
+            <Chips
+              label="High audio bloom"
+              options={[
+                { id: "on", label: "On" },
+                { id: "off", label: "Off" },
+              ]}
+              value={highAudio ? "on" : "off"}
+              onPick={(v) => setHighAudio(v === "on")}
+            />
+          </section>
+        )}
       </>
     ),
   };
@@ -849,6 +867,8 @@ export function Overlay({
   setHolds,
   effects,
   setEffects,
+  highAudio = true,
+  setHighAudio,
   view,
   setView,
   panelOpen,
@@ -890,6 +910,8 @@ export function Overlay({
   setHolds: (holds: Holds) => void;
   effects: Intensity;
   setEffects: (effects: Intensity) => void;
+  highAudio?: boolean;
+  setHighAudio?: ((highAudio: boolean) => void) | undefined;
   view: View;
   setView: (view: View) => void;
   panelOpen: boolean;
@@ -983,6 +1005,8 @@ export function Overlay({
           setBody={setBody}
           effects={effects}
           setEffects={setEffects}
+          highAudio={highAudio}
+          setHighAudio={setHighAudio}
         />
       </Dressing>
 
