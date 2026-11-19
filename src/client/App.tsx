@@ -263,9 +263,10 @@ export function App() {
   const [chat, setChat] = useState<{ text: string; at: number } | null>(null);
   useEffect(() => {
     if (!chat) return;
-    const id = window.setTimeout(() => setChat(null), BUBBLE_MS);
+    const bubbleMs = flags.still || flags.debug ? 60_000 : BUBBLE_MS;
+    const id = window.setTimeout(() => setChat(null), bubbleMs);
     return () => window.clearTimeout(id);
-  }, [chat]);
+  }, [chat, flags.still, flags.debug]);
 
   const setLook = (look: Look) => setSave((s) => ({ ...s, look }));
   const setSwim = (swim: SwimLook) => setSave((s) => ({ ...s, swim }));
@@ -515,7 +516,7 @@ export function App() {
           onPark={setCar}
           pet={save.pet}
         />
-        <div className="tag" ref={tag}>
+        <div className="tag" ref={tag} data-chat={chat?.text}>
           {chat && (
             <p className="bubble" role="status">
               {chat.text}
