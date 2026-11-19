@@ -147,6 +147,11 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
+    Other PRs run only the browser tests their changes reach: main's full
+    runs record which files each test loads (`tests/test-map.ts`), and
+    `scripts/select-tests.ts` picks the tests from that map, falling back to
+    the full suite for anything it can't vouch for. main always runs the full
+    suite. A new spec file must call `recordTestMap(test)` like the others.
 - Merge gate: nobody pushes to `main`. Branch protection lets a PR merge only
   when it is up to date with `main` and green on the fast checks (`setup`,
   `lint`, `test`, `build`), so two PRs that are green alone cannot merge into
