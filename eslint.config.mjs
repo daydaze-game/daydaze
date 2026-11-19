@@ -48,6 +48,9 @@ export default defineConfig(
       ".impeccable/",
       "skills/",
       "tmp/",
+      // git-ignored local downloads and workspaces (CI never sees them)
+      "local-assets/",
+      "recordings/",
       "art/",
       // early exploration builds, kept for reference
       "prototypes/",
