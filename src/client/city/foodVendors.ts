@@ -7,14 +7,22 @@ import {
   canOrderFood,
   type FoodKind,
 } from "../../game/city/vendors.ts";
-export const foodVendors = createStore({
-  near: null as FoodKind | null,
+export const foodVendors = createStore<{
+  near: FoodKind | null;
+  vendors: number;
+  stop: number;
+}>({
+  near: null,
   vendors: 0,
   stop: -1,
 });
-export const foodMotion = {
-  player: null as Player | null,
-  origin: null as number | null,
+export const foodMotion: {
+  player: Player | null;
+  origin: number | null;
+  pose: { x: number; z: number; yaw: number; stop: number; next: number };
+} = {
+  player: null,
+  origin: null,
   pose: { x: 0, z: 0, yaw: 0, stop: -1, next: 0 },
 };
 export function walkingForFood(): boolean {
