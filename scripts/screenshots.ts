@@ -24,6 +24,7 @@ import {
   type Furniture,
 } from "../src/game/home/decor.ts";
 import { expandShots, shard } from "./shot-plan.ts";
+import { waitForFrames } from "./wait-for-frames.ts";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:5195";
 /** Waits for the street furniture models and street pieces (CityFurniture sets data-furniture, StreetPieces data-street). */
@@ -214,6 +215,10 @@ function homeShot(name: string, furniture: readonly Furniture[], cam?: string) {
  * judged by eye.
  */
 const FRAMES = 48;
+/** Frames an actionStrip waits for before it may stop (fewer if it keeps less). */
+const MIN_STRIP_FRAMES = 8;
+/** The longest an actionStrip records while it waits for those frames. */
+const MAX_STRIP_SECONDS = 180;
 function walkStrip(
   name: string,
   gait: string,
@@ -348,60 +353,26 @@ function actionStrip(
       await setup(page);
       const cdp = await page.context().newCDPSession(page);
       const frames: Buffer[] = [];
-      // DIAGNOSTIC (#75): every screencast event, not just the kept ones
-      let events = 0;
-      const t0 = Date.now();
       cdp.on("Page.screencastFrame", (f) => {
-        events++;
-        console.log(
-          `DIAG ${name} screencast event ${events} at ${Date.now() - t0} ms`,
-        );
         if (frames.length < keep) frames.push(Buffer.from(f.data, "base64"));
         void cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId });
       });
       await cdp.send("Page.startScreencast", { format: "png" });
-      console.log(`DIAG ${name} screencast started at ${Date.now() - t0} ms`);
       await go(page);
-      console.log(`DIAG ${name} go() done at ${Date.now() - t0} ms`);
-      // DIAGNOSTIC (#75): a rAF tick counter, to read next to the renderer's
-      // own frame count (data-frames stops at 10, so it says nothing here)
-      await page.evaluate(() => {
-        let ticks = 0;
-        const tick = () => {
-          Object.assign(window, { __rafTicks: ++ticks });
-          requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+      // at least `seconds`, then until the strip has its frames: a slow room
+      // (green-haze on the high tier renders about 0.3 frames a second on CI)
+      // sends its first screencast frame after some 25 s, past a fixed window
+      const waited = await waitForFrames({
+        have: () => frames.length,
+        want: Math.min(keep, MIN_STRIP_FRAMES),
+        minMs: seconds * 1000,
+        maxMs: MAX_STRIP_SECONDS * 1000,
+        clock: { now: Date.now, sleep: (ms) => page.waitForTimeout(ms) },
       });
-      for (let n = 0; n < seconds; n++) {
-        await page.waitForTimeout(1000);
-        const t1 = Date.now();
-        const probe = await page
-          .evaluate(() => {
-            const dd: unknown = Reflect.get(window, "__dd");
-            const gl: unknown =
-              typeof dd === "object" && dd !== null
-                ? Reflect.get(dd, "gl")
-                : undefined;
-            const info: unknown =
-              typeof gl === "object" && gl !== null
-                ? Reflect.get(gl, "info")
-                : undefined;
-            const render: unknown =
-              typeof info === "object" && info !== null
-                ? Reflect.get(info, "render")
-                : undefined;
-            const frame: unknown =
-              typeof render === "object" && render !== null
-                ? Reflect.get(render, "frame")
-                : undefined;
-            return `render ${String(frame)}, raf ${String(Reflect.get(window, "__rafTicks"))}, ${document.visibilityState}`;
-          })
-          .catch((e: unknown) => `err ${String(e).slice(0, 60)}`);
-        console.log(
-          `DIAG ${name} +${n + 1}s: events ${events}, ${probe}, read ${Date.now() - t1} ms`,
+      if (!waited.reached)
+        console.warn(
+          `${name}: only ${frames.length} screencast frames in ${waited.elapsedMs / 1000} s`,
         );
-      }
       await cdp.send("Page.stopScreencast");
       frames.forEach((png, n) =>
         writeFileSync(
@@ -895,38 +866,30 @@ const SHOTS: {
       const later = page.getByRole("button", { name: "Debug: a minute later" });
       for (let i = 0; i < 5; i++) await later.click();
     },
-    // a minute on in the peak: the click repaints the page, which starts the
-    // screencast frames
+    // a minute on in the peak
     async (page) => {
       await page.getByRole("button", { name: "Debug: a minute later" }).click();
     },
-    60,
+    12,
     8,
   ),
   // molly at its peak: neon glow, faint tracers, a wide smile
-  {
-    ...actionStrip(
-      "molly-peak",
-      "quality=high&room=green-haze&adult=1&debug=1",
-      async (page) => {
-        await page
-          .getByRole("button", { name: "Pop a molly" })
-          .click({ timeout: 150_000 });
-        const later = page.getByRole("button", {
-          name: "Debug: a minute later",
-        });
-        for (let i = 0; i < 4; i++) await later.click();
-      },
-      async (page) => {
-        await page
-          .getByRole("button", { name: "Debug: a minute later" })
-          .click();
-      },
-      12,
-      8,
-    ),
-    viewport: { width: 640, height: 400 },
-  },
+  actionStrip(
+    "molly-peak",
+    "quality=high&room=green-haze&adult=1&debug=1",
+    async (page) => {
+      await page
+        .getByRole("button", { name: "Pop a molly" })
+        .click({ timeout: 150_000 });
+      const later = page.getByRole("button", { name: "Debug: a minute later" });
+      for (let i = 0; i < 4; i++) await later.click();
+    },
+    async (page) => {
+      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+    },
+    12,
+    8,
+  ),
   // cocaine at its peak (2 min on, before the 183 s it ends): no screen
   // change, just her wide eyes
   actionStrip(
