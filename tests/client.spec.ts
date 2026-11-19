@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { DEALER_AT } from "../src/game/city/dealer.ts";
 import { GAS_STATIONS, counterOf } from "../src/game/city/gasStations.ts";
 import { BUS_STOPS } from "../src/game/city/transit.ts";
 import { SONGS } from "../src/game/karaokeSongs.ts";
@@ -684,13 +685,10 @@ test("Green Haze (18+, dev flag): a joint and shroom tea land after their onset 
   expect(errors).toEqual([]);
 });
 
-/** Puts her at the first gas station's counter (dev build: `__dd`). */
-async function walkToGasCounter(page: Page) {
-  const station = GAS_STATIONS[0];
-  if (!station) throw new Error("no gas station");
-  const [x, z] = counterOf(station);
-  // the dev probe (and `__dd`) mounts a moment after the first frames; place
-  // her the way the dev teleport does, so the walker keeps the spot
+/** Puts her at a point in the city (dev build: `__dd`), the way the dev
+ * teleport does, so the walker keeps the spot. */
+async function placeInCity(page: Page, [x, z]: readonly [number, number]) {
+  // the dev probe (and `__dd`) mounts a moment after the first frames
   await page.waitForFunction(() => Reflect.get(window, "__dd") !== undefined);
   await page.evaluate(
     ([px, pz]) => {
@@ -718,10 +716,18 @@ async function walkToGasCounter(page: Page) {
     },
     [x, z] as const,
   );
-  const view = canvasOf(page);
   await expect
-    .poll(async () => Number(await view.getAttribute("data-player-x")))
+    .poll(async () =>
+      Number(await canvasOf(page).getAttribute("data-player-x")),
+    )
     .toBeCloseTo(x, 0);
+}
+
+/** Puts her at the first gas station's counter. */
+async function walkToGasCounter(page: Page) {
+  const station = GAS_STATIONS[0];
+  if (!station) throw new Error("no gas station");
+  await placeInCity(page, counterOf(station));
   return station.name;
 }
 
@@ -794,6 +800,42 @@ test("at 13+ a gas-station counter is closed and a pouch in the save is hidden, 
     JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
   );
   expect(saved).toMatchObject({ inventory: { "joint-sativa": 2 } });
+  expect(errors).toEqual([]);
+});
+
+test("the street dealer sells to an 18+ player into the pouch", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city&adult=1`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  await expect(canvas).toHaveAttribute("data-player-x", /-?\d/);
+  await placeInCity(page, DEALER_AT);
+  const shop = page.getByRole("region", { name: "Street dealer" });
+  // a few strains a day: some of the day's four, whichever they are
+  await expect(shop.getByRole("button", { name: /^Buy / })).toHaveCount(4);
+  await shop.getByRole("button", { name: /^Buy / }).first().click();
+  await expect(page.getByRole("button", { name: "Pouch (1)" })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("at 13+ the street dealer's corner has no shop", async ({ page }) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  await expect(canvas).toHaveAttribute("data-player-x", /-?\d/);
+  await placeInCity(page, DEALER_AT);
+  await expect(page.getByRole("region", { name: "Street dealer" })).toHaveCount(
+    0,
+  );
   expect(errors).toEqual([]);
 });
 

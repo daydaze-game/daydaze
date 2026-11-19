@@ -1,14 +1,15 @@
 // A weed shop's menu: a button per item with its price, paid from the saved
-// wallet into the pouch. Used by the gas-station counter (hemp) and the Green
-// Haze dispensary (every other strain). 18+ only.
+// wallet into the pouch. Used by the gas-station counter (hemp), the Green
+// Haze dispensary (every other strain) and the street dealer (a few a day). 18+ only.
 
 import type { JSX } from "react";
 import { activeTier, allows } from "../../game/age.ts";
+import { dayOf } from "../../game/challenges.ts";
 import {
   itemOf,
   MAX_PER_ITEM,
   MAX_TOTAL,
-  MENUS,
+  menuFor,
   totalOf,
   type Shop,
 } from "../../game/inventory.ts";
@@ -31,7 +32,7 @@ export function WeedShopPanel({
       </p>
       {full && <p role="status">Your pouch is full</p>}
       <div className="game-row">
-        {MENUS[shop].map(({ id, price }) => (
+        {menuFor(shop, dayOf(Date.now())).map(({ id, price }) => (
           <button
             key={id}
             type="button"

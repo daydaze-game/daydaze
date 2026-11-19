@@ -88,13 +88,19 @@ export function removeItem(
 export const usable = (tier: ContentTier, inv: Readonly<Inventory>): boolean =>
   allows(tier, "drugs") && totalOf(inv) > 0;
 
-export type Shop = "gas" | "dispensary";
+export type Shop = "gas" | "dispensary" | "street";
 
 const GAS_PRICE: Record<WeedDose, number> = { joint: 5, edible: 5, vape: 8 };
 const SHOP_PRICE: Record<WeedDose, number> = {
   joint: 10,
   edible: 12,
   vape: 15,
+};
+// the street sits between the two (no hemp: that is the counter's)
+const STREET_PRICE: Record<WeedDose, number> = {
+  joint: 7,
+  edible: 8,
+  vape: 11,
 };
 
 /** What each shop sells, in coins (a snack is 3). Hemp is the weak, cheap
@@ -108,17 +114,43 @@ export const MENUS: Record<Shop, readonly { id: ItemId; price: number }[]> = {
     id: i.id,
     price: SHOP_PRICE[i.dose],
   })),
+  // everything she may carry; what she has today is `dealerStock`
+  street: ITEMS.filter((i) => i.strain !== "hemp").map((i) => ({
+    id: i.id,
+    price: STREET_PRICE[i.dose],
+  })),
 };
 
-/** The wallet and pouch after buying `id` at `shop`, or null when it isn't
- * on the menu, is too dear, or the pouch is full. */
+/** The street dealer's stock on `day`: four items, a different four each day
+ * (a window of the street menu that slides by four, so every item turns up
+ * within nine days). */
+export function dealerStock(day: number): { id: ItemId; price: number }[] {
+  const menu = MENUS.street;
+  const start = (((day * 4) % menu.length) + menu.length) % menu.length;
+  return [0, 1, 2, 3].flatMap((k) => {
+    const entry = menu[(start + k) % menu.length];
+    return entry ? [entry] : [];
+  });
+}
+
+/** What `shop` sells on `day`: the street's changes daily (no day, no stock),
+ * the others' menus are fixed. */
+export const menuFor = (
+  shop: Shop,
+  day?: number,
+): readonly { id: ItemId; price: number }[] =>
+  shop === "street" ? (day === undefined ? [] : dealerStock(day)) : MENUS[shop];
+
+/** The wallet and pouch after buying `id` at `shop` (on `day`, for the street),
+ * or null when it isn't on the menu, is too dear, or the pouch is full. */
 export function buyItem(
   shop: Shop,
   coins: number,
   inv: Readonly<Inventory>,
   id: ItemId,
+  day?: number,
 ): { coins: number; inventory: Inventory } | null {
-  const entry = MENUS[shop].find((m) => m.id === id);
+  const entry = menuFor(shop, day).find((m) => m.id === id);
   if (!entry) return null;
   const left = spend(coins, entry.price);
   const inventory = addItem(inv, id);
