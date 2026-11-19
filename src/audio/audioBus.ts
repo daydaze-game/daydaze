@@ -6,6 +6,8 @@
  * a single global mute/volume control can reach every audio path.
  */
 
+import { createAcidFilter, type AcidFilter } from "./acidFilter.ts";
+
 export interface AudioBus {
   /** Underlying AudioContext, or null if Web Audio is unavailable. */
   getContext(): AudioContext | null;
@@ -13,6 +15,9 @@ export interface AudioBus {
   getMusicDestination(): AudioNode | null;
   /** Node producers should connect into for sound effects (instruments, UI, minigames). */
   getSfxDestination(): AudioNode | null;
+
+  /** Tints everything with the acid sound (tinny, echoing) at the acid meter's level; 0 is clean. */
+  setAcidLevel(level: number): void;
 
   setMasterVolume(vol: number): void;
   getMasterVolume(): number;
@@ -47,6 +52,7 @@ function getAudioContextClass(): typeof AudioContext | undefined {
 class AudioBusImpl implements AudioBus {
   private ctx: AudioContext | null;
   private master: GainNode | null = null;
+  private acid: AcidFilter | null = null;
   private musicGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
   private masterVolume = 1;
@@ -64,8 +70,16 @@ class AudioBusImpl implements AudioBus {
       this.sfxGain = ctx.createGain();
       this.musicGain.connect(this.master);
       this.sfxGain.connect(this.master);
-      this.master.connect(ctx.destination);
       this.applyGains();
+      try {
+        // master → acid filter → speakers (the filter is clean at level 0)
+        this.acid = createAcidFilter(ctx);
+        this.master.connect(this.acid.input);
+        this.acid.output.connect(ctx.destination);
+      } catch {
+        this.acid = null;
+        this.master.connect(ctx.destination);
+      }
     } catch {
       this.ctx = null;
       this.master = null;
@@ -84,6 +98,14 @@ class AudioBusImpl implements AudioBus {
 
   getSfxDestination(): AudioNode | null {
     return this.disposed ? null : this.sfxGain;
+  }
+
+  setAcidLevel(level: number): void {
+    try {
+      this.acid?.setLevel(level);
+    } catch {
+      /* ignore: node may be disconnected in exotic test doubles */
+    }
   }
 
   setMasterVolume(vol: number): void {
@@ -152,10 +174,12 @@ class AudioBusImpl implements AudioBus {
       this.musicGain?.disconnect();
       this.sfxGain?.disconnect();
       this.master?.disconnect();
+      this.acid?.output.disconnect();
     } catch {
       /* ignore */
     }
     this.master = null;
+    this.acid = null;
     this.musicGain = null;
     this.sfxGain = null;
     this.disposed = true;

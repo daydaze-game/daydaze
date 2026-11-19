@@ -8,8 +8,8 @@
 // shape a query. The language is in scripts/shot-plan.ts. An unknown name
 // or a bad token stops the run before any browser starts. With SHOT_STATS
 // set, each shot appends its frames, draw calls, triangles and seconds as a
-// JSON line to that file (the gallery's numbers).
-import { execFileSync } from "node:child_process";
+// JSON line to that file (the gallery's numbers). The hair-* and doll-* shots
+// are the dev lineup page's (lineupShot below) and take the same tokens.
 import { appendFileSync, writeFileSync } from "node:fs";
 import { chromium, expect, type Page } from "@playwright/test";
 import { DEFAULT_LOOK } from "../src/game/look.ts";
@@ -762,6 +762,48 @@ function jeepneyRoll(name: string): (typeof SHOTS)[number] {
 /** The pair standing by the city's spawn, for the sidewalk conversation shots. */
 const CHAT = CHAT_GROUPS[0] ?? { at: [22, 10.4] as const };
 
+/** The lineup page's hair colors, a spread from near-black to dyed. */
+const HAIR_COLORS = "1b1014,4a2a1c,b77a3e,f1d78f,ff4fb3,7b4dff";
+const MEN_COLORS = "1b1014,4a2a1c,b77a3e,1b1014,4a2a1c,c0c0c8";
+/** A camera from behind the dolls, for the back of the hair. */
+const BEHIND = "cam=0,1.52,-2.4";
+/**
+ * A shot of the dev lineup page (src/client/avatar/lineup.tsx) at 1100 x 650.
+ * `scene` is the page's `?shot=` (hairs shows a row of heads, one style and
+ * color per doll); `query` adds its other params (styles, colors, men, cam).
+ */
+function lineupShot(
+  name: string,
+  query: string,
+  scene = "hairs",
+): (typeof SHOTS)[number] {
+  return {
+    name,
+    query: [`shot=${scene}`, query].filter(Boolean).join("&"),
+    lineup: true,
+    viewport: { width: 1100, height: 650 },
+  };
+}
+
+/** The lineup page's `data-stats` JSON: `{ dolls, scene: { calls, tris } }`. */
+function sceneStats(raw: string): { calls: number; tris: number } {
+  const stats: unknown = raw ? JSON.parse(raw) : null;
+  const scene =
+    typeof stats === "object" && stats !== null && "scene" in stats
+      ? stats.scene
+      : null;
+  if (
+    typeof scene === "object" &&
+    scene !== null &&
+    "calls" in scene &&
+    typeof scene.calls === "number" &&
+    "tris" in scene &&
+    typeof scene.tris === "number"
+  )
+    return { calls: scene.calls, tris: scene.tris };
+  return { calls: 0, tris: 0 };
+}
+
 const SHOTS: {
   name: string;
   query: string;
@@ -769,6 +811,9 @@ const SHOTS: {
   /** Live shots keep the frame loop running, so a ride can move between frames. */
   live?: boolean;
   touch?: boolean;
+  /** A shot of the dev lineup page (lineup.html), not the game: its doll rows
+   * report readiness and renderer numbers on <body>, not a canvas. */
+  lineup?: boolean;
   /** Drives the scene before the capture, e.g. to start a race. */
   act?: (page: Page) => Promise<void>;
 }[] = [
@@ -2591,20 +2636,61 @@ const SHOTS: {
       ).toBeVisible();
     },
   },
+  // hair style rows (women, then men), from the front and from behind
+  lineupShot(
+    "hair-women-1",
+    `styles=rapunzel,long-waves,fishtail,layered-long,sleek-side,high-pony&colors=${HAIR_COLORS}`,
+  ),
+  lineupShot(
+    "hair-women-1-back",
+    `styles=rapunzel,long-waves,fishtail,layered-long,sleek-side,high-pony&colors=${HAIR_COLORS}&${BEHIND}`,
+  ),
+  lineupShot(
+    "hair-women-2",
+    "styles=twin-tails,lob,blunt-bob,sidebob,side-fringe,messy-bun&colors=1b1014,ff8a3d,4a2a1c,3a6bff,c0c0c8,7ee8a2",
+  ),
+  lineupShot(
+    "hair-men-1",
+    `men=1&styles=quiff,side-part,tousled,messy-curls,crew,slick-back&colors=${MEN_COLORS}`,
+  ),
+  lineupShot(
+    "hair-men-1-back",
+    `men=1&styles=quiff,side-part,tousled,messy-curls,crew,slick-back&colors=${MEN_COLORS}&${BEHIND}`,
+  ),
+  lineupShot(
+    "hair-men-2",
+    "men=1&styles=mop,pompadour,mohawk,spiky-crop,crew,quiff&colors=1b1014,3a6bff,ff4fb3,4a2a1c,b77a3e,7b4dff",
+  ),
+  // close-ups of the speckle cases: men's and women's dark hair from behind,
+  // and the Quiff's forehead in several colors
+  lineupShot(
+    "hair-close-men-back",
+    "men=1&styles=crew,side-part,slick-back,messy-curls&colors=1b1014,4a2a1c,c0c0c8,1b1014&cam=0,1.62,-1.15",
+  ),
+  lineupShot(
+    "hair-close-women-back",
+    "styles=rapunzel,long-waves,layered-long&colors=1b1014,1b1014,4a2a1c&cam=0,1.5,-1.4",
+  ),
+  lineupShot(
+    "hair-close-quiff",
+    "men=1&styles=quiff,quiff,quiff,quiff&colors=1b1014,4a2a1c,b77a3e,c0c0c8&cam=0,1.62,1.3",
+  ),
+  // a man in the suit, up close and in motion: skin must not show through
+  lineupShot("doll-suit-chest", "men=1&styles=crew&cam=0,1.3,1.8"),
+  lineupShot("doll-suit-men", "cam=0,1.1,4.2", "men"),
+  lineupShot("doll-suit-pose", "men=1&outfit=suit", "pose"),
+  lineupShot("doll-suit-sit", "men=1&outfit=suit", "sit"),
+  lineupShot("doll-suit-dance", "men=1&outfit=suit", "dance"),
+  // women walking in the trouser outfits, side on and from behind the knee
+  lineupShot("doll-suit-track-side", "cam=0.6,0.6,3.2", "trackwalk"),
+  lineupShot("doll-suit-track-back", "cam=-2.2,0.6,2.2", "trackwalk"),
+  // the face shot's doll up close
+  lineupShot("doll-face", "", "face"),
+  lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
 ];
 
-// hair-<name>, doll-suit-<name> and doll-face shots are the lineup page's
-// (scripts/hair-shots.ts), which writes docs/screenshots/<prefix>-<name>.png
-// like any other shot
-const prefixOf = (n: string) =>
-  n.startsWith("hair-")
-    ? "hair-"
-    : n.startsWith("doll-suit-") || n === "doll-face"
-      ? "doll-"
-      : "";
-
 const registry = new Set(SHOTS.map((s) => s.name));
-const isRegistered = (n: string) => registry.has(n) || prefixOf(n) !== "";
+const isRegistered = (n: string) => registry.has(n);
 
 if (process.argv[2] === "--matrix") {
   // the workflow's plan: `--matrix "<tokens>" <shards>` prints
@@ -2620,19 +2706,6 @@ if (process.argv[2] === "--matrix") {
 } else {
   const planned = expandShots(process.argv.slice(2), isRegistered);
   const only = planned.map((p) => p.name);
-  const hairShots = only.filter((n) => prefixOf(n));
-  if (hairShots.length) {
-    execFileSync(
-      process.execPath,
-      [
-        "--experimental-strip-types",
-        "scripts/hair-shots.ts",
-        ...hairShots.map((n) => n.slice(prefixOf(n).length)),
-      ],
-      { stdio: "inherit" },
-    );
-    if (hairShots.length === only.length) process.exit(0);
-  }
   // registry shots in SHOTS order (all of them when no tokens), then the queries
   const run: (typeof SHOTS)[number][] = [
     ...SHOTS.filter((s) => !only.length || only.includes(s.name)),
@@ -2673,45 +2746,64 @@ if (process.argv[2] === "--matrix") {
     const still = shot.live ? "" : "&still=1";
     // the low tier unless the shot picks its own (quality=high)
     const tier = shot.query.includes("quality=") ? "" : "quality=low";
-    await page.goto(`${BASE}/?${tier}${still}&${shot.query}`, {
-      timeout: 300_000,
-    });
+    // the lineup page renders its still frames on its own: no tier flag
+    const url = shot.lineup
+      ? `${BASE}/src/client/avatar/lineup.html?human=1&still=1&${shot.query}`
+      : `${BASE}/?${tier}${still}&${shot.query}`;
+    await page.goto(url, { timeout: 300_000 });
     if (shot.act) await shot.act(page);
     const canvas = page.getByRole("img", { name: "3D room view" });
-    await expect(canvas).toHaveAttribute("data-frames", /\d+/, {
-      timeout: 600_000,
-    });
-    if (await page.locator("canvas[data-avatar]").count()) {
-      await expect(page.locator("canvas")).toHaveAttribute(
-        "data-avatar",
-        "ready",
-        { timeout: 300_000 },
-      );
-    }
-    // wait until the demand loop has rendered and then gone quiet for 8 s
     let last = "";
-    let quietSince = Date.now();
-    while (Date.now() - quietSince < 8000) {
-      await page.waitForTimeout(1000);
-      const frames =
-        (await page
-          .locator("canvas")
-          .getAttribute("data-frames")
-          .catch(() => null)) ?? "";
-      if (frames !== last) {
-        last = frames;
-        quietSince = Date.now();
+    let calls: number;
+    let triangles: number;
+    if (shot.lineup) {
+      // models load lazily; the page flags itself once every doll is drawn
+      await page.waitForFunction(
+        () => document.body.dataset.ready === "true",
+        null,
+        { timeout: 600_000 },
+      );
+      last = await page.evaluate(() => document.body.dataset.frames ?? "");
+      const scene = sceneStats(
+        await page.evaluate(() => document.body.dataset.stats ?? ""),
+      );
+      calls = scene.calls;
+      triangles = scene.tris;
+    } else {
+      await expect(canvas).toHaveAttribute("data-frames", /\d+/, {
+        timeout: 600_000,
+      });
+      if (await page.locator("canvas[data-avatar]").count()) {
+        await expect(page.locator("canvas")).toHaveAttribute(
+          "data-avatar",
+          "ready",
+          { timeout: 300_000 },
+        );
       }
-      if (Date.now() - started > 600_000) break;
+      // wait until the demand loop has rendered and then gone quiet for 8 s
+      let quietSince = Date.now();
+      while (Date.now() - quietSince < 8000) {
+        await page.waitForTimeout(1000);
+        const frames =
+          (await page
+            .locator("canvas")
+            .getAttribute("data-frames")
+            .catch(() => null)) ?? "";
+        if (frames !== last) {
+          last = frames;
+          quietSince = Date.now();
+        }
+        if (Date.now() - started > 600_000) break;
+      }
+      // renderer stats for the first frames: draw calls and triangles
+      calls = Number(await canvas.getAttribute("data-calls"));
+      triangles = Number(await canvas.getAttribute("data-triangles"));
     }
     // a live frame loop can make the capture wait a long time on SwiftShader
     await page.screenshot({
       path: `docs/screenshots/${shot.name}.png`,
       timeout: 180_000,
     });
-    // renderer stats for the first frames: draw calls and triangles
-    const calls = await canvas.getAttribute("data-calls");
-    const triangles = await canvas.getAttribute("data-triangles");
     const seconds = Math.round((Date.now() - started) / 1000);
     console.log(
       `${shot.name}: ${last} frames, ${calls} draw calls, ${triangles} triangles, ${seconds} s`,
@@ -2720,8 +2812,8 @@ if (process.argv[2] === "--matrix") {
       const stats = {
         name: shot.name,
         frames: Number(last),
-        calls: Number(calls),
-        triangles: Number(triangles),
+        calls,
+        triangles,
         seconds,
       };
       appendFileSync(process.env.SHOT_STATS, `${JSON.stringify(stats)}\n`);
