@@ -482,7 +482,7 @@ const SHOTS = {
     x: (i: number) => (i - 1) * 0.32,
     cam: [0, 1.5, 1.25] as const,
     target: [0, 1.5, 0] as const,
-    fov: 21,
+    fov: 26,
   },
   // every hair style from behind and the side, close enough to judge strands
   hair: {

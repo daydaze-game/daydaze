@@ -642,11 +642,11 @@ function paintLips(
     const fleck = mixRgb(hexRgb(base), [255, 255, 255], 0.7);
     ctx.drawImage(
       onLips(img, (c) => {
-        for (let i = 0; i < 220; i++) {
+        for (let i = 0; i < 260; i++) {
           const x = mx + (rand() - 0.5) * width * 1.1;
           const y = my + (rand() - 0.5) * 0.07;
           c.fillStyle = rgba(rand() < 0.3 ? [255, 255, 255] : fleck, 0.95);
-          c.fillRect(x * SIZE, y * SIZE, 2, 2);
+          c.fillRect(x * SIZE, y * SIZE, 3, 3);
         }
       }),
       0,
