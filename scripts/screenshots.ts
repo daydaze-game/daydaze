@@ -2234,6 +2234,20 @@ const SHOTS: {
     act: furnitureReady,
   },
   {
+    // police chase: squad cars in pursuit of a fleeing sports car through Gallery Row
+    name: "city-chase-run",
+    query:
+      "room=city&view=room&time=22:00&chase=10&at=-30,-250&cam=-15,4,-246,-50,1.5,-256",
+    act: furnitureReady,
+  },
+  {
+    // police chase crash: wrecked sports car smoking and boxed in by squad cars on Main Ave
+    name: "city-chase-crash",
+    query:
+      "room=city&view=room&time=22:00&chase=32&at=55,10&cam=45,3.5,12,65,1.2,-2",
+    act: furnitureReady,
+  },
+  {
     // straight down on the planks: the boards run north-south, across the walk
     name: "city-deck-top",
     query: "room=city&time=15:00&at=-34,286&cam=-34,14,283,-34,0,283.5",

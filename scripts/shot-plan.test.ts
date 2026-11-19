@@ -46,6 +46,11 @@ test("heist and heistend pass through query", () => {
   assert.equal(shot?.query, "room=city&heist=30&heistend=caught&at=-170,9");
 });
 
+test("chase passes through query", () => {
+  const [shot] = expandShots(["room=city&chase=32&at=55,10"], known);
+  assert.equal(shot?.query, "room=city&chase=32&at=55,10");
+});
+
 test("a bad query is rejected before any browser starts", () => {
   for (const bad of [
     "room=city;rm",
