@@ -1936,6 +1936,12 @@ test("the debug panel is hidden without the flag", async ({ page }) => {
 test("a few drinks in, chat stretches its vowels", async ({ page }) => {
   test.setTimeout(330_000);
   await page.goto(`${LOW}&room=back-room&adult=1&debug=1`);
+  await expect(canvasOf(page)).toHaveAttribute("data-frames", "10", {
+    timeout: 150_000,
+  });
+  await expect(page.locator(".tag")).toHaveAttribute("data-shown", "true", {
+    timeout: 150_000,
+  });
   const drink = page.getByRole("button", { name: "Have a drink" });
   await drink.click({ timeout: 150_000 });
   for (let i = 0; i < 4; i++) await drink.click();
@@ -1949,6 +1955,7 @@ test("a few drinks in, chat stretches its vowels", async ({ page }) => {
   const input = page.getByRole("textbox", { name: "Chat message" });
   await input.fill(line);
   await input.press("Enter");
+  await expect(input).toHaveValue("");
   // the same letters in the same order, some of them doubled up
   const said = page.getByRole("status").filter({ hasText: /^a+ e+ i+ o+ u+/ });
   await expect(said).toHaveText(/([aeiou])\1/);
@@ -1996,14 +2003,20 @@ test("chat and the closet work while the room is still loading", async ({
 
 test("chat shows what you said above your doll", async ({ page }) => {
   await page.goto(VELVET);
+  await expect(canvasOf(page)).toHaveAttribute("data-frames", "10", {
+    timeout: 150_000,
+  });
+  await expect(page.locator(".tag")).toHaveAttribute("data-shown", "true", {
+    timeout: 150_000,
+  });
   const input = page.getByRole("textbox", { name: "Chat message" });
   await input.fill("velvet hour anyone?");
   await input.press("Enter");
+  await expect(input).toHaveValue("");
   // the HUD's food toast is a status too (an empty live region): pick by text
   await expect(
     page.getByRole("status").filter({ hasText: "velvet hour anyone?" }),
   ).toBeVisible();
-  await expect(input).toHaveValue("");
 });
 
 test("the overlay passes an axe scan", async ({ page }) => {
