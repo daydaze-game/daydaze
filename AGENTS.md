@@ -50,7 +50,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
+| `npm run lint`                      | ESLint (first regenerates `server/worker-configuration.d.ts`, which the type-aware rules need to resolve Worker types)                          |
 | `ruff check .`                      | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed)                                        |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
@@ -68,7 +68,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
+| `npm run lint`                      | ESLint (first regenerates `server/worker-configuration.d.ts`, which the type-aware rules need to resolve Worker types)                          |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
 | `npm run format` / `format:check`   | Prettier                                                                                                                                        |

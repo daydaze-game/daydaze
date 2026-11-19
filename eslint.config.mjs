@@ -36,7 +36,7 @@ const typeAware = {
  * cleaned up (issue #53). Remove an entry when its directory has no hits.
  */
 const unsafeBacklog = {
-  files: ["server/**/*.ts", "tests/client.spec.ts"],
+  files: ["tests/client.spec.ts"],
   rules: {
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
@@ -89,6 +89,9 @@ export default defineConfig(
   // (server/src/worker is typed through server/tsconfig.json). Loading the
   // TypeScript program makes a run about 10x slower, so ESLINT_NO_TYPES=1
   // (set by the pre-commit hook) skips them; CI always runs them.
+  // server/worker-configuration.d.ts is generated (`npm run types:server`, run
+  // by `npm run lint`); without it every Workers type is unresolved and the
+  // no-unsafe-* rules flag each use.
   ...(process.env.ESLINT_NO_TYPES === "1" ? [] : [typeAware, unsafeBacklog]),
   {
     // node:test's test() and describe() return promises by design.
