@@ -5,7 +5,7 @@ import type { SaveV1 } from "../../game/save.ts";
 import type { Identity } from "../../net/identity.ts";
 import { createStore } from "../rooms/shared/store.ts";
 import { stillReady } from "../../net/client/saveSync.ts";
-import { onlineSession } from "./online.ts";
+import { onlineSession } from "./session.ts";
 
 /** Who you're playing as online: a guest, or a signed-in account. */
 export const account = createStore({
