@@ -169,10 +169,11 @@ function CrowdFigures({
   const counts = useRef<number[]>(
     new Array<number>(LOOKS.length * STRIDES.length).fill(0),
   );
-  useFrame(() => {
+  useFrame(({ clock }) => {
     const t = wallSeconds();
-    if (t - last.current >= REPICK) {
-      last.current = t;
+    // repick on the monotonic frame clock: a device clock set back must not stall it
+    if (clock.elapsedTime - last.current >= REPICK) {
+      last.current = clock.elapsedTime;
       const all = nearestPedestrians(
         [player.pos.x, player.pos.z],
         t,
@@ -239,13 +240,12 @@ export function Pedestrians({ player }: { player: Player }) {
   const last = useRef(-Infinity);
   const dolls = useRef<readonly number[]>([]);
   dolls.current = shown;
-  useFrame(() => {
-    const t = wallSeconds();
-    if (t - last.current < REPICK) return;
-    last.current = t;
+  useFrame(({ clock }) => {
+    if (clock.elapsedTime - last.current < REPICK) return;
+    last.current = clock.elapsedTime;
     const next = nearestPedestrians(
       [player.pos.x, player.pos.z],
-      t,
+      wallSeconds(),
       drawn,
       radius,
       cityHour(),

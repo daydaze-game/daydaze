@@ -45,21 +45,30 @@ test("the avenue and the cross streets never both have green", () => {
   assert.ok(sawEw && sawNs);
 });
 
-test("two clients started at different moments show the same lights at the same wall time", () => {
+test("two clients run a different number of ticks and still show the same lights", () => {
   const a = createTraffic(8, 11);
   const b = createTraffic(8, 11);
   // a has run a while, b dropped frames: their own clocks have drifted apart
   run(a, 30);
   run(b, 7.3);
-  const wall = 1_763_500_000.4;
-  syncClock(a, wall);
-  syncClock(b, wall);
-  for (let i = 0; i < 40 * 50; i++) {
-    stepTraffic(a, DT, null);
-    stepTraffic(b, DT, null);
-    for (const axis of ["ew", "ns"] as const)
-      assert.equal(signalAt(a.time, axis), signalAt(b.time, axis));
-  }
+  // just before the avenue's green ends: one extra tick would flip the light
+  const cycle = SIGNAL_PHASES.reduce((x, y) => x + y, 0);
+  const wall =
+    1_763_500_000 - (1_763_500_000 % cycle) + SIGNAL_PHASES[0] - 0.01;
+  // the client's frame: pin the clock before every tick, so the lights a
+  // tick reads (lightRoom) never depend on how many ticks the frame ran
+  const lastTickTime = (t: Traffic, ticks: number) => {
+    for (let i = 0; i < ticks; i++) {
+      syncClock(t, wall);
+      stepTraffic(t, DT, null);
+    }
+    return t.time;
+  };
+  const ta = lastTickTime(a, 1);
+  const tb = lastTickTime(b, 7);
+  assert.equal(ta, tb);
+  for (const axis of ["ew", "ns"] as const)
+    assert.equal(signalAt(ta, axis), signalAt(tb, axis));
 });
 
 test("cars stay on the asphalt while they drive for two minutes", () => {

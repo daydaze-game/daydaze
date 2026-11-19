@@ -310,16 +310,20 @@ export function Traffic({ player }: { player: Player }) {
     busPosition.current[1] = busMotion.pose.z;
     truckPosition.current[0] = foodMotion.pose.x;
     truckPosition.current[1] = foodMotion.pose.z;
-    syncClock(traffic, wallSeconds());
-    advance(clock.current, dt, () =>
+    // pinned again before every tick: how many ticks a frame runs differs per
+    // client and must not move the lights
+    const wall = wallSeconds();
+    advance(clock.current, dt, () => {
+      syncClock(traffic, wall);
       stepTraffic(
         traffic,
         1 / 50,
         onFoot ? here.current : null,
         busMotion.active ? busPosition.current : null,
         foodMotion.origin !== null ? truckPosition.current : null,
-      ),
-    );
+      );
+    });
+    syncClock(traffic, wall);
     const { shell, trim, chrome, dark, wheels, lamps, signals } = meshes;
     const city = driving.session?.kind === "city" ? driving.session : null;
     bodies.reset();
