@@ -11,6 +11,7 @@ import {
   DRUNK_BODY,
   HANGOVER_SECONDS,
   shownBuzz,
+  stateSituation,
   SWAY_AMOUNT,
   SWAY_HZ,
   buzzLevel,
@@ -151,6 +152,39 @@ test("her body shows the stronger of the drink and a substance", () => {
   assert.equal(bodyFor(m, 0.8, 0), DRUNK_BODY.sloppy);
   m.trip = { level: 0.3, phase: "comeup", strain: "hybrid" };
   assert.equal(bodyFor(m, 0, 1), BODY.trip.comeup);
+});
+
+test("NPCs react once her body shows it: drunk, high or tripping", () => {
+  const level = (bac: number) => bac / BAC_FULL;
+  const m = soberMeters();
+  assert.equal(stateSituation(m, 0), null);
+  assert.equal(
+    stateSituation(m, level(0.04)),
+    null,
+    "tipsy still talks normally",
+  );
+  assert.equal(stateSituation(m, level(0.07)), "state-drunk");
+  m.high = { level: 0.5, phase: "peak", strain: "hybrid" };
+  assert.equal(
+    stateSituation(m, level(0.07)),
+    "state-high",
+    "the stronger wins",
+  );
+  assert.equal(stateSituation(m, level(0.2)), "state-drunk");
+  m.high = { level: 0.1, phase: "comeup", strain: "hybrid" };
+  assert.equal(stateSituation(m, 0), null, "below FELT it doesn't show");
+  m.acid = { level: 0.5, phase: "peak", strain: "hybrid" };
+  assert.equal(stateSituation(m, 0), "state-tripping");
+  m.acid = { level: 0, phase: null, strain: "hybrid" };
+  m.trip = { level: 0.5, phase: "peak", strain: "hybrid" };
+  assert.equal(stateSituation(m, 0), "state-tripping");
+  m.trip = { level: 0, phase: null, strain: "hybrid" };
+  m.cocaine = { level: 0.5, phase: "peak", strain: "hybrid" };
+  assert.equal(
+    stateSituation(m, level(0.07)),
+    "state-drunk",
+    "no cocaine lines yet",
+  );
 });
 
 test("each drunk effect starts at its BAC: a drink or two only warms the colors", () => {
