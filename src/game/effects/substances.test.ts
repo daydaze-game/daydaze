@@ -10,13 +10,11 @@ import {
   BREATHE_AMOUNT,
   DOSES,
   doseLevel,
-  FELT,
   dryMouthHint,
   gameSeconds,
   heavyLid,
   HEAVY_LID_MAX,
   highParams,
-  highSituation,
   isDose,
   isStrain,
   paceBoost,
@@ -513,18 +511,6 @@ test("weed stretches time: faint tracers, fainter than molly's, none under reduc
   assert.equal(highParams(weed, 1, true).tracer, 0);
   assert.equal(highParams(weed, 0, false).tracer, 0);
   assert.equal(highParams(soberMeters(), 1, false).tracer, 0);
-});
-
-test("a felt weed high makes NPCs say state-high; nothing else does", () => {
-  const m = soberMeters();
-  assert.equal(highSituation(m), null);
-  m.high = { level: FELT - 0.01, phase: "comeup", strain: "hybrid" };
-  assert.equal(highSituation(m), null);
-  m.high = { level: FELT, phase: "comeup", strain: "hybrid" };
-  assert.equal(highSituation(m), "state-high");
-  const molly = soberMeters();
-  molly.molly = { level: 1, phase: "peak", strain: "hybrid" };
-  assert.equal(highSituation(molly), null);
 });
 
 test("the dry-mouth hint shows once, as the weed peaks", () => {

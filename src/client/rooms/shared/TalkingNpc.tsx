@@ -3,11 +3,10 @@
 // its role. Remembers its recent lines so taps rarely repeat; greets once per
 // mount.
 
-import { highSituation } from "../../../game/effects/substances.ts";
+import { stateSituation } from "../../../game/effects/buzz.ts";
 import { eventSituation } from "../../../game/events.ts";
 import { PRIDE_CLUBS, prideNightOn } from "../../../game/prideNight.ts";
 import { isRoomId, type RoomId } from "../../../game/rooms.ts";
-import { getMeters } from "../../effects/high.ts";
 import { nightClock, prideClock } from "../../city/eventClocks.ts";
 import { Html } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
@@ -25,6 +24,8 @@ import type {
   DialogueSituation,
 } from "../../../game/dialogue/types.ts";
 import { talkClipFor } from "../../../game/dance/idlePlan.ts";
+import { getBuzz } from "../../effects/drunk.ts";
+import { getMeters } from "../../effects/high.ts";
 import { Doll } from "../../avatar/Doll.tsx";
 import { CrowdFigure } from "./CrowdFigure.tsx";
 
@@ -120,15 +121,10 @@ export function TalkingNpc({
             PRIDE_CLUBS.has(venue) && prideNightOn(prideClock()),
           )
         : null;
-    // else, when she's high, they notice (roles without lines fall back to tapped)
-    const high = highSituation(getMeters());
-    say(
-      event && Math.random() < 0.7
-        ? event
-        : high && Math.random() < 0.5
-          ? high
-          : situation,
-    );
+    // a player who is drunk, high or tripping gets the line for it first; the
+    // meters stay 0 at 13+, so only 18+ players ever hear these
+    const state = stateSituation(getMeters(), getBuzz());
+    say(state ?? (event && Math.random() < 0.7 ? event : situation));
     onTap?.();
   };
   // a standing NPC gestures while her line is up (the social clip pack)

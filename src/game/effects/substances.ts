@@ -6,8 +6,6 @@
 // the doses taken and the clock. Nothing here reaches real players until the
 // age gate ships.
 
-import type { DialogueSituation } from "../dialogue/types.ts";
-
 const clamp01 = (x: number) =>
   Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0;
 
@@ -557,14 +555,6 @@ export function highParams(
     wiggle: calm ? 0 : m,
   };
 }
-
-/** The dialogue situation her own high calls for when she talks to an NPC:
- * `state-high` while weed is felt, else null. Drugs are 18+ only, so at 13+
- * the meters stay at zero and this is always null. */
-export const highSituation = (
-  meters: Readonly<Meters>,
-): DialogueSituation | null =>
-  meters.high.level >= FELT ? "state-high" : null;
 
 /** A harm-reduction toast for the moment weed peaks (`was` is the phase last
  * frame): cotton mouth is real, and water is the fix. Null otherwise. */
