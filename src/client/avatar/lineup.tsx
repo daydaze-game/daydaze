@@ -459,6 +459,31 @@ const SHOTS = {
     target: [0, 1.53, 0] as const,
     fov: 30,
   },
+  // lip liner, styles and finishes: defined ombre in metallic, overlined
+  // glitter, a blurred stain with a 90s brown liner
+  lips: {
+    looks: [
+      {
+        ...LINEUP[0],
+        lips: "lips-rosewood" as const,
+        makeup: "14101400000021",
+      },
+      {
+        ...LINEUP[3],
+        lips: "lips-doll-pink" as const,
+        makeup: "25212000000030",
+      },
+      {
+        ...LINEUP[5],
+        lips: "lips-raspberry" as const,
+        makeup: "00300400000042",
+      },
+    ],
+    x: (i: number) => (i - 1) * 0.32,
+    cam: [0, 1.56, 1.25] as const,
+    target: [0, 1.53, 0] as const,
+    fov: 30,
+  },
   // every hair style from behind and the side, close enough to judge strands
   hair: {
     looks: (
