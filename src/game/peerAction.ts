@@ -8,7 +8,8 @@
 // drinks, how buzzed ("idle~2"); in an emote with someone, which and which
 // side ("pair:hug:f"); riding in someone's car, just "ride"; mid-jump, just
 // "jump" (a few seconds, so others see the hop too); flinching or tripping,
-// "react:hit-left" (for as long as the clip runs). A move id too
+// "react:hit-left" (for as long as the clip runs); under a substance, its
+// letter after the buzz ("dance:salsa~2^a"). A move id too
 // long to fit goes as a plain "dance".
 import { allows, type ContentTier } from "./age.ts";
 import { clipOf } from "./dance/clips.ts";
@@ -17,6 +18,7 @@ import { isDanceMoveId, type DanceMoveId } from "./dance/moves.ts";
 import { RIMS, TINTS, UNDERGLOWS, WRAPS, type CarMods } from "./city/drive.ts";
 import { carById } from "./driving/roster.ts";
 import { MOODS, type Mood } from "./look.ts";
+import { SUBSTANCES, type Substance } from "./effects/substances.ts";
 import { isTogetherId, roleMove, type Pair } from "./dance/together.ts";
 
 const LIMIT = 24;
@@ -49,6 +51,15 @@ const MOD_LISTS = [
 // every combination of mods, as one number written in two base-36 characters
 const COMBOS = MOD_LISTS.reduce((n, [, list]) => n * list.length, 1);
 
+// the one-letter tag for each substance a player can be under ("^a")
+const UNDER_CODE = {
+  high: "h",
+  trip: "t",
+  acid: "a",
+  molly: "m",
+  cocaine: "c",
+} as const satisfies Record<Substance, string>;
+
 export type Doing = {
   mood: Mood;
   dance?: DanceMoveId;
@@ -58,6 +69,8 @@ export type Doing = {
   car?: Driven;
   /** How buzzed, 1 to 3, shown over their head; sober is none. */
   buzz?: Tier;
+  /** The substance felt most: their doll stands the way it does. */
+  under?: Substance;
   /** In an emote with another player. */
   pair?: Pair;
   /** A passenger in someone's car: out of sight, the name tag rides along. */
@@ -85,8 +98,9 @@ export function encodeAction(
   ride = false,
   jump = false,
   react?: ReactionId,
+  under?: Substance,
 ): string {
-  const tag = buzz ? `~${buzz}` : "";
+  const tag = (buzz ? `~${buzz}` : "") + (under ? `^${UNDER_CODE[under]}` : "");
   const body = ride
     ? "ride"
     : jump
@@ -132,10 +146,15 @@ function describe(
 
 /** A received action: an unknown mood is idle, an unknown move no move. */
 export function decodeAction(action: string): Doing {
-  const tier = /~([1-3])$/.exec(action)?.[1];
-  if (!tier) return decodeBody(action);
-  const buzz = tier === "3" ? 3 : tier === "2" ? 2 : 1;
-  return { ...decodeBody(action.slice(0, -2)), buzz };
+  // tags peel off the end: the substance letter, then the buzz tier
+  const code = /\^([a-z])$/.exec(action)?.[1];
+  const under = SUBSTANCES.find((s) => UNDER_CODE[s] === code);
+  const rest = code ? action.slice(0, -2) : action;
+  const tier = /~([1-3])$/.exec(rest)?.[1];
+  const doing = tier ? decodeBody(rest.slice(0, -2)) : decodeBody(rest);
+  if (tier) doing.buzz = tier === "3" ? 3 : tier === "2" ? 2 : 1;
+  if (under) doing.under = under;
+  return doing;
 }
 
 function decodeBody(action: string): Doing {
@@ -209,4 +228,12 @@ export function shownBuzz(
   tier: ContentTier,
 ): Tier | undefined {
   return allows(tier, "alcohol") ? buzz : undefined;
+}
+
+/** The substance to show on a peer: a 13+ client never shows one, whatever the peer sends. */
+export function shownUnder(
+  under: Substance | undefined,
+  tier: ContentTier,
+): Substance | undefined {
+  return allows(tier, "drugs") ? under : undefined;
 }

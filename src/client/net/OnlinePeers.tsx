@@ -21,6 +21,7 @@ import {
   buzzTier,
   decodeAction,
   shownBuzz,
+  shownUnder,
   encodeAction,
   type Doing,
 } from "../../game/peerAction.ts";
@@ -30,6 +31,8 @@ import { carById } from "../../game/driving/roster.ts";
 import type { OnlineSession } from "../../net/client/OnlineSession.ts";
 import { Doll, type WalkState } from "../avatar/Doll.tsx";
 import { getBuzz } from "../effects/drunk.ts";
+import { getMeters } from "../effects/high.ts";
+import { strongest } from "../../game/effects/substances.ts";
 import { CarMesh } from "../rooms/speedway/CarMesh.tsx";
 import { driving } from "../world/driving.ts";
 import { placePlayer, type Player } from "../world/PlayerController.tsx";
@@ -159,6 +162,7 @@ function PeerDoll({
         next.car?.mods?.tint !== doing.car?.mods?.tint ||
         next.car?.mods?.wrap !== doing.car?.mods?.wrap ||
         next.buzz !== doing.buzz ||
+        next.under !== doing.under ||
         next.pair?.emote !== doing.pair?.emote ||
         next.pair?.role !== doing.pair?.role ||
         next.ride !== doing.ride)
@@ -167,6 +171,7 @@ function PeerDoll({
   });
   const car = doing.car ? carById(doing.car.id) : null;
   const buzz = shownBuzz(doing.buzz, activeTier());
+  const under = shownUnder(doing.under, activeTier());
   return (
     <group
       ref={group}
@@ -199,6 +204,7 @@ function PeerDoll({
               ? doing.pair.role
               : undefined
           }
+          under={under}
           walk={walk}
           seed={peer.id.length * 7}
         />
@@ -402,6 +408,7 @@ export function OnlinePeers({
       driving.passenger !== null,
       jumping(Date.now()),
       reactingNow() ?? undefined,
+      shownUnder(strongest(getMeters()) ?? undefined, activeTier()),
     );
     if (
       !session ||
