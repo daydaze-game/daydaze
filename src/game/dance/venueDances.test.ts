@@ -46,12 +46,13 @@ test("every move a style names is a real dance", () => {
     ...Object.values(LINE_DANCES),
   ])
     for (const id of moves) assert.ok(isDanceMoveId(id), id);
+  const lineDances: Record<string, readonly string[] | undefined> = LINE_DANCES;
   for (const style of Object.keys(STYLE_MOVES))
-    assert.ok(LINE_DANCES[style as keyof typeof LINE_DANCES]?.length);
+    assert.ok(lineDances[style]?.length);
 });
 
 test("every night a style names is a night on the calendar", () => {
-  const ids = new Set(CLUB_NIGHTS.map((n) => n.id as string));
+  const ids = new Set<string>(CLUB_NIGHTS.map((n) => n.id));
   for (const id of Object.keys(NIGHT_STYLE)) assert.ok(ids.has(id), id);
 });
 

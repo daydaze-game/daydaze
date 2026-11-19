@@ -3,6 +3,7 @@
 // go to the shared audio bus's SFX output so the global SFX volume reaches
 // them; nothing here throws.
 
+import { getAudioContextClass } from "./audioContextClass.ts";
 import { getSharedAudioBus } from "./audioBus.ts";
 
 /** Every instrument a room can offer. */
@@ -62,14 +63,6 @@ export function noteFrequency(
   if (instrument === "drums") return null;
   if (instrument === "floor_piano") return FLOOR_PIANO_FREQUENCIES[noteIndex];
   return PENTATONIC_FREQUENCIES[noteIndex];
-}
-
-function getAudioContextClass(): typeof AudioContext | undefined {
-  return (
-    window.AudioContext ||
-    (window as unknown as { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext
-  );
 }
 
 let sharedCtx: AudioContext | null = null;

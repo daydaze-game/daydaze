@@ -4,6 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { FOOD_VENUES, venueById, menuItemById } from "./venues.ts";
 import { NEIGHBORHOOD_IDS } from "../dialogue/types.ts";
+import { isOneOf } from "../typed.ts";
 
 // Real brands and chains, matched loosely so spacing and case do not matter.
 const BANNED = [
@@ -91,10 +92,7 @@ test("every menu has at least 3 items with sane prices", () => {
 
 test("every venue sits in a known neighborhood and has an id slug", () => {
   for (const venue of FOOD_VENUES) {
-    assert.ok(
-      (NEIGHBORHOOD_IDS as readonly string[]).includes(venue.neighborhood),
-      venue.name,
-    );
+    assert.ok(isOneOf(NEIGHBORHOOD_IDS, venue.neighborhood), venue.name);
     assert.equal(venue.id, slug(venue.id), venue.id);
   }
 });

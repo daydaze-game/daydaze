@@ -8,6 +8,7 @@ import {
   gameOver,
   newDives,
   total,
+  type Dives,
   type TrickId,
 } from "../../../game/cliffDive.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -22,11 +23,16 @@ const SPLASH = 2.9;
  * 3D view never walks her there). */
 const CLIMB_WAIT = 6;
 
-const OFF = {
-  phase: "off" as Phase,
-  dives: newDives(),
-  trick: "pencil" as TrickId,
+const OFF: {
+  phase: Phase;
+  dives: Dives;
+  trick: TrickId;
   /** performance.now() the phase began. */
+  since: number;
+} = {
+  phase: "off",
+  dives: newDives(),
+  trick: "pencil",
   since: 0,
 };
 

@@ -4,6 +4,7 @@ import {
   aimAt,
   endOver,
   endScore,
+  type End,
   newEnd,
   rest,
   slide,
@@ -15,15 +16,24 @@ import { createStore } from "../shared/store.ts";
 /** A curling end: aim, weight, then the slide (sweep it), six stones. */
 export type Phase = "off" | "aim" | "weight" | "sliding" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  end: End;
+  since: number;
+  aim: number;
+  weight: number;
+  sweeps: number[];
+}
+
+const OFF: State = {
+  phase: "off",
   end: newEnd(),
   /** performance.now() the phase began. */
   since: 0,
   aim: 0,
   weight: 0,
   /** Seconds into the slide at each press of Sweep. */
-  sweeps: [] as number[],
+  sweeps: [],
 };
 
 export const curling = createStore(OFF);

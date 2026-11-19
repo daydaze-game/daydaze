@@ -375,14 +375,14 @@ function instanced(
  * kind draws its names from `atlas`, so the mount owns that texture's material.
  */
 export function createKindMeshes(
-  capacity: Record<Kind, number>,
+  capacity: (kind: Kind) => number,
   atlas: THREE.Texture,
 ): KindMeshes {
   const walls = facadeMaterials();
   const make = (kind: Shared) => {
     const material = isFacade(kind) ? walls[kind] : MATERIAL[kind];
     if (!BAKED.has(kind))
-      return instanced(GEOMETRY[kind], material, capacity[kind]);
+      return instanced(GEOMETRY[kind], material, capacity(kind));
     // one identity instance over its own merged geometry; clicks fall
     // through to the wall or road just behind, so its tens of thousands of
     // triangles are never raycast
@@ -391,14 +391,18 @@ export function createKindMeshes(
     return mesh;
   };
   // the card and frame textures are drawn once, on first mount
-  const windowMaterial = MATERIAL.window as THREE.MeshBasicMaterial;
-  windowMaterial.map ??= windowTexture();
-  const frond = MATERIAL.palmFrond as THREE.MeshStandardMaterial;
-  frond.map ??= leafTexture();
+  const windowMaterial = MATERIAL.window;
+  if (windowMaterial instanceof THREE.MeshBasicMaterial)
+    windowMaterial.map ??= windowTexture();
+  const frond = MATERIAL.palmFrond;
+  if (frond instanceof THREE.MeshStandardMaterial) frond.map ??= leafTexture();
   const labels = new THREE.PlaneGeometry(1, 1);
   labels.setAttribute(
     "aUv",
-    new THREE.InstancedBufferAttribute(new Float32Array(capacity.label * 4), 4),
+    new THREE.InstancedBufferAttribute(
+      new Float32Array(capacity("label") * 4),
+      4,
+    ),
   );
   const labelMaterial = animate(
     new THREE.MeshBasicMaterial({
@@ -437,7 +441,7 @@ export function createKindMeshes(
     treeTrunk: make("treeTrunk"),
     treeCanopy: make("treeCanopy"),
     window: make("window"),
-    label: instanced(labels, labelMaterial, capacity.label),
+    label: instanced(labels, labelMaterial, capacity("label")),
     panel: make("panel"),
     arch: make("arch"),
     bulb: make("bulb"),

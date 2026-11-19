@@ -22,9 +22,7 @@ const STREET: readonly Machine[] = FURNITURE.filter(
 /** The machines in `room`: the city's along its avenues, else the venue's own. */
 export function machinesIn(room: RoomId): readonly Machine[] {
   if (room === "city") return STREET;
-  return room in ROOM_MACHINES
-    ? ROOM_MACHINES[room as keyof typeof ROOM_MACHINES]
-    : [];
+  return Object.entries(ROOM_MACHINES).find(([id]) => id === room)?.[1] ?? [];
 }
 
 export function VendingWatch({

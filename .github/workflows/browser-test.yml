@@ -13,6 +13,8 @@ on:
 concurrency:
   group: browser-test-${{ github.ref }}-${{ inputs.grep }}
   cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   browser:
     timeout-minutes: 45

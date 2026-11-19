@@ -18,12 +18,17 @@ import { createStore } from "./store.ts";
 /** A shift at an order station (the espresso bar, the boba bar): tickets one
  * at a time, the clock on each for the tip, a prize at the end. */
 export function createOrderSession(station: Station, prize: PrizeGame) {
-  const OFF = {
+  const OFF: {
+    on: boolean;
+    shift: Shift;
+    /** performance.now() the current ticket came in. */
+    since: number;
+    last: { name: string; right: boolean; tip: number } | null;
+  } = {
     on: false,
     shift: newShift(0),
-    /** performance.now() the current ticket came in. */
     since: 0,
-    last: null as { name: string; right: boolean; tip: number } | null,
+    last: null,
   };
   const store = createStore(OFF);
   const update = (shift: Shift) => store.set({ ...store.get(), shift });

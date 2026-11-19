@@ -9,6 +9,7 @@ import { hash } from "./city/hash.ts";
 import type { Vec2 } from "./walk.ts";
 import { rectFenceSpots, type Rect, type Spot } from "./zoo.ts";
 import type { LandKind } from "./creatures.ts";
+import { vec2 } from "./typed.ts";
 
 function box(x0: number, z0: number, x1: number, z1: number): Vec2[] {
   return [
@@ -206,7 +207,7 @@ export const PICNIC_SPOT: Spot = { x: 9, z: 14, yaw: 0.4, sx: 1, sy: 1, sz: 1 };
 export const HIKERS: readonly { at: Vec2; yaw: number }[] = [
   (() => {
     const h = beside(0.14, 1, 2.1, 1.6);
-    return { at: [h.x, h.z] as Vec2, yaw: h.yaw };
+    return { at: vec2(h.x, h.z), yaw: h.yaw };
   })(),
   { at: [BRIDGE.x + 0.7, creekZ(BRIDGE.x) + 1.4], yaw: Math.PI },
   { at: [7, -44.8], yaw: Math.PI },

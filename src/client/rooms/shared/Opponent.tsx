@@ -85,11 +85,11 @@ function skinUrl(look: OpponentLook) {
 /** Each material of the clone replaced by this figure's own copy, so the
  * team color doesn't spill onto the others, and the meshes by node name. */
 function dress(root: THREE.Object3D, look: OpponentLook, skin: THREE.Texture) {
-  const parts = {
-    cloth: undefined as THREE.MeshStandardMaterial | undefined,
-    vest: undefined as THREE.MeshStandardMaterial | undefined,
-    gun: undefined as THREE.MeshStandardMaterial | undefined,
-  };
+  const parts: {
+    cloth?: THREE.MeshStandardMaterial;
+    vest?: THREE.MeshStandardMaterial;
+    gun?: THREE.MeshStandardMaterial;
+  } = {};
   const owned: THREE.Material[] = [];
   root.traverse((o) => {
     o.frustumCulled = false;

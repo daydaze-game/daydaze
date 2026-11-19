@@ -14,8 +14,11 @@ function loadMutes(): string[] {
 }
 
 /** The player whose card is open (tapped in the world), and who's muted. */
-export const peerCard = createStore({
-  open: null as { id: string; name: string } | null,
+export const peerCard = createStore<{
+  open: { id: string; name: string } | null;
+  mutes: string[];
+}>({
+  open: null,
   mutes: loadMutes(),
 });
 
