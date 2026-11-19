@@ -1,6 +1,8 @@
 // Lazy file playback through the shared SFX bus; no requests before unlock.
 import { getSharedAudioBus } from "./audioBus.ts";
 import { AMBIENCE_IDS, isMusicBed, type AmbienceId } from "./ambience.ts";
+import type { OneShotId } from "./soundIds.ts";
+export type { OneShotId } from "./soundIds.ts";
 
 const buffers = new Map<string, Promise<AudioBuffer>>();
 /** Buffers already decoded, for sounds that must start this instant (steps). */
@@ -95,26 +97,6 @@ export async function setFileAmbience(
   );
   return failedIds();
 }
-
-/** One-shot files (public/audio/<id>.ogg), played once per call. */
-export type OneShotId =
-  | "door"
-  | "horn"
-  | "coin"
-  | "camera"
-  | "elephant"
-  | "lion"
-  | "flamingos"
-  | "zebra"
-  | "penguin"
-  | "cow"
-  | "donkey"
-  | "splash"
-  | "bus-door"
-  | "bus-brake"
-  | "step-pavement"
-  | "step-wood"
-  | "step-sand";
 
 /**
  * Plays a one-shot only if it has already been decoded, else starts loading it
