@@ -5,6 +5,8 @@
 // restores the old view on close.
 
 import { activeTier, allows, byTier } from "../../game/age.ts";
+import type { Progression } from "../../game/progression/progression.ts";
+import { ProgressionHud, LadderPanel } from "./Progression.tsx";
 import { ActionDock, DockAction } from "./ActionDock.tsx";
 import { ClubNightTicker } from "./EventCalendar.tsx";
 import { InviteButton } from "../net/InviteButton.tsx";
@@ -829,6 +831,8 @@ export function Overlay({
   swim,
   setSwim,
   coins,
+  progression,
+  onTitle,
   wardrobe,
   onBuy,
   crime,
@@ -869,6 +873,8 @@ export function Overlay({
   swim: SwimLook;
   setSwim: (swim: SwimLook) => void;
   coins: number;
+  progression: Progression;
+  onTitle: (title: string | null) => void;
   wardrobe: readonly string[];
   onBuy: (id: string, store?: ShopId, day?: number) => PurchaseResult;
   crime: CrimeSave;
@@ -961,6 +967,7 @@ export function Overlay({
         <p className="coins" aria-label={`${coins} coins`}>
           {coins} coins
         </p>
+        <ProgressionHud progression={progression} />
       </header>
 
       {phone && (
@@ -1232,6 +1239,7 @@ export function Overlay({
             options={PLAYER_MOODS}
           />
           <GameMenu>
+            <LadderPanel progression={progression} onTitle={onTitle} />
             <div className="game-menu-items" role="group" aria-label="Game">
               <button
                 type="button"

@@ -39,6 +39,11 @@ import { cleanGarage, STARTER } from "./garage.ts";
 import { cleanRecords, type RecordId } from "./records.ts";
 import { cleanWardrobe, unlockedLook } from "./shop.ts";
 import { isCoins, STARTING_COINS } from "./wallet.ts";
+import {
+  cleanProgression,
+  freshProgression,
+  type Progression,
+} from "./progression/progression.ts";
 
 /** The graphics quality setting; auto picks a tier from the device. */
 export type Quality = "auto" | "high" | "low";
@@ -70,6 +75,7 @@ export type SaveV1 = {
   bests: Bests;
   /** Today's challenges already reached. */
   challenges: ChallengeSave;
+  progression: Progression;
   /** Your car where you last parked it; null waits at the home spot. */
   car: ParkedCar | null;
   /** The road cars you own; the starter always. */
@@ -135,6 +141,7 @@ export function createDefaultSave(name: string): SaveV1 {
     crime: { ...DEFAULT_CRIME, bans: {}, stolen: {} },
     bests: {},
     challenges: { ...NO_CHALLENGES, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: [STARTER],
     records: [],
@@ -216,6 +223,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     crime: validateCrime(save.get("crime")),
     bests: cleanBests(save.get("bests")),
     challenges: cleanChallenges(save.get("challenges")),
+    progression: cleanProgression(save.get("progression")),
     car: cleanParkedCar(save.get("car"), (id) => garage.includes(id)),
     garage,
     records: cleanRecords(save.get("records")),

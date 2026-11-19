@@ -4,6 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK, DEFAULT_SWIM, type Look } from "./look.ts";
 import { DEFAULT_BODY } from "./body.ts";
+import { freshProgression } from "./progression/progression.ts";
 import { STARTING_COINS } from "./wallet.ts";
 import { createDefaultFarm } from "./farm.ts";
 import { createDefaultGarden } from "./garden.ts";
@@ -49,6 +50,7 @@ test("createDefaultSave uses the default look and auto quality", () => {
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -94,6 +96,7 @@ test("a save round-trips through serializeSave and loadSave", () => {
     crime: { offences: 3, bans: { bodega: 1_900_000_000_000 }, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: {
       id: "quill-lite",
       color: "#ff4fb3",
@@ -174,6 +177,7 @@ test("a save from before the swimsuit slot still loads", () => {
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -242,6 +246,7 @@ test("loadSave keeps a valid name when the look is bad", () => {
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -284,6 +289,7 @@ test("loadSave keeps a valid look when the name is bad", () => {
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],

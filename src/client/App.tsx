@@ -14,7 +14,6 @@ import {
 } from "react";
 import { recordCaught } from "../game/crime/record.ts";
 import { penaltyFor, type Penalty } from "../game/crime/shoplift.ts";
-import { tagStolen } from "../game/crime/lift.ts";
 import type { BodyShape } from "../game/body.ts";
 import {
   DEFAULT_HOLDS,
@@ -63,7 +62,7 @@ import {
   serializeSave,
   type SaveV1,
 } from "../game/save.ts";
-import { earn, spend, payoutFor, type PayGrade } from "../game/wallet.ts";
+import { spend, type PayGrade } from "../game/wallet.ts";
 import { buyItem } from "../game/shop.ts";
 import { CityJoystick } from "./city/CityJoystick.tsx";
 import { readFlags } from "./flags.ts";
@@ -82,12 +81,23 @@ import { preloadLook } from "./avatar/human/HumanDoll.tsx";
 import { RoomAudio } from "./RoomAudio.tsx";
 import { playSoundFile } from "../audio/soundFiles.ts";
 import { playFanfare } from "../audio/worldSounds.ts";
-import { completeChallenge, dayOf } from "../game/challenges.ts";
-import { prizeFor } from "../game/prizes.ts";
+import {
+  finishPrize,
+  rewardSteal,
+  rewardVisit,
+  rewardLegacy,
+} from "../game/progression/activities.ts";
+import {
+  levelOf,
+  totalXp,
+  titleLabel,
+  selectTitle,
+} from "../game/progression/progression.ts";
+import { RankMoment } from "./ui/Progression.tsx";
 import { PrizeCard } from "./ui/PrizeCard.tsx";
 import { UpdatePrompt } from "./ui/UpdatePrompt.tsx";
 import { Collections } from "./ui/Collections.tsx";
-import { claimSet, visit as visitPlace } from "../game/collections.ts";
+import { claimSet } from "../game/collections.ts";
 import { Onboarding } from "./ui/Onboarding.tsx";
 import { postPrize, prizeDesk } from "./ui/prizeDesk.ts";
 import { petDesk } from "./rooms/zoo/petDesk.ts";
@@ -175,13 +185,15 @@ export function App() {
   // visiting a friend's place: theirs is the home you see, read-only
   const visiting = homeVisit.use();
   useEffect(() => (ONLINE ? listenForHomes() : undefined), []);
-  // the album remembers every place you've been
+  // Discovery and real event visits commit their saved claim with the XP.
   useEffect(() => {
-    setSave((s) =>
-      s.visited.includes(here.room)
-        ? s
-        : { ...s, visited: visitPlace(s.visited, here.room) },
-    );
+    const check = () => {
+      const now = Date.now();
+      setSave((s) => rewardVisit(s, here.room, now, ADULT_OK));
+    };
+    check();
+    const timer = window.setInterval(check, 30_000);
+    return () => window.clearInterval(timer);
   }, [here.room]);
   const [fading, setFading] = useState(false);
   const traveling = useRef(false);
@@ -424,8 +436,7 @@ export function App() {
   // a finished game pays its grade; quitting early (null) pays nothing
   const endGame = (grade: PayGrade | null) => {
     setGame(null);
-    if (grade)
-      setSave((s) => ({ ...s, coins: earn(s.coins, payoutFor(grade)) }));
+    if (grade && game) setSave((s) => rewardLegacy(s, game, grade));
   };
   // a finished sports game pays its grade, and a bonus for a personal best
   const { pending } = prizeDesk.use();
@@ -437,22 +448,23 @@ export function App() {
   }, [save]);
   useEffect(() => {
     if (!pending) return;
-    const { bests, challenges } = latest.current;
-    const prize = prizeFor(pending.game, pending.score, bests[pending.game]);
-    const daily = completeChallenge(
-      challenges,
-      dayOf(Date.now()),
+    const now = Date.now();
+    const result = finishPrize(
+      latest.current,
       pending.game,
       pending.score,
+      now,
     );
-    setSave((s) => ({
-      ...s,
-      coins: earn(s.coins, prize.coins + daily.coins),
-      bests: prize.best ? { ...s.bests, [prize.game]: prize.score } : s.bests,
-      challenges: daily.save,
-    }));
-    postPrize(prize, daily.coins);
-    playFanfare(prize.grade === "S" ? 1 : prize.grade === "A" ? 0.6 : 0);
+    if (!result) {
+      prizeDesk.set({ pending: null });
+      return;
+    }
+    setSave((s) => finishPrize(s, pending.game, pending.score, now)?.save ?? s);
+    postPrize(result.prize, result.daily, result.xp);
+    if (!latest.current.settings.muted)
+      playFanfare(
+        result.prize.grade === "S" ? 1 : result.prize.grade === "A" ? 0.6 : 0,
+      );
   }, [pending]);
   const saved = save.settings.quality;
   const quality = flags.quality ?? (saved === "auto" ? null : saved);
@@ -462,6 +474,10 @@ export function App() {
       <main className="app">
         <LoadingVeil />
         <PrizeCard />
+        <RankMoment
+          progression={save.progression}
+          muted={save.settings.muted}
+        />
         <UpdatePrompt />
         <Collections
           visited={save.visited}
@@ -522,7 +538,14 @@ export function App() {
               {chat.text}
             </p>
           )}
-          <p className="nametag">{save.name}</p>
+          <p className="nametag">
+            {save.name} · {levelOf(totalXp(save.progression))}
+            {titleLabel(save.progression) && (
+              <small className="player-title">
+                {titleLabel(save.progression)}
+              </small>
+            )}
+          </p>
         </div>
         <PeerCard />
         <FriendsPanel
@@ -558,6 +581,13 @@ export function App() {
           setSwim={setSwim}
           body={save.body}
           setBody={setBody}
+          progression={save.progression}
+          onTitle={(title) =>
+            setSave((s) => ({
+              ...s,
+              progression: selectTitle(s.progression, title),
+            }))
+          }
           coins={save.coins}
           wardrobe={save.wardrobe}
           onBuy={(id, store, day) => {
@@ -576,15 +606,7 @@ export function App() {
             return r;
           }}
           crime={save.crime}
-          onSteal={(id, storeId) =>
-            setSave((s) => ({
-              ...s,
-              wardrobe: s.wardrobe.includes(id)
-                ? s.wardrobe
-                : [...s.wardrobe, id],
-              crime: tagStolen(s.crime, id, storeId),
-            }))
-          }
+          onSteal={(id, storeId) => setSave((s) => rewardSteal(s, id, storeId))}
           onCaught={caught}
           onRide={() => setRides((n) => n + 1)}
           onPlayGame={setGame}

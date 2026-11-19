@@ -16,7 +16,7 @@ const HOLD =
 /** The prize card a finished game slides in: the grade, the score, the coins
  * paid and a personal-best ribbon. */
 export function PrizeCard() {
-  const { shown, at, challenge } = prizeDesk.use();
+  const { shown, at, challenge, xp } = prizeDesk.use();
   useEffect(() => {
     if (!shown || HOLD) return;
     const id = window.setTimeout(dismissPrize, SHOW_MS);
@@ -38,6 +38,7 @@ export function PrizeCard() {
         <p className="prize-game">{table.label}</p>
         <p className="prize-score">{table.format(shown.score)}</p>
         <p className="prize-coins">+{shown.coins} coins</p>
+        {xp > 0 && <p className="prize-best">+{xp} XP</p>}
         {shown.best && <p className="prize-best">New personal best!</p>}
         {challenge > 0 && (
           <p className="prize-best">Daily challenge done! +{challenge}</p>
