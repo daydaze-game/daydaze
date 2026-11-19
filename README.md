@@ -148,3 +148,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). In short:
   small and focused: `feat(net): add room copy directory`.
 - Validate anything from the network or `localStorage` before use. Keep the
   18+ venues behind the age gate.
+
+## License
+
+Copyright (c) 2026 Kaitlyn Bassford. All rights reserved. The source is public
+to read, not to reuse; see [LICENSE](LICENSE). Third-party assets keep their own
+licenses ([docs/assets.md](docs/assets.md)).
