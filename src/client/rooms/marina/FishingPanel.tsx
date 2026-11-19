@@ -24,7 +24,11 @@ function call(c: Catch): string {
 
 /** Five casts off the dock: set the power, then strike the moment the
  * bobber dips. */
-export function FishingPanel(): JSX.Element {
+export function FishingPanel({
+  spot = "marina",
+}: {
+  spot?: "marina" | "boardwalk";
+}): JSX.Element {
   const s = fishing.use();
   const playing = s.phase !== "off";
   const now = useNow(s.phase === "power");
@@ -38,7 +42,7 @@ export function FishingPanel(): JSX.Element {
         <button
           type="button"
           className="game-main"
-          onClick={() => start(performance.now())}
+          onClick={() => start(performance.now(), spot)}
         >
           Go fishing
         </button>
@@ -89,4 +93,9 @@ export function FishingPanel(): JSX.Element {
       </button>
     </section>
   );
+}
+
+/** Fishing from the city pier. */
+export function BoardwalkFishingPanel(): JSX.Element {
+  return <FishingPanel spot="boardwalk" />;
 }

@@ -2,6 +2,8 @@
 // tally the trip by `game/fishing.ts`.
 import {
   addCatch,
+  BOARDWALK_SPECIES,
+  SPECIES,
   biteDelay,
   castDistance,
   HOOK_WINDOW,
@@ -28,6 +30,7 @@ const SHOW = 2.4;
 
 const OFF = {
   phase: "off" as Phase,
+  spot: "marina" as const,
   trip: NEW_TRIP,
   /** performance.now() the current phase started. */
   since: 0,
@@ -39,14 +42,16 @@ const OFF = {
   last: null as Catch | null,
 };
 
-export const fishing = createStore(OFF);
+export const fishing = createStore<
+  Omit<typeof OFF, "spot"> & { spot: "marina" | "boardwalk" }
+>(OFF);
 
 export function powerAt(now: number, since: number): number {
   return 0.5 - Math.cos(((now - since) / 1000) * Math.PI * 0.9) * 0.5;
 }
 
-export function start(now: number) {
-  fishing.set({ ...OFF, phase: "power", since: now });
+export function start(now: number, spot: "marina" | "boardwalk" = "marina") {
+  fishing.set({ ...OFF, spot, phase: "power", since: now });
 }
 
 export function leave() {
@@ -77,10 +82,27 @@ export function press(now: number, seen?: Phase) {
       seed: Math.floor(Math.random() * 1e6),
       since: now,
     });
-  } else if (s.phase === "waiting") land(strike(s.seed, s.distance, -1), now);
+  } else if (s.phase === "waiting")
+    land(
+      strike(
+        s.seed,
+        s.distance,
+        -1,
+        s.spot === "boardwalk" ? BOARDWALK_SPECIES : SPECIES,
+      ),
+      now,
+    );
   else if (s.phase === "bite")
-    land(strike(s.seed, s.distance, (now - s.biteAt) / 1000), now);
-  else if (s.phase === "over") start(now);
+    land(
+      strike(
+        s.seed,
+        s.distance,
+        (now - s.biteAt) / 1000,
+        s.spot === "boardwalk" ? BOARDWALK_SPECIES : SPECIES,
+      ),
+      now,
+    );
+  else if (s.phase === "over") start(now, s.spot);
 }
 
 /** The scene calls this each frame: land the bobber, bring the bite, let a
@@ -96,7 +118,15 @@ export function tick(now: number) {
   else if (s.phase === "waiting" && now >= s.biteAt)
     fishing.set({ phase: "bite", since: now });
   else if (s.phase === "bite" && now > s.biteAt + HOOK_WINDOW * 1000)
-    land(strike(s.seed, s.distance, HOOK_WINDOW + 1), now);
+    land(
+      strike(
+        s.seed,
+        s.distance,
+        HOOK_WINDOW + 1,
+        s.spot === "boardwalk" ? BOARDWALK_SPECIES : SPECIES,
+      ),
+      now,
+    );
   else if (s.phase === "result" && now - s.since >= SHOW * 1000) {
     if (tripOver(s.trip)) {
       award("fishing", tripKg(s.trip));
