@@ -41,7 +41,7 @@ for crop_name, stages in crops:
         print(f"Exported: {out_name}")
 EOF
 
-blender --background --factory-startup --python "$TMP/convert.py" -- "$CROPS_DIR" "$TMP"
+blender --background --factory-startup --python-exit-code 1 --python "$TMP/convert.py" -- "$CROPS_DIR" "$TMP"
 
 echo "=== Extracting Kenney dirt plots ==="
 unzip -p "$KENNEY_ZIP" "Models/GLTF format/crops_dirtRow.glb" > "$TMP/dirt-row.glb"

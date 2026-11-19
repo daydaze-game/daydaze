@@ -19,9 +19,9 @@ LOD="$(dirname "$0")/../art/nature/nature_lod.py"
 for m in "${MODELS[@]}"; do
   name="$(echo "$m" | tr '[:upper:]_' '[:lower:]-')"
   # near: every leaf card, bark decimated; far (-lo): one card in three, grown
-  KEEP=1 GROW=1 SOLID_RATIO=0.35 BARK_KEEP=0 blender --background --factory-startup \
+  KEEP=1 GROW=1 SOLID_RATIO=0.35 BARK_KEEP=0 blender --background --factory-startup --python-exit-code 1 \
     --python "$LOD" -- "$KIT/$m.gltf" "$TMP/$name.glb" > /dev/null
-  blender --background --factory-startup --python "$LOD" -- "$KIT/$m.gltf" "$TMP/$name-lo.glb" > /dev/null
+  blender --background --factory-startup --python-exit-code 1 --python "$LOD" -- "$KIT/$m.gltf" "$TMP/$name-lo.glb" > /dev/null
   "${GT[@]}" optimize "$TMP/$name.glb" "$OUT/$name.glb" \
     --compress meshopt --texture-compress webp --texture-size 512 --simplify false
   "${GT[@]}" optimize "$TMP/$name-lo.glb" "$OUT/$name-lo.glb" \

@@ -6,7 +6,7 @@
 # (art/motels/build_motels.py) and keeps it under 5300 triangles; gltf-transform compresses it.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-blender --background --factory-startup --python art/motels/build_motels.py > /dev/null
+blender --background --factory-startup --python-exit-code 1 --python art/motels/build_motels.py > /dev/null
 GT=(npx -y @gltf-transform/cli@4.5.1)
 OPTS=(--compress meshopt --texture-compress webp --texture-size 256 --join false
   --instance false --flatten false --palette false --prune-attributes false)

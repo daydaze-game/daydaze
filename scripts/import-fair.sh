@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 KIT="${KIT:-/tmp/fair-kenney/kit/Models/GLB format}"
 OUT=public/models/fair
 mkdir -p "$OUT"
-blender --background --factory-startup --python art/fair/build_fair.py
+blender --background --factory-startup --python-exit-code 1 --python art/fair/build_fair.py
 GT=(npx -y @gltf-transform/cli@4.5.1)
 OPTS=(--compress meshopt --texture-compress webp --simplify false --join false
   --instance false --flatten false --palette false --prune-attributes false)

@@ -7,8 +7,8 @@ player can select their own brows and makeup.
 
 ```sh
 python3 art/doll/blender/fetch_skin.py
-blender --background --factory-startup --python art/doll/blender/build_doll.py
-DOLL_SEX=male blender --background --factory-startup --python art/doll/blender/build_doll.py
+blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/build_doll.py
+DOLL_SEX=male blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/build_doll.py
 bash scripts/optimize-doll.sh
 ```
 

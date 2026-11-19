@@ -20,7 +20,7 @@ for kind in bus van stop; do
   for detail in near lo; do
     suffix=""
     if [[ "$detail" == lo ]]; then suffix="-lo"; fi
-    "$BLENDER" --background --factory-startup --python art/transit/import.py -- "$source" "$TRANSIT_TMP/model.glb" "$kind" "$detail" > "$TRANSIT_TMP/blender.log" 2>&1
+    "$BLENDER" --background --factory-startup --python-exit-code 1 --python art/transit/import.py -- "$source" "$TRANSIT_TMP/model.glb" "$kind" "$detail" > "$TRANSIT_TMP/blender.log" 2>&1
     npx -y @gltf-transform/cli@4.5.1 optimize "$TRANSIT_TMP/model.glb" "public/models/transit/$kind$suffix.glb" --compress meshopt --texture-compress webp --simplify false
   done
 done
