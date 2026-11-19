@@ -1188,6 +1188,23 @@ const SHOTS: {
   { name: "mini-golf", query: "room=mini-golf" },
   { name: "dome", query: "room=dome" },
   { name: "kamayan-hall", query: "room=kamayan-hall" },
+  // indoor windows follow ?time= (issue #110): the same room at noon and at night
+  {
+    name: "window-sky-apartment-noon",
+    query: "room=apartment&quality=low&time=12:00",
+  },
+  {
+    name: "window-sky-apartment-night",
+    query: "room=apartment&quality=low&time=23:00",
+  },
+  {
+    name: "window-sky-kamayan-noon",
+    query: "room=kamayan-hall&quality=low&time=12:00",
+  },
+  {
+    name: "window-sky-kamayan-night",
+    query: "room=kamayan-hall&quality=low&time=23:00",
+  },
   { name: "galleria", query: "room=galleria" },
   { name: "roller-rink", query: "room=roller-rink" },
   { name: "skatepark", query: "room=skatepark" },
