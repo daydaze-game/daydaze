@@ -57,6 +57,8 @@ export type Flags = {
   height: number | null;
   /** `?cam=ex,ey,ez,lx,ly,lz` (world) or `?cam=dx,dy,dz` (relative). */
   cam: CamFlag | null;
+  /** `?heistend=caught|escape` selects how a held preview heist ends. */
+  heistend: "caught" | "escape" | null;
 };
 
 /** Room copies are numbered 1 to 99 (OnlineSession's MAX_COPY). */
@@ -91,6 +93,9 @@ export function readFlags(search: string): Flags {
     Number.isFinite(heightNum) && heightNum >= -20 && heightNum <= 60
       ? heightNum
       : null;
+  const heistendRaw = q.get("heistend");
+  const heistend =
+    heistendRaw === "caught" || heistendRaw === "escape" ? heistendRaw : null;
   return {
     quality: quality === "low" || quality === "high" ? quality : null,
     still: q.get("still") === "1",
@@ -106,6 +111,7 @@ export function readFlags(search: string): Flags {
     pitch,
     height,
     cam: parseCamFlag(q.get("cam")),
+    heistend,
   };
 }
 
