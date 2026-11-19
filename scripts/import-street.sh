@@ -12,7 +12,7 @@ set -euo pipefail
 KIT="${KIT:-/tmp/street-kit-kit}"
 OUT="$(dirname "$0")/../public/models/street"
 TMP="$(mktemp -d)"
-KIT="$KIT" flock /tmp/daydaze-blender.lock nice -n 19 blender --background --factory-startup \
+KIT="$KIT" flock /tmp/daydaze-blender.lock nice -n 19 blender --background --factory-startup --python-exit-code 1 \
   --python "$(dirname "$0")/../art/city/street_kit.py" -- "$TMP/kit.glb" > /dev/null
 nice -n 19 npx -y @gltf-transform/cli@4.5.1 optimize "$TMP/kit.glb" "$OUT/kit.glb" \
   --compress meshopt --texture-compress webp --texture-size 1024 --simplify false \

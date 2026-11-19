@@ -2,7 +2,7 @@
 per hair style and face preset, on the built doll, so the character creator
 shows options instead of words.
 
-    blender --background --factory-startup --python art/doll/blender/thumbs.py [-- outfits hair figures]
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/thumbs.py [-- outfits hair figures]
 
 Run after build_doll.py, then convert to WebP (192 px) with sharp, as the
 commit that added it did; the client loads `/closet/<group>-<id>.webp`. Hair tiles are three-quarter views in a warm brown;

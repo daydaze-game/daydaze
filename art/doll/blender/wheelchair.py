@@ -4,7 +4,7 @@ Source: "WheelChair" by Loic, Sketchfab f0ef4adc17ee4929b40e894c608061ea
 (CC-BY 4.0), downloaded with the Sketchfab API into
 art/doll/blender/.cache/wheelchair-src.glb (git-ignored).
 
-    blender --background --factory-startup --python art/doll/blender/wheelchair.py
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/wheelchair.py
 
 Writes .cache/out/wheelchair.glb with three nodes: "chair", and the rear
 wheels "wheelL" and "wheelR", each with its origin on the axle so the client
