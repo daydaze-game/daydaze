@@ -50,7 +50,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run build` / `npm run preview` | Vite build of `dist/` / serve it                                                                                                                |
 | `npm test`                          | Node test runner over `src/`, `server/` and `scripts/` `*.test.ts`                                                                              |
 | `npm run test:coverage`             | Same, with coverage into `coverage/`                                                                                                            |
-| `npm run lint`                      | ESLint                                                                                                                                          |
+| `npm run lint`                      | ESLint (first regenerates `server/worker-configuration.d.ts`, which the type-aware rules need to resolve Worker types)                          |
 | `ruff check .`                      | Python lint for the Blender and asset scripts (`pipx run ruff==0.17.2 check .` if Ruff is not installed)                                        |
 | `npm run lint:md`                   | markdownlint-cli2 over the Markdown docs                                                                                                        |
 | `npm run typecheck`                 | Strict `tsc`, plus the Worker (regenerates `server/worker-configuration.d.ts`)                                                                  |
@@ -131,6 +131,10 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
     `gh workflow run record.yml -f scene="room=karaoke" -f seconds=30`, or
     `-f game=trivia -f clicks=Play`; then `gh run download <id> -n recording`.
     Options are in `scripts/record.ts`.
+  - Artifacts expire, so `archive-sweep.yml` copies screenshots, recordings,
+    Playwright reports and profiles to permanent releases on
+    `dpologdvinity/daydaze-artifacts` daily (`scripts/archive-sweep.ts`);
+    builds and coverage come back from any commit and are left to expire.
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.

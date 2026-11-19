@@ -5,7 +5,13 @@
 
 import { SHOW_EVERY } from "../../game/city/fireworks.ts";
 import { PARADE_EVERY } from "../../game/city/parade.ts";
-import { HEIST_SLOT, heistOffset, nextHeistIn } from "../../game/city/heist.ts";
+import {
+  HEIST_SLOT,
+  heistOffset,
+  heistSlotWith,
+  nextHeistIn,
+  type HeistOutcome,
+} from "../../game/city/heist.ts";
 import { heldClock, toNextStart, wallSeconds } from "../../game/clock.ts";
 import { PRIDE_EVERY } from "../../game/prideNight.ts";
 import { schedule } from "../../game/events.ts";
@@ -24,14 +30,34 @@ const skew: Record<DevEvent, number> = {
 
 /** A schedule's clock: real, or held by its URL flag, plus any dev skip.
  * `lead` is how far into its slot the held event starts (0: on the slot). */
-function clockFor(flag: DevEvent, every: number, lead = 0): () => number {
-  const preview = Number(
-    new URLSearchParams(window.location.search).get(flag) ?? Number.NaN,
-  );
+function clockFor(
+  flag: DevEvent,
+  every: number,
+  lead = 0,
+  slot = 1000,
+): () => number {
+  const search = typeof location !== "undefined" ? location.search : "";
+  const preview = Number(new URLSearchParams(search).get(flag) ?? Number.NaN);
   if (!Number.isFinite(preview)) return () => wallSeconds() + skew[flag];
-  const held = heldClock(every, lead + preview);
+  const held = heldClock(every, lead + preview, wallSeconds, slot);
   return () => held.read() + skew[flag];
 }
+
+/** Resolves the slot and offset for previewing a heist with ?heistend=caught|escape. */
+export function heistPreviewConfig(search: string): {
+  slot: number;
+  lead: number;
+} {
+  const q = new URLSearchParams(search);
+  const end = q.get("heistend");
+  const outcome: HeistOutcome = end === "caught" ? "caught" : "escape";
+  const slot = heistSlotWith(outcome, 1000);
+  return { slot, lead: heistOffset(slot) };
+}
+
+const heistConfig = heistPreviewConfig(
+  typeof location !== "undefined" ? location.search : "",
+);
 
 /** The fireworks clock (`?fireworks=20` holds it 20 s into a show). */
 export const showClock = clockFor("fireworks", SHOW_EVERY);
@@ -39,8 +65,14 @@ export const showClock = clockFor("fireworks", SHOW_EVERY);
 export const paradeClock = clockFor("parade", PARADE_EVERY);
 /** The clubs' Pride night clock (`?pride=20` holds it 20 s into one). */
 export const prideClock = clockFor("pride", PRIDE_EVERY);
-/** The heist clock (`?heist=20` holds it 20 s into slot 1000's heist). */
-export const heistClock = clockFor("heist", HEIST_SLOT, heistOffset(1000));
+/** The heist clock (`?heist=20` holds it 20 s into slot 1000's heist, or
+ * `?heistend=caught|escape` selects the first matching slot). */
+export const heistClock = clockFor(
+  "heist",
+  HEIST_SLOT,
+  heistConfig.lead,
+  heistConfig.slot,
+);
 
 /** Each event's clock and the seconds from a time to its next start. */
 const CLOCKS: Record<
@@ -75,7 +107,8 @@ export function onNightSkip(fn: () => void): () => void {
  * next run, so a screenshot or a test can see it on any day of the week.
  */
 export const nightClock: () => number = (() => {
-  const id = new URLSearchParams(window.location.search).get("night");
+  const search = typeof location !== "undefined" ? location.search : "";
+  const id = new URLSearchParams(search).get("night");
   const row = schedule(Date.now()).find((r) => r.id === id);
   const offset = !row || row.on ? 0 : row.inMs + 3_600_000;
   return () => Date.now() + offset + nightSkew;

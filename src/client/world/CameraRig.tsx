@@ -10,6 +10,7 @@ import {
   ZOOM_STEP,
   faceHeightOf,
   focusHeight,
+  followCameraShot,
   keyZoomNotches,
   portraitFov,
   portraitTarget,
@@ -28,6 +29,7 @@ import { cameraHold } from "./cameraHold.ts";
 import { driving } from "./driving.ts";
 import { getCamOverride, subscribeCamOverride } from "./camOverride.ts";
 import type { Player } from "./PlayerController.tsx";
+import { readFlags } from "../flags.ts";
 import type { View } from "./view.ts";
 export type { View } from "./view.ts";
 
@@ -511,12 +513,6 @@ const MAX_DISTANCE: Record<RoomId, number> = {
   city: 300,
 };
 
-// Close-ups orbit with the player: offsets are in the player's frame.
-const CLOSE: Record<"full" | "face", { off: THREE.Vector3; look: number }> = {
-  full: { off: new THREE.Vector3(0.6, 1.2, 4.1), look: 0.9 },
-  face: { off: new THREE.Vector3(0.12, 1.6, 0.85), look: 1.53 },
-};
-
 /** Closer than this to her (meters), the camera keeps out of the room's walls. */
 const CLOSE_RANGE = 4;
 /** How long after a zoom in the camera keeps coming round to her front. */
@@ -552,6 +548,16 @@ export function CameraRig({
   const canvas = useThree((s) => s.gl.domElement);
   const invalidate = useThree((s) => s.invalidate);
   const calm = useReducedMotion();
+  const flags = useMemo(
+    () => (typeof location !== "undefined" ? readFlags(location.search) : null),
+    [],
+  );
+  useEffect(() => {
+    if (flags?.fov && camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = flags.fov;
+      camera.updateProjectionMatrix();
+    }
+  }, [flags?.fov, camera]);
   // a night may swap the room's overview for one that shows what it's about
   const nightId = useNight(room)?.id;
   const nightShot = useMemo(() => {
@@ -711,9 +717,14 @@ export function CameraRig({
         goalPos.copy(shot.eye);
         goalTarget.copy(shot.look);
       } else {
-        const v = CLOSE[view];
+        const v = followCameraShot(view, {
+          dist: flags?.dist,
+          pitch: flags?.pitch,
+          height: flags?.height,
+          relCam: flags?.cam?.kind === "relative" ? flags.cam.off : null,
+        });
         goalPos
-          .copy(v.off)
+          .set(v.off[0], v.off[1], v.off[2])
           .applyAxisAngle(Y, player.seat?.yaw ?? player.yaw)
           .add(at);
         goalTarget.copy(at).setY(at.y + v.look);
@@ -837,9 +848,9 @@ export function CameraRig({
       camera.position.fromArray(pulled);
     }
     wallSeen.copy(wallKey);
-    // a face wants a longer lens than the room does
+    // a face wants a longer lens than the room does; ?fov overrides both
     if (camera instanceof THREE.PerspectiveCamera) {
-      const fov = portraitFov(away);
+      const fov = flags?.fov ?? portraitFov(away);
       if (Math.abs(camera.fov - fov) > 0.05) {
         camera.fov = fov;
         camera.updateProjectionMatrix();

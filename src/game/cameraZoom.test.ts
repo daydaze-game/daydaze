@@ -22,6 +22,7 @@ import {
   roomInside,
   swingToFront,
   zoomAbout,
+  followCameraShot,
   type Vec3,
 } from "./cameraZoom.ts";
 
@@ -267,4 +268,45 @@ test("in a portrait she looks into the camera; out of one, or with it behind her
     assert.ok(turn <= last + 1e-9 && last - turn < 0.1, `at ${side}`);
     last = turn;
   }
+});
+
+test("followCameraShot returns default full and face offsets", () => {
+  const full = followCameraShot("full");
+  assert.deepEqual(full.off, [0.6, 1.2, 4.1]);
+  assert.equal(full.look, 0.9);
+
+  const face = followCameraShot("face");
+  assert.deepEqual(face.off, [0.12, 1.6, 0.85]);
+  assert.equal(face.look, 1.53);
+});
+
+test("followCameraShot dist scales horizontal distance from player", () => {
+  const shot = followCameraShot("full", { dist: 10 });
+  const hDist = Math.hypot(shot.off[0], shot.off[2]);
+  assert.ok(Math.abs(hDist - 10) < 1e-6);
+  assert.equal(shot.off[1], 1.2);
+  assert.equal(shot.look, 0.9);
+});
+
+test("followCameraShot height overrides eye height", () => {
+  const shot = followCameraShot("full", { height: 3.5 });
+  assert.equal(shot.off[1], 3.5);
+  assert.equal(shot.off[0], 0.6);
+  assert.equal(shot.off[2], 4.1);
+});
+
+test("followCameraShot pitch tilts look target height", () => {
+  const flat = followCameraShot("full", { dist: 10, pitch: 0 });
+  const up = followCameraShot("full", { dist: 10, pitch: 15 });
+  const down = followCameraShot("full", { dist: 10, pitch: -15 });
+
+  assert.equal(flat.look, 0.9);
+  const expectedDiff = 10 * Math.tan((15 * Math.PI) / 180);
+  assert.ok(Math.abs(up.look - (0.9 + expectedDiff)) < 1e-6);
+  assert.ok(Math.abs(down.look - (0.9 - expectedDiff)) < 1e-6);
+});
+
+test("followCameraShot relCam overrides camera offset in local frame", () => {
+  const shot = followCameraShot("full", { relCam: [0, 2, 8] });
+  assert.deepEqual(shot.off, [0, 2, 8]);
 });

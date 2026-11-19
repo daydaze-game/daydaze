@@ -32,6 +32,7 @@ import { hikerBank } from "./hiker.ts";
 import { captainBank } from "./captain.ts";
 import { crewBank } from "./crew.ts";
 import { gardenerBank } from "./gardener.ts";
+import { dealerBank } from "./dealer.ts";
 import type { DialogueRole, RoleBank } from "./types.ts";
 
 /**
@@ -70,4 +71,5 @@ export const LINE_BANKS: Record<DialogueRole, RoleBank> = {
   captain: captainBank,
   crew: crewBank,
   gardener: gardenerBank,
+  dealer: dealerBank,
 };

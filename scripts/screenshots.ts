@@ -2227,6 +2227,13 @@ const SHOTS: {
     act: furnitureReady,
   },
   {
+    // the bust: robbers boxed in by squad cars at the getaway car
+    name: "city-heist-bust",
+    query:
+      "room=city&view=room&time=22:00&heist=30&heistend=caught&at=-170,9&cam=-150,4,8,-180,1,-10",
+    act: furnitureReady,
+  },
+  {
     // straight down on the planks: the boards run north-south, across the walk
     name: "city-deck-top",
     query: "room=city&time=15:00&at=-34,286&cam=-34,14,283,-34,0,283.5",

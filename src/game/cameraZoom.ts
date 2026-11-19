@@ -221,3 +221,63 @@ export function swingToFront(
     face[2] + Math.cos(to) * flat,
   ];
 }
+
+export type FollowCameraParams = {
+  /** Distance from player in meters (scales horizontal offset). */
+  dist?: number | null | undefined;
+  /** Camera eye height above player feet in meters. */
+  height?: number | null | undefined;
+  /** Camera pitch angle in degrees (positive tilts up toward building). */
+  pitch?: number | null | undefined;
+  /** Explicit relative eye offset in player's local frame. */
+  relCam?: readonly [number, number, number] | null | undefined;
+};
+
+export type FollowCameraShot = {
+  off: Vec3;
+  look: number;
+};
+
+export const DEFAULT_CLOSE_SHOTS: Record<"full" | "face", FollowCameraShot> = {
+  full: { off: [0.6, 1.2, 4.1], look: 0.9 },
+  face: { off: [0.12, 1.6, 0.85], look: 1.53 },
+};
+
+/** Computes the camera eye offset and look target height for follow views. */
+export function followCameraShot(
+  view: "full" | "face",
+  params?: FollowCameraParams,
+): FollowCameraShot {
+  const base = DEFAULT_CLOSE_SHOTS[view];
+  let [ox, oy, oz] = params?.relCam ?? base.off;
+  const h = params?.height;
+  if (h !== undefined && h !== null && Number.isFinite(h)) {
+    oy = h;
+  }
+  const hDist0 = Math.hypot(ox, oz);
+  if (
+    params?.dist !== undefined &&
+    params?.dist !== null &&
+    Number.isFinite(params.dist) &&
+    params.dist > 0 &&
+    hDist0 > 0
+  ) {
+    const scale = params.dist / hDist0;
+    ox *= scale;
+    oz *= scale;
+  }
+  const hDist = Math.hypot(ox, oz);
+  let look = base.look;
+  if (
+    params?.pitch !== undefined &&
+    params?.pitch !== null &&
+    Number.isFinite(params.pitch)
+  ) {
+    const pitchRad = (params.pitch * Math.PI) / 180;
+    look += hDist * Math.tan(pitchRad);
+  }
+  return {
+    off: [ox, oy, oz],
+    look,
+  };
+}
