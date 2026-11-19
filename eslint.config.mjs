@@ -31,21 +31,6 @@ const typeAware = {
   },
 };
 
-/**
- * The no-unsafe-* rules are on everywhere except the directories still being
- * cleaned up (issue #53). Remove an entry when its directory has no hits.
- */
-const unsafeBacklog = {
-  files: ["tests/client.spec.ts"],
-  rules: {
-    "@typescript-eslint/no-unsafe-assignment": "off",
-    "@typescript-eslint/no-unsafe-argument": "off",
-    "@typescript-eslint/no-unsafe-call": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unsafe-return": "off",
-  },
-};
-
 export default defineConfig(
   {
     ignores: [
@@ -92,7 +77,7 @@ export default defineConfig(
   // server/worker-configuration.d.ts is generated (`npm run types:server`, run
   // by `npm run lint`); without it every Workers type is unresolved and the
   // no-unsafe-* rules flag each use.
-  ...(process.env.ESLINT_NO_TYPES === "1" ? [] : [typeAware, unsafeBacklog]),
+  ...(process.env.ESLINT_NO_TYPES === "1" ? [] : [typeAware]),
   {
     // node:test's test() and describe() return promises by design.
     files: ["**/*.test.ts"],
