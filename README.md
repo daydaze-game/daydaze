@@ -1,6 +1,6 @@
 # Daydaze
 
-[![ci](https://github.com/daydaze-game/daydaze/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/daydaze-game/daydaze/actions/workflows/ci.yml)
+[![ci](https://github.com/dpologdvinity/daydaze/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dpologdvinity/daydaze/actions/workflows/ci.yml)
 ![Node 22.18+](https://img.shields.io/badge/node-%3E%3D22.18-339933?logo=node.js&logoColor=white)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 
