@@ -3,7 +3,11 @@
 // "this must exist" unwrap. Pure.
 
 /** The keys of `obj`, typed as its key union (`Object.keys` alone gives
- * `string[]`). The guard is real: it checks each key is on the object. */
+ * `string[]`). The filter only narrows the type; `k in obj` is true for every
+ * key, so it does not validate anything.
+ * shortcut: an object with extra properties beyond `T` (structural typing)
+ * yields keys outside `keyof T`; use it on literal tables, and pass an
+ * explicit key list instead if `obj` can come from elsewhere. */
 export function typedKeys<T extends object>(obj: T): Array<keyof T & string> {
   return Object.keys(obj).filter((k): k is keyof T & string => k in obj);
 }
