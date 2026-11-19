@@ -173,15 +173,42 @@ export function CityScene({
       fog.current.far = Math.min(420 + 320 * day.sun, 590);
     }
     if (sun.current) {
-      const [dx, dy, dz] = day.sunDirection;
-      sun.current.position.set(dx * 120, dy * 120, dz * 120);
-      // warm white at noon, deep gold low in the sky
-      sun.current.color.setRGB(
-        1,
-        0.95 - 0.25 * day.golden,
-        0.86 - 0.45 * day.golden,
-      );
-      sun.current.intensity = 2.6 * day.sun;
+      // celestial directional light: sun by day, reused as cool moonlight at
+      // night (#16) to avoid shader recompile hitches while keeping the light slot useful
+      const wSun = 2.6 * day.sun;
+      const wMoon = 0.38 * day.moon;
+      const total = wSun + wMoon;
+      if (total > 0) {
+        const dx =
+          (day.sunDirection[0] * wSun + day.moonDirection[0] * wMoon) / total;
+        const dy =
+          (day.sunDirection[1] * wSun + day.moonDirection[1] * wMoon) / total;
+        const dz =
+          (day.sunDirection[2] * wSun + day.moonDirection[2] * wMoon) / total;
+        const dLen = Math.hypot(dx, dy, dz) || 1;
+        sun.current.position.set(
+          (dx / dLen) * 120,
+          (dy / dLen) * 120,
+          (dz / dLen) * 120,
+        );
+
+        const sunR = 1;
+        const sunG = 0.95 - 0.25 * day.golden;
+        const sunB = 0.86 - 0.45 * day.golden;
+        // cool pale silver-blue moonlight
+        const moonR = 0.66;
+        const moonG = 0.76;
+        const moonB = 1.0;
+
+        const sW = wSun / total;
+        const mW = wMoon / total;
+        sun.current.color.setRGB(
+          sunR * sW + moonR * mW,
+          sunG * sW + moonG * mW,
+          sunB * sW + moonB * mW,
+        );
+        sun.current.intensity = total;
+      }
     }
     if (hemi.current) {
       hemi.current.color.setRGB(...day.hemiSky);
@@ -261,7 +288,7 @@ export function CityScene({
     <>
       <primitive attach="background" object={background} />
       <fog ref={fog} attach="fog" args={["#1a0d30", 120, 420]} />
-      {/* the sun, low and gold at either end of the day */}
+      {/* the celestial light: sun by day, moonlight by night */}
       <directionalLight
         ref={sun}
         position={[60, 80, -20]}
