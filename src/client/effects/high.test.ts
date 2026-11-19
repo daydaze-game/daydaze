@@ -3,13 +3,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setActiveTier } from "../../game/age.ts";
+import { stateSituation } from "../../game/effects/buzz.ts";
 import { DOSES, gameSeconds } from "../../game/effects/substances.ts";
+import { drink, getBuzz } from "./drunk.ts";
 import { ageHigh, dosesOnboard, getMeters, take } from "./high.ts";
 
 test("at 13+ a dose does nothing", () => {
   setActiveTier("teen");
   assert.equal(take("joint"), false);
   assert.equal(dosesOnboard(), 0);
+});
+
+test("at 13+ NPCs never react: the drink and the dose leave her sober", () => {
+  setActiveTier("teen");
+  drink("shot");
+  take("joint");
+  assert.equal(stateSituation(getMeters(), getBuzz()), null);
 });
 
 test("at 18+ a joint lands after its onset and wears off", () => {

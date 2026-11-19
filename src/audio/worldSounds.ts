@@ -194,6 +194,18 @@ export function playFireworkBoom(level: number): boolean {
   return true;
 }
 
+/** A car crash collision: a heavy low impact thump, crunch and metal scrape. */
+export function playCrashBoom(level: number): boolean {
+  const out = sfx();
+  if (!out || level <= 0) return false;
+  const { ctx, dest } = out;
+  const l = Math.min(1, level);
+  burst(ctx, dest, "lowpass", 180, 0.6 * l, 0.8);
+  burst(ctx, dest, "bandpass", 1600, 0.25 * l, 0.4);
+  burst(ctx, dest, "highpass", 3200, 0.1 * l, 0.2);
+  return true;
+}
+
 /** The singing shells' notes: a bell-like tone on a pentatonic step
  * (shell 0..3), or a sour low chord for a wrong note (`shell` -1). */
 export function playShellNote(shell: number): boolean {
