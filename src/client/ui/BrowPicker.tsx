@@ -1,6 +1,7 @@
 // Eyebrow silhouettes use the same curves as the character's painted brows.
 import { BROW_DESIGNS, browRise, type BrowDesign } from "../../game/brows.ts";
 import { BROWS, type Look } from "../../game/look.ts";
+import { onRadioKeyDown } from "./controls.tsx";
 
 function outline(brow: BrowDesign): string {
   const edge = (t: number, side: number) => {
@@ -29,16 +30,20 @@ export function BrowPicker({
   color?: string | undefined;
   onPick: (brows: Look["brows"]) => void;
 }) {
+  const selectedIndex = BROWS.findIndex((o) => o.id === value);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
   return (
     <div className="tiles brow-options" role="radiogroup" aria-label="Brows">
-      {previews.map((option) => (
+      {previews.map((option, idx) => (
         <button
           type="button"
           role="radio"
+          tabIndex={idx === activeIndex ? 0 : -1}
           aria-checked={value === option.id}
           className="tile"
           key={option.id}
           onClick={() => onPick(option.id)}
+          onKeyDown={(e) => onRadioKeyDown(e, BROWS, idx, onPick)}
         >
           <svg viewBox="0 0 120 48" aria-hidden="true">
             <path d={option.path} fill={color ?? option.color} />
