@@ -18,6 +18,7 @@ import {
 import { useReducedMotion } from "../motion.ts";
 import { patchBlacklight, uvGlow } from "./shared/blacklight.ts";
 import { rand, shapeTexture } from "./shared/nightSprites.ts";
+import { isMesh } from "../world/guards.ts";
 
 /** The floor extents of a room and how high its ceiling is. */
 export type Hall = {
@@ -103,7 +104,7 @@ export function NightGrade({ look }: { look: NightLook }) {
         o.position.y =
           o.userData.skyline * (1 - look.skyline) + o.position.y * look.skyline;
       }
-      if (o instanceof THREE.Mesh) {
+      if (isMesh(o)) {
         if (Array.isArray(o.material)) o.material.forEach(touch);
         else touch(o.material);
       }

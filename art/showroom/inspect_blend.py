@@ -1,7 +1,6 @@
 """Lists the meshes of a .blend (BLEND): name, triangles, materials, world size."""
 import os
 import bpy
-from mathutils import Vector
 
 bpy.ops.wm.open_mainfile(filepath=os.environ["BLEND"])
 total = 0

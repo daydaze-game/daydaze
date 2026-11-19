@@ -7,6 +7,7 @@ import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { BONE } from "./anims.ts";
 import type { Anchors } from "./Jewelry.tsx";
+import { isMesh } from "../../world/guards.ts";
 
 const TANK = new THREE.MeshStandardMaterial({
   color: "#ffb02e",
@@ -120,7 +121,7 @@ export function ScubaGear({
       built.head.remove(built.mask);
       for (const g of [built.tank, built.mask])
         g.traverse((o) => {
-          if (o instanceof THREE.Mesh) o.geometry.dispose();
+          if (isMesh(o)) o.geometry.dispose();
         });
     };
   }, [built]);

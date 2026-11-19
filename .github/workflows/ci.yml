@@ -11,6 +11,9 @@ on:
     tags: ["v*"]
   pull_request:
     branches: [main]
+  # the merge queue: lint, tests, typecheck and build on each PR combined with
+  # main and the PRs ahead of it, so two green PRs cannot merge into a red main
+  merge_group:
 
 # a newer push to the same branch or PR cancels the run in progress; runs on main
 # finish, or the status badge reads the latest cancelled run as failing
@@ -53,6 +56,8 @@ jobs:
       - run: npm ci
       - name: ESLint
         run: npm run lint
+      - name: Ruff (Python scripts in art/ and scripts/)
+        run: pipx run ruff==0.17.2 check .
       - name: Markdownlint (docs)
         run: npm run lint:md
       - name: Dead code (Knip)

@@ -18,6 +18,7 @@ import {
 import { useReducedMotion } from "../../motion.ts";
 import { useQuality } from "../../world/quality.ts";
 import { siren } from "./session.ts";
+import { isMesh, isSkinnedMesh } from "../../world/guards.ts";
 
 const URL = "/models/cove/mermaid.glb";
 /** A touch over life size, so her upper body matches the player's. */
@@ -76,7 +77,7 @@ export function Mermaid({
     root.traverse((node) => {
       // the skinned bounds are the rest pose's, not the animated one's
       node.frustumCulled = false;
-      if (node instanceof THREE.Mesh) {
+      if (isMesh(node)) {
         const recolor = (material: THREE.Material) => {
           const copy = material.clone();
           if (copy instanceof THREE.MeshStandardMaterial)
@@ -105,7 +106,7 @@ export function Mermaid({
       rig.mixer.stopAllAction();
       rig.materials.forEach((material) => material.dispose());
       rig.root.traverse((node) => {
-        if (node instanceof THREE.SkinnedMesh) node.skeleton.dispose();
+        if (isSkinnedMesh(node)) node.skeleton.dispose();
       });
     };
   }, [rig]);

@@ -3,6 +3,7 @@
 // Rotation is in degrees for editing. Development only.
 import * as THREE from "three";
 import type { Selection } from "./store.ts";
+import { isInstancedMesh } from "../guards.ts";
 
 export type Vec3 = [number, number, number];
 
@@ -35,7 +36,7 @@ function instanceParts(mesh: THREE.InstancedMesh, id: number) {
 
 function partsOf(sel: Selection) {
   const o = sel.object;
-  if (o instanceof THREE.InstancedMesh && sel.instanceId !== null) {
+  if (isInstancedMesh(o) && sel.instanceId !== null) {
     return instanceParts(o, sel.instanceId);
   }
   return { position: o.position, rotation: o.rotation, scale: o.scale };
@@ -67,7 +68,7 @@ export function writeTransform(
   const key = (["x", "y", "z"] as const)[axis];
   if (part === "rotation") p.rotation[key] = value / DEG;
   else p[part][key] = value;
-  if (o instanceof THREE.InstancedMesh && sel.instanceId !== null) {
+  if (isInstancedMesh(o) && sel.instanceId !== null) {
     const q = new THREE.Quaternion().setFromEuler(p.rotation);
     o.setMatrixAt(
       sel.instanceId,

@@ -6,6 +6,7 @@ import { bakedGeometry } from "../../world/bakedGeometry.ts";
 import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
+import { isMesh } from "../../world/guards.ts";
 
 /** Fans: four looks, standing with arms folded or cheering. */
 export const FAN_MODELS = [
@@ -47,7 +48,7 @@ export function usePersonAt(path: string): {
     // really 0.67 m tall here
     scene.updateMatrixWorld(true);
     scene.traverse((o) => {
-      if (o instanceof THREE.Mesh && !Array.isArray(o.material) && !found)
+      if (isMesh(o) && !Array.isArray(o.material) && !found)
         found = {
           geometry: bakedGeometry(o),
           material: o.material,

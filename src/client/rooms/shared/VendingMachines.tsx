@@ -11,6 +11,7 @@ import {
   type VendingRoom,
 } from "../../../game/vending.ts";
 import { paintVending } from "../../vending/vendingLook.ts";
+import { isMesh } from "../../world/guards.ts";
 
 const URL = "/models/street/vending.glb";
 
@@ -21,7 +22,7 @@ export function VendingMachines({ room }: { room: VendingRoom }): JSX.Element {
       ROOM_MACHINES[room].map((m) => {
         const copy = scene.clone(true);
         copy.traverse((o) => {
-          if (!(o instanceof THREE.Mesh)) return;
+          if (!isMesh(o)) return;
           const mat = Array.isArray(o.material) ? o.material[0] : o.material;
           if (!(mat instanceof THREE.MeshStandardMaterial)) return;
           const own = mat.clone();
@@ -38,7 +39,7 @@ export function VendingMachines({ room }: { room: VendingRoom }): JSX.Element {
     () => () =>
       machines.forEach(({ copy }) =>
         copy.traverse((o) => {
-          if (o instanceof THREE.Mesh) o.material.dispose();
+          if (isMesh(o)) [o.material].flat().forEach((m) => m.dispose());
         }),
       ),
     [machines],
