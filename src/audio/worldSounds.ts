@@ -50,6 +50,20 @@ function noiseBuffer(ctx: AudioContext): AudioBuffer {
   return buffer;
 }
 
+function rampDown(
+  source: AudioNode,
+  ctx: AudioContext,
+  dest: AudioNode,
+  level: number,
+  sec: number,
+  now = ctx.currentTime,
+) {
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(level, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + sec);
+  source.connect(gain).connect(dest);
+}
+
 function burst(
   ctx: AudioContext,
   dest: AudioNode,
@@ -67,10 +81,8 @@ function burst(
   filter.type = type;
   filter.frequency.setValueAtTime(frequency, now);
   filter.Q.setValueAtTime(q, now);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(level, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
-  source.connect(filter).connect(gain).connect(dest);
+  source.connect(filter);
+  rampDown(filter, ctx, dest, level, seconds, now);
   source.start(now, Math.random() * 1.5);
   source.stop(now + seconds + 0.02);
 }
@@ -78,30 +90,53 @@ function burst(
 function tone(
   ctx: AudioContext,
   dest: AudioNode,
-  type: OscillatorType,
-  startFreq: number,
-  endFreq: number,
+  f0: number,
+  f1: number,
   level: number,
-  seconds: number,
-  offset = 0,
+  sec: number,
 ) {
-  const now = ctx.currentTime + offset;
+  const now = ctx.currentTime;
   const osc = ctx.createOscillator();
-  osc.type = type;
-  osc.frequency.setValueAtTime(startFreq, now);
-  if (endFreq !== startFreq) {
-    osc.frequency.exponentialRampToValueAtTime(
-      Math.max(1, endFreq),
-      now + seconds,
-    );
-  }
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(level, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
-  osc.connect(gain).connect(dest);
+  osc.frequency.setValueAtTime(f0, now);
+  if (f1 !== f0)
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, f1), now + sec);
+  rampDown(osc, ctx, dest, level, sec, now);
   osc.start(now);
-  osc.stop(now + seconds + 0.02);
+  osc.stop(now + sec + 0.02);
 }
+
+const TYPES: readonly BiquadFilterType[] = ["bandpass", "lowpass", "highpass"];
+type StepBurst = readonly [
+  type: number,
+  freq: number,
+  level: number,
+  sec: number,
+  offset?: number,
+  q?: number,
+];
+
+const STEP_BURSTS: Record<string, readonly StepBurst[]> = {
+  wood: [[0, 1500, 0.06, 0.035, 0, 1.8]],
+  tile: [
+    [0, 2700, 0.08, 0.035, 0, 3.2],
+    [1, 950, 0.04, 0.025],
+  ],
+  metal: [[0, 1800, 0.05, 0.025, 0, 2]],
+  gravel: [
+    [0, 2300, 0.06, 0.028, 0, 1.5],
+    [0, 3200, 0.05, 0.032, 0.012, 1.8],
+    [0, 1700, 0.04, 0.035, 0.024, 1.2],
+  ],
+  puddle: [
+    [0, 1100, 0.07, 0.055, 0, 2],
+    [2, 2600, 0.06, 0.08, 0.01],
+  ],
+  soft: [[0, 1500, 0.05, 0.11]],
+  hard: [
+    [1, 880, 0.09, 0.065],
+    [0, 2400, 0.03, 0.02],
+  ],
+};
 
 /** One footstep synthesized for the material underfoot. */
 export function playStep(surface: Surface = "hard"): boolean {
@@ -110,55 +145,22 @@ export function playStep(surface: Surface = "hard"): boolean {
   const { ctx, dest } = out;
   const pitch = 0.88 + Math.random() * 0.24;
 
-  switch (surface) {
-    case "wood": {
-      // Hollow timber resonance + plank impact click
-      tone(ctx, dest, "sine", 340 * pitch, 140 * pitch, 0.11, 0.075);
-      burst(ctx, dest, "bandpass", 1500 * pitch, 0.06, 0.035, 0, 1.8);
-      break;
-    }
-    case "tile": {
-      // Sharp, crisp ceramic click with quick decay
-      burst(ctx, dest, "bandpass", 2700 * pitch, 0.08, 0.035, 0, 3.2);
-      burst(ctx, dest, "lowpass", 950 * pitch, 0.04, 0.025);
-      break;
-    }
-    case "metal": {
-      // Metallic tap with dual high-Q ringing frequencies
-      burst(ctx, dest, "bandpass", 1800 * pitch, 0.05, 0.025, 0, 2.0);
-      tone(ctx, dest, "sine", 820 * pitch, 820 * pitch, 0.05, 0.08);
-      tone(ctx, dest, "sine", 2460 * pitch, 2460 * pitch, 0.03, 0.06);
-      break;
-    }
-    case "gravel": {
-      // Staggered multi-grain crunch of loose stones
-      burst(ctx, dest, "bandpass", 2300 * pitch, 0.06, 0.028, 0, 1.5);
-      burst(ctx, dest, "bandpass", 3200 * pitch, 0.05, 0.032, 0.012, 1.8);
-      burst(ctx, dest, "bandpass", 1700 * pitch, 0.04, 0.035, 0.024, 1.2);
-      break;
-    }
-    case "puddle":
-    case "wet": {
-      // Wet water squelch + droplet splash spray
-      burst(ctx, dest, "bandpass", 1100 * pitch, 0.07, 0.055, 0, 2.0);
-      burst(ctx, dest, "highpass", 2600 * pitch, 0.06, 0.08, 0.01);
-      break;
-    }
-    case "soft":
-    case "sand":
-    case "grass": {
-      // Muffled soft scuff
-      burst(ctx, dest, "bandpass", 1500 * pitch, 0.05, 0.11);
-      break;
-    }
-    case "hard":
-    case "pavement":
-    default: {
-      // Solid pavement/floor impact tap
-      burst(ctx, dest, "lowpass", 880 * pitch, 0.09, 0.065);
-      burst(ctx, dest, "bandpass", 2400 * pitch, 0.03, 0.02);
-      break;
-    }
+  if (surface === "wood")
+    tone(ctx, dest, 340 * pitch, 140 * pitch, 0.11, 0.075);
+  else if (surface === "metal") {
+    tone(ctx, dest, 820 * pitch, 820 * pitch, 0.05, 0.08);
+    tone(ctx, dest, 2460 * pitch, 2460 * pitch, 0.03, 0.06);
+  }
+
+  const key =
+    surface === "wet"
+      ? "puddle"
+      : surface === "sand" || surface === "grass"
+        ? "soft"
+        : surface;
+  const bursts = STEP_BURSTS[key] ?? STEP_BURSTS.hard;
+  for (const b of bursts) {
+    burst(ctx, dest, TYPES[b[0]], b[1] * pitch, b[2], b[3], b[4], b[5]);
   }
   return true;
 }

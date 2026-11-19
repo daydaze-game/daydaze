@@ -78,13 +78,9 @@ import { GameMenu, closeMenu } from "./GameMenu.tsx";
 import type { CrimeSave } from "../../game/crime/record.ts";
 import type { Caught } from "./ShopliftPanel.tsx";
 import { VendingPanel } from "../vending/VendingPanel.tsx";
-import { GasMartPanel } from "../inventory/GasMartPanel.tsx";
 import { PouchPanel } from "../inventory/PouchPanel.tsx";
-import { WeedShopPanel } from "../inventory/WeedShopPanel.tsx";
-import { TaxiPanel } from "../city/TaxiPanel.tsx";
 import { driverSays, taxiRide } from "../city/taxiStore.ts";
 import { fareFor, planRoute, routeLength } from "../../game/city/taxi.ts";
-import { FuelStop } from "../city/FuelStop.tsx";
 import type { ParkedCar } from "../../game/city/drive.ts";
 import type { RoomId, Spawn } from "../../game/rooms.ts";
 import {
@@ -182,6 +178,22 @@ const CityMap = lazy(() =>
 );
 const DeliveryApp = lazy(() =>
   import("./phone/DeliveryApp.tsx").then((m) => ({ default: m.DeliveryApp })),
+);
+const TaxiPanel = lazy(() =>
+  import("../city/TaxiPanel.tsx").then((m) => ({ default: m.TaxiPanel })),
+);
+const FuelStop = lazy(() =>
+  import("../city/FuelStop.tsx").then((m) => ({ default: m.FuelStop })),
+);
+const GasMartPanel = lazy(() =>
+  import("../inventory/GasMartPanel.tsx").then((m) => ({
+    default: m.GasMartPanel,
+  })),
+);
+const WeedShopPanel = lazy(() =>
+  import("../inventory/WeedShopPanel.tsx").then((m) => ({
+    default: m.WeedShopPanel,
+  })),
 );
 
 // Sit and lean need furniture, so the player only picks these.
@@ -997,7 +1009,11 @@ export function Overlay({
         onCaught={onCaught}
       />
       <RoomPanel room={room} />
-      {room === "city" && <FuelStop coins={coins} onSpend={onSpend} />}
+      {room === "city" && (
+        <Suspense fallback={null}>
+          <FuelStop coins={coins} onSpend={onSpend} />
+        </Suspense>
+      )}
       {room === "city" && (
         <Suspense fallback={null}>
           <VolleyStop />
@@ -1009,9 +1025,15 @@ export function Overlay({
       )}
       <VendingPanel coins={coins} onSpend={onSpend} />
       <PouchPanel />
-      {room === "city" && <GasMartPanel />}
+      {room === "city" && (
+        <Suspense fallback={null}>
+          <GasMartPanel />
+        </Suspense>
+      )}
       {room === "green-haze" && (
-        <WeedShopPanel shop="dispensary" title="Dispensary" />
+        <Suspense fallback={null}>
+          <WeedShopPanel shop="dispensary" title="Dispensary" />
+        </Suspense>
       )}
       <Suspense fallback={null}>
         {room === "vinyl-vault" && (
@@ -1073,7 +1095,11 @@ export function Overlay({
                 <ElPanel />
               </Suspense>
             )}
-            {room === "city" && <TaxiPanel />}
+            {room === "city" && (
+              <Suspense fallback={null}>
+                <TaxiPanel />
+              </Suspense>
+            )}
             {room === "city" && !inCab && (
               <DockAction
                 id="drive"

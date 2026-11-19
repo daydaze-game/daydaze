@@ -30,8 +30,8 @@ This spec adds distinct procedural Web Audio synthesis for:
    - Park paths, sidewalks, streets -> `pavement` (maps to `hard`)
 
 2. **Room Floors:**
-   - Rooms declare their floor surface on `RoomDefinition.surface` (`wood`, `tile`, `metal`, `gravel`, `soft`, `hard`, `puddle`).
-   - Default room floor falls back to `tile` or `hard` based on venue character.
+   - Underfoot room surfaces are mapped via `roomSurface(roomId)` in `src/game/surface.ts` (`wood`, `tile`, `metal`, `gravel`, `soft`, `hard`, `puddle`), defaulting to `hard` pavement/flooring when unspecified.
+   - Beach areas such as `open-water` map to `soft` (dry sand), while submerged water venues (e.g. `mermaid-cove`) map to `puddle`.
 
 3. **Water Wading:**
    - When the player is in shallow water (`state === "wade"`), footsteps automatically trigger `puddle` splash sounds regardless of room or ground type.

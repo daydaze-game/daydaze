@@ -66,7 +66,6 @@ import { driving } from "./driving.ts";
 import { ignoresKeys } from "./keyTargets.ts";
 import { playGlide, playStep, type Surface } from "../../audio/worldSounds.ts";
 import { SKATE_SPEED, skates } from "./skates.ts";
-import { CITY_AREA } from "../../game/city/layout.ts";
 import { groundAt } from "../../game/city/ground.ts";
 import { roomSurface } from "../../game/surface.ts";
 import type { RoomId } from "../../game/roomTypes.ts";
@@ -547,9 +546,9 @@ export function PlayerController({
           const underfoot: Surface =
             wet === "wade"
               ? "puddle"
-              : area === CITY_AREA || !room || room === "city"
-                ? groundAt(player.pos.x, player.pos.z)
-                : roomSurface(room);
+              : room && room !== "city"
+                ? roomSurface(room)
+                : groundAt(player.pos.x, player.pos.z);
           stepOn(underfoot);
         }
       }

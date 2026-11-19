@@ -33,5 +33,6 @@ test("specific venues map to their expected signature materials", () => {
   assert.equal(roomSurface("warehouse"), "metal");
   assert.equal(roomSurface("garden"), "gravel");
   assert.equal(roomSurface("mini-golf"), "soft");
-  assert.equal(roomSurface("open-water"), "puddle");
+  assert.equal(roomSurface("open-water"), "soft");
+  assert.equal(roomSurface("mermaid-cove"), "puddle");
 });
