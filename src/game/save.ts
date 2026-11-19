@@ -8,6 +8,7 @@ import { cleanSets, cleanVisited } from "./collections.ts";
 import { cleanFarm, createDefaultFarm, type FarmSave } from "./farm.ts";
 import { validateBouquet, type Bouquet } from "./florist.ts";
 import { cleanGarden, createDefaultGarden, type GardenSave } from "./garden.ts";
+import { cleanGiftDay, cleanInventory, type Inventory } from "./inventory.ts";
 import type { RoomId } from "./rooms.ts";
 import { isIntensity, type Intensity } from "./effects/buzz.ts";
 import {
@@ -90,6 +91,10 @@ export type SaveV1 = {
   bouquet: Bouquet | null;
   /** Suburbia Community Garden plot state and produce inventory. */
   garden: GardenSave;
+  /** The weed pouch (inventory.ts); kept at 13+ too, but only used at 18+. */
+  inventory: Inventory;
+  /** The day (challenges.ts `dayOf`) the friend's free item was last taken. */
+  giftDay: number;
 };
 
 /** The localStorage key the save lives under. */
@@ -141,6 +146,8 @@ export function createDefaultSave(name: string): SaveV1 {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   };
 }
 
@@ -225,6 +232,8 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     pottery: cleanPot(save.get("pottery")),
     bouquet: validateBouquet(bouquet) ? bouquet : null,
     garden: cleanGarden(save.get("garden")),
+    inventory: cleanInventory(save.get("inventory")),
+    giftDay: cleanGiftDay(save.get("giftDay")),
   };
 }
 
