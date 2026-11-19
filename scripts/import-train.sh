@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-blender --background --factory-startup --python art/fair/build_train.py -- "$TMP" > /dev/null
+blender --background --factory-startup --python-exit-code 1 --python art/fair/build_train.py -- "$TMP" > /dev/null
 for part in engine tender wagon; do
   npx -y @gltf-transform/cli@4.5.1 optimize "$TMP/kiddie-$part.glb" "public/models/fair/kiddie-$part.glb" \
     --compress meshopt --simplify false --join false --instance false \

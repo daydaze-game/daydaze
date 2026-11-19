@@ -5,7 +5,7 @@
 # attribute pruning stay off so COLOR_0 and the UVs survive.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-blender --background --factory-startup --python art/forest/build_forest.py
+blender --background --factory-startup --python-exit-code 1 --python art/forest/build_forest.py
 OUT=public/models/forest
 mkdir -p "$OUT"
 for src in art/forest/.cache/out/*.glb; do

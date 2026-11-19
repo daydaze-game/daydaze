@@ -8,5 +8,5 @@ for prop in Crate Locker; do
 done
 # J-Toastie's CC-BY arcade machine; remove its original screen, then bake colors.
 curl -fsSL https://static.poly.pizza/e45e15cd-7b22-4b5d-ba19-e29fe9d5811a.glb -o /tmp/daydaze-scifi-arcade.glb
-blender --background --factory-startup --python "$root/art/scifi/cabinet.py" -- /tmp/daydaze-scifi-arcade.glb /tmp/daydaze-scifi-cabinet.glb
+blender --background --factory-startup --python-exit-code 1 --python "$root/art/scifi/cabinet.py" -- /tmp/daydaze-scifi-arcade.glb /tmp/daydaze-scifi-cabinet.glb
 npx -y @gltf-transform/cli@4.5.1 optimize /tmp/daydaze-scifi-cabinet.glb "$root/public/models/props/scifi-arcade.glb" --compress meshopt --texture-compress webp

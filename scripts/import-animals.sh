@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 # Name some animals (./scripts/import-animals.sh bear elk) to rebuild only those.
-blender --background --factory-startup --python art/animals/build_animals.py ${1:+-- "$@"}
+blender --background --factory-startup --python-exit-code 1 --python art/animals/build_animals.py ${1:+-- "$@"}
 OUT=public/models/animals
 mkdir -p "$OUT"
 for src in art/animals/.cache/out/*.glb; do

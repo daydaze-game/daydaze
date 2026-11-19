@@ -4,7 +4,7 @@ Source: "leg prosthesis" by victorghys, Sketchfab
 59d7e2b28b8b45ec8b179fff0134ceec (CC-BY 4.0), downloaded with the Sketchfab
 API into art/doll/blender/.cache/prosthesis-src.glb (git-ignored).
 
-    blender --background --factory-startup --python art/doll/blender/prosthesis.py
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/prosthesis.py
 
 Keeps only the pylon and its ankle adapter (the doll keeps her own foot,
 inside her shoe), centers the pylon over the origin, puts its top at y = 0

@@ -1,7 +1,7 @@
 """Dev-only: renders frames of a baked clip on the built doll, for checking
 a retarget by eye (Workbench, so it is quick).
 
-    blender --background --factory-startup --python art/doll/blender/anim_strip.py -- \
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/anim_strip.py -- \
         walk-easy /tmp/strip [frames=4] [view=side] [focus=0.5] [sex=female] [pack=social] [show=Outfit_jeans] [chest=1]
 
 Writes /tmp/strip_0.png ... one per frame, evenly over the clip; montage
