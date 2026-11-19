@@ -3,6 +3,7 @@
 // pull in the band's tunes and, through them, the whole karaoke songbook.
 import type { Vec2 } from "../walk.ts";
 import { AUDIENCE, BLANKETS } from "./park.ts";
+import { vec2 } from "../typed.ts";
 
 /** Blankets in front of the stage (the park's others are elsewhere). */
 export const STAGE_BLANKETS: readonly Vec2[] = BLANKETS.filter(
@@ -18,6 +19,6 @@ export type BlanketSeat = { id: string; at: Vec2 };
 export const BLANKET_SEATS: readonly BlanketSeat[] = STAGE_BLANKETS.map(
   ([x, z], i) => ({
     id: `park-blanket-${i}`,
-    at: [x, z + 0.1] as Vec2,
+    at: vec2(x, z + 0.1),
   }),
 );

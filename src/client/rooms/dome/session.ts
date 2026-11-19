@@ -4,6 +4,7 @@ import {
   AIM_LIMIT,
   GAME_SECONDS,
   NEW_SHOOTOUT,
+  type Shootout,
   scoreShot,
   shoot,
   spotFor,
@@ -21,16 +22,26 @@ import { crowd } from "../shared/Stands.tsx";
  */
 export type Phase = "off" | "aim" | "power" | "flying" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  game: Shootout;
+  endsAt: number;
+  since: number;
+  aim: number;
+  shot: ShotResult | null;
+  last: ShotKind | null;
+}
+
+const OFF: State = {
+  phase: "off",
   game: NEW_SHOOTOUT,
   /** performance.now() when the clock runs out. */
   endsAt: 0,
   /** When the current sweep, or the shot's flight, started. */
   since: 0,
   aim: 0,
-  shot: null as ShotResult | null,
-  last: null as ShotKind | null,
+  shot: null,
+  last: null,
 };
 
 export const hoops = createStore(OFF);

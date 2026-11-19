@@ -62,7 +62,7 @@ function palmParts() {
 /** Adds one potted palm at (x, y, z), scaled like the shared Palm. */
 export function addPalm(b: Batch, x: number, y: number, z: number, scale = 1) {
   const { pot, trunk, frond } = palmParts();
-  const at = (dy: number) => [x, y + dy * scale, z] as [number, number, number];
+  const at = (dy: number): [number, number, number] => [x, y + dy * scale, z];
   b.add(pot, GOLD, { position: at(0.25), scale }).add(trunk, TRUNK, {
     position: at(0.45),
     scale,

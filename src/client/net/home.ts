@@ -14,11 +14,16 @@ import { onlineSession } from "./session.ts";
 
 type Who = { id: string; name: string };
 
-export const homeVisit = createStore({
+export const homeVisit = createStore<{
+  owner: Who | null;
+  home: HomeSave | null;
+  bounced: boolean;
+  note: string;
+}>({
   /** Whose place you're going to or at; null for your own. */
-  owner: null as Who | null,
+  owner: null,
   /** Their layout, once it arrives. */
-  home: null as HomeSave | null,
+  home: null,
   /** Set when you must leave (turned away, locked out): App takes you back. */
   bounced: false,
   note: "",

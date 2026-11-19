@@ -2,9 +2,10 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { test } from "node:test";
-import { ARTWORKS, artworkUrl, fitInside, type ArtworkId } from "./artworks.ts";
+import { ARTWORKS, artworkUrl, fitInside } from "./artworks.ts";
+import { typedKeys } from "./typed.ts";
 
-const ids = Object.keys(ARTWORKS) as ArtworkId[];
+const ids = typedKeys(ARTWORKS);
 
 test("every artwork has an image under public/art and a distinct title", () => {
   for (const id of ids) {

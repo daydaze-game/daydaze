@@ -27,13 +27,15 @@ export type PouchSave = {
 
 const NONE: Inventory = {};
 
-export const pouchDesk = createStore({
+export const pouchDesk = createStore<
+  PouchSave & { note: string; commit: ((next: PouchSave) => void) | null }
+>({
   inventory: NONE,
   giftDay: 0,
   coins: 0,
   /** What just happened, for the pouch panel's status line. */
   note: "",
-  commit: null as ((next: PouchSave) => void) | null,
+  commit: null,
 });
 
 const commit = (next: PouchSave, note: string) => {
