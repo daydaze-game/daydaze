@@ -44,7 +44,11 @@ import {
 } from "../../../game/look.ts";
 import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
-import { heavyLid } from "../../../game/effects/substances.ts";
+import {
+  heavyLid,
+  peakBody,
+  type Substance,
+} from "../../../game/effects/substances.ts";
 import { bodyFor } from "../../../game/effects/buzz.ts";
 import { useReducedMotion } from "../../motion.ts";
 import {
@@ -228,6 +232,9 @@ type Props = {
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
   hold?: string | undefined;
   buzzed?: boolean | undefined;
+  /** A peer's felt substance, from their move action (the player's own
+   * doll reads the live meters instead). */
+  under?: Substance | undefined;
   walk?: { current: WalkState } | undefined;
   seed?: number | undefined;
   /** The player's own doll: full detail at any distance on the low tier. */
@@ -920,6 +927,7 @@ export function HumanDoll({
   couple,
   hold: picked,
   buzzed = false,
+  under,
   walk,
   seed = 0,
   own = false,
@@ -1236,9 +1244,13 @@ export function HumanDoll({
           seed,
           afloat: afloatNow,
           seated: gait.seated,
-          // only the player's own drinks and doses are known: strangers
-          // stand sober (peers: issue #8)
-          body: own ? bodyFor(getMeters(), getBuzz(), getHangover()) : null,
+          // the player's own drinks and doses are known live; a peer's
+          // substance comes in their move action (their drinks don't)
+          body: own
+            ? bodyFor(getMeters(), getBuzz(), getHangover())
+            : under
+              ? peakBody(under)
+              : null,
         });
         if (want?.need) void loadPack(body.key, want.need);
       }
@@ -1370,7 +1382,8 @@ export function HumanDoll({
     // open eyes rest with the upper lid a little lowered, not wide and staring
     // only when it changes (or new meshes mount): a dictionary lookup per
     // worn mesh per doll per frame adds up in a crowd
-    // molly and cocaine (her own doll only; peers: issue #8) open the eyes
+    // molly and cocaine (her own doll only: a peer sends the substance, not
+    // its level) open the eyes
     // wide, in fiftieths so the morphs change a few times a second, not every
     // frame; only molly smiles
     const meters = own ? getMeters() : null;

@@ -49,7 +49,8 @@ substances; research it so it's accurate"). Research with sources:
   can skip ahead a minute.
 - `src/game/dance/idlePlan.ts` `bodyIdle()` picks loop or tic from `BODY`.
   `pickClip` takes the doll's `body`, and `HumanDoll` passes it for the
-  player's doll only (peers: issue #8).
+  player's doll from the live meters; a peer's doll gets `under` (the substance
+  from the move action's `^x` tag, `peerAction.ts`) and stands at its peak body.
 - `src/client/effects/DrunkPost.tsx` holds the post passes; each substance adds
   its uniforms to `DrunkEffect`. Acid also adds `TracerEffect`: it keeps two
   ping-ponged history targets (`max(current, old * 0.86)`) and draws one extra
