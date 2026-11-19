@@ -8,6 +8,10 @@ b=$1; w=$2; msg=$3; M=${DAYDAZE_MAIN:-$HOME/git/daydaze}; d=$M/.worktrees/$w
 [ -d "$d" ] || { git -C "$M" worktree add -q "$d" "$b" && ln -s "$M/node_modules" "$d/node_modules"; }
 cd "$d" || exit 1
 [ -z "$(git status --porcelain)" ] || { echo "$w DIRTY: $(git status --porcelain | head -3 | tr '\n' ' ')"; exit 1; }
+# GitHub adds merge commits from main to PR branches: pull them first or the push is rejected
+if git ls-remote --exit-code --heads origin "$b" > /dev/null 2>&1; then
+  git pull -q --no-rebase origin "$b" > "/tmp/land-$w-pull.log" 2>&1 || { echo "$w PULL-FAILED: $(head -2 "/tmp/land-$w-pull.log" | tr '\n' ' ')"; exit 1; }
+fi
 # a conflict with main has to be solved here; the queue cannot merge a conflicted PR
 git fetch -q origin main
 if ! git rebase origin/main > "/tmp/land-$w-rebase.log" 2>&1; then git rebase --abort; echo "$w CONFLICT $(grep -o 'Merge conflict in .*' "/tmp/land-$w-rebase.log" | tr '\n' ' ')"; exit 1; fi
