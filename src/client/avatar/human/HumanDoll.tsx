@@ -507,6 +507,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     hairColor,
     body: build,
     face: faceCode,
+    browColor,
   } = look;
   // the man's clip file loads only once a man is in the scene
   useEffect(() => {
@@ -536,6 +537,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
         hairColor,
         body: build,
         face: faceCode,
+        browColor,
       },
       marks,
       body.key,
@@ -569,6 +571,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     hairColor,
     build,
     faceCode,
+    browColor,
     invalidate,
   ]);
   useEffect(() => {
