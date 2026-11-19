@@ -1,7 +1,8 @@
 name: PR screenshots
 # Screenshots for pull requests that change what players see. The changed
 # files pick the shots (scripts/pr-shots.ts), screenshots.yml takes them, and
-# a comment on the PR links the run's `screenshots` artifact (kept 7 days).
+# a comment on the PR links the run's `screenshots` artifact (kept 7 days)
+# and its permanent release on dpologdvinity/daydaze-artifacts.
 # Download: gh run download <run-id> -n screenshots
 # Docs-only or unmapped changes pick nothing, so no shots run.
 on:
@@ -47,6 +48,8 @@ jobs:
       contents: write
     with:
       shots: ${{ needs.pick.outputs.shots }}
+    secrets:
+      ARTIFACTS_TOKEN: ${{ secrets.ARTIFACTS_TOKEN }}
   comment:
     needs: [pick, shots]
     # still comment when a shot failed, so the PR says so
@@ -62,6 +65,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           SHOTS: ${{ needs.pick.outputs.shots }}
           RESULT: ${{ needs.shots.result }}
+          ARCHIVE: ${{ needs.shots.outputs.archive }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           marker='<!-- pr-screenshots -->'
@@ -72,6 +76,7 @@ jobs:
             echo "Shots: \`$SHOTS\`"
             echo
             echo "Download the \`screenshots\` artifact from [this run]($RUN_URL#artifacts) (kept 7 days), or \`gh run download ${RUN_URL##*/} -n screenshots\`."
+            if [ -n "$ARCHIVE" ]; then echo "Permanent copy: $ARCHIVE"; fi
             echo "Copy the good ones into \`docs/screenshots/\`."
           } > body.md
           # one comment per PR: update ours if it is there, else post it

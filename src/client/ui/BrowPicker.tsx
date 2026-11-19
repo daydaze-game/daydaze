@@ -22,9 +22,11 @@ const previews = BROWS.map((option) => ({
 
 export function BrowPicker({
   value,
+  color,
   onPick,
 }: {
   value: Look["brows"];
+  color?: string | undefined;
   onPick: (brows: Look["brows"]) => void;
 }) {
   return (
@@ -39,7 +41,7 @@ export function BrowPicker({
           onClick={() => onPick(option.id)}
         >
           <svg viewBox="0 0 120 48" aria-hidden="true">
-            <path d={option.path} fill={option.color} />
+            <path d={option.path} fill={color ?? option.color} />
           </svg>
           <span>{option.label}</span>
         </button>

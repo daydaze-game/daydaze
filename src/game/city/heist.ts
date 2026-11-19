@@ -208,6 +208,14 @@ export function heistOutcome(slot: number): HeistOutcome {
   return hash(slot, 2.17) < 0.5 ? "escape" : "caught";
 }
 
+/** The first slot from `from` whose heist ends `outcome`. */
+export function heistSlotWith(outcome: HeistOutcome, from = 1000): number {
+  for (let s = from; s < from + 200; s++) {
+    if (heistOutcome(s) === outcome) return s;
+  }
+  throw new Error(`no ${outcome} heist`);
+}
+
 /** Seconds into the heist under way at `t`, or null when none is. */
 export function heistInto(t: number): number | null {
   const into = t - heistStart(Math.floor(t / HEIST_SLOT));
