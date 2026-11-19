@@ -48,10 +48,9 @@ try {
       const face = encodeFace({ ...DEFAULT_FACE, [group.field]: option.id });
       await page.evaluate((code) => {
         const select: unknown = Reflect.get(window, "setPreviewFace");
-        const isFaceFn = (fn: unknown): fn is (faceCode: string) => void =>
-          typeof fn === "function";
-        if (!isFaceFn(select)) throw new Error("Missing live preset selection");
-        select(code);
+        if (typeof select !== "function")
+          throw new Error("Missing live preset selection");
+        Reflect.apply(select, undefined, [code]);
       }, face);
       await page.waitForFunction(
         (code) =>

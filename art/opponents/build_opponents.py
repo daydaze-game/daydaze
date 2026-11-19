@@ -211,7 +211,7 @@ def build(sex):
     top = max(v.co.z for v in body.data.vertices)
     # landmarks from the rig, in metres (the pack's bones are the same on both)
     z = lambda bone: rig.data.bones[bone].head_local.z
-    waist, hip, knee, ankle = z("spine_01") - 0.02, z("pelvis"), z("calf_l"), z("foot_l")
+    waist, _, _, ankle = z("spine_01") - 0.02, z("pelvis"), z("calf_l"), z("foot_l")
     chest0, neck = z("spine_03") - 0.05, z("neck_01")
     elbow = rig.data.bones["lowerarm_l"].head_local.x
     shoulder = rig.data.bones["upperarm_l"].head_local.x

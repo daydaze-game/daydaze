@@ -11,8 +11,6 @@ and the Kenney ship wreck) and gulls.glb (the standing and the flying seagull).
 Every node's real-world size is its natural size scaled by SCALE below.
 """
 
-import glob
-import math
 import os
 
 import bpy

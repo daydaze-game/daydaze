@@ -176,7 +176,8 @@ export function Tiles<T extends string>({
           <img
             src={`/closet/${tiles}-${o.id}.webp`}
             alt=""
-            loading="lazy"
+            loading={idx < 6 ? undefined : "lazy"}
+            decoding="async"
             onError={(e) => {
               e.currentTarget.hidden = true;
             }}

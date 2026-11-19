@@ -5,6 +5,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import { isMesh } from "./guards.ts";
 
 function clamp(color: THREE.Color) {
   const max = Math.max(color.r, color.g, color.b);
@@ -30,7 +31,7 @@ export function NeonClamp() {
       // eslint-disable-next-line no-restricted-syntax -- once per 30 frames, to collect scene materials
       const found = new Set<THREE.MeshBasicMaterial>();
       scene.traverse((obj) => {
-        if (!(obj instanceof THREE.Mesh)) return;
+        if (!isMesh(obj)) return;
         const m = obj.material;
         if (Array.isArray(m)) {
           for (const x of m)

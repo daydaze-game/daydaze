@@ -117,7 +117,7 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
     canvas.gl = gl;
     canvas.camera = () => get().camera;
     // the extension's hook is an EventTarget on window; it takes the object
-    const hook = Reflect.get(window, "__THREE_DEVTOOLS__");
+    const hook: unknown = Reflect.get(window, "__THREE_DEVTOOLS__");
     if (hook instanceof EventTarget) {
       hook.dispatchEvent(new CustomEvent("observe", { detail: scene }));
       hook.dispatchEvent(new CustomEvent("observe", { detail: gl }));

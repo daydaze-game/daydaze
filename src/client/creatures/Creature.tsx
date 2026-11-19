@@ -22,6 +22,7 @@ import { clipToPlay } from "../../game/creature.ts";
 import { lit } from "./glow.ts";
 import { useReducedMotion } from "../motion.ts";
 import { useQuality } from "../world/quality.ts";
+import { isMesh, isSkinnedMesh } from "../world/guards.ts";
 
 /** Where a creature stands, which way it faces and what it is doing. */
 export type CreaturePose = {
@@ -81,7 +82,7 @@ export function Creature({
     root.traverse((o) => {
       // skinned bounds come from the bind pose; the walk leaves them
       o.frustumCulled = false;
-      if (glow > 0 && o instanceof THREE.Mesh) {
+      if (glow > 0 && isMesh(o)) {
         o.material = Array.isArray(o.material)
           ? o.material.map((m: THREE.Material) => lit(m, glow))
           : lit(o.material, glow);
@@ -100,7 +101,7 @@ export function Creature({
       // bone matrices follow the posed bones, not the bind pose
       root.updateMatrixWorld(true);
       root.traverse((o) => {
-        if (o instanceof THREE.SkinnedMesh) {
+        if (isSkinnedMesh(o)) {
           o.skeleton.update();
           o.computeBoundingBox();
         }
@@ -117,7 +118,7 @@ export function Creature({
       // (rebuilt if the rig is shown again; the mixer's cache is not dropped:
       // a remount, as React's dev check does, plays the same actions again)
       rig.root.traverse((o) => {
-        if (o instanceof THREE.SkinnedMesh) o.skeleton.dispose();
+        if (isSkinnedMesh(o)) o.skeleton.dispose();
       });
     },
     [rig],

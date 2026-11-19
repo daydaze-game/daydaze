@@ -93,6 +93,7 @@ import {
 import { Jewelry, readAnchors } from "./Jewelry.tsx";
 import { Glasses } from "./Glasses.tsx";
 import { HearingAids } from "./HearingAids.tsx";
+import { isBone, isMesh, isSkinnedMesh } from "../../world/guards.ts";
 
 /**
  * The 3D doll: a skinned, shape-keyed body built in Blender from MakeHuman's
@@ -263,7 +264,7 @@ export function partsFor(look: Look, swim: SwimLook | null) {
 const morphMeshes = (root: THREE.Object3D) => {
   const out: THREE.Mesh[] = [];
   root.traverse((o) => {
-    if (o instanceof THREE.Mesh && o.morphTargetDictionary) out.push(o);
+    if (isMesh(o) && o.morphTargetDictionary) out.push(o);
   });
   return out;
 };
@@ -346,7 +347,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     const scene = cloneSkinned(gltf.scene);
     const bones = new Map<string, THREE.Bone>();
     scene.traverse((o) => {
-      if (o instanceof THREE.Bone) bones.set(o.name, o);
+      if (isBone(o)) bones.set(o.name, o);
     });
     // the built-pose driver reads the bones' rest, so it is made first
     const built = new BuiltPose(bones, scene);
@@ -420,7 +421,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     // far body, where each is a pixel or two and the proxy has no sockets
     const eyeballs: THREE.Mesh[] = [];
     scene.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
+      if (!isMesh(o)) return;
       o.frustumCulled = false;
       const name = o.material instanceof THREE.Material ? o.material.name : "";
       if (name === "eye" || name === "cornea") eyeballs.push(o);
@@ -437,15 +438,12 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     // shown instead of the full skin (and lashes) when the camera is far
     const near: THREE.Mesh[] = [];
     scene.traverse((o) => {
-      if (
-        o instanceof THREE.SkinnedMesh &&
-        (o.material === skin || o.material === lashes)
-      )
+      if (isSkinnedMesh(o) && (o.material === skin || o.material === lashes))
         near.push(o);
     });
     const lods: THREE.SkinnedMesh[] = [];
     loGltf.scene.traverse((o) => {
-      if (!(o instanceof THREE.SkinnedMesh) || lods.length) return;
+      if (!isSkinnedMesh(o) || lods.length) return;
       const mesh = o.clone();
       mesh.bind(
         new THREE.Skeleton(
@@ -462,8 +460,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       lods.push(mesh);
       scene.add(mesh);
     });
-    for (const mesh of near)
-      if (mesh instanceof THREE.SkinnedMesh) addShinWeights(mesh);
+    for (const mesh of near) if (isSkinnedMesh(mesh)) addShinWeights(mesh);
     return {
       scene,
       near,
@@ -824,7 +821,7 @@ function buildPart(
   {
     const meshes: THREE.SkinnedMesh[] = [];
     scene.traverse((o) => {
-      if (o instanceof THREE.SkinnedMesh) meshes.push(o);
+      if (isSkinnedMesh(o)) meshes.push(o);
     });
     const group = new THREE.Group();
     const materials: THREE.Material[] = [];

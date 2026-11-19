@@ -18,6 +18,7 @@ import {
 } from "./dreamMeshes.ts";
 
 import { DreamLandmarkBuilding, isLandmark } from "./DreamLandmarks.tsx";
+import { isMesh } from "../world/guards.ts";
 
 const URL = "/models/city-dream/architecture.glb";
 
@@ -197,8 +198,7 @@ export function DreamBuildings() {
       [false, true].map((far) => {
         const name = far ? `${kind}-lo` : kind;
         const node = gltf.scene.getObjectByName(name);
-        if (!(node instanceof THREE.Mesh))
-          throw new Error(`architecture.glb has no ${name}`);
+        if (!isMesh(node)) throw new Error(`architecture.glb has no ${name}`);
         const mesh = createDreamMesh(prepared(node, far), material);
         mesh.name = `dream-${name}`;
         // The library grows buffers as needed and culls each building.
