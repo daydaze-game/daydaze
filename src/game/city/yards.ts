@@ -19,7 +19,7 @@ import type { Neighborhood } from "./layout.ts";
 import type { FurnitureSpot } from "./furniture.ts";
 import { INFILL_LANES, INFILL_YARDS } from "./infill.generated.ts";
 import type { Rect, YardKind } from "./infill.ts";
-import type { Instance, Kind } from "./plan.ts";
+import type { Instance, Kind } from "./instanceTypes.ts";
 
 export type { Rect, YardKind };
 

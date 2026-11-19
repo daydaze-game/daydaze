@@ -28,9 +28,10 @@ import { cameraHold } from "./cameraHold.ts";
 import { driving } from "./driving.ts";
 import { getCamOverride, subscribeCamOverride } from "./camOverride.ts";
 import type { Player } from "./PlayerController.tsx";
+import type { View } from "./view.ts";
+export type { View } from "./view.ts";
 
 /** `detail` is only reachable with `?view=detail`, for close-up screenshots. */
-export type View = "room" | "full" | "face" | "detail";
 
 export const VIEWS: readonly { id: View; label: string }[] = [
   { id: "room", label: "Room" },

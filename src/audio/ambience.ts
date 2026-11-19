@@ -1,7 +1,7 @@
 // Pure selection of the ambience appropriate to a place and its daylight.
 import type { RoomId } from "../game/rooms.ts";
 import type { Neighborhood } from "../game/city/layout.ts";
-import type { OneShotId } from "./soundFiles.ts";
+import type { OneShotId } from "./soundIds.ts";
 import { daylightAt } from "../game/city/daylight.ts";
 
 /** Every looped sound file (public/audio/<id>.ogg). */

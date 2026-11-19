@@ -6,7 +6,7 @@
 import { hash, pick } from "./hash.ts";
 import { roofKit } from "./roofs.ts";
 import type { Building } from "./layout.ts";
-import type { Buckets, Front } from "./dressing.ts";
+import type { Buckets, Front } from "./dressingTypes.ts";
 
 // the window rows sit on the same floors as dressing's windows
 const FLOOR = 3.4;

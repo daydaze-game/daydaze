@@ -3,7 +3,7 @@
 // placeholder coin prices (food is free until the wallet lands). Three venues
 // have an interior room; the rest stand in the city as storefronts.
 import { activeTier, byTier, type ContentTier } from "../age.ts";
-import type { RoomId } from "../rooms.ts";
+import type { RoomId } from "../roomTypes.ts";
 import type { NeighborhoodId } from "../dialogue/types.ts";
 import type { Drink } from "../effects/buzz.ts";
 
