@@ -46,6 +46,18 @@ test("pedestrians stay on walkable ground and keep walking back and forth", () =
   assert.ok(Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.z - b.z) < 1e-6);
 });
 
+test("pedestrians stand in the same place for every client at the same wall time", () => {
+  // wall seconds are ~1.7e9: the walk must stay exact at that size, so two
+  // clients that loaded at different moments still agree
+  const wall = 1_763_500_000.25;
+  const p = PEDESTRIANS[3];
+  const lap = (2 * Math.hypot(p.b[0] - p.a[0], p.b[1] - p.a[1])) / p.speed;
+  const a = pedestrianAt(p, wall);
+  const b = pedestrianAt(p, wall + lap * 12);
+  assert.ok(Math.abs(a.x - b.x) < 1e-3 && Math.abs(a.z - b.z) < 1e-3);
+  assert.deepEqual(pedestrianAt(p, wall), a);
+});
+
 test("only the nearest few are drawn, nearest first", () => {
   const near = nearestPedestrians(CITY_SPAWN.position, 30, 4, 60);
   assert.ok(near.length <= 4);
