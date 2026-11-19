@@ -149,7 +149,9 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 - Merge gate: nobody pushes to `main`. GitHub merges a PR only when it is up
   to date with `main` and every required check passes (the browser suites
   included), so two PRs that are green alone cannot merge into a red `main`.
-  To land a PR, turn on auto-merge: `gh pr merge <n> --auto --merge`, or
+  The `automerge` workflow turns auto-merge on for every PR that is not a
+  draft (when it opens or is marked ready). To do it by hand:
+  `gh pr merge <n> --auto --merge`, or
   `docs/agents/scripts/land.sh <branch> <worktree> "<message>"`, which pushes,
   opens the PR, turns auto-merge on, waits for the merge and removes the
   worktree and branch. The `auto-update` workflow brings the oldest

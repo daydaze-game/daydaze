@@ -39,6 +39,7 @@ export default defineConfig(
       "coverage/",
       "test-results/",
       "playwright-report/",
+      "blob-report/",
       ".worktrees/",
       // agent and harness scratch (git-excluded)
       ".claude/",
@@ -48,9 +49,15 @@ export default defineConfig(
       ".impeccable/",
       "skills/",
       "tmp/",
+      ".tripo-home/",
+      ".playwright/",
+      ".playwright-mcp/",
+      ".playwright-cli/",
+      ".venv/",
       // git-ignored local downloads and workspaces (CI never sees them)
       "local-assets/",
       "recordings/",
+      "test-map/",
       "art/",
       // early exploration builds, kept for reference
       "prototypes/",
