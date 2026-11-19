@@ -10,6 +10,12 @@ import * as THREE from "three";
 import { clampToArea, type WalkArea } from "../../../game/area.ts";
 import { placePlayer, type Player } from "../PlayerController.tsx";
 import {
+  clearCamOverride,
+  formatCamOverride,
+  getCamOverride,
+  setCamOverride,
+} from "../camOverride.ts";
+import {
   applyWireframe,
   countLights,
   countObjects,
@@ -111,6 +117,19 @@ export function DevProbe({ player, area }: { player: Player; area: WalkArea }) {
       get,
       player,
       pick: null as THREE.Object3D | null,
+      get cam() {
+        return formatCamOverride(getCamOverride());
+      },
+      getCam: () => getCamOverride(),
+      setCam: (spec: unknown) => setCamOverride(spec),
+      clearCam: () => clearCamOverride(),
+      pinCam: () => {
+        const { camera, controls } = get();
+        const eye = camera.position;
+        const target = (controls as { target?: THREE.Vector3 } | null)?.target;
+        const look = target ?? new THREE.Vector3(0, 0, 0);
+        return setCamOverride({ eye, look });
+      },
     };
     Object.assign(window, { __dd: dd });
     canvas.scene = scene;

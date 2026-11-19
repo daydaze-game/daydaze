@@ -1,0 +1,30 @@
+name: auto-assign
+# Every issue and pull request belongs to the owner (AGENTS.md: assign new
+# issues to dpologdvinity). Agents sometimes forget the --assignee flag, so
+# this assigns the owner to anything opened without an assignee.
+# pull_request_target gives Dependabot's PRs a token that may assign; the job
+# never checks out or runs the PR's code, so that event is safe here.
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  assign:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    if: >-
+      (github.event_name == 'issues' && toJSON(github.event.issue.assignees) == '[]') ||
+      (github.event_name == 'pull_request_target' && toJSON(github.event.pull_request.assignees) == '[]')
+    steps:
+      - name: Assign the owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          OWNER: ${{ github.repository_owner }}
+        # the issues API assigns pull requests too (every PR is an issue)
+        run: gh api -X POST "repos/$REPO/issues/$NUMBER/assignees" -f "assignees[]=$OWNER" > /dev/null

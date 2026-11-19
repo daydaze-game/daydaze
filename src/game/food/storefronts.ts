@@ -2,13 +2,12 @@
 // a sidewalk row beside a north-south street: in its own neighborhood when
 // that neighborhood is built, else on Downtown's rows, in data order. A
 // venue with an interior room gets a street door on its row's sidewalk.
-import type { Building } from "../city/layout.ts";
-import type { RoomId } from "../rooms.ts";
+import type { Building, Neighborhood } from "../city/buildingTypes.ts";
+import type { RoomId } from "../roomTypes.ts";
 import type { Vec2 } from "../walk.ts";
 import { INTERIOR_SPAWN } from "./interiors.ts";
 import { FOOD_VENUES } from "./venues.ts";
 import { NEIGHBORHOOD_IDS, type NeighborhoodId } from "../dialogue/types.ts";
-import type { Neighborhood } from "../city/layout.ts";
 
 function isNeighborhoodId(value: string): value is NeighborhoodId {
   return NEIGHBORHOOD_IDS.some((n) => n === value);

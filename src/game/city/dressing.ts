@@ -23,7 +23,7 @@ import {
   type Building,
   type BuildingStyle,
 } from "./layout.ts";
-import type { Instance, Kind } from "./plan.ts";
+import type { Instance, Kind } from "./instanceTypes.ts";
 import { hash, pick } from "./hash.ts";
 import { CAR_COLORS } from "./traffic.ts";
 import {
@@ -38,26 +38,10 @@ import { boardwalkFurniture } from "./boardwalk.ts";
 import { detailBuilding } from "./detail.ts";
 import { YARD_CARS, YARD_FURNITURE } from "./yards.ts";
 import { DISTRICT_NAMES } from "./districtNames.ts";
+import type { Placed, Buckets, Front } from "./dressingTypes.ts";
+export type { Placed, Buckets, Front } from "./dressingTypes.ts";
 
 export { hash };
-
-/** An instance on the ground at `at`, so the planner can cull it by cell. */
-export type Placed = { at: Vec2; kind: Kind; instance: Instance };
-export type Buckets = Record<Kind, Instance[]>;
-
-/** Where a building faces the avenue, and which way is out of it. */
-export type Front = {
-  x0: number;
-  x1: number;
-  z0: number;
-  z1: number;
-  cx: number;
-  cz: number;
-  w: number;
-  h: number;
-  faceZ: number;
-  out1: number;
-};
 
 /** Gate arches stand this tall; their beam hangs just under the top. */
 export const ARCH_TOP = 17;
