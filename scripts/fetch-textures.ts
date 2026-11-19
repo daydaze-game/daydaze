@@ -5,7 +5,14 @@
 // refetch it. Downloads land in art/textures/.cache/ (git-ignored).
 //   node --experimental-strip-types scripts/fetch-textures.ts [id...]
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  closeSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { chromium } from "@playwright/test";
 
@@ -82,10 +89,24 @@ const SETS: readonly (readonly [string, Source, string?])[] = [
 ];
 
 async function download(url: string, to: string) {
-  if (existsSync(to)) return;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${url}`);
-  writeFileSync(to, Buffer.from(await res.arrayBuffer()));
+  const data = Buffer.from(await res.arrayBuffer());
+  try {
+    const fd = openSync(to, "wx");
+    try {
+      writeFileSync(fd, data);
+    } finally {
+      closeSync(fd);
+    }
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      !("code" in error) ||
+      error.code !== "EEXIST"
+    )
+      throw error;
+  }
 }
 
 /** The three source images for a set, downloaded into the cache. */

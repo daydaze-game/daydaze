@@ -7,6 +7,7 @@
 // Search prefers CC0 (listed first); CC-BY results carry the author for the
 // credits screen. Only the public preview files are fetched, never originals.
 import { writeFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
 
 const KEY = process.env.FREESOUND_API_KEY;
 if (!KEY) throw new Error("FREESOUND_API_KEY is not set");
@@ -45,8 +46,17 @@ if (cmd === "search") {
   console.log(rows.join("\n"));
 } else if (cmd === "get") {
   const s = await api(`/sounds/${a}/`, { fields: FIELDS });
-  const r = await fetch(s.previews["preview-hq-ogg"]);
+  const preview = new URL(s.previews["preview-hq-ogg"]);
+  if (preview.origin !== "https://freesound.org")
+    throw new Error("unexpected preview host");
+  const output = resolve(b);
+  const audioRoot = resolve(import.meta.dirname, "..", "public", "audio");
+  const outsideRoot = relative(audioRoot, output);
+  if (outsideRoot.startsWith("..") || outsideRoot.startsWith("/"))
+    throw new Error("output must be inside public/audio");
+  if (!output.endsWith(".ogg")) throw new Error("output must be an Ogg file");
+  const r = await fetch(preview);
   if (!r.ok) throw new Error(`preview ${r.status}`);
-  writeFileSync(b, Buffer.from(await r.arrayBuffer()));
+  writeFileSync(output, Buffer.from(await r.arrayBuffer()));
   console.log(`${s.id}\t${s.license}\t${s.username}\t${s.name}\t${s.url}`);
 } else console.log("usage: search <query> [max] [min] | get <id> <out>");
