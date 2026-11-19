@@ -12,7 +12,7 @@ import {
   type TogetherId,
 } from "../../game/dance/together.ts";
 import { createStore } from "../rooms/shared/store.ts";
-import { onlineSession } from "./online.ts";
+import { onlineSession } from "./session.ts";
 import { peerCard } from "./peerCard.ts";
 
 type Ask = { id: string; name: string; e: TogetherId };
