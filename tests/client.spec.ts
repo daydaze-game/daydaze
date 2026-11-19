@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { GAS_STATIONS, counterOf } from "../src/game/city/gasStations.ts";
 import { BUS_STOPS } from "../src/game/city/transit.ts";
 import { SONGS } from "../src/game/karaokeSongs.ts";
 import { dockAction } from "./dock.ts";
@@ -680,6 +681,119 @@ test("Green Haze (18+, dev flag): a joint and shroom tea land after their onset 
     .poll(async () => Number(await canvas.getAttribute("data-trip")))
     .toBeGreaterThan(0.3);
   await expect(canvas).toHaveAttribute("data-under", "trip");
+  expect(errors).toEqual([]);
+});
+
+/** Puts her at the first gas station's counter (dev build: `__dd`). */
+async function walkToGasCounter(page: Page) {
+  const station = GAS_STATIONS[0];
+  if (!station) throw new Error("no gas station");
+  const [x, z] = counterOf(station);
+  // the dev probe (and `__dd`) mounts a moment after the first frames; place
+  // her the way the dev teleport does, so the walker keeps the spot
+  await page.waitForFunction(() => Reflect.get(window, "__dd") !== undefined);
+  await page.evaluate(
+    ([px, pz]) => {
+      const get = (o: unknown, k: string): unknown =>
+        typeof o === "object" && o !== null ? Reflect.get(o, k) : undefined;
+      const player = get(Reflect.get(window, "__dd"), "player");
+      const walk = get(player, "walk");
+      const before = get(player, "before");
+      const pos = get(player, "pos");
+      const set = get(pos, "set");
+      if (
+        typeof player !== "object" ||
+        player === null ||
+        typeof walk !== "object" ||
+        walk === null ||
+        typeof before !== "object" ||
+        before === null ||
+        typeof set !== "function"
+      )
+        throw new Error("no dev player");
+      Reflect.set(walk, "pos", [px, pz]);
+      Reflect.set(before, "pos", [px, pz]);
+      Reflect.apply(set, pos, [px, 0, pz]);
+      Reflect.set(player, "acc", 0);
+    },
+    [x, z] as const,
+  );
+  const view = canvasOf(page);
+  await expect
+    .poll(async () => Number(await view.getAttribute("data-player-x")))
+    .toBeCloseTo(x, 0);
+  return station.name;
+}
+
+test("Green Haze (18+, dev flag): the dispensary fills the pouch, using it takes a dose, and the pouch survives a reload", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${STILL}&room=green-haze&adult=1&debug=1`);
+  await expect(roomTitle(page)).toHaveText("Green Haze", { timeout: 150_000 });
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 150_000,
+  });
+  const shop = page.getByRole("region", { name: "Dispensary" });
+  await shop.getByRole("button", { name: "Buy Sativa joint" }).click();
+  await expect(shop).toContainText("90 coins");
+  await expect(page.getByRole("button", { name: "Pouch (1)" })).toBeVisible();
+  // the free menu stays
+  await expect(
+    page.getByRole("button", { name: "Light a joint" }),
+  ).toBeVisible();
+  // the pouch is saved: it is still there after a reload
+  await page.reload();
+  await expect(roomTitle(page)).toHaveText("Green Haze", { timeout: 150_000 });
+  await page.getByRole("button", { name: "Pouch (1)" }).click();
+  await page.getByRole("button", { name: "Use Sativa joint" }).click();
+  await expect(canvas).toHaveAttribute("data-doses", "1");
+  // the last one is gone, and with it the pouch
+  await expect(page.getByRole("region", { name: "Pouch" })).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("a gas-station counter sells hemp to an 18+ player into the pouch", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city&adult=1`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  await expect(canvas).toHaveAttribute("data-player-x", /-?\d/);
+  const name = await walkToGasCounter(page);
+  const counter = page.getByRole("region", { name: `${name} counter` });
+  await counter.getByRole("button", { name: "Buy Hemp joint" }).click();
+  await expect(page.getByRole("button", { name: "Pouch (1)" })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("at 13+ a gas-station counter is closed and a pouch in the save is hidden, not lost", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await seedSave(page, { inventory: { "joint-sativa": 2 } });
+  await page.goto(`${LOW}&room=city`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  await expect(canvas).toHaveAttribute("data-player-x", /-?\d/);
+  const name = await walkToGasCounter(page);
+  await expect(
+    page.getByRole("region", { name: `${name} counter` }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Pouch" })).toHaveCount(0);
+  const saved: unknown = await page.evaluate((): unknown =>
+    JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
+  );
+  expect(saved).toMatchObject({ inventory: { "joint-sativa": 2 } });
   expect(errors).toEqual([]);
 });
 
