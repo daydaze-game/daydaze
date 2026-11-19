@@ -7,6 +7,7 @@ import {
   decodeAction,
   encodeAction,
   shownBuzz,
+  shownUnder,
 } from "./peerAction.ts";
 
 test("a dance goes out with its move, other moods plain", () => {
@@ -248,4 +249,67 @@ test("a reaction travels as react:<id>, and only a real one is believed", () => 
     "react:constructor",
   ])
     assert.deepEqual(decodeAction(bad), { mood: "idle" }, bad);
+});
+
+test("the substance a player is under rides along, with a buzz, and still fits", () => {
+  const a = encodeAction(
+    "dance",
+    "salsa",
+    undefined,
+    undefined,
+    2,
+    undefined,
+    false,
+    false,
+    undefined,
+    "acid",
+  );
+  assert.equal(a, "dance:salsa~2^a");
+  assert.deepEqual(decodeAction(a), {
+    mood: "dance",
+    dance: "salsa",
+    buzz: 2,
+    under: "acid",
+  });
+  assert.deepEqual(
+    decodeAction(
+      encodeAction(
+        "idle",
+        "groove",
+        undefined,
+        undefined,
+        0,
+        undefined,
+        false,
+        false,
+        undefined,
+        "high",
+      ),
+    ),
+    { mood: "idle", under: "high" },
+  );
+  // a long car action drops nothing it can't afford: it still fits 24
+  const driving = encodeAction(
+    "idle",
+    "salsa",
+    undefined,
+    { id: "nova-spyder", color: "#ff4fb3" },
+    3,
+    undefined,
+    false,
+    false,
+    undefined,
+    "cocaine",
+  );
+  assert.ok(driving.length <= 24);
+  assert.equal(decodeAction(driving).under, "cocaine");
+  // unknown tags are ignored, never trusted
+  assert.deepEqual(decodeAction("idle^z"), { mood: "idle" });
+  assert.deepEqual(decodeAction("idle^"), { mood: "idle" });
+});
+
+test("a 13+ client never shows what a peer is under", () => {
+  assert.equal(shownUnder("molly", "teen"), undefined);
+  assert.equal(shownUnder("molly", "adult"), "molly");
+  assert.equal(shownUnder(undefined, "adult"), undefined);
 });

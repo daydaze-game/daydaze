@@ -41,6 +41,7 @@ import {
   shadowTex,
 } from "./dollParts.ts";
 import { buildFaceTextures } from "./faceTexture.ts";
+import type { Substance } from "../../game/effects/substances.ts";
 import { HumanDoll } from "./human/HumanDoll.tsx";
 import { pose, type Rig } from "./pose.ts";
 import { gaitOf } from "../../game/gaits.ts";
@@ -233,6 +234,8 @@ type DollProps = {
   hold?: string | undefined;
   /** Wobbles with the local player's buzz. */
   buzzed?: boolean | undefined;
+  /** A peer's felt substance (the 3D doll's alone). */
+  under?: Substance | undefined;
   walk?: { current: WalkState } | undefined;
   seed?: number | undefined;
   /** The player's own doll: full detail at any distance on the low tier. */
@@ -252,6 +255,7 @@ export function ToonDoll({
   couple,
   hold: _hold, // the 3D doll's alone
   joins: _joins, // the 3D doll's alone
+  under: _under, // the 3D doll's alone
   buzzed = false,
   walk,
   seed = 0,
