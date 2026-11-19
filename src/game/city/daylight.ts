@@ -170,3 +170,15 @@ export function laneTint(neon: number): Rgb {
 export function lampGain(neon: number): number {
   return 0.5 + 7 * Math.min(1, Math.max(0, neon));
 }
+
+/**
+ * The sky as seen through an indoor window: mostly the horizon band (a window
+ * looks out, not up) with a little zenith, dimmed at night so the pane reads
+ * as dark glass, not a lit panel. Interior lighting does not follow the hour;
+ * only what a window shows does.
+ */
+export function windowSky(day: Daylight): Rgb {
+  const sky = mixRgb(day.horizon, day.zenith, 0.3);
+  const dim = mix(1, 0.55, Math.min(1, Math.max(0, day.neon)));
+  return [sky[0] * dim, sky[1] * dim, sky[2] * dim];
+}

@@ -126,7 +126,7 @@ These work in any build, without the panel:
 | `?room=<id>`                                                   | Start in a room (ids in `src/game/rooms.ts`).                  |
 | `?at=x,z&yaw=r`                                                | Start at a spot in that room.                                  |
 | `?view=room\|full\|face\|detail`                               | Start with that camera view.                                   |
-| `?time=HH:MM`                                                  | Pin the city's hour.                                           |
+| `?time=HH:MM`                                                  | Pin the city's hour (and the sky in indoor windows).           |
 | `?night=<id>`                                                  | Start an hour into a club night (ids in `src/game/events.ts`). |
 | `?fireworks=<s>`, `?parade=<s>`, `?pride=<s>`, `?danceoff=<s>` | Hold that event's clock `s` seconds into a run.                |
 | `?quality=low\|high`                                           | Force a quality tier.                                          |

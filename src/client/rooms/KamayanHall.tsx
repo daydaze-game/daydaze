@@ -31,6 +31,8 @@ import { AssetBoundary } from "./shared/AssetBoundary.tsx";
 import { ImagePiece } from "./shared/ImagePiece.tsx";
 import { PropSet } from "./shared/Prop.tsx";
 import { groundMaps, surface } from "../city/worldTexture.ts";
+import { useDaylight } from "../city/daylight.ts";
+import { windowSky } from "../../game/city/daylight.ts";
 
 const VENUE = FOOD_VENUES.find((v) => v.id === "lechon-kamayan-hall");
 const W = FLOOR_BOUNDS.x1 - FLOOR_BOUNDS.x0;
@@ -437,6 +439,8 @@ function Videoke() {
 function Shell() {
   const woven = <primitive object={WOVEN} attach="material" />;
   const dressing = useMemo(buildDressing, []);
+  // the capiz panes glow with the sky outside at the city hour
+  const pane = new THREE.Color().setRGB(...windowSky(useDaylight()));
   return (
     <>
       <primitive object={dressing} />
@@ -463,7 +467,7 @@ function Shell() {
           />
         </Suspense>
       </AssetBoundary>
-      {/* capiz-shell windows down the north wall, lit from outside */}
+      {/* capiz-shell windows down the north wall, lit by the sky outside */}
       {[-4.5, -1.5, 1.5, 4.5].map((x) => (
         <mesh key={x} position={[x, 2, FLOOR_BOUNDS.z0 + 0.02]}>
           <planeGeometry args={[1.6, 1.4, 6, 5]} />
@@ -477,7 +481,7 @@ function Shell() {
       {[-4.5, -1.5, 1.5, 4.5].map((x) => (
         <mesh key={`g${x}`} position={[x, 2, FLOOR_BOUNDS.z0 + 0.01]}>
           <planeGeometry args={[1.6, 1.4]} />
-          <meshBasicMaterial color={hdr("#ffe8c8", 0.55)} toneMapped={false} />
+          <meshBasicMaterial color={pane} toneMapped={false} />
         </mesh>
       ))}
       <NeonText
