@@ -7,6 +7,7 @@ import {
   type DanceMove,
   type DanceMoveId,
 } from "./moves.ts";
+import { isOneOf } from "../typed.ts";
 
 export type DanceGroup = {
   id: string;
@@ -172,8 +173,7 @@ export type DanceGroupId = (typeof DANCE_GROUPS)[number]["id"];
 
 /** The group a dance is in, or undefined for one that is not in the picker. */
 export function groupOf(id: string): DanceGroupId | undefined {
-  return DANCE_GROUPS.find((g) => (g.ids as readonly string[]).includes(id))
-    ?.id;
+  return DANCE_GROUPS.find((g) => isOneOf(g.ids, id))?.id;
 }
 
 /** A group's moves, in its menu order. */

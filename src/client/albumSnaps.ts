@@ -47,7 +47,10 @@ function read(): Snap[] {
 }
 
 /** The snapshots, for the album panel. */
-export const snaps = createStore({ list: [] as Snap[], loaded: false });
+export const snaps = createStore<{ list: Snap[]; loaded: boolean }>({
+  list: [],
+  loaded: false,
+});
 
 /** Loads the stored snapshots once. */
 export function loadSnaps(): void {

@@ -8,6 +8,7 @@ import {
   NEW_SERIES,
   scoreKick,
   seriesOver,
+  type Series,
   type KickResult,
 } from "../../../game/fieldGoal.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -17,12 +18,20 @@ import { crowd } from "../shared/Stands.tsx";
 /** Five field goals: press to sweep the aim, lock it, then the power. */
 export type Phase = "off" | "aim" | "power" | "flying" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  series: Series;
+  since: number;
+  aim: number;
+  kick: KickResult | null;
+}
+
+const OFF: State = {
+  phase: "off",
   series: NEW_SERIES,
   since: 0,
   aim: 0,
-  kick: null as KickResult | null,
+  kick: null,
 };
 
 export const fieldGoals = createStore(OFF);

@@ -17,8 +17,9 @@ test("batch merges pieces into one mesh per material", () => {
     .build();
   assert.equal(group.children.length, 2);
   const merged = group.children.find(
-    (c) => (c as THREE.Mesh).material === gold,
-  ) as THREE.Mesh;
+    (c): c is THREE.Mesh => c instanceof THREE.Mesh && c.material === gold,
+  );
+  assert.ok(merged);
   assert.equal(merged.geometry.attributes.position.count, 2 * 36);
 });
 
