@@ -16,6 +16,7 @@ import {
   PEDESTRIAN_DOLLS,
   PEDESTRIAN_DOLL_RADIUS,
 } from "../../game/city/tuning.ts";
+import { wallSeconds } from "../../game/clock.ts";
 import { useQuality } from "../world/quality.ts";
 import { Doll } from "../avatar/Doll.tsx";
 import { Creature, type CreaturePose } from "../creatures/Creature.tsx";
@@ -32,9 +33,9 @@ function Walker({ index }: { index: number }) {
   const p = PEDESTRIANS[index];
   // her own pace over the ground, so her legs keep up with it
   const walking = useMemo(() => ({ current: { speed: p.speed } }), [p]);
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!g.current) return;
-    pedestrianAt(p, clock.elapsedTime, pose.current);
+    pedestrianAt(p, wallSeconds(), pose.current);
     g.current.position.set(pose.current.x, 0, pose.current.z);
     g.current.rotation.y = pose.current.yaw;
   });
@@ -116,13 +117,13 @@ function Cyclist({
     }),
     [bike, male, female],
   );
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const g = group.current;
     if (!g) return;
     const i = bikers.current[slot];
     g.visible = i !== undefined;
     if (i === undefined) return;
-    pedestrianAt(PEDESTRIANS[i], clock.elapsedTime, pose.current);
+    pedestrianAt(PEDESTRIANS[i], wallSeconds(), pose.current);
     g.position.set(pose.current.x, 0.14, pose.current.z);
     g.rotation.y = pose.current.yaw;
     // the rider is the one this walker's number picks
@@ -169,9 +170,10 @@ function CrowdFigures({
     new Array<number>(LOOKS.length * STRIDES.length).fill(0),
   );
   useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
-    if (t - last.current >= REPICK) {
-      last.current = t;
+    const t = wallSeconds();
+    // repick on the monotonic frame clock: a device clock set back must not stall it
+    if (clock.elapsedTime - last.current >= REPICK) {
+      last.current = clock.elapsedTime;
       const all = nearestPedestrians(
         [player.pos.x, player.pos.z],
         t,
@@ -239,12 +241,11 @@ export function Pedestrians({ player }: { player: Player }) {
   const dolls = useRef<readonly number[]>([]);
   dolls.current = shown;
   useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
-    if (t - last.current < REPICK) return;
-    last.current = t;
+    if (clock.elapsedTime - last.current < REPICK) return;
+    last.current = clock.elapsedTime;
     const next = nearestPedestrians(
       [player.pos.x, player.pos.z],
-      t,
+      wallSeconds(),
       drawn,
       radius,
       cityHour(),

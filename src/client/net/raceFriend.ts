@@ -19,16 +19,23 @@ import { peerCard } from "./peerCard.ts";
 
 type Who = { id: string; name: string };
 
-export const raceFriend = createStore({
+export const raceFriend = createStore<{
+  ask: (Who & { track: FriendTrack }) | null;
+  asked: Who | null;
+  rival: Who | null;
+  mine: number | null;
+  theirs: number | null;
+  note: string;
+}>({
   /** A friend asked you to race. */
-  ask: null as (Who & { track: FriendTrack }) | null,
+  ask: null,
   /** You asked a friend, waiting on their answer. */
-  asked: null as Who | null,
+  asked: null,
   /** Racing them now (or just did). */
-  rival: null as Who | null,
+  rival: null,
   /** Total race times, once each of you finishes. */
-  mine: null as number | null,
-  theirs: null as number | null,
+  mine: null,
+  theirs: null,
   note: "",
 });
 

@@ -39,7 +39,7 @@ export const PIECE_HEIGHT: Readonly<Record<StreetKind, number>> = {
 };
 
 const isKind = (name: string): name is StreetKind =>
-  (STREET_KINDS as readonly string[]).includes(name);
+  STREET_KINDS.some((kind) => kind === name);
 
 /** The kit's pieces by name, read from the loaded scene. */
 export function pieceModels(

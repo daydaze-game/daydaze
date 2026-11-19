@@ -15,14 +15,20 @@ import { isBanned, type CrimeSave } from "../../game/crime/record.ts";
 
 // Stub shop shelf for the shoplifting test. Two real stores stand in for the
 // shops that arrive with the Shops milestone; the item prices are placeholders.
+function storeById(id: string): Store {
+  const store = STORES.find((s) => s.id === id);
+  if (!store) throw new Error(`Unknown store: ${id}`);
+  return store;
+}
+
 const STUB_SHELF: readonly { store: Store; item: string; price: number }[] = [
   {
-    store: STORES.find((s) => s.id === "bodega") as Store,
+    store: storeById("bodega"),
     item: "Gum pack",
     price: 5,
   },
   {
-    store: STORES.find((s) => s.id === "jewelry") as Store,
+    store: storeById("jewelry"),
     item: "Silver hoop",
     price: 300,
   },
