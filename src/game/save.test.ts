@@ -62,6 +62,15 @@ test("createDefaultSave uses the default look and auto quality", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      last: 0,
+      count: 0,
+      best: 0,
+      freezeWeek: -1,
+      days: [],
+      frozen: [],
+    },
+    xp: 0,
   });
 });
 
@@ -113,6 +122,15 @@ test("a save round-trips through serializeSave and loadSave", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      last: 0,
+      count: 0,
+      best: 0,
+      freezeWeek: -1,
+      days: [],
+      frozen: [],
+    },
+    xp: 0,
   };
   assert.deepEqual(loadSave(serializeSave(save), "Fallback"), save);
 });
@@ -187,6 +205,15 @@ test("a save from before the swimsuit slot still loads", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      last: 0,
+      count: 0,
+      best: 0,
+      freezeWeek: -1,
+      days: [],
+      frozen: [],
+    },
+    xp: 0,
   });
 });
 
@@ -255,6 +282,15 @@ test("loadSave keeps a valid name when the look is bad", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      last: 0,
+      count: 0,
+      best: 0,
+      freezeWeek: -1,
+      days: [],
+      frozen: [],
+    },
+    xp: 0,
   });
 });
 
@@ -297,6 +333,15 @@ test("loadSave keeps a valid look when the name is bad", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      last: 0,
+      count: 0,
+      best: 0,
+      freezeWeek: -1,
+      days: [],
+      frozen: [],
+    },
+    xp: 0,
   });
 });
 
@@ -481,6 +526,15 @@ test("loadSave salvages valid fields from a wrong version", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      last: 0,
+      count: 0,
+      best: 0,
+      freezeWeek: -1,
+      days: [],
+      frozen: [],
+    },
+    xp: 0,
   });
 });
 
@@ -726,4 +780,27 @@ test("a teen save keeps its pouch: loading never strips it", () => {
     loadSave(serializeSave(save), "Fallback").inventory,
     save.inventory,
   );
+});
+
+test("the streak and XP round-trip, and an older save starts them fresh", () => {
+  const save = createDefaultSave("Streaky");
+  save.streak = {
+    last: 20_300,
+    count: 5,
+    best: 9,
+    freezeWeek: 2900,
+    days: [20_299, 20_300],
+    frozen: [],
+  };
+  save.xp = 70;
+  const back = loadSave(serializeSave(save), "Fallback");
+  assert.deepEqual(back.streak, save.streak);
+  assert.equal(back.xp, 70);
+  const old = loadSave(JSON.stringify({ name: "Old Timer" }), "Fallback");
+  assert.equal(old.streak.count, 0);
+  assert.equal(old.streak.freezeWeek, -1);
+  assert.equal(old.xp, 0);
+  const bad = loadSave(JSON.stringify({ streak: 5, xp: -4 }), "Fallback");
+  assert.equal(bad.streak.count, 0);
+  assert.equal(bad.xp, 0);
 });

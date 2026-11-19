@@ -87,6 +87,8 @@ import { prizeFor } from "../game/prizes.ts";
 import { PrizeCard } from "./ui/PrizeCard.tsx";
 import { UpdatePrompt } from "./ui/UpdatePrompt.tsx";
 import { Collections } from "./ui/Collections.tsx";
+import { StreakCard } from "./ui/StreakCard.tsx";
+import { checkIn, type CheckIn } from "../game/streak.ts";
 import { claimSet, visit as visitPlace } from "../game/collections.ts";
 import { Onboarding } from "./ui/Onboarding.tsx";
 import { postPrize, prizeDesk } from "./ui/prizeDesk.ts";
@@ -454,6 +456,31 @@ export function App() {
     postPrize(prize, daily.coins);
     playFanfare(prize.grade === "S" ? 1 : prize.grade === "A" ? 0.6 : 0);
   }, [pending]);
+  // the daily streak: counted once when the game opens, with any reward paid
+  const [streakResult, setStreakResult] = useState<CheckIn | null>(null);
+  const checkedIn = useRef(false);
+  useEffect(() => {
+    // StrictMode runs effects twice in development: pay only once
+    if (checkedIn.current) return;
+    checkedIn.current = true;
+    const today = dayOf(Date.now());
+    const r = checkIn(latest.current.streak, today);
+    if (r.streak === latest.current.streak) return;
+    setSave((s) => {
+      const gift = r.reward?.item;
+      return {
+        ...s,
+        streak: r.streak,
+        coins: earn(s.coins, r.reward?.coins ?? 0),
+        xp: s.xp + (r.reward?.xp ?? 0),
+        wardrobe:
+          gift && !s.wardrobe.includes(gift)
+            ? [...s.wardrobe, gift]
+            : s.wardrobe,
+      };
+    });
+    setStreakResult(r);
+  }, []);
   const saved = save.settings.quality;
   const quality = flags.quality ?? (saved === "auto" ? null : saved);
 
@@ -462,6 +489,14 @@ export function App() {
       <main className="app">
         <LoadingVeil />
         <PrizeCard />
+        {streakResult && (
+          <StreakCard
+            streak={save.streak}
+            today={dayOf(Date.now())}
+            result={streakResult}
+            onClose={() => setStreakResult(null)}
+          />
+        )}
         <UpdatePrompt />
         <Collections
           visited={save.visited}

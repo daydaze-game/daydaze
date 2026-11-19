@@ -32,6 +32,7 @@ import {
   NO_CHALLENGES,
   type ChallengeSave,
 } from "./challenges.ts";
+import { cleanStreak, cleanXp, NO_STREAK, type StreakSave } from "./streak.ts";
 import { cleanBests, type Bests } from "./prizes.ts";
 import { validatePet, type PetSave } from "./pet.ts";
 import { cleanParkedCar, type ParkedCar } from "./city/drive.ts";
@@ -95,6 +96,10 @@ export type SaveV1 = {
   inventory: Inventory;
   /** The day (challenges.ts `dayOf`) the friend's free item was last taken. */
   giftDay: number;
+  /** The daily streak and its weekly freeze (streak.ts). */
+  streak: StreakSave;
+  /** Experience points earned so far (streak rewards for now). */
+  xp: number;
 };
 
 /** The localStorage key the save lives under. */
@@ -148,6 +153,8 @@ export function createDefaultSave(name: string): SaveV1 {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: { ...NO_STREAK, days: [], frozen: [] },
+    xp: 0,
   };
 }
 
@@ -234,6 +241,9 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     garden: cleanGarden(save.get("garden")),
     inventory: cleanInventory(save.get("inventory")),
     giftDay: cleanGiftDay(save.get("giftDay")),
+    // saves from before the daily streak start it fresh
+    streak: cleanStreak(save.get("streak")),
+    xp: cleanXp(save.get("xp")),
   };
 }
 
