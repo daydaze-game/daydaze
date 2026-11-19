@@ -8,6 +8,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # the merge queue: a PR enters it only with these suites green, so the queue
+  # skips them (the jobs still report, as the required checks need) and gates
+  # on ci.yml's fast checks of the combined commit
+  merge_group:
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,7 +41,10 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           run=true
-          if [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
+          if [ "${{ github.event_name }}" = merge_group ]; then
+            run=false
+            echo "Merge queue: the PR already passed the browser tests."
+          elif [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
             run=false
             echo "Docs-only change: skipping the browser tests."
           fi
@@ -74,7 +81,10 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           run=true
-          if [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
+          if [ "${{ github.event_name }}" = merge_group ]; then
+            run=false
+            echo "Merge queue: the PR already passed the browser tests."
+          elif [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
             run=false
             echo "Docs-only change: skipping the browser tests."
           fi

@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { BONE } from "./anims.ts";
 import type { Makeup } from "../../../game/look.ts";
 import type { Anchors } from "./Jewelry.tsx";
+import { isMesh } from "../../world/guards.ts";
 
 type Style = Exclude<Makeup["glasses"], "none">;
 
@@ -138,7 +139,7 @@ export function Glasses({
     return () => {
       built.bone.remove(built.group);
       built.group.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (isMesh(o)) o.geometry.dispose();
       });
     };
   }, [built]);

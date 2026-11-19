@@ -8,6 +8,7 @@ import { useGLTF } from "@react-three/drei";
 import { useCallback, useMemo } from "react";
 import * as THREE from "three";
 import { bakedGeometry } from "../../world/bakedGeometry.ts";
+import { isMesh } from "../../world/guards.ts";
 
 /** `name` as plain floats, `size` per vertex: the optimized GLBs store UVs and colors normalized. */
 function asFloats(g: THREE.BufferGeometry, name: string, size: 2 | 3) {
@@ -46,7 +47,7 @@ export function useBeachProps(names: readonly BeachProp[]): BeachGeometry {
       const scene = gltfs[i]?.scene;
       scene?.updateMatrixWorld(true);
       scene?.traverse((o) => {
-        if (!(o instanceof THREE.Mesh) || out.has(name)) return;
+        if (!isMesh(o) || out.has(name)) return;
         const g = bakedGeometry(o);
         asFloats(g, "uv", 2);
         asFloats(g, "color", 3);

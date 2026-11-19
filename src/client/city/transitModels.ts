@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
 import { boxMapped } from "./worldTexture.ts";
 import { useDaylight } from "./daylight.ts";
+import { isMesh } from "../world/guards.ts";
 
 // Cars, taxis and vans in traffic are the car bodies now (trafficBodies.ts).
 export type TransitModel = "bus" | "stop";
@@ -35,7 +36,7 @@ export function useTransitModels(
           scene.updateMatrixWorld(true);
           let geometry: THREE.BufferGeometry | undefined;
           scene.traverse((o) => {
-            if (o instanceof THREE.Mesh) geometry = bakedGeometry(o);
+            if (isMesh(o)) geometry = bakedGeometry(o);
           });
           if (!geometry) throw new Error(`Empty transit model: ${kind}`);
           const mat = boxMapped(

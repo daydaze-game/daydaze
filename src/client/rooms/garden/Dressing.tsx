@@ -26,6 +26,7 @@ import type { Spot } from "../../../game/zoo.ts";
 import { surface } from "../../city/worldTexture.ts";
 import { Batch } from "../shared/batch.ts";
 import { Scatter } from "../zoo/Scatter.tsx";
+import { isMesh } from "../../world/guards.ts";
 
 /** How big each crop model stands in a bed (shared with the player's own crops). */
 export const CROP_SCALE = {
@@ -165,7 +166,7 @@ function GateArch(): JSX.Element {
   useEffect(
     () => () => {
       group.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (isMesh(o)) o.geometry.dispose();
       });
     },
     [group],
@@ -236,7 +237,7 @@ function NeighborBeds({
   useEffect(
     () => () => {
       cages.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (isMesh(o)) o.geometry.dispose();
       });
     },
     [cages],
@@ -383,7 +384,7 @@ function Greenhouse(): JSX.Element {
   useEffect(
     () => () => {
       group.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (isMesh(o)) o.geometry.dispose();
       });
     },
     [group],
@@ -515,7 +516,7 @@ function Furniture(): JSX.Element {
   useEffect(
     () => () => {
       rack.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (isMesh(o)) o.geometry.dispose();
       });
     },
     [rack],

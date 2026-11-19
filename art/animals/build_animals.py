@@ -10,7 +10,6 @@ Every model comes out as ONE skinned mesh with ONE vertex-colored material
 draw call, and only the clips the game plays are kept (see CLIPS).
 """
 
-import glob
 import os
 import sys
 

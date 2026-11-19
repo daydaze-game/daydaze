@@ -28,3 +28,30 @@ test("the same builder gives 18+ its alcohol and 13+ none", () => {
     [],
   );
 });
+
+test("18+ alcohol is marked with its buzz drink and 13+ menus have none", () => {
+  const items = (tier: "teen" | "adult") =>
+    foodVenuesFor(tier).flatMap((v) => v.menu);
+  const named = (name: string) =>
+    items("adult").find((m) => m.name === name)?.alcohol;
+  assert.equal(named("Sake flight"), "cocktail");
+  assert.equal(named("Lager stein"), "beer");
+  assert.equal(named("Sake pour"), "shot");
+  assert.equal(named("Hot spiced cider"), undefined, "no alcohol in it");
+  assert.deepEqual(
+    items("teen").filter((m) => m.alcohol),
+    [],
+  );
+  // Every adult item the alcohol regex catches carries the marker, except
+  // hot spiced cider (an American mulled apple juice).
+  assert.deepEqual(
+    items("adult").filter(
+      (m) =>
+        m.kind === "drink" &&
+        ALCOHOL.test(m.name) &&
+        !m.alcohol &&
+        m.name !== "Hot spiced cider",
+    ),
+    [],
+  );
+});

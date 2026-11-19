@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { bakedGeometry } from "../world/bakedGeometry.ts";
+import { isMesh } from "../world/guards.ts";
 
 for (const [name, min, max] of [
   ["truck", [4, 2.7, 2], [6.5, 3.6, 2.6]],
@@ -27,7 +28,7 @@ for (const [name, min, max] of [
     gltf.scene.updateMatrixWorld(true);
     const bounds = new THREE.Box3();
     gltf.scene.traverse((mesh) => {
-      if (!(mesh instanceof THREE.Mesh)) return;
+      if (!isMesh(mesh)) return;
       const geometry = bakedGeometry(mesh);
       geometry.computeBoundingBox();
       assert.ok(geometry.boundingBox);

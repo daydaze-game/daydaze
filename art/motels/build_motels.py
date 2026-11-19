@@ -11,7 +11,6 @@ ground center, +z the front, the longer side one unit like Kenney's houses) and 
 scripts/import-motels.sh compresses the chosen ones into public/models/.
 """
 
-import math
 import os
 import sys
 
@@ -64,7 +63,6 @@ def pastel(image):
     white for the Ocean City pastels, keeping windows, doors and trim."""
     px = list(image.pixels)
     for i in range(0, len(px), 4):
-        rgb = tuple(round(c * 255) for c in px[i : i + 3])
         # pixels are linear floats; compare in sRGB-ish bytes by gamma
         srgb = tuple(round(255 * (c ** (1 / 2.2))) for c in px[i : i + 3])
         if any(all(abs(a - b) < 6 for a, b in zip(srgb, k)) for k in KEEP):

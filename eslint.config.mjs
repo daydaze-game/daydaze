@@ -36,7 +36,7 @@ const typeAware = {
  * cleaned up (issue #53). Remove an entry when its directory has no hits.
  */
 const unsafeBacklog = {
-  files: ["server/**/*.ts", "src/client/**/*.{ts,tsx}", "tests/client.spec.ts"],
+  files: ["server/**/*.ts", "tests/client.spec.ts"],
   rules: {
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-argument": "off",

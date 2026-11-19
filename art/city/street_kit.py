@@ -21,7 +21,6 @@ city's sidewalks), `manhole`, `drain` (base y = 0) and `bollard` (base y = 0),
 thinned to a few dozen triangles.
 """
 
-import math
 import os
 import sys
 
