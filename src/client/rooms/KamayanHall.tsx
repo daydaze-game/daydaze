@@ -8,6 +8,7 @@ import type { Player } from "../world/PlayerController.tsx";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { FOOD_VENUES } from "../../game/food/venues.ts";
 import {
   CARVING,
@@ -436,6 +437,24 @@ function Videoke() {
   );
 }
 
+const WINDOW_XS = [-4.5, -1.5, 1.5, 4.5];
+
+/** Capiz lattice for every window: a frame plus a 3x2 grid of thin bars, merged into one mesh. */
+const LATTICE = (() => {
+  const bar = (w: number, h: number, x: number, y: number) =>
+    new THREE.BoxGeometry(w, h, 0.02).translate(x, y, 0);
+  const parts = WINDOW_XS.flatMap((x) => [
+    bar(1.6, 0.05, x, 0.7),
+    bar(1.6, 0.05, x, -0.7),
+    bar(0.05, 1.4, x - 0.8, 0),
+    bar(0.05, 1.4, x + 0.8, 0),
+    bar(1.6, 0.04, x, 0),
+    bar(0.04, 1.4, x - 0.27, 0),
+    bar(0.04, 1.4, x + 0.27, 0),
+  ]);
+  return mergeGeometries(parts, false);
+})();
+
 function Shell() {
   const woven = <primitive object={WOVEN} attach="material" />;
   const dressing = useMemo(buildDressing, []);
@@ -468,17 +487,11 @@ function Shell() {
         </Suspense>
       </AssetBoundary>
       {/* capiz-shell windows down the north wall, lit by the sky outside */}
-      {[-4.5, -1.5, 1.5, 4.5].map((x) => (
-        <mesh key={x} position={[x, 2, FLOOR_BOUNDS.z0 + 0.02]}>
-          <planeGeometry args={[1.6, 1.4, 6, 5]} />
-          <meshBasicMaterial
-            color={hdr("#fff0d8", 0.9)}
-            toneMapped={false}
-            wireframe
-          />
-        </mesh>
-      ))}
-      {[-4.5, -1.5, 1.5, 4.5].map((x) => (
+      {/* the lattice is real bars, so the sky pane shows between them */}
+      <mesh geometry={LATTICE} position={[0, 2, FLOOR_BOUNDS.z0 + 0.03]}>
+        <meshBasicMaterial color={hdr("#fff0d8", 0.9)} toneMapped={false} />
+      </mesh>
+      {WINDOW_XS.map((x) => (
         <mesh key={`g${x}`} position={[x, 2, FLOOR_BOUNDS.z0 + 0.01]}>
           <planeGeometry args={[1.6, 1.4]} />
           <meshBasicMaterial color={pane} toneMapped={false} />
