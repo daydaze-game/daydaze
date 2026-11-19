@@ -6,7 +6,7 @@
 //
 // Every tier decision goes through `allows` / `byTier`; do not test the flag
 // or write alcohol checks anywhere else.
-import type { RoomId } from "./rooms.ts";
+import type { RoomId } from "./roomTypes.ts";
 
 export const ADULT_ROOMS: ReadonlySet<RoomId> = new Set<RoomId>(["green-haze"]);
 

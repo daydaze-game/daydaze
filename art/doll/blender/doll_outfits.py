@@ -22,7 +22,7 @@ SNUG = 0.03  # metres within which proxy cloth takes the skin's bone weights
 GRID = 0.002  # metres: the precision a tuck key is stored at
 CLEAR = 0.008  # gap kept between sunk skin and the cloth
 LEG_PULL = 1.0  # share of the way covered leg skin is drawn in to its leg's axis: 1 collapses it onto the axis, so there is nothing to show through
-LEG_RAMP = 0.12  # metres up from a garment's lowest edge over which that pull fades in
+LEG_RAMP = 0.06  # metres up from a garment's lowest edge over which that pull fades in
 
 
 def heights(ctx):
@@ -205,6 +205,7 @@ def tuck(ctx, body, body_src, garment, name):
     co = np.array([v.co[:] for v in body.data.vertices])
     normals = np.array([v.normal[:] for v in body.data.vertices])
     sink = np.zeros(len(co))
+    behind = np.zeros(len(co), bool)  # skin the cloth wraps
     if "deleted" in garment:
         hidden = np.where(np.isin(body_src, np.array(garment["deleted"], int)))[0]
         inside = BVHTree.FromObject(body, bpy.context.evaluated_depsgraph_get())
@@ -213,21 +214,29 @@ def tuck(ctx, body, body_src, garment, name):
             # to its far side (the sink stops short of the middle)
             far, _n, _f, thick = inside.ray_cast(Vector(co[i] - normals[i] * 1e-3), Vector(-normals[i]))
             sink[i] = TUCK if far is None else min(TUCK, DEPTH * thick)
+        behind[hidden] = True
     bvh = BVHTree.FromObject(garment, bpy.context.evaluated_depsgraph_get())
-    behind = np.zeros(len(co), bool)  # skin the cloth wraps
+    is_shoe = garment.name.startswith("Shoes")
+    floor = min(v.co.z for v in garment.data.vertices) if not is_shoe else -1.0
+    # trousers and wide legs can sit up to ~10 cm off the skin, shoes stay snug (3 cm)
+    search_dist = 0.03 if is_shoe else 0.10
     for i, p in enumerate(co):
-        loc, _n, _f, dist = bvh.find_nearest(Vector(p), 0.03)
+        if not is_shoe and p[2] < floor:
+            continue
+        loc, _n, _f, dist = bvh.find_nearest(Vector(p), search_dist)
         if loc is None:
             continue
+        if abs(p[0]) > 0.03 and np.sign(p[0]) != np.sign(loc[0]):
+            continue
         outside = float(np.dot(p - np.array(loc), normals[i]))
-        behind[i] = outside < 0
+        if outside < 0:
+            behind[i] = True
         if outside > -CLEAR:
             sink[i] = max(sink[i], min(outside + CLEAR, 0.03))
     # shoes ride on the same body next to the trousers and their keys add up:
     # a pull from the sole up would collapse the ankle the hem leaves bare
     move = -normals * sink[:, None]
-    if not garment.name.startswith("Shoes"):
-        floor = min(v.co.z for v in garment.data.vertices)
+    if not is_shoe:
         move = move + leg_pull(ctx, body, co, behind, floor)
     sk = body.shape_key_add(name=f"tuck_{name}", from_mix=False)
     # on a GRID-metre grid: the key compresses far smaller, unseen
