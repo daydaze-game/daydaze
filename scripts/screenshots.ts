@@ -900,26 +900,33 @@ const SHOTS: {
     async (page) => {
       await page.getByRole("button", { name: "Debug: a minute later" }).click();
     },
-    12,
+    60,
     8,
   ),
   // molly at its peak: neon glow, faint tracers, a wide smile
-  actionStrip(
-    "molly-peak",
-    "quality=high&room=green-haze&adult=1&debug=1",
-    async (page) => {
-      await page
-        .getByRole("button", { name: "Pop a molly" })
-        .click({ timeout: 150_000 });
-      const later = page.getByRole("button", { name: "Debug: a minute later" });
-      for (let i = 0; i < 4; i++) await later.click();
-    },
-    async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
-    },
-    12,
-    8,
-  ),
+  {
+    ...actionStrip(
+      "molly-peak",
+      "quality=high&room=green-haze&adult=1&debug=1",
+      async (page) => {
+        await page
+          .getByRole("button", { name: "Pop a molly" })
+          .click({ timeout: 150_000 });
+        const later = page.getByRole("button", {
+          name: "Debug: a minute later",
+        });
+        for (let i = 0; i < 4; i++) await later.click();
+      },
+      async (page) => {
+        await page
+          .getByRole("button", { name: "Debug: a minute later" })
+          .click();
+      },
+      12,
+      8,
+    ),
+    viewport: { width: 640, height: 400 },
+  },
   // cocaine at its peak (2 min on, before the 183 s it ends): no screen
   // change, just her wide eyes
   actionStrip(
