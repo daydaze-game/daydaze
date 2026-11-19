@@ -694,11 +694,27 @@ async function walkToGasCounter(page: Page) {
   await page.waitForFunction(() => Reflect.get(window, "__dd") !== undefined);
   await page.evaluate(
     ([px, pz]) => {
-      const p = Reflect.get(window, "__dd").player;
-      p.walk.pos = [px, pz];
-      p.before.pos = p.walk.pos;
-      p.pos.set(px, 0, pz);
-      p.acc = 0;
+      const get = (o: unknown, k: string): unknown =>
+        typeof o === "object" && o !== null ? Reflect.get(o, k) : undefined;
+      const player = get(Reflect.get(window, "__dd"), "player");
+      const walk = get(player, "walk");
+      const before = get(player, "before");
+      const pos = get(player, "pos");
+      const set = get(pos, "set");
+      if (
+        typeof player !== "object" ||
+        player === null ||
+        typeof walk !== "object" ||
+        walk === null ||
+        typeof before !== "object" ||
+        before === null ||
+        typeof set !== "function"
+      )
+        throw new Error("no dev player");
+      Reflect.set(walk, "pos", [px, pz]);
+      Reflect.set(before, "pos", [px, pz]);
+      Reflect.apply(set, pos, [px, 0, pz]);
+      Reflect.set(player, "acc", 0);
     },
     [x, z] as const,
   );
@@ -774,10 +790,10 @@ test("at 13+ a gas-station counter is closed and a pouch in the save is hidden, 
     page.getByRole("region", { name: `${name} counter` }),
   ).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Pouch" })).toHaveCount(0);
-  const saved = await page.evaluate(() =>
+  const saved: unknown = await page.evaluate((): unknown =>
     JSON.parse(localStorage.getItem("daydaze-save-v1") ?? "{}"),
   );
-  expect(saved.inventory).toEqual({ "joint-sativa": 2 });
+  expect(saved).toMatchObject({ inventory: { "joint-sativa": 2 } });
   expect(errors).toEqual([]);
 });
 
