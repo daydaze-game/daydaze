@@ -134,13 +134,14 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
-- Merge gate: GitHub's merge queue. Nobody pushes to `main`; a PR joins the
-  queue with `gh pr merge <n> --auto` once its checks (browser suites
-  included) are green, and the queue merges it only after `ci.yml` passes on
-  it combined with `main` and every PR ahead of it, so two green PRs cannot
-  merge into a red `main`. A PR that fails in the queue is dropped: fix it and
-  queue it again. `docs/agents/scripts/land.sh` rebases, pushes, opens the PR,
-  queues it, and removes the worktree and branch after the merge.
+- Merge gate: nobody pushes to `main`. Branch protection lets a PR merge only
+  when it is up to date with `main` and green on the fast checks (`setup`,
+  `lint`, `test`, `build`), so two PRs that are green alone cannot merge into
+  a red `main`. The browser suites must pass once on the PR; catching up with
+  `main` afterwards (`gh pr update-branch <n>`) re-runs only what blocks the
+  merge. `docs/agents/scripts/land.sh` does all of it: pushes, opens the PR,
+  waits for the browser suites, updates the branch whenever `main` moves,
+  merges, and removes the worktree and branch.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
@@ -170,7 +171,8 @@ request. Use the `gh` CLI.
   Do not fix it in the same branch. Title it like a Conventional Commit subject
   (`fix(net): ...`), say what you saw, how to reproduce it, which files, and
   what you expect. Add labels (`bug`, `enhancement`, `documentation`,
-  `security`, `performance`, and one `area: *`). Never put secrets in an issue.
+  `security`, `performance`, and one `area: *`) and assign it to the owner
+  (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
   reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
   stays open). When you finish something that has no issue, the PR is enough.
