@@ -9,12 +9,14 @@ import {
   claimGift,
   cleanGiftDay,
   cleanInventory,
+  dealerStock,
   giftFor,
   isItemId,
   ITEMS,
   itemOf,
   MAX_PER_ITEM,
   MAX_TOTAL,
+  menuFor,
   MENUS,
   totalOf,
   removeItem,
@@ -152,4 +154,43 @@ test("the gift day is a non-negative whole day, else 0", () => {
   assert.equal(cleanGiftDay(20_000), 20_000);
   for (const bad of [-1, 1.5, NaN, Infinity, "20", null, undefined])
     assert.equal(cleanGiftDay(bad), 0);
+});
+
+test("the street stock is four strains of the dispensary's, a day at a time, at a middle price", () => {
+  for (let day = 20_000; day < 20_020; day++) {
+    const stock = dealerStock(day);
+    assert.equal(stock.length, 4);
+    assert.equal(new Set(stock.map((s) => s.id)).size, 4);
+    for (const { id, price } of stock) {
+      const shop = MENUS.dispensary.find((m) => m.id === id);
+      const gas = MENUS.gas.find((m) =>
+        m.id.startsWith(itemOf(id)?.dose ?? ""),
+      );
+      assert.ok(shop && gas, id);
+      assert.ok(price > gas.price && price < shop.price, id);
+    }
+    assert.deepEqual(dealerStock(day), stock);
+  }
+  // the stock changes from day to day
+  assert.notDeepEqual(dealerStock(20_000), dealerStock(20_001));
+  assert.deepEqual(menuFor("street", 20_000), dealerStock(20_000));
+  assert.equal(menuFor("gas", 20_000), MENUS.gas);
+});
+
+test("the street sells only today's stock", () => {
+  const day = 20_000;
+  const [first] = dealerStock(day);
+  assert.ok(first);
+  const bought = buyItem("street", 100, {}, first.id, day);
+  assert.deepEqual(bought, {
+    coins: 100 - first.price,
+    inventory: { [first.id]: 1 },
+  });
+  const out = ITEMS.find(
+    (i) => i.strain !== "hemp" && !dealerStock(day).some((s) => s.id === i.id),
+  );
+  assert.ok(out);
+  assert.equal(buyItem("street", 100, {}, out.id, day), null);
+  // no day, no street
+  assert.equal(buyItem("street", 100, {}, first.id), null);
 });

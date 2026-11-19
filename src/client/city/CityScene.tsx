@@ -19,6 +19,7 @@ import { useReducedMotion } from "../motion.ts";
 import type { Player } from "../world/PlayerController.tsx";
 import { useQuality } from "../world/quality.ts";
 import { StreetFood } from "./StreetFood.tsx";
+import { StreetDealer } from "./StreetDealer.tsx";
 import { CitySky } from "./CitySky.tsx";
 import { Fleet } from "./Fleet.tsx";
 import { Ocean } from "./Ocean.tsx";
@@ -323,6 +324,7 @@ export function CityScene({
       <Suspense fallback={null}>
         <CityTransit player={player} />
         <StreetFood player={player} />
+        <StreetDealer player={player} />
         <TaxiRide player={player} />
         <Traffic player={player} />
         <ParkedCars player={player} />

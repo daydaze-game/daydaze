@@ -46,7 +46,9 @@ const open = () => allows(activeTier(), "drugs");
 /** Buys `id` at `shop` into the pouch. Returns whether it was bought. */
 export function buy(shop: Shop, id: ItemId): boolean {
   const d = pouchDesk.get();
-  const bought = open() ? buyItem(shop, d.coins, d.inventory, id) : null;
+  const bought = open()
+    ? buyItem(shop, d.coins, d.inventory, id, dayOf(Date.now()))
+    : null;
   if (!bought) return false;
   commit(
     { inventory: bought.inventory, giftDay: d.giftDay, coins: bought.coins },
