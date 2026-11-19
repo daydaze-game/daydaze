@@ -33,6 +33,10 @@ function toVector3(
   return null;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object";
+}
+
 /** Parses a cam override from a string, array, or object into a CamShot. */
 export function parseCamOverride(input: unknown): CamShot | null {
   if (!input) return null;
@@ -65,12 +69,7 @@ export function parseCamOverride(input: unknown): CamShot | null {
     };
   }
 
-  if (
-    typeof input === "object" &&
-    input !== null &&
-    "eye" in input &&
-    "look" in input
-  ) {
+  if (isRecord(input) && "eye" in input && "look" in input) {
     const raw = input as {
       eye: THREE.Vector3 | readonly [number, number, number];
       look: THREE.Vector3 | readonly [number, number, number];
