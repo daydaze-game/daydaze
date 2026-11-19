@@ -22,8 +22,9 @@ export function heldClock(
   every: number,
   into: number,
   now: () => number = wallSeconds,
+  slot = 1000,
 ): EventClock {
-  const held = every * 1000 + into;
+  const held = every * slot + into;
   let releasedAt: number | null = null;
   return {
     read: () => (releasedAt === null ? held : held + now() - releasedAt),

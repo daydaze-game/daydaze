@@ -31,6 +31,13 @@ on:
         required: false
         default: 2
         type: number
+    secrets:
+      ARTIFACTS_TOKEN:
+        required: false
+    outputs:
+      archive:
+        description: URL of the run's permanent release on the artifacts repo
+        value: ${{ jobs.gallery.outputs.archive }}
   push:
     branches: [main]
     # only what can change a frame; docs, server, tests and CI take no shots
@@ -114,6 +121,8 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+    outputs:
+      archive: ${{ steps.archive.outputs.url }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -130,6 +139,15 @@ jobs:
           name: screenshots
           path: shots/*.png
           retention-days: 7
+      # the artifact above expires; this copy, a release on the artifacts
+      # repo, does not (scripts/archive-run.sh)
+      - id: archive
+        env:
+          ARTIFACTS_TOKEN: ${{ secrets.ARTIFACTS_TOKEN }}
+          ARCHIVE_REF: ${{ github.head_ref || github.ref_name }}
+          ARCHIVE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          ARCHIVE_NOTES: "Shots: ${{ inputs.shots || 'tour' }}"
+        run: shopt -s nullglob && bash scripts/archive-run.sh screenshots shots/*.png
       - if: ${{ github.event_name != 'pull_request' }}
         env:
           REF: ${{ github.ref_name }}

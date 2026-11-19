@@ -91,6 +91,9 @@ const VendingWatch = lazy(() =>
     default: m.VendingWatch,
   })),
 );
+const MartWatch = lazy(() =>
+  import("../inventory/MartWatch.tsx").then((m) => ({ default: m.MartWatch })),
+);
 
 // Enough for the environment map, face textures and reflector to settle.
 const STILL_FRAMES = 4;
@@ -771,6 +774,7 @@ export function World({
           <Seats room={room} player={player} area={area} home={home} />
           <Suspense fallback={null}>
             <VendingWatch room={room} player={player} />
+            {room === "city" && <MartWatch player={player} />}
           </Suspense>
           <PlayerController
             editing={dressing}
