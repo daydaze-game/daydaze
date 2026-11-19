@@ -27,6 +27,7 @@ import {
 } from "./budget.ts";
 import { BODY_KEYS, ROSTER_BODY } from "../driving/bodies.ts";
 import type { Vec2 } from "../walk.ts";
+import { vec2 } from "../typed.ts";
 
 type Gltf = {
   meshes: {
@@ -95,7 +96,7 @@ test("the queue people are one part each and no dearer than the budget says", ()
 });
 
 test("wherever she stands, the low tier's city (architecture, trees, furniture, park) fits 250 draw calls and 300k triangles", () => {
-  let worst = { tris: 0, at: [0, 0] as Vec2 };
+  let worst = { tris: 0, at: vec2(0, 0) };
   for (let x = -432; x <= 432; x += 32)
     for (let z = -320; z <= 368; z += 32) {
       const at: Vec2 = [x, z];
@@ -113,7 +114,7 @@ test("wherever she stands, the low tier's city (architecture, trees, furniture, 
 });
 
 test("pulled out to the overview, the low tier draws distant architecture and yards and still fits", () => {
-  let worst = { tris: 0, at: [0, 0] as Vec2 };
+  let worst = { tris: 0, at: vec2(0, 0) };
   for (let x = -432; x <= 432; x += 48)
     for (let z = -320; z <= 368; z += 48) {
       const at: Vec2 = [x, z];

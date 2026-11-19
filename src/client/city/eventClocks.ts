@@ -12,12 +12,19 @@ import {
   nextHeistIn,
   type HeistOutcome,
 } from "../../game/city/heist.ts";
+import { CHASE_SLOT, chaseOffset, nextChaseIn } from "../../game/city/chase.ts";
 import { heldClock, toNextStart, wallSeconds } from "../../game/clock.ts";
 import { PRIDE_EVERY } from "../../game/prideNight.ts";
 import { schedule } from "../../game/events.ts";
 
 /** The city events the dev panel can set off. */
-export const DEV_EVENTS = ["fireworks", "parade", "pride", "heist"] as const;
+export const DEV_EVENTS = [
+  "fireworks",
+  "parade",
+  "pride",
+  "heist",
+  "chase",
+] as const;
 export type DevEvent = (typeof DEV_EVENTS)[number];
 
 /** Dev panel skips, seconds added to each clock (0 outside development). */
@@ -26,6 +33,7 @@ const skew: Record<DevEvent, number> = {
   parade: 0,
   pride: 0,
   heist: 0,
+  chase: 0,
 };
 
 /** A schedule's clock: real, or held by its URL flag, plus any dev skip.
@@ -73,6 +81,9 @@ export const heistClock = clockFor(
   heistConfig.lead,
   heistConfig.slot,
 );
+const chaseLead = chaseOffset(1000);
+/** The chase clock (`?chase=20` holds it 20 s into slot 1000's chase). */
+export const chaseClock = clockFor("chase", CHASE_SLOT, chaseLead, 1000);
 
 /** Each event's clock and the seconds from a time to its next start. */
 const CLOCKS: Record<
@@ -83,6 +94,7 @@ const CLOCKS: Record<
   parade: { read: paradeClock, toNext: (t) => toNextStart(t, PARADE_EVERY) },
   pride: { read: prideClock, toNext: (t) => toNextStart(t, PRIDE_EVERY) },
   heist: { read: heistClock, toNext: nextHeistIn },
+  chase: { read: chaseClock, toNext: nextChaseIn },
 };
 
 /** Dev panel: skip an event's clock to the start of its next run. */

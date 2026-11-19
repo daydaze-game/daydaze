@@ -18,13 +18,18 @@ import { peerCard } from "./peerCard.ts";
 type Ask = { id: string; name: string; e: TogetherId };
 
 /** An emote with another player: an invite either way, then the pose. */
-export const pairUp = createStore({
+export const pairUp = createStore<{
+  invite: Ask | null;
+  asked: Ask | null;
+  pair: (Ask & { role: CoupleRole; placed: boolean }) | null;
+  note: string;
+}>({
   /** Someone asked you. */
-  invite: null as Ask | null,
+  invite: null,
   /** You asked someone, and they haven't answered. */
-  asked: null as Ask | null,
+  asked: null,
   /** Doing it now. `placed` is set once the follow has stepped into place. */
-  pair: null as (Ask & { role: CoupleRole; placed: boolean }) | null,
+  pair: null,
   note: "",
 });
 

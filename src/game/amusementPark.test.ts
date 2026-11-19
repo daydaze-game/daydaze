@@ -44,6 +44,7 @@ import {
 import { areaOf, isBlocked } from "./area.ts";
 import { ROOMS } from "./rooms.ts";
 import { pointInPolygon, type Vec2 } from "./walk.ts";
+import { must } from "./typed.ts";
 
 function assertNear(actual: readonly number[], expected: readonly number[]) {
   assert.equal(actual.length, expected.length);
@@ -221,15 +222,15 @@ test("the seat follows the ride, then steps off to the boarding spot", () => {
     start: 0,
     seconds: 24,
   };
-  assertNear(at(seatPose(riding, 0, false)!), at(ferrisPose(FERRIS, 0)));
+  assertNear(at(must(seatPose(riding, 0, false))), at(ferrisPose(FERRIS, 0)));
   const exiting: RideState = {
     phase: "exiting",
     ride: "ferris-wheel",
     start: 24,
   };
   const [sx, sz] = RIDES["ferris-wheel"].spot;
-  assertNear(at(seatPose(exiting, 24, false)!), at(ferrisPose(FERRIS, 1)));
-  const landed = seatPose(exiting, 24 + EXIT_SECONDS, false)!;
+  assertNear(at(must(seatPose(exiting, 24, false))), at(ferrisPose(FERRIS, 1)));
+  const landed = must(seatPose(exiting, 24 + EXIT_SECONDS, false));
   assertNear([landed.x, landed.y, landed.z], [sx, 0, sz]);
 });
 

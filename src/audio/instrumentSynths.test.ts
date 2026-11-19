@@ -2,6 +2,7 @@
 // null for drums and bad indices, and a label for every instrument type.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { toAudioContext } from "./fakeAudioContext.ts";
 import {
   DRUM_LABELS,
   FLOOR_PIANO_FREQUENCIES,
@@ -104,24 +105,24 @@ function makeFakeAudioContext(): AudioContext {
       connect: () => {},
       start: () => {},
       stop: () => {},
-      buffer: null as unknown,
+      buffer: null,
     };
   };
-  return {
+  return toAudioContext({
     currentTime: 0,
     sampleRate: 44100,
     state: "running",
     destination: {},
-    createOscillator: () => node() as unknown,
-    createGain: () => node() as unknown,
-    createBiquadFilter: () => node() as unknown,
+    createOscillator: () => node(),
+    createGain: () => node(),
+    createBiquadFilter: () => node(),
     createBuffer: (_channels: number, length: number) => ({
       getChannelData: () => new Float32Array(length),
     }),
-    createBufferSource: () => node() as unknown,
+    createBufferSource: () => node(),
     resume: () => Promise.resolve(),
     close: () => Promise.resolve(),
-  } as unknown as AudioContext;
+  });
 }
 
 test("playInstrumentNote returns true when a note plays successfully", () => {
@@ -145,10 +146,10 @@ test("playInstrumentNote returns false when no audio context is available", () =
 });
 
 test("playInstrumentNote catches constructor/resume errors and returns false", () => {
-  const throwingCtx = {
+  const throwingCtx = toAudioContext({
     get currentTime(): number {
       throw new Error("boom");
     },
-  } as unknown as AudioContext;
+  });
   assert.equal(playInstrumentNote("piano", 0, throwingCtx), false);
 });

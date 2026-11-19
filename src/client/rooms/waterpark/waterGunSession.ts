@@ -8,6 +8,7 @@ import {
   battleOver,
   newBattle,
   squirt,
+  type Battle,
   type Target,
 } from "../../../game/waterGuns.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -18,21 +19,27 @@ export type Phase = "off" | "playing" | "over";
 /** The aim keeps a little inside the coping. */
 const EDGE = 0.4;
 
-const OFF = {
-  phase: "off" as Phase,
-  battle: newBattle(1),
+const OFF: {
+  phase: Phase;
+  battle: Battle;
   /** performance.now() the battle began. */
-  since: 0,
+  since: number;
   /** Where the squirt will land: [x, z] on the pool. */
-  aim: [(POOL.x0 + POOL.x1) / 2, (POOL.z0 + POOL.z1) / 2] as [number, number],
+  aim: [number, number];
   /** The last squirt: where it landed, when, and what it soaked; `n`
    * counts squirts. */
-  shot: null as {
+  shot: {
     at: [number, number];
     when: number;
     soaked: Target | null;
     n: number;
-  } | null,
+  } | null;
+} = {
+  phase: "off",
+  battle: newBattle(1),
+  since: 0,
+  aim: [(POOL.x0 + POOL.x1) / 2, (POOL.z0 + POOL.z1) / 2],
+  shot: null,
 };
 
 export const waterGuns = createStore(OFF);

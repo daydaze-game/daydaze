@@ -22,10 +22,14 @@ import { doWork } from "../shared/game3d/workClip.ts";
 type FarmCoins = { farm: FarmSave; coins: number };
 
 /** The saved farm and coins, and the way to change them. */
-export const farmDesk = createStore({
+export const farmDesk = createStore<{
+  farm: FarmSave;
+  coins: number;
+  commit: ((next: FarmCoins) => void) | null;
+}>({
   farm: createDefaultFarm(),
   coins: 0,
-  commit: null as ((next: FarmCoins) => void) | null,
+  commit: null,
 });
 
 /** Hook providing the latest FarmSave, coin balance, and mutating farm actions. */

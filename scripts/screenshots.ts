@@ -25,6 +25,13 @@ import {
 } from "../src/game/home/decor.ts";
 import { expandShots, shard } from "./shot-plan.ts";
 
+// `?debug=1` puts this on the page (src/client/world/reaction.ts).
+declare global {
+  interface Window {
+    daydazeReact: (id: string) => void;
+  }
+}
+
 const BASE = process.env.BASE_URL ?? "http://localhost:5195";
 /** Waits for the street furniture models and street pieces (CityFurniture sets data-furniture, StreetPieces data-street). */
 const furnitureReady = async (page: Page) => {
@@ -989,13 +996,7 @@ const SHOTS: {
     ] as const
   ).map(([name, id]) => {
     const play = (page: Page, r: string) =>
-      page.evaluate(
-        (r) =>
-          (
-            window as unknown as { daydazeReact: (id: string) => void }
-          ).daydazeReact(r),
-        r,
-      );
+      page.evaluate((r) => window.daydazeReact(r), r);
     const fall = id === "trip-fall";
     return actionStrip(
       name,
@@ -2293,6 +2294,20 @@ const SHOTS: {
     name: "city-heist-bust",
     query:
       "room=city&view=room&time=22:00&heist=30&heistend=caught&at=-170,9&cam=-150,4,8,-180,1,-10",
+    act: furnitureReady,
+  },
+  {
+    // police chase: squad cars in pursuit of a fleeing sports car through Gallery Row
+    name: "city-chase-run",
+    query:
+      "room=city&view=room&time=22:00&chase=10&at=-30,-250&cam=-15,4,-246,-50,1.5,-256",
+    act: furnitureReady,
+  },
+  {
+    // police chase crash: wrecked sports car smoking and boxed in by squad cars on Main Ave
+    name: "city-chase-crash",
+    query:
+      "room=city&view=room&time=22:00&chase=32&at=55,10&cam=45,3.5,12,65,1.2,-2",
     act: furnitureReady,
   },
   {

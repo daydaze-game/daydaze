@@ -2,6 +2,7 @@
 // an AudioContext, and play/stop state on the controller.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { toAudioContext } from "./fakeAudioContext.ts";
 import {
   JUKEBOX_TRACKS,
   TRACK_PROGRAMS,
@@ -90,48 +91,47 @@ test("createJukeboxController falls back safely when AudioContext constructor th
       throw new Error("no audio hardware");
     }
   }
-  const originalAudioContext = (globalThis as { AudioContext?: unknown })
-    .AudioContext;
-  (globalThis as { AudioContext?: unknown }).AudioContext =
-    ThrowingAudioContext;
+  const originalAudioContext: unknown = Reflect.get(globalThis, "AudioContext");
+  Reflect.set(globalThis, "AudioContext", ThrowingAudioContext);
   try {
     const controller = createJukeboxController();
     assert.equal(controller.playTrack("savanna-nightclub"), false);
     assert.equal(controller.isPlaying(), false);
   } finally {
-    (globalThis as { AudioContext?: unknown }).AudioContext =
-      originalAudioContext;
+    Reflect.set(globalThis, "AudioContext", originalAudioContext);
   }
 });
 
-function makeFakeAudioContext(): AudioContext {
-  const node = () => ({
-    connect: () => {},
-    disconnect: () => {},
-    start: () => {},
-    stop: () => {},
-    frequency: {
-      value: 0,
-      setValueAtTime: () => {},
-      exponentialRampToValueAtTime: () => {},
-      linearRampToValueAtTime: () => {},
-    },
-    gain: {
-      value: 0,
-      setValueAtTime: () => {},
-      exponentialRampToValueAtTime: () => {},
-      linearRampToValueAtTime: () => {},
-    },
-    type: "sine",
-    Q: { value: 0 },
-    detune: { value: 0 },
-  });
-  const fake = {
+/** A fake audio node; `gain.value` is what the volume tests read back. */
+const node = () => ({
+  connect: () => {},
+  disconnect: () => {},
+  start: () => {},
+  stop: () => {},
+  frequency: {
+    value: 0,
+    setValueAtTime: () => {},
+    exponentialRampToValueAtTime: () => {},
+    linearRampToValueAtTime: () => {},
+  },
+  gain: {
+    value: 0,
+    setValueAtTime: () => {},
+    exponentialRampToValueAtTime: () => {},
+    linearRampToValueAtTime: () => {},
+  },
+  type: "sine",
+  Q: { value: 0 },
+  detune: { value: 0 },
+});
+/** The fake's plain object: tests swap its factories, then wrap it. */
+function makeFake() {
+  return {
     currentTime: 0,
     sampleRate: 44100,
     state: "running",
     destination: {},
-    createOscillator: () => node(),
+    createOscillator: (): object => node(),
     createGain: () => node(),
     createBiquadFilter: () => node(),
     createBufferSource: () => ({ ...node(), buffer: null }),
@@ -144,7 +144,10 @@ function makeFakeAudioContext(): AudioContext {
     suspend: () => Promise.resolve(),
     close: () => Promise.resolve(),
   };
-  return fake as unknown as AudioContext;
+}
+
+function makeFakeAudioContext(): AudioContext {
+  return toAudioContext(makeFake());
 }
 
 test("playTrack starts playback and getCurrentTrack/isPlaying reflect it", () => {
@@ -193,7 +196,7 @@ test("stopTrack is a safe no-op when nothing is playing", () => {
 test("playTrack rejects unknown track ids", () => {
   const ctx = makeFakeAudioContext();
   const controller = createJukeboxController(ctx);
-  const result = controller.playTrack("not-a-real-track" as TrackId);
+  const result = controller.playTrack("not-a-real-track");
   assert.equal(result, false);
   assert.equal(controller.getCurrentTrack(), null);
   controller.dispose();
@@ -251,22 +254,15 @@ test("setMuted toggles mute state independent of volume", () => {
 });
 
 test("setMuted actually zeroes the controller's gain node value, not just the flag", () => {
-  const ctx = makeFakeAudioContext();
+  const fake = makeFake();
   const captured: { gain: { value: number } }[] = [];
-  const originalCreateGain = (
-    ctx as unknown as { createGain: () => { gain: { value: number } } }
-  ).createGain;
-  (
-    ctx as unknown as { createGain: () => { gain: { value: number } } }
-  ).createGain = () => {
-    const node = originalCreateGain.call(ctx) as unknown as {
-      gain: { value: number };
-      connect: () => void;
-    };
-    captured.push(node);
-    return node;
+  const originalCreateGain = fake.createGain;
+  fake.createGain = () => {
+    const created = originalCreateGain();
+    captured.push(created);
+    return created;
   };
-  const controller = createJukeboxController(ctx);
+  const controller = createJukeboxController(toAudioContext(fake));
   controller.setMusicVolume(0.7);
   const createdGain = captured[0];
   assert.ok(createdGain);
@@ -299,12 +295,11 @@ test("playTrack returns false after dispose", () => {
 });
 
 test("controller never throws even if underlying node creation fails mid-track", () => {
-  const ctx = makeFakeAudioContext();
-  (ctx as unknown as { createOscillator: () => never }).createOscillator =
-    () => {
-      throw new Error("boom");
-    };
-  const controller = createJukeboxController(ctx);
+  const fake = makeFake();
+  fake.createOscillator = () => {
+    throw new Error("boom");
+  };
+  const controller = createJukeboxController(toAudioContext(fake));
   assert.doesNotThrow(() => controller.playTrack("savanna-nightclub"));
   controller.dispose();
 });
@@ -343,22 +338,21 @@ test("collectDueSteps resyncs to now after a long delay instead of bursting stal
 });
 
 test("stopTrack cancels the scheduling timer so no further steps fire", async () => {
-  const ctx = makeFakeAudioContext();
+  const fake = makeFake();
   let oscillatorsCreated = 0;
-  (ctx as unknown as { createOscillator: () => unknown }).createOscillator =
-    () => {
-      oscillatorsCreated += 1;
-      return {
-        connect: () => {},
-        start: () => {},
-        stop: () => {},
-        frequency: {
-          setValueAtTime: () => {},
-          exponentialRampToValueAtTime: () => {},
-        },
-      };
+  fake.createOscillator = () => {
+    oscillatorsCreated += 1;
+    return {
+      connect: () => {},
+      start: () => {},
+      stop: () => {},
+      frequency: {
+        setValueAtTime: () => {},
+        exponentialRampToValueAtTime: () => {},
+      },
     };
-  const controller = createJukeboxController(ctx);
+  };
+  const controller = createJukeboxController(toAudioContext(fake));
   controller.playTrack("waterhole-twilight");
   const afterStart = oscillatorsCreated;
   controller.stopTrack();
@@ -395,8 +389,8 @@ test("Savanna Nightclub fires the kick oscillator once per quarter note, not eve
   const ctx = makeFakeAudioContext();
   const dest = ctx.createGain();
   let kicks = 0;
-  const countingCtx = {
-    ...ctx,
+  const countingCtx = toAudioContext({
+    ...makeFake(),
     createOscillator: () => {
       kicks += 1;
       return {
@@ -409,7 +403,7 @@ test("Savanna Nightclub fires the kick oscillator once per quarter note, not eve
         },
       };
     },
-  } as unknown as AudioContext;
+  });
   // 16 steps at 8th-note resolution = 8 beats; the kick (first oscillator
   // created each step) must fire on exactly the 8 even steps, not all 16.
   for (let step = 0; step < 16; step++) {

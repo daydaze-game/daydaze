@@ -3,7 +3,13 @@
 // through (the hall fades and is dressed as the next room) or plays a scare
 // (hauntedSets.ts) before you turn back.
 
-import { newRun, open, runOver, runScore } from "../../../game/hauntedRun.ts";
+import {
+  newRun,
+  open,
+  runOver,
+  runScore,
+  type Run,
+} from "../../../game/hauntedRun.ts";
 import { scareFor, type ScareKind } from "../../../game/hauntedSets.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
@@ -16,14 +22,22 @@ export const WALK = 1.2;
 export const SCARE = 2.4;
 export const THROUGH = 1;
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  run: Run;
+  door: number;
+  since: number;
+  scare: { kind: ScareKind; line: string } | null;
+}
+
+const OFF: State = {
+  phase: "off",
   run: newRun(1),
   /** The door picked (0 left, 1 ahead, 2 right). */
   door: 1,
   /** performance.now() the phase began. */
   since: 0,
-  scare: null as { kind: ScareKind; line: string } | null,
+  scare: null,
 };
 
 export const escape = createStore(OFF);
