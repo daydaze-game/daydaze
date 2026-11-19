@@ -12,7 +12,7 @@ import { getSharedAudioBus } from "./audioBus.ts";
 export type Ambience = "city" | "beach" | "aquarium" | "rink" | "haunted";
 export type Surface = "hard" | "soft";
 
-function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
+export function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
   try {
     const bus = getSharedAudioBus();
     const ctx = bus.getContext();
@@ -39,7 +39,7 @@ function noiseBuffer(ctx: AudioContext): AudioBuffer {
   return buffer;
 }
 
-function burst(
+export function burst(
   ctx: AudioContext,
   dest: AudioNode,
   type: BiquadFilterType,
