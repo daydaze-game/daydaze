@@ -348,13 +348,32 @@ function actionStrip(
       await setup(page);
       const cdp = await page.context().newCDPSession(page);
       const frames: Buffer[] = [];
+      // DIAGNOSTIC (#75): every screencast event, not just the kept ones
+      let events = 0;
+      const t0 = Date.now();
       cdp.on("Page.screencastFrame", (f) => {
+        events++;
+        console.log(
+          `DIAG ${name} screencast event ${events} at ${Date.now() - t0} ms`,
+        );
         if (frames.length < keep) frames.push(Buffer.from(f.data, "base64"));
         void cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId });
       });
       await cdp.send("Page.startScreencast", { format: "png" });
+      console.log(`DIAG ${name} screencast started at ${Date.now() - t0} ms`);
       await go(page);
-      await page.waitForTimeout(seconds * 1000);
+      console.log(`DIAG ${name} go() done at ${Date.now() - t0} ms`);
+      for (let n = 0; n < seconds; n++) {
+        await page.waitForTimeout(1000);
+        const t1 = Date.now();
+        const df = await page
+          .locator("canvas")
+          .getAttribute("data-frames", { timeout: 60_000 })
+          .catch((e: unknown) => `err ${String(e).slice(0, 60)}`);
+        console.log(
+          `DIAG ${name} +${n + 1}s: events ${events}, data-frames ${df}, read ${Date.now() - t1} ms`,
+        );
+      }
       await cdp.send("Page.stopScreencast");
       frames.forEach((png, n) =>
         writeFileSync(
