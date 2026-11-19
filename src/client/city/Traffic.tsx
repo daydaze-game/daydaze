@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { SIGNAL } from "../../game/city/furniture.ts";
+import { wallSeconds } from "../../game/clock.ts";
 import { advance } from "../../game/driving/fixedStep.ts";
 import {
   carPose,
@@ -10,6 +11,7 @@ import {
   TRAFFIC_COUNT,
   TRAFFIC_SEED,
   signalAt,
+  syncClock,
   signalledJunctions,
   stepTraffic,
   type Signal,
@@ -308,6 +310,7 @@ export function Traffic({ player }: { player: Player }) {
     busPosition.current[1] = busMotion.pose.z;
     truckPosition.current[0] = foodMotion.pose.x;
     truckPosition.current[1] = foodMotion.pose.z;
+    syncClock(traffic, wallSeconds());
     advance(clock.current, dt, () =>
       stepTraffic(
         traffic,
