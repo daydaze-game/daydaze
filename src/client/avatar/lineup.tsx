@@ -27,7 +27,7 @@ import { naturalPace } from "../../game/dance/clips.ts";
 import { Environment, Lightformer, useGLTF } from "@react-three/drei";
 import { Suspense } from "react";
 import { BODY_TRAITS, cleanBody, DEFAULT_BODY } from "../../game/body.ts";
-import { isMesh } from "../world/guards.ts";
+import { isBone, isMesh } from "../world/guards.ts";
 
 // ?human=1 shows the 3D doll built in Blender instead of the toon doll
 const human = new URLSearchParams(location.search).get("human") === "1";
@@ -639,7 +639,8 @@ function NeutralPreview() {
   const rest = useMemo(() => {
     const bones = new Map<string, THREE.Bone>();
     source.traverse((node) => {
-      if (node instanceof THREE.Bone) bones.set(node.name, node);
+      // isBone, not instanceof: instanceof narrows to Bone<any> (no-unsafe-argument)
+      if (isBone(node)) bones.set(node.name, node);
     });
     return bones;
   }, [source]);

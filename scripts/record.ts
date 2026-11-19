@@ -138,7 +138,8 @@ if (import.meta.main) {
   // a fresh save would show the first-visit walkthrough over the scene
   await page.addInitScript(() => {
     const key = "daydaze-save-v1";
-    const save = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+    const save = typeof parsed === "object" && parsed !== null ? parsed : {};
     if (!("onboarded" in save))
       localStorage.setItem(key, JSON.stringify({ ...save, onboarded: true }));
   });
