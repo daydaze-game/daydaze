@@ -6,6 +6,8 @@
 # once on the PR; after that, catching up with main only re-runs the fast checks. Removes
 # the worktree and branches after the merge. No local verify: the owner's machine stays free.
 b=$1; w=$2; msg=$3; M=${DAYDAZE_MAIN:-$HOME/git/daydaze}; d=$M/.worktrees/$w
+# gh finds the repo from the cwd, which another landing of the same PR can delete
+export GH_REPO=${GH_REPO:-$(git -C "$M" remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##')}
 FAST="setup lint test build"; BROWSER="browser (1)|browser (2)|browser (3)|browser (4)|minigames"
 [ -d "$d" ] || { git -C "$M" worktree add -q "$d" "$b" && ln -s "$M/node_modules" "$d/node_modules"; }
 cd "$d" || exit 1
