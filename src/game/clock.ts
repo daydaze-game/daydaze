@@ -63,3 +63,12 @@ export function toNextStart(t: number, every: number): number {
   const into = ((t % every) + every) % every;
   return into === 0 ? 0 : every - into;
 }
+
+/**
+ * Seconds from `start` to `t`, rounded to the millisecond. Wall-clock seconds
+ * run into the millions, so a plain `t - start` carries float noise
+ * (74.89999999990687 for 74.9) that breaks exact comparisons.
+ */
+export function secondsSince(t: number, start: number): number {
+  return Math.round((t - start) * 1000) / 1000;
+}
