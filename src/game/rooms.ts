@@ -133,7 +133,6 @@ import * as FOREST from "./forest.ts";
 import type { Vec2 } from "./walk.ts";
 
 export {
-  ROOM_IDS,
   type RoomId,
   type Spawn,
   type RoomDefinition,

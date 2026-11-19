@@ -27,7 +27,6 @@ export type {
   RoadNode,
   RoadEdge,
   BuildingStyle,
-  Door,
   Building,
   Surface,
   PropKind,
