@@ -3,14 +3,36 @@
 // walk rules both read it. Axis-aligned throughout, so every surface is a
 // rectangle that the cell grid can clip.
 import { byTier } from "../age.ts";
-import type { WalkArea } from "../area.ts";
+import type { WalkArea } from "../areaTypes.ts";
 import { FOOD_STOREFRONTS } from "../food/storefronts.ts";
 import { FOOD_BLOCKERS } from "./vendors.ts";
 import { MARKET, MARKET_BLOCKERS } from "./nightMarket.ts";
 import { DOG_PARK_BLOCKERS } from "./dogPark.ts";
 import { MARKET_BLOCKERS as FARMERS_BLOCKERS } from "./farmersMarket.ts";
 import { GAS_BLOCKERS, GAS_SURFACES } from "./gasStations.ts";
-import type { RoomId, Spawn } from "../rooms.ts";
+import type { Spawn } from "../roomTypes.ts";
+import type {
+  Neighborhood,
+  RoadNode,
+  RoadEdge,
+  BuildingStyle,
+  Door,
+  Building,
+  Surface,
+  PropKind,
+  Prop,
+} from "./buildingTypes.ts";
+export type {
+  Neighborhood,
+  RoadNode,
+  RoadEdge,
+  BuildingStyle,
+  Door,
+  Building,
+  Surface,
+  PropKind,
+  Prop,
+};
 import { LIFT, SKYLARK_DOOR } from "../rooftop.ts";
 import { SPAWN as SUGAR_RUSH_SPAWN, SUGAR_RUSH_DOOR } from "../sugarRush.ts";
 import { ARCADE_DOOR, SPAWN as ARCADE_SPAWN } from "../arcadeBar.ts";
@@ -86,29 +108,6 @@ import {
   WAREHOUSE_DOOR,
 } from "../warehouse.ts";
 import type { Vec2 } from "../walk.ts";
-
-export type Neighborhood =
-  | "downtown"
-  | "nightlife-row"
-  | "beachside"
-  | "little-manila"
-  | "arts-district"
-  | "chinatown-koreatown"
-  | "uptown"
-  | "suburbia"
-  | "fairground";
-
-export type RoadNode = { id: string; position: Vec2 };
-export type RoadEdge = {
-  from: string;
-  to: string;
-  /** Meters of asphalt across the edge. */
-  width: number;
-  /** Lanes in both directions. */
-  lanes: number;
-  /** Meters per second. */
-  speedLimit: number;
-};
 
 /** Beachside runs south of the old city edge to the water. */
 const SOUTH_EDGE = 384;
@@ -264,50 +263,6 @@ export const ROAD_EDGES: readonly RoadEdge[] = [
   { from: "a-shore", to: "b-shore", width: 14, lanes: 2, speedLimit: 11 },
   { from: "b-shore", to: "shore-e", width: 14, lanes: 2, speedLimit: 11 },
 ];
-
-export type BuildingStyle =
-  | "tower"
-  | "glass"
-  | "billboard"
-  | "storefront"
-  | "deck"
-  | "brick"
-  | "club"
-  | "warehouse"
-  | "velvet"
-  | "gate";
-
-export type Door = {
-  position: Vec2;
-  radius: number;
-  label: string;
-  target: RoomId;
-  targetSpawn: Spawn;
-};
-
-export type Building = {
-  id: string;
-  neighborhood: Neighborhood;
-  footprint: readonly Vec2[];
-  height: number;
-  style: BuildingStyle;
-  /** Paint over the style's own color (pastel beach houses). */
-  color?: string;
-  sign?: { text: string; color: string };
-  /** A line of people waits on the forecourt. */
-  queue?: boolean;
-  door?: Door;
-  /** Which wall carries the dressing, when not the one the street or door picks. */
-  front?: "zmin" | "zmax" | "xmin" | "xmax";
-};
-
-export type Surface = {
-  kind: "road" | "sidewalk" | "square" | "boardwalk" | "sand" | "lawn";
-  polygon: readonly Vec2[];
-};
-
-export type PropKind = "lamp" | "palm" | "tree";
-export type Prop = { kind: PropKind; position: Vec2 };
 
 export function rect(x0: number, z0: number, x1: number, z1: number): Vec2[] {
   return [

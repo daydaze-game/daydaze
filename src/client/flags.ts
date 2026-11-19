@@ -9,7 +9,7 @@ import {
   type Spawn,
 } from "../game/rooms.ts";
 import { loadSave } from "../game/save.ts";
-import type { View } from "./world/CameraRig.tsx";
+import { VIEW_IDS, type View } from "./world/view.ts";
 import type { QualityTier } from "./world/quality.ts";
 
 /** Every URL flag, already validated. */
@@ -37,8 +37,6 @@ export type Flags = {
 
 /** Room copies are numbered 1 to 99 (OnlineSession's MAX_COPY). */
 const MAX_COPY = 99;
-
-const VIEW_IDS: readonly View[] = ["room", "full", "face", "detail"];
 
 /** Reads the flags from a location.search string. */
 export function readFlags(search: string): Flags {

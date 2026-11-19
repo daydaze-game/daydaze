@@ -4,7 +4,8 @@
 // mutated after first use. Pure.
 
 import { CITY_AREA } from "./city/layout.ts";
-import type { Portal, RoomDefinition } from "./rooms.ts";
+import { BODY_RADIUS, type WalkArea } from "./areaTypes.ts";
+import type { RoomDefinition } from "./roomTypes.ts";
 import {
   nearestPointOnPolygon,
   pointInPolygon,
@@ -12,18 +13,7 @@ import {
   type Vec2,
 } from "./walk.ts";
 
-/** Meters the player's body keeps clear of a blocker's edge. */
-export const BODY_RADIUS = 0.35;
-
-/**
- * Where a player can stand and what stops them. Surfaces may overlap; a
- * point is walkable if any surface holds it. Blockers are solid footprints.
- */
-export type WalkArea = {
-  surfaces: readonly (readonly Vec2[])[];
-  blockers: readonly (readonly Vec2[])[];
-  portals: readonly Portal[];
-};
+export { BODY_RADIUS, type WalkArea };
 
 /**
  * A single-surface walk area from a room definition: its walkable polygon, its
