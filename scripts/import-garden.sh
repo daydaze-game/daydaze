@@ -41,7 +41,7 @@ for crop_id, stages in crops:
         print(f"Exported: {out_name}")
 EOF
 
-blender --background --factory-startup --python "$TMP/convert.py" -- "$CROPS_DIR" "$TMP"
+blender --background --factory-startup --python-exit-code 1 --python "$TMP/convert.py" -- "$CROPS_DIR" "$TMP"
 
 echo "=== Downloading Poly Pizza / Quaternius & CreativeTrio CC0 models ==="
 declare -A POLY_MODELS=(
