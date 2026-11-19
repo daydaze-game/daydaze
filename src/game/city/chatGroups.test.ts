@@ -27,6 +27,12 @@ const onSidewalk = (p: readonly [number, number]) =>
     (s) => s.kind === "sidewalk" && pointInPolygon(s.polygon, [p[0], p[1]]),
   );
 
+/** A chat group's head count, narrowed to the sizes the ring table has. */
+function groupSize(n: number): 2 | 3 | 4 {
+  if (n === 2 || n === 3 || n === 4) return n;
+  throw new Error(`chat group of ${n}`);
+}
+
 test("the city has a dozen or more groups, of two to four, each on a sidewalk", () => {
   assert.ok(CHAT_GROUPS.length >= 12, `${CHAT_GROUPS.length}`);
   for (const g of CHAT_GROUPS) {
@@ -86,7 +92,7 @@ test("every huddle's people and their gesturing arms are clear of the street's f
     ...PARKED_CARS.map((c) => [c.x, c.z, "parked car"] as const),
   ];
   for (const g of CHAT_GROUPS) {
-    const size = g.looks.length as 2 | 3 | 4;
+    const size = groupSize(g.looks.length);
     const r = CHAT_RING[size];
     // each person's spot, and an arm's length (0.9 m) round it
     for (let m = 0; m < size; m++) {
@@ -137,7 +143,7 @@ test("no huddle stands in the El's stairs, platform or columns, or within an arm
       const dx = Math.max(Math.abs(g.at[0] - b.x) - b.sx / 2, 0);
       const dz = Math.max(Math.abs(g.at[1] - b.z) - b.sz / 2, 0);
       assert.ok(
-        Math.hypot(dx, dz) > huddleReach(g.looks.length as 2 | 3 | 4),
+        Math.hypot(dx, dz) > huddleReach(groupSize(g.looks.length)),
         `${g.at} is by an El ${b.kind} at ${b.x},${b.z}`,
       );
     }

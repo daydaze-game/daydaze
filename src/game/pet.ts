@@ -5,6 +5,7 @@
 // client's PetFollower draws it with the Creature component.
 
 import type { Vec2 } from "./walk.ts";
+import { isOneOf, isRecord } from "./typed.ts";
 
 export const PET_KINDS = [
   "husky",
@@ -32,8 +33,7 @@ export type PetSave = {
   fedAt: number;
 };
 
-const isKind = (v: unknown): v is PetKind =>
-  typeof v === "string" && (PET_KINDS as readonly string[]).includes(v);
+const isKind = (v: unknown): v is PetKind => isOneOf(PET_KINDS, v);
 
 /** The same ASCII-only rule as display names (save.ts), 2-16 characters. */
 export const isValidPetName = (name: unknown): name is string =>
@@ -46,8 +46,8 @@ const isTime = (v: unknown): v is number =>
 
 /** A pet from stored or network JSON, or null (no pet) when it isn't one. */
 export function validatePet(value: unknown): PetSave | null {
-  if (typeof value !== "object" || value === null) return null;
-  const { kind, name, adoptedAt, fedAt } = value as Record<string, unknown>;
+  if (!isRecord(value)) return null;
+  const { kind, name, adoptedAt, fedAt } = value;
   if (!isKind(kind) || !isValidPetName(name) || !isTime(adoptedAt)) return null;
   return { kind, name, adoptedAt, fedAt: isTime(fedAt) ? fedAt : adoptedAt };
 }

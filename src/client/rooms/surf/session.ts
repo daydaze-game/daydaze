@@ -1,15 +1,21 @@
 // The surf client session: the board's state, the lean held, and when a trick
 // last landed, over the pure ride rules in `src/game/`.
-import { newRide, step, surfScore, trick } from "../../../game/surf.ts";
+import {
+  newRide,
+  step,
+  surfScore,
+  trick,
+  type Surf,
+} from "../../../game/surf.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
 
 /** A ride at Swell Surf Co.: the board's state, which way she's leaning
  * (held buttons or arrow keys) and when a trick last landed. */
-const OFF = {
+const OFF: { on: boolean; surf: Surf; lean: -1 | 0 | 1; trickAt: number } = {
   on: false,
   surf: newRide(0),
-  lean: 0 as -1 | 0 | 1,
+  lean: 0,
   trickAt: -Infinity,
 };
 

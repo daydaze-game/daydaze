@@ -21,15 +21,21 @@ import { peerCard } from "./peerCard.ts";
 
 type Who = { id: string; name: string };
 
-export const ride = createStore({
+export const ride = createStore<{
+  offer: Who | null;
+  offered: Who | null;
+  passenger: Who | null;
+  driver: Who | null;
+  note: string;
+}>({
   /** A friend offered you a ride. */
-  offer: null as Who | null,
+  offer: null,
   /** You offered a friend a ride, waiting on their answer. */
-  offered: null as Who | null,
+  offered: null,
   /** Driving: who rides with you. */
-  passenger: null as Who | null,
+  passenger: null,
   /** Riding: whose car you're in. */
-  driver: null as Who | null,
+  driver: null,
   note: "",
 });
 

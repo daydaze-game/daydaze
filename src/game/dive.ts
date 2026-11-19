@@ -4,6 +4,7 @@
 // and checks sightings with `canSee`.
 
 import type { Vec2 } from "./walk.ts";
+import { vec2 } from "./typed.ts";
 
 /** Seconds of air in a fresh tank at the surface's pressure. */
 export const AIR_SECONDS = 210;
@@ -47,7 +48,7 @@ export const FLOOR: readonly Vec2[] = [
   [-24, 6.2],
 ];
 /** The wreck and how close counts as exploring it. */
-export const WRECK = { at: [-10, -27] as Vec2, yaw: 0.6, radius: 7 } as const;
+export const WRECK = { at: vec2(-10, -27), yaw: 0.6, radius: 7 } as const;
 
 /** What can be spotted. `id` is also the creature kind the client draws. */
 export const SPECIES = [

@@ -27,13 +27,20 @@ export const zooView: { t: number; from: [number, number]; yaw: number } = {
  * keeps its `at` current, so a snap sees where they really are. */
 export const zooAnimals = new Set<{ kind: Species; at: Vec2 }>();
 
-const OFF = {
+const OFF: {
+  on: boolean;
+  start: number;
+  hunt: Hunt;
+  last: string | null;
+  over: boolean;
+  /** The score the hunt ended on, time bonus and all. */
+  final: number;
+} = {
   on: false,
   start: 0,
   hunt: newHunt(1),
-  last: null as string | null,
+  last: null,
   over: false,
-  /** The score the hunt ended on, time bonus and all. */
   final: 0,
 };
 

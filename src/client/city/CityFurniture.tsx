@@ -51,12 +51,12 @@ const url = (kind: FurnitureKind) => {
 };
 
 /** The furniture in view and where the plan was cut; set by CityScene. */
-export const cityFurniture = createStore({
-  spots: [] as readonly FurnitureSpot[],
-  at: [0, 0] as readonly [number, number],
+export const cityFurniture = createStore<{
+  spots: readonly FurnitureSpot[];
+  at: readonly [number, number];
   /** The camera is pulled out to the overview: small props near her are not drawn. */
-  overview: false,
-});
+  overview: boolean;
+}>({ spots: [], at: [0, 0], overview: false });
 
 /** A model's meshes, each with its node transform baked into the geometry. */
 export function partsOf(

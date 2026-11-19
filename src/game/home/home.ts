@@ -1,5 +1,6 @@
 // The apartment save: the lock and the placed furniture. Doors start locked.
 import { validateFurniture, type Furniture } from "./decor.ts";
+import { isRecord } from "../typed.ts";
 
 // The apartment save. Doors start locked; the owner opens them to invite
 // friends once multiplayer lands.
@@ -17,10 +18,10 @@ export function toggleLock(home: HomeSave): HomeSave {
 // Saves from before the apartment have no home field; anything malformed
 // falls back to the defaults.
 export function validateHome(value: unknown): HomeSave {
-  if (typeof value !== "object" || value === null) {
+  if (!isRecord(value)) {
     return { ...DEFAULT_HOME, furniture: [] };
   }
-  const { locked, furniture } = value as Record<string, unknown>;
+  const { locked, furniture } = value;
   return {
     locked: typeof locked === "boolean" ? locked : DEFAULT_HOME.locked,
     furniture: validateFurniture(furniture),

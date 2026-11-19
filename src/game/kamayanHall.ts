@@ -4,6 +4,7 @@
 // east. Its door and spawn are the food interiors' (food/interiors.ts), so
 // the street storefront lands you in the same place.
 import type { Vec2 } from "./walk.ts";
+import { vec2 } from "./typed.ts";
 
 export const FLOOR_BOUNDS = { x0: -7, x1: 7, z0: -6, z1: 5.6 } as const;
 
@@ -16,8 +17,8 @@ export const TABLE_SEATS: readonly { at: Vec2; facing: Vec2 }[] = [
   Array.from({ length: 10 }, (_, i) => {
     const x = TABLE.x0 + 0.45 + i * 0.9;
     return {
-      at: [x, TABLE.z + side * (TABLE.half + 0.45)] as Vec2,
-      facing: [x, TABLE.z] as Vec2,
+      at: vec2(x, TABLE.z + side * (TABLE.half + 0.45)),
+      facing: vec2(x, TABLE.z),
     };
   }),
 );

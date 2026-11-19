@@ -24,6 +24,7 @@ import { MIC } from "./karaoke.ts";
 import { FISH_SPOT as MARINA_FISH_SPOT } from "./marina.ts";
 import { seatsIn } from "./seats.ts";
 import { pointInPolygon, type Vec2 } from "./walk.ts";
+import { vec2 } from "./typed.ts";
 
 test("every room is registered under its own id", () => {
   assert.deepEqual(Object.keys(ROOMS).sort(), [
@@ -534,7 +535,7 @@ test("the Roller Disco: the rental clerk and the benches are reachable", () => {
   const area = areaOf(room);
   assert.equal(isBlocked(area, room.spawn.position), false);
   for (const goal of [
-    [RINK_RENTAL[0] + 0.7, RINK_RENTAL[1]] as Vec2,
+    vec2(RINK_RENTAL[0] + 0.7, RINK_RENTAL[1]),
     ...seatsIn("roller-rink").map((s) => s.approach),
   ]) {
     let pos: Vec2 = room.spawn.position;

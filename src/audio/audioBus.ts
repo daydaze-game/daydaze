@@ -6,6 +6,7 @@
  * a single global mute/volume control can reach every audio path.
  */
 
+import { getAudioContextClass } from "./audioContextClass.ts";
 import { createAcidFilter, type AcidFilter } from "./acidFilter.ts";
 
 export interface AudioBus {
@@ -39,14 +40,6 @@ export interface AudioBus {
 
 function clampUnit(value: number, fallback: number): number {
   return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback;
-}
-
-function getAudioContextClass(): typeof AudioContext | undefined {
-  return (
-    (globalThis as { AudioContext?: typeof AudioContext }).AudioContext ||
-    (globalThis as unknown as { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext
-  );
 }
 
 class AudioBusImpl implements AudioBus {
