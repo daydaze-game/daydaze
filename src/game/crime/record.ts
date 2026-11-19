@@ -1,6 +1,7 @@
 // The crime record: offense count, store bans and the "stolen" tags, saved so
 // they survive a reload.
 import type { Penalty } from "./shoplift.ts";
+import { isRecord } from "../typed.ts";
 
 // Offense count and store bans, saved so a ban and a repeat offense survive a reload.
 export type CrimeSave = {
@@ -41,8 +42,8 @@ const MAX_STOLEN = 200;
 
 // Saved crime data is untrusted: keep a sane count and finite ban times only.
 export function validateCrime(value: unknown): CrimeSave {
-  if (typeof value !== "object" || value === null) return DEFAULT_CRIME;
-  const { offences, bans, stolen } = value as Record<string, unknown>;
+  if (!isRecord(value)) return DEFAULT_CRIME;
+  const { offences, bans, stolen } = value;
   const count =
     typeof offences === "number" && Number.isInteger(offences) && offences >= 0
       ? Math.min(offences, MAX_OFFENCES)

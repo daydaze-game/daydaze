@@ -2,6 +2,7 @@
 // Pure data and rules; the room renders whatever these functions return.
 
 import { ARTWORKS, type ArtGroup, type ArtworkId } from "../artworks.ts";
+import { isOneOf, typedKeys } from "../typed.ts";
 
 export const HOME_GRID = { columns: 8, rows: 6 } as const;
 
@@ -9,6 +10,9 @@ export const HOME_GRID = { columns: 8, rows: 6 } as const;
 export const WINDOW_COLUMNS: readonly number[] = [1, 2, 3];
 
 export type Rotation = 0 | 1 | 2 | 3;
+
+/** The quarter turn after each rotation. */
+const NEXT_ROTATION: Record<Rotation, Rotation> = { 0: 1, 1: 2, 2: 3, 3: 0 };
 
 /** The tabs the decorating panel lists furniture under. */
 export const FURNITURE_GROUPS = [
@@ -137,7 +141,7 @@ export function lookGroups(id: FurnitureId): LookGroup[] {
   const groups: LookGroup[] = [
     { label: null, indexes: all.slice(0, DRAWN_PRINTS.length) },
   ];
-  for (const group of Object.keys(GROUP_LABELS) as ArtGroup[]) {
+  for (const group of typedKeys(GROUP_LABELS)) {
     const indexes = all.filter((i) => {
       const art = printArtwork(i);
       return art !== null && ARTWORKS[art].group === group;
@@ -249,12 +253,10 @@ export type Furniture = {
   variant?: number;
 };
 
-export const FURNITURE_IDS = Object.keys(FURNITURE_CATALOG) as FurnitureId[];
+export const FURNITURE_IDS = typedKeys(FURNITURE_CATALOG);
 
 function isFurnitureId(value: unknown): value is FurnitureId {
-  return (
-    typeof value === "string" && FURNITURE_IDS.includes(value as FurnitureId)
-  );
+  return isOneOf(FURNITURE_IDS, value);
 }
 
 export function footprint(id: FurnitureId, rotation: Rotation) {
@@ -360,7 +362,7 @@ export function rotateFurniture(
 ): Furniture[] | null {
   const current = items[index];
   if (!current || isWall(current)) return null;
-  const rotation = ((current.rotation + 1) % 4) as Rotation;
+  const rotation = NEXT_ROTATION[current.rotation];
   return replaceAt(items, index, { ...current, rotation });
 }
 

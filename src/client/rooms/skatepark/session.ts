@@ -2,6 +2,7 @@
 // run rules in `src/game/`, read by the panel and scene.
 import {
   NEW_RUN,
+  type Run,
   press as pressRun,
   RUN_SECONDS,
 } from "../../../game/skate.ts";
@@ -13,8 +14,8 @@ import { crowd } from "../shared/Stands.tsx";
  * a trick off the lip. */
 export type Phase = "off" | "riding" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
+const OFF: { phase: Phase; run: Run; startAt: number } = {
+  phase: "off",
   run: NEW_RUN,
   /** performance.now() when she dropped in. */
   startAt: 0,

@@ -3,6 +3,7 @@
 // and neighbor gardener interactions.
 import type { Vec2 } from "./walk.ts";
 import type { Spot } from "./zoo.ts";
+import { typedKeys } from "./typed.ts";
 
 export type GardenCropId =
   "tomato" | "strawberry" | "sunflower" | "pepper" | "herb";
@@ -66,9 +67,7 @@ export const GARDEN_CROPS: Record<GardenCropId, GardenCropDef> = {
   },
 };
 
-export const GARDEN_CROP_IDS = Object.keys(
-  GARDEN_CROPS,
-) as readonly GardenCropId[];
+export const GARDEN_CROP_IDS = typedKeys(GARDEN_CROPS);
 
 export function isGardenCropId(value: unknown): value is GardenCropId {
   return typeof value === "string" && Object.hasOwn(GARDEN_CROPS, value);

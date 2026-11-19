@@ -39,6 +39,7 @@ import { detailBuilding } from "./detail.ts";
 import { YARD_CARS, YARD_FURNITURE } from "./yards.ts";
 import { DISTRICT_NAMES } from "./districtNames.ts";
 import type { Placed, Buckets, Front } from "./dressingTypes.ts";
+import { typedKeys } from "../typed.ts";
 export type { Placed, Buckets, Front } from "./dressingTypes.ts";
 
 export { hash };
@@ -193,9 +194,7 @@ export function facingOf(b: Building): Facing {
       xmin: Math.abs(dx - x0),
       xmax: Math.abs(dx - x1),
     };
-    face = (Object.keys(gaps) as Face[]).reduce((a, c) =>
-      gaps[c] < gaps[a] ? c : a,
-    );
+    face = typedKeys(gaps).reduce((a, c) => (gaps[c] < gaps[a] ? c : a));
   } else if (!paved(outside[avenue])) {
     const order: Face[] = [avenue === "zmin" ? "zmax" : "zmin", "xmin", "xmax"];
     face = order.find((f) => paved(outside[f])) ?? avenue;

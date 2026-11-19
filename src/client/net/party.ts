@@ -22,17 +22,24 @@ import { peerCard } from "./peerCard.ts";
 
 type Who = { id: string; name: string };
 
-export const party = createStore({
+export const party = createStore<{
+  leader: string | null;
+  members: Who[];
+  invite: Who | null;
+  asked: Who[];
+  going: { room: RoomId; copy: number } | null;
+  note: string;
+}>({
   /** The leader's id (yours when you lead); null outside a party. */
-  leader: null as string | null,
+  leader: null,
   /** Everyone else in it: the members when you lead, the leader when not. */
-  members: [] as Who[],
+  members: [],
   /** A friend asked you to join. */
-  invite: null as Who | null,
+  invite: null,
   /** Friends you asked, waiting on their answer. */
-  asked: [] as Who[],
+  asked: [],
   /** Where the leader just went, until you've followed. */
-  going: null as { room: RoomId; copy: number } | null,
+  going: null,
   note: "",
 });
 
