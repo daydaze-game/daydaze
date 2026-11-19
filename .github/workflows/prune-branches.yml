@@ -38,7 +38,7 @@ jobs:
         run: |
           cutoff=$(date -d '7 days ago' +%s)
           deleted=0
-          for b in $(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin); do
+          while IFS= read -r -d '' b; do
             case "$b" in main | HEAD | gh-pages | dependabot/*) continue ;; esac
             [ "$(git log -1 --format=%ct "origin/$b")" -lt "$cutoff" ] || continue
             [ -z "$(gh pr list -R "$REPO" --head "$b" --state open --json number -q '.[0].number')" ] || continue
@@ -51,5 +51,5 @@ jobs:
             if [ "$DRY_RUN" != true ]; then
               git push -q origin --delete "$b" && deleted=$((deleted + 1))
             fi
-          done
+          done < <(git for-each-ref -z --format='%(refname:lstrip=3)' refs/remotes/origin)
           echo "deleted $deleted branch(es); dry_run=$DRY_RUN"
