@@ -49,7 +49,7 @@ import {
 } from "../../game/seatMove.ts";
 import { pickTransition } from "../../game/dance/transitions.ts";
 import { reactionClip, type ReactionId } from "../../game/reactions.ts";
-import { reactingNow } from "./reaction.ts";
+import { reactingNow, tickReactionClock } from "./reaction.ts";
 import { seatedHold } from "../../game/dance/seatActions.ts";
 import { endJump, jumping, startJump } from "./jump.ts";
 import { TIME_SCALE } from "../timeScale.ts";
@@ -371,8 +371,9 @@ export function PlayerController({
   // leaving the room mid-dive must not leave the next one underwater
   useEffect(() => () => submergedView.set({ on: false }), []);
   useFrame((state, rawDt) => {
-    if (editing) return;
     const dt = rawDt * TIME_SCALE;
+    tickReactionClock(dt);
+    if (editing) return;
     playerSpot.x = player.pos.x;
     playerSpot.z = player.pos.z;
     // in the city she's in the car (hers or a friend's), out of sight; at
