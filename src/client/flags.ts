@@ -1,5 +1,5 @@
 // Parses the client's URL flags (?quality, ?still, ?debug, ?room, ?view,
-// ?slide, ?at and ?yaw, ?adult) into typed values. Invalid values become null
+// ?slide, ?at and ?yaw, ?spot, ?adult) into typed values. Invalid values become null
 // or false; nothing here enforces the age gate.
 
 import {
@@ -8,6 +8,7 @@ import {
   type RoomId,
   type Spawn,
 } from "../game/rooms.ts";
+import { spotFor } from "../game/city/spots.ts";
 import { loadSave } from "../game/save.ts";
 import { VIEW_IDS, type View } from "./world/view.ts";
 import type { QualityTier } from "./world/quality.ts";
@@ -26,7 +27,9 @@ export type Flags = {
   view: View | null;
   /** `?slide=0.4` starts the Water Park's first slide 40% of the way down. */
   slide: number | null;
-  /** `?at=0,300` starts the room at that point (x, z), facing `yaw` (0). */
+  /** `?at=0,300` starts the room at that point (x, z), facing `yaw` (0).
+   * `?spot=<building-id>` starts in the city in front of that building
+   * (spots.ts), her back to it unless `yaw` is given. */
   at: Spawn | null;
   /** `?adult=1` opens the 18+ rooms, in a development build only (adult.ts). */
   adult: boolean;
@@ -45,14 +48,18 @@ export function readFlags(search: string): Flags {
   const room = q.get("room");
   const slide = Number(q.get("slide") ?? Number.NaN);
   const view = VIEW_IDS.find((v) => v === q.get("view")) ?? null;
+  const yaw = q.get("yaw");
+  const spot = spotFor(q.get("spot") ?? "");
+  if (spot && yaw !== null && Number.isFinite(Number(yaw)))
+    spot.yaw = Number(yaw);
   return {
     quality: quality === "low" || quality === "high" ? quality : null,
     still: q.get("still") === "1",
     debug: q.get("debug") === "1",
-    room: isRoomId(room) ? room : null,
+    room: spot ? "city" : isRoomId(room) ? room : null,
     view,
     slide: slide >= 0 && slide <= 1 ? slide : null,
-    at: spawnAt(q.get("at"), Number(q.get("yaw") ?? 0)),
+    at: spot ?? spawnAt(q.get("at"), Number(yaw ?? 0)),
     adult: q.get("adult") === "1",
     join: joinAt(q.get("join")),
   };

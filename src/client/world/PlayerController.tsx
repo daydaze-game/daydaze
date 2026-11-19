@@ -382,6 +382,7 @@ export function PlayerController({
     if (hidden && tag.current && tagAt.current.shown) {
       tagAt.current.shown = false;
       tag.current.style.visibility = "hidden";
+      tag.current.dataset.shown = "false";
     }
     // a driven car takes the keys; a passenger goes where the car goes
     if (driving.session || driving.passenger) {
@@ -600,6 +601,7 @@ export function PlayerController({
         last.x = px;
         last.y = py;
         el.style.visibility = shown ? "visible" : "hidden";
+        el.dataset.shown = shown ? "true" : "false";
         el.style.transform = `translate(${px}px, ${py}px) translate(-50%, -100%)`;
       }
     }
