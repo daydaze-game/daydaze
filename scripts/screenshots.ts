@@ -363,15 +363,43 @@ function actionStrip(
       console.log(`DIAG ${name} screencast started at ${Date.now() - t0} ms`);
       await go(page);
       console.log(`DIAG ${name} go() done at ${Date.now() - t0} ms`);
+      // DIAGNOSTIC (#75): a rAF tick counter, to read next to the renderer's
+      // own frame count (data-frames stops at 10, so it says nothing here)
+      await page.evaluate(() => {
+        let ticks = 0;
+        const tick = () => {
+          Object.assign(window, { __rafTicks: ++ticks });
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
       for (let n = 0; n < seconds; n++) {
         await page.waitForTimeout(1000);
         const t1 = Date.now();
-        const df = await page
-          .locator("canvas")
-          .getAttribute("data-frames", { timeout: 60_000 })
+        const probe = await page
+          .evaluate(() => {
+            const dd: unknown = Reflect.get(window, "__dd");
+            const gl: unknown =
+              typeof dd === "object" && dd !== null
+                ? Reflect.get(dd, "gl")
+                : undefined;
+            const info: unknown =
+              typeof gl === "object" && gl !== null
+                ? Reflect.get(gl, "info")
+                : undefined;
+            const render: unknown =
+              typeof info === "object" && info !== null
+                ? Reflect.get(info, "render")
+                : undefined;
+            const frame: unknown =
+              typeof render === "object" && render !== null
+                ? Reflect.get(render, "frame")
+                : undefined;
+            return `render ${String(frame)}, raf ${String(Reflect.get(window, "__rafTicks"))}, ${document.visibilityState}`;
+          })
           .catch((e: unknown) => `err ${String(e).slice(0, 60)}`);
         console.log(
-          `DIAG ${name} +${n + 1}s: events ${events}, data-frames ${df}, read ${Date.now() - t1} ms`,
+          `DIAG ${name} +${n + 1}s: events ${events}, ${probe}, read ${Date.now() - t1} ms`,
         );
       }
       await cdp.send("Page.stopScreencast");
