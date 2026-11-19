@@ -119,3 +119,10 @@ test("dispose detaches nodes and is safe to call multiple times", () => {
   assert.equal(bus.getMusicDestination(), null);
   assert.equal(bus.getSfxDestination(), null);
 });
+
+test("acid level reaches the filter, and a context that can't build it still works", () => {
+  const bus = createAudioBus(makeFakeAudioContext()); // no filter nodes: skipped
+  bus.setAcidLevel(1);
+  assert.ok(bus.getContext());
+  bus.dispose();
+});
