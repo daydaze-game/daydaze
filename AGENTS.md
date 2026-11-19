@@ -147,8 +147,11 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   opens the PR, turns auto-merge on, waits for the merge and removes the
   worktree and branch. The `auto-update` workflow brings the oldest
   auto-merge PR up to date whenever `main` moves, one at a time; a PR with a
-  failing check or a conflict is skipped until it's fixed. Pull your branch
-  (`git pull --no-rebase`) before pushing: the workflow adds merge commits.
+  failing check or a conflict is skipped until it's fixed. A commit that only
+  merges `main` into a PR whose browser suites already passed re-runs just the
+  fast checks (`scripts/main-merged-only.sh`), so catching up costs minutes.
+  Pull your branch (`git pull --no-rebase`) before pushing: the workflow adds
+  merge commits.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
