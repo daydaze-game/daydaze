@@ -24,6 +24,7 @@ import {
   type Furniture,
 } from "../src/game/home/decor.ts";
 import { expandShots, shard } from "./shot-plan.ts";
+import { waitForFrames } from "./wait-for-frames.ts";
 
 // `?debug=1` puts this on the page (src/client/world/reaction.ts).
 declare global {
@@ -221,6 +222,10 @@ function homeShot(name: string, furniture: readonly Furniture[], cam?: string) {
  * judged by eye.
  */
 const FRAMES = 48;
+/** Frames an actionStrip waits for before it may stop (fewer if it keeps less). */
+const MIN_STRIP_FRAMES = 8;
+/** The longest an actionStrip records while it waits for those frames. */
+const MAX_STRIP_SECONDS = 180;
 function walkStrip(
   name: string,
   gait: string,
@@ -361,7 +366,20 @@ function actionStrip(
       });
       await cdp.send("Page.startScreencast", { format: "png" });
       await go(page);
-      await page.waitForTimeout(seconds * 1000);
+      // at least `seconds`, then until the strip has its frames: a slow room
+      // (green-haze on the high tier renders about 0.3 frames a second on CI)
+      // sends its first screencast frame after some 25 s, past a fixed window
+      const waited = await waitForFrames({
+        have: () => frames.length,
+        want: Math.min(keep, MIN_STRIP_FRAMES),
+        minMs: seconds * 1000,
+        maxMs: MAX_STRIP_SECONDS * 1000,
+        clock: { now: Date.now, sleep: (ms) => page.waitForTimeout(ms) },
+      });
+      if (!waited.reached)
+        console.warn(
+          `${name}: only ${frames.length} screencast frames in ${waited.elapsedMs / 1000} s`,
+        );
       await cdp.send("Page.stopScreencast");
       frames.forEach((png, n) =>
         writeFileSync(
@@ -855,8 +873,7 @@ const SHOTS: {
       const later = page.getByRole("button", { name: "Debug: a minute later" });
       for (let i = 0; i < 5; i++) await later.click();
     },
-    // a minute on in the peak: the click repaints the page, which starts the
-    // screencast frames
+    // a minute on in the peak
     async (page) => {
       await page.getByRole("button", { name: "Debug: a minute later" }).click();
     },
