@@ -66,6 +66,7 @@ import { driving } from "./driving.ts";
 import { ignoresKeys } from "./keyTargets.ts";
 import { playGlide, playStep, type Surface } from "../../audio/worldSounds.ts";
 import { SKATE_SPEED, skates } from "./skates.ts";
+import { CITY_AREA } from "../../game/city/layout.ts";
 import { groundAt } from "../../game/city/ground.ts";
 import { roomSurface } from "../../game/surface.ts";
 import type { RoomId } from "../../game/roomTypes.ts";
