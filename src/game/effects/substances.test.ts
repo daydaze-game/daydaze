@@ -11,6 +11,8 @@ import {
   DOSES,
   doseLevel,
   gameSeconds,
+  heavyLid,
+  HEAVY_LID_MAX,
   highParams,
   isDose,
   isStrain,
@@ -458,4 +460,41 @@ test("the meter's strain follows the dose felt most, and resets when sober", () 
   assert.equal(indica.high.strain, "hybrid");
   assert.equal(isStrain("sativa"), true);
   assert.equal(isStrain("toString"), false);
+});
+
+test("weed lowers the lids: heavier with more, heavier for indica, sleepiest on the way down", () => {
+  const lid = (
+    level: number,
+    phase: "comeup" | "peak" | "comedown",
+    strain: "hybrid" | "sativa" | "indica" | "hemp" = "hybrid",
+  ) => {
+    const m = soberMeters();
+    m.high = { level, phase, strain };
+    return heavyLid(m);
+  };
+  assert.equal(heavyLid(soberMeters()), 0);
+  assert.ok(lid(0.2, "peak") > 0 && lid(0.4, "peak") > lid(0.2, "peak"));
+  assert.ok(lid(0.4, "peak") > lid(0.4, "comeup"));
+  assert.ok(lid(0.4, "comedown") > lid(0.4, "peak"));
+  assert.ok(lid(0.4, "peak", "indica") > lid(0.4, "peak"));
+  assert.ok(lid(0.4, "peak") > lid(0.4, "peak", "sativa"));
+  // heavy, never shut: a blink (1) still reads, and out-of-range input is safe
+  for (const level of [0.5, 1, 5, NaN]) {
+    const v = lid(level, "comedown", "indica");
+    assert.ok(v >= 0 && v <= HEAVY_LID_MAX, String(level));
+  }
+  assert.equal(lid(0.4, "peak"), lid(0.4, "peak"));
+  // other substances don't weigh the lids down
+  const m = soberMeters();
+  m.molly = { level: 1, phase: "peak", strain: "hybrid" };
+  assert.equal(heavyLid(m), 0);
+});
+
+test("dry mouth and the munchies: every weed style has a consume tic after the come-up", () => {
+  for (const body of [BODY.high, ...Object.values(STRAIN_BODY)])
+    assert.ok(
+      body.peak.tics.includes("consume") ||
+        body.comedown.tics.includes("consume"),
+    );
+  assert.ok(BODY.high.comedown.tics.includes("consume"));
 });

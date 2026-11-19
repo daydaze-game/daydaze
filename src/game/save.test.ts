@@ -60,6 +60,8 @@ test("createDefaultSave uses the default look and auto quality", () => {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   });
 });
 
@@ -109,6 +111,8 @@ test("a save round-trips through serializeSave and loadSave", () => {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   };
   assert.deepEqual(loadSave(serializeSave(save), "Fallback"), save);
 });
@@ -181,6 +185,8 @@ test("a save from before the swimsuit slot still loads", () => {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   });
 });
 
@@ -247,6 +253,8 @@ test("loadSave keeps a valid name when the look is bad", () => {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   });
 });
 
@@ -287,6 +295,8 @@ test("loadSave keeps a valid look when the name is bad", () => {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   });
 });
 
@@ -469,6 +479,8 @@ test("loadSave salvages valid fields from a wrong version", () => {
     pottery: null,
     bouquet: null,
     garden: createDefaultGarden(),
+    inventory: {},
+    giftDay: 0,
   });
 });
 
@@ -683,4 +695,35 @@ test("garden state round-trips through the save system", () => {
 
   const back = loadSave(serializeSave(save), "x");
   assert.deepEqual(back.garden, save.garden);
+});
+
+test("the pouch and gift day round-trip, and corrupt ones are salvaged", () => {
+  const save = createDefaultSave("Stash Friend");
+  save.inventory = { "joint-sativa": 2, "vape-hemp": 1 };
+  save.giftDay = 20_000;
+  const back = loadSave(serializeSave(save), "Fallback");
+  assert.deepEqual(back.inventory, save.inventory);
+  assert.equal(back.giftDay, 20_000);
+  const bad = loadSave(
+    JSON.stringify({
+      inventory: { "joint-sativa": -3, nope: 1 },
+      giftDay: "x",
+    }),
+    "Fallback",
+  );
+  assert.deepEqual(bad.inventory, {});
+  assert.equal(bad.giftDay, 0);
+  // saves from before the pouch load with an empty one
+  const old = loadSave(JSON.stringify({ name: "Older Save" }), "Fallback");
+  assert.deepEqual(old.inventory, {});
+  assert.equal(old.giftDay, 0);
+});
+
+test("a teen save keeps its pouch: loading never strips it", () => {
+  const save = createDefaultSave("Grown Up");
+  save.inventory = { "edible-indica": 4 };
+  assert.deepEqual(
+    loadSave(serializeSave(save), "Fallback").inventory,
+    save.inventory,
+  );
 });
