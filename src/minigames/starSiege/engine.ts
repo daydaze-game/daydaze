@@ -120,12 +120,13 @@ export function step(prev: Game, input: Input, dt: number): Game {
   if (edge) g.dir = g.dir === 1 ? -1 : 1;
   // your shot
   if (g.shot) {
-    g.shot.y -= SHOT_SPEED * t;
+    const shot = g.shot;
+    shot.y -= SHOT_SPEED * t;
     const hit = alive.find(
       (a) =>
         a.alive &&
-        Math.abs(a.x - g.shot!.x) < ALIEN_HALF &&
-        Math.abs(a.y - g.shot!.y) < ALIEN_HALF,
+        Math.abs(a.x - shot.x) < ALIEN_HALF &&
+        Math.abs(a.y - shot.y) < ALIEN_HALF,
     );
     if (hit) {
       hit.alive = false;

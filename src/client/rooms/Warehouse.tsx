@@ -200,9 +200,9 @@ function Boxes({
 }
 
 // steel: the trusses' chords and posts, and the speaker stacks' frames
-const TRUSSES: Piece[] = TRUSS_ZS.flatMap((z) => [
-  [0, TRUSS_Y, z, WALL_X * 2, 0.12, 0.12] as Piece,
-  [0, TRUSS_Y + 0.6, z, WALL_X * 2, 0.12, 0.12] as Piece,
+const TRUSSES: Piece[] = TRUSS_ZS.flatMap((z): Piece[] => [
+  [0, TRUSS_Y, z, WALL_X * 2, 0.12, 0.12],
+  [0, TRUSS_Y + 0.6, z, WALL_X * 2, 0.12, 0.12],
   ...[-6, -3, 0, 3, 6].map((x): Piece => [
     x,
     TRUSS_Y + 0.3,

@@ -39,20 +39,12 @@ const BEAMS: readonly Beam[] = [
   { position: [-5.2, 4.4, -2.5], color: "#ffb02e", phase: 4 },
 ];
 
-const DRAPES = [
-  {
-    position: [-5.85, 0, -3.4] as [number, number, number],
-    fabric: PLUM_VELVET,
-  },
-  {
-    position: [-5.85, 0, 0.4] as [number, number, number],
-    fabric: PLUM_VELVET,
-  },
-  {
-    position: [-5.85, 0, 3.6] as [number, number, number],
-    fabric: ROSE_VELVET,
-  },
-];
+const DRAPES: { position: [number, number, number]; fabric: THREE.Material }[] =
+  [
+    { position: [-5.85, 0, -3.4], fabric: PLUM_VELVET },
+    { position: [-5.85, 0, 0.4], fabric: PLUM_VELVET },
+    { position: [-5.85, 0, 3.6], fabric: ROSE_VELVET },
+  ];
 
 // Four lights in total: one fill, three colored points.
 function Lights() {

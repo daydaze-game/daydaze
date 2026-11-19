@@ -16,6 +16,7 @@ import {
   type DanceMove,
   type Pose,
 } from "./moves.ts";
+import { isOneOf } from "../typed.ts";
 
 const FRAME = 1 / 60;
 const EPS = 1e-9;
@@ -56,10 +57,7 @@ test("every joint named in a clip is a rig joint", () => {
   for (const m of ALL_DANCE_MOVES) {
     for (const key of m.keys) {
       for (const name of Object.keys(key.joints ?? {})) {
-        assert.ok(
-          (JOINTS as readonly string[]).includes(name),
-          `${m.id} joint ${name}`,
-        );
+        assert.ok(isOneOf(JOINTS, name), `${m.id} joint ${name}`);
       }
     }
   }
@@ -133,7 +131,8 @@ test("a key's own values are reached exactly at its time", () => {
 
 test("danceMove finds a move by id and rejects unknown ids", () => {
   assert.equal(danceMove("slow-dance").id, "slow-dance");
-  assert.throws(() => danceMove("not-a-dance" as never));
+  // Reflect.apply takes untyped arguments: the id is deliberately not a DanceMoveId
+  assert.throws(() => Reflect.apply(danceMove, undefined, ["not-a-dance"]));
   assert.equal(isDanceMoveId("body-roll"), true);
   assert.equal(isDanceMoveId("__proto__"), false);
   assert.equal(isDanceMoveId(3), false);

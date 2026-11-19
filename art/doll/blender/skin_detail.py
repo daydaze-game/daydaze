@@ -29,6 +29,45 @@ def blur(values, radius):
     return result
 
 
+def draw(result, depth, tri, z, source, pixels):
+    """Rasterize one triangle into `result` (an RGBA atlas) by destination pixel.
+
+    `tri` holds the three destination points in pixels, `z` their Blender Y and
+    `source` their UVs in `pixels`, the (height, width, 4) source image. The
+    planar face projection stacks hidden eye-socket and mouth-interior faces
+    under the visible lids and lips, so the nearest surface (lowest Y, as the
+    face looks down -Y) owns each texel, whatever order faces arrive in.
+    """
+    size = result.shape[0]
+    low = np.maximum(np.floor(tri.min(0)).astype(int), 0)
+    high = np.minimum(np.ceil(tri.max(0)).astype(int), size-1)
+    if np.any(high < low):
+        return
+    yy, xx = np.mgrid[low[1]:high[1]+1, low[0]:high[0]+1] + .5
+    (x1,y1),(x2,y2),(x3,y3) = tri
+    den = (y2-y3)*(x1-x3)+(x3-x2)*(y1-y3)
+    if abs(den) < 1e-9:
+        return
+    a = ((y2-y3)*(xx-x3)+(x3-x2)*(yy-y3))/den
+    b = ((y3-y1)*(xx-x3)+(x1-x3)*(yy-y3))/den
+    c = 1-a-b
+    region_depth = depth[low[1]:high[1]+1,low[0]:high[0]+1]
+    near = a*z[0] + b*z[1] + c*z[2]
+    inside = (a >= -.003) & (b >= -.003) & (c >= -.003) & (near < region_depth)
+    uv = a[...,None]*source[0] + b[...,None]*source[1] + c[...,None]*source[2]
+    # Bilinear sampling keeps pores from aliasing in the face atlas.
+    height, width = pixels.shape[:2]
+    xy = np.clip(uv, 0, 1) * [width-1, height-1]
+    ij = xy.astype(int); frac = xy-ij
+    x,y = ij[...,0],ij[...,1]; fx,fy = frac[...,0,None],frac[...,1,None]
+    xnext,ynext = np.minimum(x+1,width-1),np.minimum(y+1,height-1)
+    color = (pixels[y,x]*(1-fx)+pixels[y,xnext]*fx)*(1-fy)+(pixels[ynext,x]*(1-fx)+pixels[ynext,xnext]*fx)*fy
+    region = result[low[1]:high[1]+1,low[0]:high[0]+1]
+    region[inside,:3] = color[inside,:3]
+    region[inside,3] = 1
+    region_depth[inside] = near[inside]
+
+
 def bake(body, base_obj, source_path, output, marks):
     if not Path(source_path).is_file():
         raise RuntimeError("Missing CC0 skin source; run fetch_skin.py first")
@@ -53,6 +92,7 @@ def bake(body, base_obj, source_path, output, marks):
     face_uv = {frozenset(v for v, _ in face): dict(face) for face in source_faces}
     uv_points = np.array(uv_points)
     result = np.zeros((SIZE, SIZE, 4), dtype=np.float32)
+    depth = np.full((SIZE, SIZE), np.inf, dtype=np.float32)
     uv_layer = body.data.uv_layers.active.data
     for face in body.data.polygons:
         if face.material_index:
@@ -64,32 +104,11 @@ def bake(body, base_obj, source_path, output, marks):
         vertices = [used[body.data.loops[i].vertex_index] for i in loops]
         lookup = face_uv[frozenset(vertices)]
         original = uv_points[[lookup[v] for v in vertices]]
+        z = np.array([body.data.vertices[body.data.loops[i].vertex_index].co.y for i in loops])
+
         for k in range(1, len(loops)-1):
             ix = [0, k, k+1]
-            tri = dest[ix] * SIZE
-            low = np.maximum(np.floor(tri.min(0)).astype(int), 0)
-            high = np.minimum(np.ceil(tri.max(0)).astype(int), SIZE-1)
-            if np.any(high < low):
-                continue
-            yy, xx = np.mgrid[low[1]:high[1]+1, low[0]:high[0]+1] + .5
-            (x1,y1),(x2,y2),(x3,y3) = tri
-            den = (y2-y3)*(x1-x3)+(x3-x2)*(y1-y3)
-            if abs(den) < 1e-9:
-                continue
-            a = ((y2-y3)*(xx-x3)+(x3-x2)*(yy-y3))/den
-            b = ((y3-y1)*(xx-x3)+(x1-x3)*(yy-y3))/den
-            c = 1-a-b
-            inside = (a >= -.003) & (b >= -.003) & (c >= -.003)
-            uv = a[...,None]*original[ix[0]] + b[...,None]*original[ix[1]] + c[...,None]*original[ix[2]]
-            # Bilinear sampling keeps pores from aliasing in the face atlas.
-            xy = np.clip(uv, 0, 1) * [width-1, height-1]
-            ij = xy.astype(int); frac = xy-ij
-            x,y = ij[...,0],ij[...,1]; fx,fy = frac[...,0,None],frac[...,1,None]
-            xnext,ynext = np.minimum(x+1,width-1),np.minimum(y+1,height-1)
-            color = (pixels[y,x]*(1-fx)+pixels[y,xnext]*fx)*(1-fy)+(pixels[ynext,x]*(1-fx)+pixels[ynext,xnext]*fx)*fy
-            region = result[low[1]:high[1]+1,low[0]:high[0]+1]
-            region[inside,:3] = color[inside,:3]
-            region[inside,3] = 1
+            draw(result, depth, dest[ix] * SIZE, z[ix], original[ix], pixels)
     # Neutralize the source's complexion using the central forehead. Preserve
     # relative red pigmentation (lips/nostrils) instead of imposing its skin tone.
     forehead = result[int(SIZE*.72):int(SIZE*.82),int(SIZE*.4):int(SIZE*.6)]

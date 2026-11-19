@@ -218,12 +218,14 @@ def tuck(ctx, body, body_src, garment, name):
     bvh = BVHTree.FromObject(garment, bpy.context.evaluated_depsgraph_get())
     is_shoe = garment.name.startswith("Shoes")
     floor = min(v.co.z for v in garment.data.vertices) if not is_shoe else -1.0
-    # trousers and wide legs can sit up to ~10 cm off the skin, shoes stay snug (3 cm)
-    search_dist = 0.03 if is_shoe else 0.10
+    # skin sinks only within SNUG of the cloth; trousers and wide legs can sit
+    # up to ~10 cm off the leg, so the wider reach only marks leg skin as
+    # covered. Sinking everything within 10 cm tore the jaw and neck near a collar.
+    reach = 0.03 if is_shoe else 0.10
     for i, p in enumerate(co):
         if not is_shoe and p[2] < floor:
             continue
-        loc, _n, _f, dist = bvh.find_nearest(Vector(p), search_dist)
+        loc, _n, _f, dist = bvh.find_nearest(Vector(p), reach)
         if loc is None:
             continue
         if abs(p[0]) > 0.03 and np.sign(p[0]) != np.sign(loc[0]):
@@ -231,7 +233,7 @@ def tuck(ctx, body, body_src, garment, name):
         outside = float(np.dot(p - np.array(loc), normals[i]))
         if outside < 0:
             behind[i] = True
-        if outside > -CLEAR:
+        if dist <= SNUG and outside > -CLEAR:
             sink[i] = max(sink[i], min(outside + CLEAR, 0.03))
     # shoes ride on the same body next to the trousers and their keys add up:
     # a pull from the sole up would collapse the ankle the hem leaves bare

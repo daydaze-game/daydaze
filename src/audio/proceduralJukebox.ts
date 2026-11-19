@@ -5,6 +5,7 @@
 // throws.
 
 import type { TrackId } from "../game/trackId.ts";
+import { getAudioContextClass } from "./audioContextClass.ts";
 import { getSharedAudioBus } from "./audioBus.ts";
 
 export type { TrackId };
@@ -106,7 +107,7 @@ export const JUKEBOX_TRACKS: readonly TrackMetadata[] = [
 const TRACK_IDS: readonly TrackId[] = JUKEBOX_TRACKS.map((t) => t.id);
 
 function isTrackId(id: string): id is TrackId {
-  return (TRACK_IDS as readonly string[]).includes(id);
+  return TRACK_IDS.some((track) => track === id);
 }
 
 /**
@@ -114,7 +115,8 @@ function isTrackId(id: string): id is TrackId {
  * audio is unavailable or the controller is disposed.
  */
 export interface JukeboxController {
-  playTrack(id: TrackId): boolean;
+  /** Any string is accepted; an id that is not a track plays nothing. */
+  playTrack(id: string): boolean;
   stopTrack(): void;
   getCurrentTrack(): TrackId | null;
   isPlaying(): boolean;
@@ -219,14 +221,6 @@ type AnyNode = AudioNode;
 
 const PENTATONIC_FLUTE = [392.0, 440.0, 523.25, 587.33, 659.25, 784.0];
 const CALLIOPE_SCALE = [523.25, 587.33, 659.25, 698.46, 783.99, 880.0];
-
-function getAudioContextClass(): typeof AudioContext | undefined {
-  return (
-    (globalThis as { AudioContext?: typeof AudioContext }).AudioContext ||
-    (globalThis as unknown as { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext
-  );
-}
 
 function whiteNoiseBuffer(ctx: AudioContext, seconds: number): AudioBuffer {
   const length = Math.max(1, Math.floor(ctx.sampleRate * seconds));
@@ -1127,9 +1121,11 @@ function playVoice(
   vibrato.stop(now + length);
 }
 
-const TRACK_BPM: Record<TrackId, number> = Object.fromEntries(
-  JUKEBOX_TRACKS.map((t) => [t.id, t.bpm]),
-) as Record<TrackId, number>;
+const bpmOf = (id: TrackId): number => {
+  const track = JUKEBOX_TRACKS.find((t) => t.id === id);
+  if (!track) throw new Error(`unknown jukebox track ${id}`);
+  return track.bpm;
+};
 
 class JukeboxControllerImpl implements JukeboxController {
   private ctx: AudioContext | null;
@@ -1156,7 +1152,7 @@ class JukeboxControllerImpl implements JukeboxController {
     }
   }
 
-  playTrack(id: TrackId): boolean {
+  playTrack(id: string): boolean {
     if (this.disposed) return false;
     if (!this.ctx || !this.master) return false;
     if (!isTrackId(id)) return false;
@@ -1168,7 +1164,7 @@ class JukeboxControllerImpl implements JukeboxController {
       }
       this.loop?.stop();
       const program = TRACK_PROGRAMS[id];
-      const stepSeconds = program.stepSeconds(TRACK_BPM[id]);
+      const stepSeconds = program.stepSeconds(bpmOf(id));
       this.loop = new LoopEngine(this.ctx);
       const dest = this.master;
       this.loop.start(stepSeconds, (ctx, step, time) =>
@@ -1202,7 +1198,7 @@ class JukeboxControllerImpl implements JukeboxController {
       return { track: null, bpm: this.band.bpm, startedAt: this.loop.anchor() };
     const track = this.currentTrack;
     if (!track || !this.loop) return null;
-    return { track, bpm: TRACK_BPM[track], startedAt: this.loop.anchor() };
+    return { track, bpm: bpmOf(track), startedAt: this.loop.anchor() };
   }
 
   audioTime(): number | null {

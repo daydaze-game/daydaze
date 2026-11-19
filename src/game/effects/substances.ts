@@ -514,6 +514,22 @@ export function heavyLid(meters: Readonly<Meters>): number {
   );
 }
 
+/** The reddest the whites of the eyes get at full weed (0..1 blend). */
+export const RED_EYES_MAX = 0.6;
+
+/** How red the sclera is from weed (dilated conjunctival vessels, docs/research
+ * /substances.md section 2), 0 to RED_EYES_MAX. Scales with the high level and
+ * is zero sober and for every other substance. Own doll only. */
+export function redEyes(meters: Readonly<Meters>): number {
+  const { level, phase } = meters.high;
+  if (!phase) return 0;
+  return Math.min(RED_EYES_MAX, clamp01(level) * RED_EYES_MAX);
+}
+
+/** Weed's time stretch ("a minute feels like ten"): a faint afterimage trail,
+ * so moments linger. A fade, never a flash; molly's is 0.3, acid's 0.85. */
+export const WEED_TRACER = 0.2;
+
 export const BREATHE_AMOUNT = 0.006;
 export const BREATHE_HZ = 0.25;
 
@@ -547,7 +563,18 @@ export function highParams(
     drift: calm ? 0 : 1,
     radiance: Math.min(1, a + m * 0.6 + (strain === "sativa" ? h * 0.15 : 0)),
     geometry: calm ? 0 : a,
-    tracer: calm ? 0 : Math.min(1, a * 0.85 + m * 0.3),
+    tracer: calm ? 0 : Math.min(1, a * 0.85 + m * 0.3 + h * WEED_TRACER),
     wiggle: calm ? 0 : m,
   };
+}
+
+/** A harm-reduction toast for the moment weed peaks (`was` is the phase last
+ * frame): cotton mouth is real, and water is the fix. Null otherwise. */
+export function dryMouthHint(
+  was: Phase | null,
+  meters: Readonly<Meters>,
+): string | null {
+  return meters.high.phase === "peak" && was !== "peak"
+    ? "Cotton mouth. A glass of water helps."
+    : null;
 }

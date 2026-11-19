@@ -3,8 +3,9 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { BONE } from "./anims.ts";
-import type {
-  PiercingSpot,
+import {
+  PIERCING_SPOTS,
+  type PiercingSpot,
   Piercings,
   PiercingStyle,
 } from "../../../game/look.ts";
@@ -163,10 +164,8 @@ export function Jewelry({
 }) {
   const pieces = useMemo(() => {
     const out: { group: THREE.Group; bone: THREE.Bone }[] = [];
-    for (const [spot, style] of Object.entries(piercings) as [
-      PiercingSpot,
-      PiercingStyle,
-    ][]) {
+    for (const { id: spot } of PIERCING_SPOTS) {
+      const style = piercings[spot];
       const at = anchors[spot];
       const bone = bones.get(SPOT_BONE[spot]);
       const inv = restInverse.get(SPOT_BONE[spot]);
