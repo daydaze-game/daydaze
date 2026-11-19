@@ -1273,6 +1273,23 @@ const SHOTS: {
   { name: "mini-golf", query: "room=mini-golf" },
   { name: "dome", query: "room=dome" },
   { name: "kamayan-hall", query: "room=kamayan-hall" },
+  // indoor windows follow ?time= (issue #110): the same room at noon and at night
+  {
+    name: "window-sky-apartment-noon",
+    query: "room=apartment&quality=low&time=12:00",
+  },
+  {
+    name: "window-sky-apartment-night",
+    query: "room=apartment&quality=low&time=23:00",
+  },
+  {
+    name: "window-sky-kamayan-noon",
+    query: "room=kamayan-hall&time=12:00&cam=0,1.7,1,0,2,-6",
+  },
+  {
+    name: "window-sky-kamayan-night",
+    query: "room=kamayan-hall&time=23:00&cam=0,1.7,1,0,2,-6",
+  },
   { name: "galleria", query: "room=galleria" },
   { name: "roller-rink", query: "room=roller-rink" },
   { name: "skatepark", query: "room=skatepark" },
@@ -2293,6 +2310,20 @@ const SHOTS: {
     name: "city-heist-bust",
     query:
       "room=city&view=room&time=22:00&heist=30&heistend=caught&at=-170,9&cam=-150,4,8,-180,1,-10",
+    act: furnitureReady,
+  },
+  {
+    // police chase: squad cars in pursuit of a fleeing sports car through Gallery Row
+    name: "city-chase-run",
+    query:
+      "room=city&view=room&time=22:00&chase=10&at=-30,-250&cam=-15,4,-246,-50,1.5,-256",
+    act: furnitureReady,
+  },
+  {
+    // police chase crash: wrecked sports car smoking and boxed in by squad cars on Main Ave
+    name: "city-chase-crash",
+    query:
+      "room=city&view=room&time=22:00&chase=32&at=55,10&cam=45,3.5,12,65,1.2,-2",
     act: furnitureReady,
   },
   {

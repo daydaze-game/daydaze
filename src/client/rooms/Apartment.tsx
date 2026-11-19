@@ -18,6 +18,8 @@ import { plant, poster, stringLights } from "./shared/details.ts";
 import { GOLD, canvasTex } from "./shared/materials.ts";
 import { usePaintingTexture } from "./gallery/painting.ts";
 import { surface } from "../city/worldTexture.ts";
+import { useDaylight } from "../city/daylight.ts";
+import { windowSky } from "../../game/city/daylight.ts";
 import { AssetBoundary } from "./shared/AssetBoundary.tsx";
 import { textureAspect, useArtTexture } from "./shared/artTexture.ts";
 import { Prop } from "./shared/Prop.tsx";
@@ -43,6 +45,8 @@ export function Apartment({
   home: HomeSave;
   onShelf: () => void;
 }) {
+  // the window shows the real sky; the room's own lighting stays as designed
+  const sky = new THREE.Color().setRGB(...windowSky(useDaylight()));
   return (
     <>
       <color attach="background" args={["#120a1c"]} />
@@ -72,10 +76,10 @@ export function Apartment({
       {home.furniture.map((item, index) => (
         <Piece key={`${item.id}-${index}`} item={item} />
       ))}
-      {/* a window on the back wall, glowing sunset */}
+      {/* a window on the back wall, showing the sky at the city hour */}
       <mesh position={[-1.5, 1.7, -2.93]}>
         <boxGeometry args={[2, 1.2, 0.05]} />
-        <meshStandardMaterial color="#ffb37a" emissive="#ff8a4a" />
+        <meshBasicMaterial color={sky} toneMapped={false} />
       </mesh>
       <mesh
         position={[3.4, 1.1, -2.2]}
