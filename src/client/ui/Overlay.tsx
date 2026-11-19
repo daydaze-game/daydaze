@@ -71,7 +71,6 @@ import {
 } from "../../game/look.ts";
 import type { DanceMoveId, Holds } from "../../game/dance/moves.ts";
 import { INTENSITIES, type Intensity } from "../../game/effects/buzz.ts";
-import { CarPicker } from "../city/CarPicker.tsx";
 import { driving } from "../world/driving.ts";
 import { collectionsBook } from "./Collections.tsx";
 import { GameMenu, closeMenu } from "./GameMenu.tsx";
@@ -178,6 +177,9 @@ const CityMap = lazy(() =>
 );
 const DeliveryApp = lazy(() =>
   import("./phone/DeliveryApp.tsx").then((m) => ({ default: m.DeliveryApp })),
+);
+const CarPicker = lazy(() =>
+  import("../city/CarPicker.tsx").then((m) => ({ default: m.CarPicker })),
 );
 const TaxiPanel = lazy(() =>
   import("../city/TaxiPanel.tsx").then((m) => ({ default: m.TaxiPanel })),
@@ -1340,7 +1342,9 @@ export function Overlay({
             </div>
             <InviteButton />
             {room === "city" && (
-              <CarPicker car={car} garage={garage} onChange={setCar} />
+              <Suspense fallback={null}>
+                <CarPicker car={car} garage={garage} onChange={setCar} />
+              </Suspense>
             )}
             <Segmented
               className="views"
