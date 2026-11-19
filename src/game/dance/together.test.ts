@@ -12,6 +12,7 @@ import {
   roleMove,
   TOGETHER,
 } from "./together.ts";
+import { must } from "../typed.ts";
 
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
 
@@ -25,7 +26,7 @@ test("every emote together has its own move, kept out of the solo picker", () =>
 });
 
 test("a piggyback rider climbs on the leader's back, facing the same way", () => {
-  const e = TOGETHER.find((x) => x.id === "piggyback")!;
+  const e = must(TOGETHER.find((x) => x.id === "piggyback"));
   const spot = followSpot("piggyback", [2, 3], 0);
   // yaw 0 faces +z: behind is -z
   assert.ok(close(spot.at[0], 2) && close(spot.at[1], 3 - e.gap));
@@ -50,7 +51,7 @@ test("a piggyback rider's action code carries the riding move", () => {
 });
 
 test("the follower faces the leader, gap meters in front", () => {
-  const hug = TOGETHER.find((e) => e.id === "hug")!;
+  const hug = must(TOGETHER.find((e) => e.id === "hug"));
   const spot = followSpot("hug", [2, 3], 0);
   // yaw 0 faces +z
   assert.ok(close(spot.at[0], 2) && close(spot.at[1], 3 + hug.gap));
@@ -58,7 +59,7 @@ test("the follower faces the leader, gap meters in front", () => {
 });
 
 test("holding hands puts the follower at the leader's side, facing the same way", () => {
-  const e = TOGETHER.find((x) => x.id === "hold-hands")!;
+  const e = must(TOGETHER.find((x) => x.id === "hold-hands"));
   const spot = followSpot("hold-hands", [0, 0], Math.PI / 2);
   assert.ok(close(Math.hypot(...spot.at), e.gap));
   assert.ok(close(spot.yaw, Math.PI / 2));

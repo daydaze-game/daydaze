@@ -16,6 +16,7 @@ import { tuneById, type Tune } from "./bandTunes.ts";
 import { hash, pick } from "./hash.ts";
 import { STAGE_BLANKETS } from "./blankets.ts";
 import { AUDIENCE, BAND_SHELL, GROUND } from "./park.ts";
+import { vec2 } from "../typed.ts";
 
 export { BLANKET_SEATS, STAGE_BLANKETS } from "./blankets.ts";
 
@@ -206,7 +207,7 @@ export const CHAIRS: readonly { at: Vec2; yaw: number }[] = [
   AUDIENCE.z0 + 9.2,
 ].flatMap((z, row) =>
   Array.from({ length: 6 - row }, (_, i) => ({
-    at: [BAND_SHELL.x - 5.4 + row * 1.1 + i * 2.2, z] as Vec2,
+    at: vec2(BAND_SHELL.x - 5.4 + row * 1.1 + i * 2.2, z),
     // facing +z: the stage is south of the audience
     yaw: Math.PI + (hash(row, i) - 0.5) * 0.12,
   })),

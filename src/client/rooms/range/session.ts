@@ -5,6 +5,7 @@ import {
   bucketEmpty,
   hit,
   NEW_BUCKET,
+  type Bucket,
   type Shot,
 } from "../../../game/golfRange.ts";
 import { award } from "../../ui/prizeDesk.ts";
@@ -14,12 +15,20 @@ import { createStore } from "../shared/store.ts";
  * the power, then press as the strike meter crosses the middle. */
 export type Phase = "off" | "power" | "strike" | "flying" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
+interface State {
+  phase: Phase;
+  bucket: Bucket;
+  since: number;
+  power: number;
+  shot: Shot | null;
+}
+
+const OFF: State = {
+  phase: "off",
   bucket: NEW_BUCKET,
   since: 0,
   power: 0,
-  shot: null as Shot | null,
+  shot: null,
 };
 
 export const range = createStore(OFF);
