@@ -15,6 +15,7 @@ import {
   machineColor,
   machineNear,
 } from "./vending.ts";
+import { typedKeys } from "./typed.ts";
 
 const ROOMS = {
   market: MARKET,
@@ -31,8 +32,9 @@ const bounds = (poly: readonly Vec2[]) => ({
 });
 
 test("a room machine stands against a wall, blocks the floor there alone, and has room in front", () => {
-  for (const [room, machines] of Object.entries(ROOM_MACHINES)) {
-    const { FLOOR, BLOCKERS } = ROOMS[room as keyof typeof ROOMS];
+  for (const room of typedKeys(ROOM_MACHINES)) {
+    const machines = ROOM_MACHINES[room];
+    const { FLOOR, BLOCKERS } = ROOMS[room];
     const f = bounds(FLOOR);
     for (const m of machines) {
       const b = bounds(machineBox(m));
@@ -85,7 +87,7 @@ test("the soda has made-up brands and costs a few coins", () => {
 });
 
 test("machine colors are brand colors, steady, and not all one", () => {
-  const colors = DRINKS.map((d) => d.color) as string[];
+  const colors: string[] = DRINKS.map((d) => d.color);
   const spots = Array.from({ length: 40 }, (_, i) => ({ x: i * 13.7, z: 9.9 }));
   for (const m of spots) {
     assert.ok(colors.includes(machineColor(m)));

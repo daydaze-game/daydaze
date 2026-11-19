@@ -18,16 +18,18 @@ let active: CamShot | null = initialFromLocation();
 const listeners = new Set<(shot: CamShot | null) => void>();
 
 /** Converts an eye/look vector pair or array into a CamShot. */
-function toVector3(
-  v: THREE.Vector3 | readonly [number, number, number] | undefined,
-): THREE.Vector3 | null {
+function toVector3(v: unknown): THREE.Vector3 | null {
   if (!v) return null;
   if (v instanceof THREE.Vector3) {
     return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z)
       ? v.clone()
       : null;
   }
-  if (Array.isArray(v) && v.length === 3 && v.every(Number.isFinite)) {
+  if (
+    Array.isArray(v) &&
+    v.length === 3 &&
+    v.every((n): n is number => Number.isFinite(n))
+  ) {
     return new THREE.Vector3(v[0], v[1], v[2]);
   }
   return null;
@@ -57,13 +59,10 @@ export function parseCamOverride(input: unknown): CamShot | null {
   }
 
   if (Array.isArray(input)) {
-    if (
-      input.length !== 6 ||
-      input.some((n) => typeof n !== "number" || !Number.isFinite(n))
-    ) {
-      return null;
-    }
-    const nums = input as readonly number[];
+    const nums = input.filter(
+      (n): n is number => typeof n === "number" && Number.isFinite(n),
+    );
+    if (input.length !== 6 || nums.length !== 6) return null;
     return {
       eye: new THREE.Vector3(nums[0], nums[1], nums[2]),
       look: new THREE.Vector3(nums[3], nums[4], nums[5]),
@@ -71,12 +70,8 @@ export function parseCamOverride(input: unknown): CamShot | null {
   }
 
   if (isRecord(input) && "eye" in input && "look" in input) {
-    const raw = input as {
-      eye: THREE.Vector3 | readonly [number, number, number];
-      look: THREE.Vector3 | readonly [number, number, number];
-    };
-    const eye = toVector3(raw.eye);
-    const look = toVector3(raw.look);
+    const eye = toVector3(input.eye);
+    const look = toVector3(input.look);
     if (eye && look) return { eye, look };
   }
 

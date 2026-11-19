@@ -7,18 +7,28 @@ import {
   buyBouquet,
   emptyBouquet,
   removeLastStem,
+  STEMS,
   type Bouquet,
   type Stem,
 } from "../../../game/florist.ts";
 import { createStore } from "../shared/store.ts";
 
+/** Every stem id, in the catalog's order (a guard, since keys are strings). */
+export const STEM_IDS: Stem[] = Object.keys(STEMS).filter(
+  (k): k is Stem => k in STEMS,
+);
+
 type FloristCoins = { coins: number; bouquet: Bouquet | null };
 
 /** The saved bouquet (the one in the vase at home) and the coins. */
-export const floristDesk = createStore({
-  bouquet: null as Bouquet | null,
+export const floristDesk = createStore<{
+  bouquet: Bouquet | null;
+  coins: number;
+  commit: ((next: FloristCoins) => void) | null;
+}>({
+  bouquet: null,
   coins: 0,
-  commit: null as ((next: FloristCoins) => void) | null,
+  commit: null,
 });
 
 type CounterStatus = "idle" | "bought" | "broke";

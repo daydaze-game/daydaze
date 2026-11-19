@@ -44,10 +44,10 @@ const urls = (lo: boolean) =>
   );
 
 /** The trees in view and where the plan was cut; set by CityScene. */
-export const cityTrees = createStore({
-  spots: [] as readonly TreeSpot[],
-  at: [0, 0] as readonly [number, number],
-});
+export const cityTrees = createStore<{
+  spots: readonly TreeSpot[];
+  at: readonly [number, number];
+}>({ spots: [], at: [0, 0] });
 
 type Part = { geometry: THREE.BufferGeometry; material: THREE.Material };
 

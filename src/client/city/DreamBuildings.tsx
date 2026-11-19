@@ -23,7 +23,9 @@ import { isMesh } from "../world/guards.ts";
 const URL = "/models/city-dream/architecture.glb";
 
 /** Updated with the city plan, after movement or a camera-detail change. */
-export const cityDream = createStore({ spots: [] as readonly DreamSpot[] });
+export const cityDream = createStore<{ spots: readonly DreamSpot[] }>({
+  spots: [],
+});
 
 /** Surface flags survive meshopt quantization; UV.y is unused. */
 function architectureMaterial(night: { value: number }, onReady: () => void) {

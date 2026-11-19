@@ -33,10 +33,10 @@ test("only what's in front, and in range, is in the frame", () => {
 });
 
 test("snapping ticks the listed animals in frame, once each", () => {
-  const animals = [
-    { kind: "lion" as const, at: [0, 4] as [number, number] },
-    { kind: "lion" as const, at: [0, 9] as [number, number] },
-    { kind: "zebra" as const, at: [0, -4] as [number, number] },
+  const animals: { kind: "lion" | "zebra"; at: [number, number] }[] = [
+    { kind: "lion", at: [0, 4] },
+    { kind: "lion", at: [0, 9] },
+    { kind: "zebra", at: [0, -4] },
   ];
   const h = {
     list: ["lion", "zebra", "giraffe", "penguin"] as const,

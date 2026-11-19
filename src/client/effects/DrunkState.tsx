@@ -8,9 +8,11 @@ import {
   type Intensity,
 } from "../../game/effects/buzz.ts";
 import {
+  dryMouthHint,
   highParams,
   strongest,
   SUBSTANCES,
+  type Phase,
   type Substance,
 } from "../../game/effects/substances.ts";
 import {
@@ -20,6 +22,7 @@ import {
   liveHigh,
   onHighChange,
 } from "./high.ts";
+import { showToast } from "../food/store.ts";
 import { getSharedAudioBus } from "../../audio/audioBus.ts";
 import { useReducedMotion } from "../motion.ts";
 import {
@@ -41,6 +44,7 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
   const calm = useReducedMotion();
   const shown = useRef({ buzz: -1, calm, intensity });
   const acidHeard = useRef(0);
+  const weedPhase = useRef<Phase | null>(null);
 
   useEffect(() => onBuzzChange(() => invalidate()), [invalidate]);
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
@@ -74,6 +78,9 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
       acidHeard.current = meters.acid.level;
       getSharedAudioBus().setAcidLevel(acidHeard.current);
     }
+    const hint = dryMouthHint(weedPhase.current, meters);
+    weedPhase.current = meters.high.phase;
+    if (hint) showToast(hint);
     const lifted = highParams(meters, intensityFactor(intensity), calm);
     liveHigh.glow = lifted.glow;
     liveHigh.hue = lifted.hue;

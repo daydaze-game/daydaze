@@ -16,6 +16,7 @@ import {
   waterPlot,
   type CropId,
 } from "./farm.ts";
+import { must } from "./typed.ts";
 
 test("crop catalog contains valid definitions for carrot, tomato, corn and wheat", () => {
   const ids: CropId[] = ["carrot", "tomato", "corn", "wheat"];
@@ -73,7 +74,7 @@ test("planting a seed sets the crop and timestamp", () => {
 test("watering an unwatered planted plot starts its growth", () => {
   const farm = createDefaultFarm();
   const t0 = 1000000;
-  const planted = plantSeed(farm, 1, "tomato", t0)!.farm;
+  const planted = must(plantSeed(farm, 1, "tomato", t0)).farm;
 
   // Cannot water an empty plot
   assert.equal(waterPlot(planted, 0, t0), null);
@@ -92,7 +93,7 @@ test("watering an unwatered planted plot starts its growth", () => {
 test("growth stages progress over time once watered", () => {
   const farm = createDefaultFarm();
   const t0 = 1000000;
-  const planted = plantSeed(farm, 2, "corn", t0)!.farm;
+  const planted = must(plantSeed(farm, 2, "corn", t0)).farm;
   const duration = CROPS.corn.growthDurationMs;
 
   // Unwatered: stage 0, progress 0, not ready
@@ -101,7 +102,7 @@ test("growth stages progress over time once watered", () => {
   assert.equal(unwateredGrowth.progress, 0);
   assert.equal(unwateredGrowth.ready, false);
 
-  const watered = waterPlot(planted, 2, t0)!.plots[2];
+  const watered = must(waterPlot(planted, 2, t0)).plots[2];
 
   // Stage 1: early sprout (progress < 0.33)
   const g1 = plotGrowth(watered, t0 + duration * 0.15);
@@ -128,8 +129,8 @@ test("growth stages progress over time once watered", () => {
 test("harvesting yields produce and clears the plot", () => {
   const farm = createDefaultFarm();
   const t0 = 1000000;
-  const planted = plantSeed(farm, 0, "wheat", t0)!.farm;
-  const watered = waterPlot(planted, 0, t0)!;
+  const planted = must(plantSeed(farm, 0, "wheat", t0)).farm;
+  const watered = must(waterPlot(planted, 0, t0));
   const duration = CROPS.wheat.growthDurationMs;
 
   // Cannot harvest before ready
@@ -165,8 +166,8 @@ test("selling produce at the farm stand adds coins and deducts stock", () => {
 test("fast-forward accelerates plot timers for testing", () => {
   const farm = createDefaultFarm();
   const t0 = 1000000;
-  const planted = plantSeed(farm, 0, "carrot", t0)!.farm;
-  const watered = waterPlot(planted, 0, t0)!;
+  const planted = must(plantSeed(farm, 0, "carrot", t0)).farm;
+  const watered = must(waterPlot(planted, 0, t0));
 
   const duration = CROPS.carrot.growthDurationMs;
   const shifted = fastForwardFarm(watered, duration);
