@@ -3,6 +3,7 @@
 // its role. Remembers its recent lines so taps rarely repeat; greets once per
 // mount.
 
+import { stateSituation } from "../../../game/effects/buzz.ts";
 import { eventSituation } from "../../../game/events.ts";
 import { PRIDE_CLUBS, prideNightOn } from "../../../game/prideNight.ts";
 import { isRoomId, type RoomId } from "../../../game/rooms.ts";
@@ -23,6 +24,8 @@ import type {
   DialogueSituation,
 } from "../../../game/dialogue/types.ts";
 import { talkClipFor } from "../../../game/dance/idlePlan.ts";
+import { getBuzz } from "../../effects/drunk.ts";
+import { getMeters } from "../../effects/high.ts";
 import { Doll } from "../../avatar/Doll.tsx";
 import { CrowdFigure } from "./CrowdFigure.tsx";
 
@@ -118,7 +121,10 @@ export function TalkingNpc({
             PRIDE_CLUBS.has(venue) && prideNightOn(prideClock()),
           )
         : null;
-    say(event && Math.random() < 0.7 ? event : situation);
+    // a player who is drunk, high or tripping gets the line for it first; the
+    // meters stay 0 at 13+, so only 18+ players ever hear these
+    const state = stateSituation(getMeters(), getBuzz());
+    say(state ?? (event && Math.random() < 0.7 ? event : situation));
     onTap?.();
   };
   // a standing NPC gestures while her line is up (the social clip pack)
