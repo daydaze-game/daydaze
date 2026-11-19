@@ -1,7 +1,7 @@
 """Builds public/models/doll.raw.glb: the Daydaze doll, from MakeHuman's CC0 base.
 
     art/doll/blender/fetch_makehuman.sh
-    blender --background --factory-startup --python art/doll/blender/build_doll.py
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/build_doll.py
 
 The rig is Mixamo's 52-bone skeleton (MPFB2's CC0 rig.mixamo.json and its
 weights), fitted to the shaped body and re-posed with the mesh to arms down,

@@ -7,7 +7,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 OUT=public/models/home
 mkdir -p "$OUT"
-blender --background --factory-startup --python art/home/build_home.py
+blender --background --factory-startup --python-exit-code 1 --python art/home/build_home.py
 for f in art/home/.cache/out/*.glb; do
   id=$(basename "$f" .glb)
   [[ -z "${ONLY:-}" || ",$ONLY," == *",$id,"* ]] || continue
