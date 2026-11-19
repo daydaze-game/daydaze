@@ -46,7 +46,9 @@ import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
 import {
   heavyLid,
+  jawClench,
   peakBody,
+  pupilDilation,
   type Substance,
 } from "../../../game/effects/substances.ts";
 import { bodyFor } from "../../../game/effects/buzz.ts";
@@ -90,6 +92,8 @@ import { ScubaGear } from "./ScubaGear.tsx";
 import {
   acquireFace,
   acquireIris,
+  IRIS_R,
+  PUPIL_R,
   readMarks,
   releaseFace,
   releaseIris,
@@ -118,6 +122,10 @@ const REST_LID = 0.04;
 // Full effect opens the remaining upper lid; cocaine is 70% as wide.
 const WIDE_LID = REST_LID;
 const COCAINE_STARE = 0.7;
+// Fully blown pupils are this much wider than her own (about 70% of the iris).
+const PUPIL_GROW = 1.2;
+// Gurning grinds: the clench eases and sets again about once a second.
+const GRIND_HZ = 1.1;
 
 // the baked clips come in their own file (a big one), fetched once the first
 // room shows, so they don't share the bandwidth it loads over; dolls wear
@@ -419,6 +427,32 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       map: acquireIris(DEFAULT_EYE),
       roughness: 0.3,
     });
+    // pupil size (0 her own, 1 blown): the dark disc grows and the iris's
+    // fibers squeeze into the ring left, as a real iris does, so the one
+    // painted texture serves every size
+    const pupil: THREE.IUniform<number> = { value: 0 };
+    eye.onBeforeCompile = (shader) => {
+      shader.uniforms.uPupil = pupil;
+      shader.fragmentShader = shader.fragmentShader
+        .replace("void main() {", "uniform float uPupil;\nvoid main() {")
+        .replace(
+          "#include <map_fragment>",
+          [
+            "#ifdef USE_MAP",
+            "vec2 pupilD = vMapUv - 0.5;",
+            "float pupilR = length(pupilD);",
+            `float pupilTo = ${PUPIL_R.toFixed(4)} * (1.0 + uPupil * ${PUPIL_GROW.toFixed(2)});`,
+            "float pupilFrom = pupilR < pupilTo",
+            `  ? pupilR * ${PUPIL_R.toFixed(4)} / pupilTo`,
+            `  : mix(${PUPIL_R.toFixed(4)}, ${IRIS_R.toFixed(4)}, clamp((pupilR - pupilTo) / (${IRIS_R.toFixed(4)} - pupilTo), 0.0, 1.0));`,
+            // the sclera and the back of the ball keep their own texels
+            `if (pupilR >= ${IRIS_R.toFixed(4)}) pupilFrom = pupilR;`,
+            "diffuseColor *= texture2D(map, 0.5 + pupilD * (pupilFrom / max(pupilR, 1e-5)));",
+            "#endif",
+          ].join("\n"),
+        );
+    };
+    eye.customProgramCacheKey = () => "doll-eye-pupil";
     const cornea = new THREE.MeshStandardMaterial({
       color: "#ffffff",
       roughness: 0.02,
@@ -491,6 +525,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       restInverse,
       skin,
       eye,
+      pupil,
       materials: [skin, lashes, eye, cornea],
     };
   }, [gltf, loGltf, m, surface]);
@@ -1041,6 +1076,8 @@ export function HumanDoll({
   const lidMeshes = useRef<THREE.Mesh[] | null>(null);
   const smileShown = useRef(-1);
   const smileMeshes = useRef<THREE.Mesh[] | null>(null);
+  const gurnShown = useRef(-1);
+  const gurnMeshes = useRef<THREE.Mesh[] | null>(null);
   // a far doll's skeleton updates every third frame (thinned): the time owed
   const owed = useRef({ dt: 0, tick: 0 });
   useEffect(() => {
@@ -1409,6 +1446,20 @@ export function HumanDoll({
       smileShown.current = molly;
       smileMeshes.current = wornList.current;
       setMorph(wornList.current, "smile", Math.min(1, molly * 1.5));
+    }
+    // molly's big pupils and gurning jaw, less for cocaine and the
+    // psychedelics (pupilDilation, jawClench); the clench grinds in and out
+    // unless motion is reduced, when it holds
+    body.pupil.value = meters ? pupilDilation(meters) : 0;
+    const clench = meters ? jawClench(meters) : 0;
+    const grind = calm
+      ? 0.8
+      : 0.65 + 0.35 * Math.sin(tm * GRIND_HZ * Math.PI * 2 + seed);
+    const gurn = Math.round(clench * grind * 50) / 50;
+    if (gurnShown.current !== gurn || gurnMeshes.current !== wornList.current) {
+      gurnShown.current = gurn;
+      gurnMeshes.current = wornList.current;
+      setMorph(wornList.current, "gurn", gurn);
     }
     // face and body shape change rarely: set them only when they, or the
     // worn meshes (parts mount later), change, never every frame
