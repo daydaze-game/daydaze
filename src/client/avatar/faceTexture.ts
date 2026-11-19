@@ -147,38 +147,49 @@ function inkOnly(img: HTMLImageElement) {
 
 const ART_BROWS = new Set<string>(BROWS.slice(0, 4).map((b) => b.id));
 const browArt = new Map<string, Promise<HTMLCanvasElement>>();
-function browsImage(id: string): Promise<HTMLCanvasElement> {
-  if (ART_BROWS.has(id)) return loadImage(id).then(inkOnly);
-  let image = browArt.get(id);
+function browsImage(id: string, color?: string): Promise<HTMLCanvasElement> {
+  const key = BROWS.find((b) => b.id === id)?.id ?? DEFAULT_LOOK.brows;
+  const design = BROW_DESIGNS[key];
+  const ink = color ?? design.color;
+  const cacheKey = `${key}:${ink}`;
+  let image = browArt.get(cacheKey);
   if (!image) {
-    const key = BROWS.find((b) => b.id === id)?.id ?? DEFAULT_LOOK.brows;
-    const design = BROW_DESIGNS[key];
-    const { canvas, ctx } = makeCanvas(452, 130);
-    ctx.strokeStyle = design.color;
-    ctx.lineCap = "round";
-    for (const side of [-1, 1])
-      for (let i = 0; i < 40; i++) {
-        const t = i / 40;
-        const next = (i + 1) / 40;
-        ctx.lineWidth = design.thickness * (1 - 0.65 * t) * 1300;
-        ctx.beginPath();
-        ctx.moveTo(
-          226 + side * (40 + t * 160),
-          80 - (browRise(design, t) - 0.046) * 1300,
-        );
-        ctx.lineTo(
-          226 + side * (40 + next * 160),
-          80 - (browRise(design, next) - 0.046) * 1300,
-        );
-        ctx.stroke();
-      }
-    image = Promise.resolve(canvas);
-    browArt.set(id, image);
+    if (ART_BROWS.has(id) && !color) {
+      image = loadImage(id).then(inkOnly);
+    } else {
+      const { canvas, ctx } = makeCanvas(452, 130);
+      ctx.strokeStyle = ink;
+      ctx.lineCap = "round";
+      for (const side of [-1, 1])
+        for (let i = 0; i < 40; i++) {
+          const t = i / 40;
+          const next = (i + 1) / 40;
+          ctx.lineWidth = design.thickness * (1 - 0.65 * t) * 1300;
+          ctx.beginPath();
+          ctx.moveTo(
+            226 + side * (40 + t * 160),
+            80 - (browRise(design, t) - 0.046) * 1300,
+          );
+          ctx.lineTo(
+            226 + side * (40 + next * 160),
+            80 - (browRise(design, next) - 0.046) * 1300,
+          );
+          ctx.stroke();
+        }
+      image = Promise.resolve(canvas);
+    }
+    browArt.set(cacheKey, image);
   }
   return image;
 }
 
-type FaceOpts = { skin: string; lips: string; brows: string; shadow: string };
+type FaceOpts = {
+  skin: string;
+  lips: string;
+  brows: string;
+  shadow: string;
+  browColor?: string | undefined;
+};
 
 function paintBase(
   ctx: CanvasRenderingContext2D,
@@ -369,7 +380,7 @@ async function paint(opts: FaceOpts, closed: boolean) {
   const [features, lips, brows] = await Promise.all([
     featureLayer(skin),
     lipsImage(opts.lips),
-    browsImage(opts.brows),
+    browsImage(opts.brows, opts.browColor),
   ]);
   const { canvas: c, ctx } = makeCanvas(
     Math.round(FACE_W * SCALE),
