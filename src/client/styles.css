@@ -3077,6 +3077,13 @@ button:focus-visible {
   width: auto;
 }
 
+/* The weed pouch sits at the upper left, mirroring the shop panels on the right
+ * (the dock fills the bottom, so a low spot gets covered). */
+.pouch-panel {
+  right: auto;
+  left: 16px;
+}
+
 /* Street counters stay legible over the city, with accessible menu controls. */
 .food-vendor-panel {
   position: fixed;

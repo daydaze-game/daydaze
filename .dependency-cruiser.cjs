@@ -53,7 +53,7 @@ module.exports = {
     {
       name: "no-circular",
       comment: "Cycles make load order fragile.",
-      severity: "warn",
+      severity: "error",
       from: {},
       to: { circular: true },
     },

@@ -6,7 +6,7 @@
 // compared across independent transcriptions), moved to a singable key and
 // cut at a cadence; the `source:` comments name where each came from.
 
-import type { KaraokeSong } from "../karaokeSongs.ts";
+import type { KaraokeSong } from "../karaokeTypes.ts";
 
 export const AMERICA: readonly KaraokeSong[] = [
   // source: trillian.mit.edu/~jc/music/abc/mirror/mindspring.com/~thornton.rose/SwingLowSweetChariot/0000

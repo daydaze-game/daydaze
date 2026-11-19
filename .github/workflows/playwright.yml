@@ -8,10 +8,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  # the merge queue: a PR enters it only with these suites green, so the queue
-  # skips them (the jobs still report, as the required checks need) and gates
-  # on ci.yml's fast checks of the combined commit
-  merge_group:
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +19,15 @@ jobs:
   browser:
     timeout-minutes: 45
     runs-on: ubuntu-24.04
+    # gh pr diff (the PR's files) and gh run download (main's test map)
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+    # main's full runs record which files each test loads (tests/test-map.ts)
+    env:
+      RECORD_TEST_MAP: ${{ github.event_name == 'push' && '1' || '' }}
+      SHARD: ${{ matrix.shard }}
     strategy:
       fail-fast: false
       # the client suite is long on SwiftShader: four runners share it
@@ -37,37 +42,67 @@ jobs:
       # A change that only touches docs or editor/lint config cannot break a
       # browser test: report green without the slow steps. The job still runs,
       # so the required check names (browser (1..4), minigames) always report.
+      # A pull request runs only the browser tests its changes reach: the
+      # files each test loaded on main's last full run (scripts/select-tests.ts)
+      # say which. Docs-only changes and changes no test loads run none;
+      # anything the map can't vouch for runs the full suite.
       - id: scope
-        name: Docs-only change?
+        name: Which browser tests?
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           run=true
-          if [ "${{ github.event_name }}" = merge_group ]; then
-            run=false
-            echo "Merge queue: the PR already passed the browser tests."
-          elif [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
-            run=false
-            echo "Docs-only change: skipping the browser tests."
+          if [ -n "$PR" ]; then
+            gh pr diff "$PR" --name-only > /tmp/changed.txt
+            if [ "$(bash scripts/main-merged-only.sh "$HEAD_SHA")" = true ]; then
+              run=false
+              echo "Only main merged in, and the browser tests passed before it: skipping them."
+            elif [ "$(node --experimental-strip-types scripts/docs-only.ts < /tmp/changed.txt)" = true ]; then
+              run=false
+              echo "Docs-only change: skipping the browser tests."
+            else
+              map_run=$(gh run list --workflow Tests --branch main --event push --status success -L 1 --json databaseId -q '.[0].databaseId')
+              [ -n "$map_run" ] && gh run download "$map_run" -p 'test-map-*' -D test-map || echo "No test map from main yet."
+              pick=$(node --experimental-strip-types scripts/select-tests.ts test-map < /tmp/changed.txt)
+              case "$pick" in
+                none) run=false; echo "No browser test loads the changed files." ;;
+                all) ;;
+                *) { echo 'PW_GREP<<PW_GREP_END'; echo "$pick"; echo 'PW_GREP_END'; } >> "$GITHUB_ENV" ;;
+              esac
+            fi
           fi
           echo "run=$run" >> "$GITHUB_OUTPUT"
       - if: steps.scope.outputs.run == 'true'
         run: npm ci
       - if: steps.scope.outputs.run == 'true'
         run: npx playwright install --with-deps chromium
-      # Headless WebGL runs on SwiftShader, so these are slow but real.
+      # Headless WebGL runs on SwiftShader, so these are slow but real. With a
+      # selection, a shard can be left with no tests; that's a pass.
       - if: steps.scope.outputs.run == 'true'
-        run: npm run test:e2e:client -- --shard=${{ matrix.shard }}/4
+        run: npm run test:e2e:client -- --shard=${{ matrix.shard }}/4 --pass-with-no-tests
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: playwright-report-${{ matrix.shard }}
           path: test-results/
           retention-days: 14
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() && env.RECORD_TEST_MAP == '1' }}
+        with:
+          name: test-map-${{ matrix.shard }}
+          path: test-map/
+          retention-days: 30
+          if-no-files-found: ignore
   minigames:
     timeout-minutes: 20
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -78,15 +113,17 @@ jobs:
       # browser test: report green without the slow steps. The job still runs,
       # so the required check names (browser (1..4), minigames) always report.
       - id: scope
-        name: Docs-only change?
+        name: Docs-only change, or only main merged in?
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           run=true
-          if [ "${{ github.event_name }}" = merge_group ]; then
+          if [ -n "$PR" ] && [ "$(bash scripts/main-merged-only.sh "$HEAD_SHA")" = true ]; then
             run=false
-            echo "Merge queue: the PR already passed the browser tests."
+            echo "Only main merged in, and the browser tests passed before it: skipping them."
           elif [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
             run=false
             echo "Docs-only change: skipping the browser tests."

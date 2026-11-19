@@ -553,3 +553,23 @@ test("legacy and expanded eye and lip shapes keep stable save codes", () => {
     assert.equal(validateLook({ ...DEFAULT_LOOK, face: saved }), true);
   }
 });
+
+test("validateLook validates optional browColor field", () => {
+  // Legacy looks without browColor remain valid
+  assert.equal(validateLook(DEFAULT_LOOK), true);
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: undefined }), false);
+
+  // Valid 6-digit RGB hex colors accepted
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: "#1a120e" }), true);
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: "#ff0077" }), true);
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: "#000000" }), true);
+
+  // Invalid colors rejected
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: "black" }), false);
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: "#fff" }), false);
+  assert.equal(
+    validateLook({ ...DEFAULT_LOOK, browColor: "#1a120eff" }),
+    false,
+  );
+  assert.equal(validateLook({ ...DEFAULT_LOOK, browColor: "123456" }), false);
+});

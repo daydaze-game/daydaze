@@ -6,7 +6,7 @@
 // compared across independent transcriptions), moved to a singable key and
 // cut at a cadence; the `source:` comments name where each came from.
 
-import type { KaraokeSong } from "../karaokeSongs.ts";
+import type { KaraokeSong } from "../karaokeTypes.ts";
 
 export const WORLD: readonly KaraokeSong[] = [
   // source: tunearch.org/wiki/Bonnie_Banks_o%27_Loch_Lomond_(The).no-ext/0001
