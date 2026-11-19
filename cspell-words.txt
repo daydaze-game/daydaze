@@ -206,6 +206,7 @@ clocktower
 clownfish
 cmaj
 cocaethylene
+coderabbit
 colinhume
 colormap
 colormass
