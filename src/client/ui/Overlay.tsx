@@ -352,6 +352,11 @@ const EFFECT_LEVELS = INTENSITIES.map((id) => ({
   label: id === "off" ? "Off" : id === "low" ? "Low" : "Full",
 }));
 
+const HIGH_AUDIO_CHIPS = [
+  { id: "on", label: "On" },
+  { id: "off", label: "Off" },
+] as const;
+
 /**
  * The closet's tabs, in order. Face and makeup frame the camera on the face;
  * the rest show the full doll.
@@ -790,13 +795,10 @@ function Mirror({
         )}
         {allows(activeTier(), "drugs") && setHighAudio && (
           <section>
-            <h3>High audio bloom</h3>
+            <h3>High audio</h3>
             <Chips
-              label="High audio bloom"
-              options={[
-                { id: "on", label: "On" },
-                { id: "off", label: "Off" },
-              ]}
+              label="High audio"
+              options={HIGH_AUDIO_CHIPS}
               value={highAudio ? "on" : "off"}
               onPick={(v) => setHighAudio(v === "on")}
             />

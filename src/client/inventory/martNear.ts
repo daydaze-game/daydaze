@@ -4,6 +4,8 @@
 import type { Shop } from "../../game/inventory.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
+export const DEALER_NAME = "Street dealer";
+
 const none: { name: string; shop: Shop } = { name: "", shop: "gas" };
 
 export const martNear = createStore(none);
