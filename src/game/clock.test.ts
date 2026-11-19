@@ -20,6 +20,12 @@ test("a held clock stays put however much real time passes", () => {
   assert.equal(((first % 300) + 300) % 300, 5);
 });
 
+test("heldClock can hold at an explicit slot", () => {
+  const wall = fakeNow(1_000);
+  const clock = heldClock(300, 5, wall.now, 1005);
+  assert.equal(clock.read(), 300 * 1005 + 5);
+});
+
 test("a released held clock runs on from where it was held", () => {
   const wall = fakeNow(1_000);
   const clock = heldClock(300, 5, wall.now);
