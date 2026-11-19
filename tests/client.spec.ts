@@ -2832,6 +2832,24 @@ test("the marina: cast, strike, and the catch is called", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("the boardwalk pier: cast and leave fishing", async ({ page }) => {
+  test.setTimeout(300_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city`);
+  await expect(canvasOf(page)).toHaveAttribute("data-frames", "10");
+  await page.getByRole("button", { name: "Fishing", exact: true }).click();
+  const panel = page.getByRole("region", { name: "Fishing" });
+  await panel.getByRole("button", { name: "Go fishing" }).click();
+  await panel.getByRole("button", { name: "Cast", exact: true }).click();
+  await panel.getByRole("button", { name: "Strike!" }).click();
+  await expect(panel.getByRole("status")).toHaveText(/spooked|got away|kg/, {
+    timeout: 120_000,
+  });
+  await panel.getByRole("button", { name: "Reel in and leave" }).click();
+  await expect(panel.getByRole("button", { name: "Go fishing" })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test("Starlight yacht: board at the marina, cruise, dance and return", async ({
   page,
 }) => {
