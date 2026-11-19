@@ -121,3 +121,22 @@ export const GAS_BLOCKERS: readonly Vec2[][] = GAS_STATIONS.flatMap((s) => [
   martOf(s),
   ...islandsOf(s),
 ]);
+
+/** How near (meters) the player must be to a mart's counter to shop. */
+export const COUNTER_REACH = 3.5;
+
+/** The mart's counter: just in front of its door, mid-lot, on the forecourt
+ * side where the player can stand (the mart itself is a blocker). */
+export function counterOf(s: GasStation): Vec2 {
+  return [outX(s, SIDEWALK + APRON - 1), (s.z0 + s.z1) / 2];
+}
+
+// built once: counterAt runs every frame and must not allocate
+const COUNTERS = GAS_STATIONS.map((s) => ({ s, at: counterOf(s) }));
+
+/** The station whose counter (x, z) is within reach of, or null. */
+export function counterAt(x: number, z: number): GasStation | null {
+  for (const { s, at } of COUNTERS)
+    if (Math.hypot(at[0] - x, at[1] - z) <= COUNTER_REACH) return s;
+  return null;
+}
