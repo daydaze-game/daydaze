@@ -1,0 +1,55 @@
+name: prune branches
+# Weekly cleanup of remote branches left behind by agents (issue #72). A
+# branch is deleted only when all of these hold:
+# - it has no open pull request,
+# - it is merged into main, or its last pull request was merged or closed,
+# - its newest commit is more than 7 days old, so a branch an agent pushed
+#   recently but has not opened a PR for yet is never touched.
+# main, dependabot/* and gh-pages are never deleted. Run it by hand with
+# dry_run (the default for manual runs) to see the list first.
+on:
+  schedule:
+    - cron: "41 7 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: List the branches without deleting them
+        type: boolean
+        default: true
+concurrency:
+  group: prune-branches
+permissions:
+  contents: write
+  pull-requests: read
+jobs:
+  prune:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Delete stale branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          # a scheduled run has no inputs, so it deletes; a manual run lists by default
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          cutoff=$(date -d '7 days ago' +%s)
+          deleted=0
+          for b in $(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin); do
+            case "$b" in main | HEAD | gh-pages | dependabot/*) continue ;; esac
+            [ "$(git log -1 --format=%ct "origin/$b")" -lt "$cutoff" ] || continue
+            [ -z "$(gh pr list -R "$REPO" --head "$b" --state open --json number -q '.[0].number')" ] || continue
+            if git merge-base --is-ancestor "origin/$b" origin/main; then why=merged-into-main
+            else
+              why=$(gh pr list -R "$REPO" --head "$b" --state all -L 1 --json state -q '.[0].state // empty')
+              case "$why" in MERGED | CLOSED) ;; *) continue ;; esac
+            fi
+            echo "$b ($why)"
+            if [ "$DRY_RUN" != true ]; then
+              git push -q origin --delete "$b" && deleted=$((deleted + 1))
+            fi
+          done
+          echo "deleted $deleted branch(es); dry_run=$DRY_RUN"
