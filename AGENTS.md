@@ -184,7 +184,8 @@ request. Use the `gh` CLI.
   Do not fix it in the same branch. Title it like a Conventional Commit subject
   (`fix(net): ...`), say what you saw, how to reproduce it, which files, and
   what you expect. Add labels (`bug`, `enhancement`, `documentation`,
-  `security`, `performance`, and one `area: *`). Never put secrets in an issue.
+  `security`, `performance`, and one `area: *`) and assign it to the owner
+  (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
   reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
   stays open). When you finish something that has no issue, the PR is enough.
