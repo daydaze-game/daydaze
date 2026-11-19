@@ -61,3 +61,51 @@ test("?spot=<building> starts in the city in front of it; ?yaw still turns", () 
   assert.equal(readFlags("?spot=nowhere").at, null);
   assert.equal(readFlags("?spot=nowhere").room, null);
 });
+
+test("?fov, ?dist, ?pitch, ?height parse numeric camera overrides", () => {
+  const f = readFlags("?fov=60&dist=12.5&pitch=15&height=2.8");
+  assert.equal(f.fov, 60);
+  assert.equal(f.dist, 12.5);
+  assert.equal(f.pitch, 15);
+  assert.equal(f.height, 2.8);
+});
+
+test("invalid or out-of-range camera flags fall back to null", () => {
+  const f = readFlags("?fov=5&dist=-2&pitch=120&height=100");
+  assert.equal(f.fov, null);
+  assert.equal(f.dist, null);
+  assert.equal(f.pitch, null);
+  assert.equal(f.height, null);
+
+  const fNaN = readFlags("?fov=wide&dist=far&pitch=up&height=high");
+  assert.equal(fNaN.fov, null);
+  assert.equal(fNaN.dist, null);
+  assert.equal(fNaN.pitch, null);
+  assert.equal(fNaN.height, null);
+});
+
+test("?cam= parses 3 relative or 6 world coordinates", () => {
+  const rel = readFlags("?cam=0,1.5,-2.4");
+  assert.deepEqual(rel.cam, {
+    kind: "relative",
+    off: [0, 1.5, -2.4],
+  });
+
+  const world = readFlags("?cam=6.4,5.4,10,0.6,1.0,-1.0");
+  assert.deepEqual(world.cam, {
+    kind: "world",
+    eye: [6.4, 5.4, 10],
+    look: [0.6, 1.0, -1.0],
+  });
+
+  assert.equal(readFlags("?cam=1,2").cam, null);
+  assert.equal(readFlags("?cam=1,2,3,4").cam, null);
+  assert.equal(readFlags("?cam=1,2,a").cam, null);
+});
+
+test("?heistend= parses caught or escape, falls back to null", () => {
+  assert.equal(readFlags("?heistend=caught").heistend, "caught");
+  assert.equal(readFlags("?heistend=escape").heistend, "escape");
+  assert.equal(readFlags("?heistend=other").heistend, null);
+  assert.equal(readFlags("").heistend, null);
+});

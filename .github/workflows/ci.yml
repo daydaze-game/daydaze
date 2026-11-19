@@ -50,6 +50,13 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      # the ESLint, Prettier and tsc caches (npm run lint / format:check / typecheck
+      # write into .cache); without this every run pays the cold cost
+      - uses: actions/cache@v6
+        with:
+          path: .cache
+          key: lint-cache-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: lint-cache-${{ hashFiles('package-lock.json') }}-
       - run: npm ci
       - name: ESLint
         run: npm run lint
