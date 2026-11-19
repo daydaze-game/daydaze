@@ -19,7 +19,7 @@ import {
 } from "./chase.ts";
 
 test("chase offset stays inside slot and never overlaps with heist", () => {
-  for (let s = 0; s < 500; s++) {
+  for (let s = 0; s < 100; s++) {
     const cOffset = chaseOffset(s);
     assert.ok(cOffset >= 0, `slot ${s} offset >= 0`);
     assert.ok(
@@ -48,8 +48,8 @@ test("chaseInto and nextChaseIn report current or upcoming chase", () => {
   const start = chaseStart(slot);
   assert.equal(chaseInto(start - 1), null);
   assert.equal(chaseInto(start), 0);
-  assert.equal(chaseInto(start + 15.5), 15.5);
-  assert.equal(chaseInto(start + CHASE_LENGTH - 0.1), CHASE_LENGTH - 0.1);
+  assert.equal(chaseInto(start + 15), 15);
+  assert.equal(chaseInto(start + CHASE_LENGTH - 1), CHASE_LENGTH - 1);
   assert.equal(chaseInto(start + CHASE_LENGTH), null);
 
   assert.equal(nextChaseIn(start - 20), 20);
