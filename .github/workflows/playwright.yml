@@ -47,12 +47,17 @@ jobs:
         name: Which browser tests?
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           run=true
           if [ -n "$PR" ]; then
             gh pr diff "$PR" --name-only > /tmp/changed.txt
-            if [ "$(node --experimental-strip-types scripts/docs-only.ts < /tmp/changed.txt)" = true ]; then
+            if [ "$(bash scripts/main-merged-only.sh "$HEAD_SHA")" = true ]; then
+              run=false
+              echo "Only main merged in, and the browser tests passed before it: skipping them."
+            elif [ "$(node --experimental-strip-types scripts/docs-only.ts < /tmp/changed.txt)" = true ]; then
               run=false
               echo "Docs-only change: skipping the browser tests."
             else
@@ -91,6 +96,10 @@ jobs:
   minigames:
     timeout-minutes: 20
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -101,13 +110,18 @@ jobs:
       # browser test: report green without the slow steps. The job still runs,
       # so the required check names (browser (1..4), minigames) always report.
       - id: scope
-        name: Docs-only change?
+        name: Docs-only change, or only main merged in?
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           run=true
-          if [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
+          if [ -n "$PR" ] && [ "$(bash scripts/main-merged-only.sh "$HEAD_SHA")" = true ]; then
+            run=false
+            echo "Only main merged in, and the browser tests passed before it: skipping them."
+          elif [ -n "$PR" ] && [ "$(gh pr diff "$PR" --name-only | node --experimental-strip-types scripts/docs-only.ts)" = true ]; then
             run=false
             echo "Docs-only change: skipping the browser tests."
           fi
