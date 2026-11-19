@@ -32,7 +32,9 @@ the `__dd` console handles and every URL flag.
 ## Checks
 
 Run these before you push; CI (`.github/workflows/ci.yml`) runs the same on
-every push and pull request to `main` and fails fast.
+every push and pull request to `main` and fails fast. Pull requests merge
+through GitHub's merge queue (`gh pr merge <n> --auto`): it runs `ci.yml` again
+on each PR combined with `main` and the PRs ahead of it before it merges.
 
 | Command                 | What it checks                                                                                                                                                                      |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
