@@ -14,11 +14,11 @@ one relief entry point. No save, network, asset, or NPC changes.
 consumption while high gives a short relief toast. Alcohol provides no relief.
 Only the 18+ tier enables needs. No penalties or lost progress.
 
-- [ ] Add failing pure tests for high/sober/teen behavior, invalid deltas,
+- [x] Add failing pure tests for high/sober/teen behavior, invalid deltas,
       bounds, matching relief, and unchanged intoxication.
-- [ ] Implement pure needs and food-store integration; test held, delivered,
+- [x] Implement pure needs and food-store integration; test held, delivered,
       quick snack/water, and vending consumption, with 13+ isolation.
-- [ ] Show accessible needs and relief feedback in FoodHud; keep the delivery
+- [x] Show accessible needs and relief feedback in FoodHud; keep the delivery
       timer and toast working. Clamp background time so tab suspension adds no debt.
 - [ ] Run focused tests, lint/type checks, and Playwright for the food loop and
       age gate; inspect desktop/mobile screenshots, then open a focused PR for CI.

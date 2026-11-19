@@ -52,50 +52,46 @@ export function FoodHud() {
     ADULT_OK &&
     (food.needs.hunger >= NEED_NOTICE || food.needs.thirst >= NEED_NOTICE);
   return (
-    <>
+    <div className="food-tray">
       <p className="food-toast" role="status" aria-live="polite">
         {food.toast ?? ""}
       </p>
-      <div className="food-tray">
-        {showNeeds && (
-          <section className="food-needs" aria-label="Food and water needs">
-            <strong>
-              {food.needs.hunger >= NEED_NOTICE
-                ? "The munchies"
-                : "Cotton mouth"}
-            </strong>
-            <label>
-              Hunger{" "}
-              <meter
-                aria-label="Hunger"
-                min={0}
-                max={1}
-                value={food.needs.hunger}
-              />
-            </label>
-            <label>
-              Thirst{" "}
-              <meter
-                aria-label="Thirst"
-                min={0}
-                max={1}
-                value={food.needs.thirst}
-              />
-            </label>
-            <p>Grab a snack and a soft drink, or order Plate Rush from Menu.</p>
-          </section>
-        )}
-        {held && (
-          <section className="food-held" aria-label="Held food">
-            <p>
-              Holding <strong>{held.name}</strong>
-            </p>
-            <button type="button" onClick={eatHeld}>
-              {held.kind === "food" ? "Eat it" : "Sip it"}
-            </button>
-          </section>
-        )}
-      </div>
-    </>
+      {showNeeds && (
+        <section className="food-needs" aria-label="Food and water needs">
+          <strong>
+            {food.needs.hunger >= NEED_NOTICE ? "The munchies" : "Cotton mouth"}
+          </strong>
+          <label>
+            Hunger{" "}
+            <meter
+              aria-label="Hunger"
+              min={0}
+              max={1}
+              value={food.needs.hunger}
+            />
+          </label>
+          <label>
+            Thirst{" "}
+            <meter
+              aria-label="Thirst"
+              min={0}
+              max={1}
+              value={food.needs.thirst}
+            />
+          </label>
+          <p>Grab a snack and a soft drink, or order Plate Rush from Menu.</p>
+        </section>
+      )}
+      {held && (
+        <section className="food-held" aria-label="Held food">
+          <p>
+            Holding <strong>{held.name}</strong>
+          </p>
+          <button type="button" onClick={eatHeld}>
+            {held.kind === "food" ? "Eat it" : "Sip it"}
+          </button>
+        </section>
+      )}
+    </div>
   );
 }
