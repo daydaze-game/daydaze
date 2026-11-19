@@ -110,6 +110,16 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 
 ## Agent workflow
 
+- **Work only in git worktrees, never in the main checkout.** The main checkout
+  (`~/git/daydaze`) always stays on `main`; the owner and other agents use it at
+  the same time. In it, never switch or create a branch (`git switch`,
+  `git checkout <branch>`), commit, stage, stash, or discard changes
+  (`git restore`, `git checkout -- <file>`, `git reset`). Read-only git there is
+  fine (`status`, `log`, `diff`, `fetch`). Every change, however small (one
+  line, docs, config), starts with
+  `git worktree add -b <type>/<name> .worktrees/<name> origin/main`, and is
+  committed, pushed and opened as a PR from the worktree. Remove the worktree
+  after the merge.
 - Parallel agents each work in a git worktree, `.worktrees/<name>` on
   `feat/<name>`, with `node_modules` symlinked from the main checkout (never
   `npm install` in a worktree). Build agents get `docs/agents/agent-rules.md` as
