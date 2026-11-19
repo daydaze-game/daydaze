@@ -23,6 +23,29 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v3
+      # the gitleaks CLI (MIT), not gitleaks-action: the action wants a paid
+      # license key on organization repos, the binary does not
+      - name: Install gitleaks
+        run: |
+          curl -sSfL -o /tmp/gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+      # a PR scans its own commits, a push to main the pushed ones, the weekly
+      # and manual runs the full history (as the action did)
+      - name: Scan
+        run: |
+          case "$EVENT" in
+            pull_request) range="$BASE..$HEAD" ;;
+            push) range="$BEFORE..$AFTER" ;;
+            *) range="" ;;
+          esac
+          /tmp/gitleaks git --redact --verbose --exit-code 1 ${range:+--log-opts="$range"} .
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}

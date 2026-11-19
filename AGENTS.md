@@ -147,9 +147,13 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - `ci.yml` and `playwright.yml` run on pushes and pull requests to `main`;
     `deploy.yml` runs only by hand. A PR that touches only docs or editor/lint
     config skips the browser steps (`scripts/docs-only.ts`) and reports green.
-- Merge gate: rebase onto `main`, verify green, the touched feature's Playwright
-  tests green, then `git merge --no-ff`, remove the worktree and branch, push
-  `main`. `docs/agents/scripts/land.sh` automates this against GitHub CI.
+- Merge gate: GitHub's merge queue. Nobody pushes to `main`; a PR joins the
+  queue with `gh pr merge <n> --auto` once its checks (browser suites
+  included) are green, and the queue merges it only after `ci.yml` passes on
+  it combined with `main` and every PR ahead of it, so two green PRs cannot
+  merge into a red `main`. A PR that fails in the queue is dropped: fix it and
+  queue it again. `docs/agents/scripts/land.sh` rebases, pushes, opens the PR,
+  queues it, and removes the worktree and branch after the merge.
 - Playwright: no `waitForTimeout`; wait on `data-*` attributes on the canvas
   (`data-frames` reaches `10`). Use role locators and the `?debug=1` room
   buttons. Headless WebGL is CPU SwiftShader, so run only the tests you need; a
