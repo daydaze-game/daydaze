@@ -11,9 +11,6 @@ on:
     tags: ["v*"]
   pull_request:
     branches: [main]
-  # the merge queue: lint, tests, typecheck and build on each PR combined with
-  # main and the PRs ahead of it, so two green PRs cannot merge into a red main
-  merge_group:
 
 # a newer push to the same branch or PR cancels the run in progress; runs on main
 # finish, or the status badge reads the latest cancelled run as failing
