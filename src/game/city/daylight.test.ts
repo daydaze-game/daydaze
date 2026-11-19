@@ -8,6 +8,7 @@ import {
   lampGain,
   laneTint,
   parseTimeFlag,
+  windowSky,
 } from "./daylight.ts";
 
 test("midnight is night: no sun, the neon at full, moon is up", () => {
@@ -90,4 +91,25 @@ test("car lamps are dull by day and well past the bloom threshold at night", () 
   assert.ok(lampGain(daylightAt(23).neon) * 0.2 > 1);
   assert.equal(lampGain(5), lampGain(1));
   assert.equal(lampGain(-1), lampGain(0));
+});
+
+// The sky seen through a room's window follows the hour (issue #110).
+const lum = ([r, g, b]: readonly [number, number, number]) =>
+  0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+test("windowSky: a blue day sky, a warm dusk, a dark night", () => {
+  const noon = windowSky(daylightAt(12));
+  assert.ok(noon[2] > noon[0], "blue at noon");
+  const dusk = windowSky(daylightAt(19));
+  assert.ok(dusk[0] > dusk[2], "warm at dusk");
+  const night = windowSky(daylightAt(23.5));
+  assert.ok(lum(night) < lum(noon) / 2, "much darker at night than noon");
+  assert.ok(lum(night) > 0, "night is dim, not black");
+});
+
+test("windowSky: stays in 0..1 at every hour and wraps past midnight", () => {
+  for (let h = 0; h < 24; h += 0.25) {
+    for (const c of windowSky(daylightAt(h))) assert.ok(c >= 0 && c <= 1);
+  }
+  assert.deepEqual(windowSky(daylightAt(25)), windowSky(daylightAt(1)));
 });

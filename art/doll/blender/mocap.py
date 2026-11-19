@@ -1,8 +1,8 @@
 """Bakes Mixamo clips onto the doll's own skeleton and writes them as one
 animation-only GLB, plus the clip catalog src/game/dance/mocap.ts.
 
-    blender --background --factory-startup --python art/doll/blender/build_doll.py
-    blender --background --factory-startup --python art/doll/blender/mocap.py
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/build_doll.py
+    blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/mocap.py
     scripts/optimize-doll.sh
 
 build_doll.py leaves each doll's bare rig in .cache/rig{-m}.blend: Mixamo's 52
