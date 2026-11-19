@@ -53,8 +53,10 @@ And:
   of event nights.
 - A failure even if it works: progression that makes the 100 activities feel
   like chores, or that locks the fun stuff (driving, dressing up, the city)
-  behind grinding. **The city stays open from minute one;** progression adds
-  goals and status, it doesn't gate play.
+  behind grinding. **The city stays open from minute one:** driving,
+  dressing up, every venue and every minigame. Progression adds goals and
+  status, and ranks unlock extras on top (the DJ booth, VIP rooms, owning a
+  business, bigger heists), never the base game.
 
 ## The system
 
@@ -147,8 +149,9 @@ progress. Each is its own issue (see the tracking issue).
 - **Achievements:** hundreds, across every activity, with badges for the
   name tag.
 - **Seasons:** a free season track (no paid tier) every 6 to 8 weeks with a
-  theme, a story chain, season-only clothes and cars, and a season
-  leaderboard.
+  theme, a story chain, season clothes and cars, and a season leaderboard.
+  Season rewards come back in a later rerun, so missing a season never
+  loses them for good.
 - **Tournaments:** weekly brackets for minigames, races, dance-offs and
   karaoke, with trophies for your apartment.
 - **City life:** weather (rain, storms, snow events), a day and night
