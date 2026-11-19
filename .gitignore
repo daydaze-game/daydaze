@@ -60,3 +60,6 @@ art/opponents/.cache/
 
 # Screen recordings from scripts/record.ts
 /recordings/
+
+# per-test file lists recorded on main for scripts/select-tests.ts
+/test-map/

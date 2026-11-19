@@ -1,28 +1,80 @@
 name: Screenshots
-# Take screenshots (scripts/screenshots.ts shot names) on any branch, by hand:
-#   gh workflow run screenshots.yml --ref feat/x -f shots="yacht taxi-ride"
+# Take screenshots on any branch and publish them to the `screenshots` branch,
+# one folder per branch with a README grid that renders on a phone:
+#   https://github.com/<repo>/tree/screenshots/<branch-with-dashes>
+# By hand (also from mobile web: Actions > Screenshots > Run workflow):
+#   gh workflow run screenshots.yml --ref feat/x -f shots="yacht spot=pulse room=city&at=10,5&turn=4"
 #   gh run download <id> -n screenshots -D /tmp/shots-<id>
-# Then look at each PNG and copy the good ones into docs/screenshots/.
+# Tokens (scripts/shot-plan.ts): registry names from scripts/screenshots.ts,
+# raw queries of client URL flags, and the presets all-rooms, all-spots, tour.
+# A push to main that can change the game reshoots the tour.
 on:
   workflow_dispatch:
     inputs:
       shots:
-        description: Space-separated shot names from scripts/screenshots.ts
-        required: true
+        description: "Shot tokens: names, queries (room=city&at=10,5&turn=4), all-rooms, all-spots, tour"
+        required: false
+        default: tour
         type: string
+      shards:
+        description: Parallel browser jobs
+        required: false
+        default: 8
+        type: number
   # pr-screenshots.yml calls this with the shots a pull request should show
   workflow_call:
     inputs:
       shots:
         required: true
         type: string
+      shards:
+        required: false
+        default: 2
+        type: number
+  push:
+    branches: [main]
+    # only what can change a frame; docs, server, tests and CI take no shots
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "vite.config.ts"
+      - "package-lock.json"
 concurrency:
-  group: screenshots-${{ github.ref }}-${{ inputs.shots }}
+  group: screenshots-${{ github.ref }}-${{ inputs.shots || 'tour' }}
   cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
-  shots:
-    timeout-minutes: 45
+  # expand the tokens and deal them into shards; a bad token fails here,
+  # before any browser starts
+  plan:
+    timeout-minutes: 10
     runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: plan
+        run: |
+          matrix=$(node --experimental-strip-types scripts/screenshots.ts --matrix "$SHOTS" "$SHARDS")
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+        env:
+          SHOTS: ${{ inputs.shots || 'tour' }}
+          SHARDS: ${{ inputs.shards || 8 }}
+  shots:
+    needs: plan
+    timeout-minutes: 90
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -31,20 +83,109 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      # one shot per process (a fresh browser each), against a local dev server
+      # one shot per process (a fresh browser each), against a local dev server;
+      # a failed shot is reported and the rest still run
       - run: |
           npx vite --port 5195 --strictPort > /tmp/vite.log 2>&1 &
           for _ in $(seq 1 60); do curl -sf -o /dev/null http://localhost:5195 && break; sleep 1; done
+          mkdir -p shots-out && touch /tmp/started
+          failed=0
           for s in $SHOTS; do
-            case "$s" in *[!a-z0-9-]*) echo "bad shot name: $s"; exit 1;; esac
-            node --experimental-strip-types scripts/screenshots.ts "$s"
-            mkdir -p shots-out && cp docs/screenshots/"$s".png docs/screenshots/"$s"-[0-9][0-9].png shots-out/ 2>/dev/null || true
+            node --experimental-strip-types scripts/screenshots.ts "$s" || { echo "::error::shot failed: $s"; failed=1; }
           done
+          # every PNG this run wrote, strips and lineup shots included
+          find docs/screenshots -name '*.png' -newer /tmp/started -exec cp {} shots-out/ \;
+          exit "$failed"
         env:
-          SHOTS: ${{ inputs.shots }}
+          SHOTS: ${{ matrix.shots }}
+          SHOT_STATS: ${{ github.workspace }}/shots-out/stats-${{ matrix.shard }}.jsonl
       - uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
+          name: shots-${{ matrix.shard }}
+          path: shots-out/
+          retention-days: 1
+  # merge the shards into one `screenshots` artifact, then (not for pull
+  # requests) publish the branch's folder on the `screenshots` branch
+  gallery:
+    needs: [plan, shots]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: shots-*
+          path: shots
+          merge-multiple: true
+      - run: cat shots/stats-*.jsonl > shots/stats.jsonl 2>/dev/null || true
+      - uses: actions/upload-artifact@v7
+        with:
           name: screenshots
-          path: shots-out/*.png
+          path: shots/*.png
           retention-days: 7
+      - if: ${{ github.event_name != 'pull_request' }}
+        env:
+          REF: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 -m venv /tmp/pil && /tmp/pil/bin/pip install -q pillow
+          slugify() { tr '/' '-' | tr -c 'A-Za-z0-9._\n-' '-'; }
+          slug=$(printf '%s\n' "$REF" | slugify)
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # each publish is one orphan commit pushed with a lease, so the branch
+          # never grows history; a race with another branch's run just retries
+          for attempt in 1 2 3; do
+            git worktree remove --force site 2>/dev/null || true
+            if git fetch --depth 1 origin screenshots 2>/dev/null; then
+              base=$(git rev-parse FETCH_HEAD)
+              git worktree add --force --detach site "$base"
+            else
+              base=""
+              git worktree add --force --detach site HEAD
+              git -C site rm -rqf . && git -C site clean -fdqx
+            fi
+            rm -rf "site/$slug" && mkdir -p "site/$slug"
+            cp shots/*.png shots/stats.jsonl "site/$slug/" 2>/dev/null || true
+            # JPEGs are a quarter the size, kinder to a phone and to the repo;
+            # the PNG originals stay in the screenshots artifact
+            /tmp/pil/bin/python -c 'import pathlib, sys; from PIL import Image
+          for p in pathlib.Path(sys.argv[1]).glob("*.png"):
+              Image.open(p).convert("RGB").save(p.with_suffix(".jpg"), quality=85)
+              p.unlink()' "site/$slug"
+            node --experimental-strip-types scripts/shot-plan.ts --gallery "site/$slug" "$REF" "$SHA"
+            rm -f "site/$slug/stats.jsonl"
+            # drop the folders of branches that are gone
+            branches=$(git ls-remote --heads origin | sed 's|.*refs/heads/||' | slugify)
+            for dir in site/*/; do
+              name=$(basename "$dir")
+              printf '%s\n' "$branches" | grep -qxF "$name" || rm -rf "$dir"
+            done
+            {
+              echo "# Daydaze screenshots"
+              echo
+              echo "The latest screenshots of each branch, taken by \`.github/workflows/screenshots.yml\`."
+              echo
+              for dir in site/*/; do
+                name=$(basename "$dir")
+                echo "- [$name]($name/)"
+              done
+            } > site/README.md
+            git -C site checkout -q --orphan "publish-$attempt"
+            git -C site add -A
+            git -C site commit -qm "screenshots: $REF at ${SHA:0:7}"
+            if git -C site push --force-with-lease="screenshots:$base" origin "HEAD:refs/heads/screenshots"; then
+              echo "Gallery: https://github.com/$REPO/tree/screenshots/$slug" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep $((attempt * 10))
+          done
+          exit 1
