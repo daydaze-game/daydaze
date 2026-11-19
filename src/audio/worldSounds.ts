@@ -10,7 +10,18 @@ import { playCachedSound } from "./soundFiles.ts";
 import { getSharedAudioBus } from "./audioBus.ts";
 
 export type Ambience = "city" | "beach" | "aquarium" | "rink" | "haunted";
-export type Surface = "hard" | "soft";
+export type Surface =
+  | "hard"
+  | "soft"
+  | "wood"
+  | "tile"
+  | "metal"
+  | "gravel"
+  | "puddle"
+  | "wet"
+  | "pavement"
+  | "grass"
+  | "sand";
 
 function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
   try {
@@ -46,13 +57,16 @@ function burst(
   frequency: number,
   level: number,
   seconds: number,
+  offset = 0,
+  q = 1,
 ) {
-  const now = ctx.currentTime;
+  const now = ctx.currentTime + offset;
   const source = ctx.createBufferSource();
   source.buffer = noiseBuffer(ctx);
   const filter = ctx.createBiquadFilter();
   filter.type = type;
   filter.frequency.setValueAtTime(frequency, now);
+  filter.Q.setValueAtTime(q, now);
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(level, now);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
@@ -61,15 +75,90 @@ function burst(
   source.stop(now + seconds + 0.02);
 }
 
-/** One footstep: a short low tap on floors, a softer scuff on sand or grass. */
+function tone(
+  ctx: AudioContext,
+  dest: AudioNode,
+  type: OscillatorType,
+  startFreq: number,
+  endFreq: number,
+  level: number,
+  seconds: number,
+  offset = 0,
+) {
+  const now = ctx.currentTime + offset;
+  const osc = ctx.createOscillator();
+  osc.type = type;
+  osc.frequency.setValueAtTime(startFreq, now);
+  if (endFreq !== startFreq) {
+    osc.frequency.exponentialRampToValueAtTime(
+      Math.max(1, endFreq),
+      now + seconds,
+    );
+  }
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(level, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
+  osc.connect(gain).connect(dest);
+  osc.start(now);
+  osc.stop(now + seconds + 0.02);
+}
+
+/** One footstep synthesized for the material underfoot. */
 export function playStep(surface: Surface = "hard"): boolean {
   const out = sfx();
   if (!out) return false;
-  const pitch = 0.85 + Math.random() * 0.3;
-  if (surface === "hard") {
-    burst(out.ctx, out.dest, "lowpass", 900 * pitch, 0.09, 0.07);
-  } else {
-    burst(out.ctx, out.dest, "bandpass", 1600 * pitch, 0.05, 0.12);
+  const { ctx, dest } = out;
+  const pitch = 0.88 + Math.random() * 0.24;
+
+  switch (surface) {
+    case "wood": {
+      // Hollow timber resonance + plank impact click
+      tone(ctx, dest, "sine", 340 * pitch, 140 * pitch, 0.11, 0.075);
+      burst(ctx, dest, "bandpass", 1500 * pitch, 0.06, 0.035, 0, 1.8);
+      break;
+    }
+    case "tile": {
+      // Sharp, crisp ceramic click with quick decay
+      burst(ctx, dest, "bandpass", 2700 * pitch, 0.08, 0.035, 0, 3.2);
+      burst(ctx, dest, "lowpass", 950 * pitch, 0.04, 0.025);
+      break;
+    }
+    case "metal": {
+      // Metallic tap with dual high-Q ringing frequencies
+      burst(ctx, dest, "bandpass", 1800 * pitch, 0.05, 0.025, 0, 2.0);
+      tone(ctx, dest, "sine", 820 * pitch, 820 * pitch, 0.05, 0.08);
+      tone(ctx, dest, "sine", 2460 * pitch, 2460 * pitch, 0.03, 0.06);
+      break;
+    }
+    case "gravel": {
+      // Staggered multi-grain crunch of loose stones
+      burst(ctx, dest, "bandpass", 2300 * pitch, 0.06, 0.028, 0, 1.5);
+      burst(ctx, dest, "bandpass", 3200 * pitch, 0.05, 0.032, 0.012, 1.8);
+      burst(ctx, dest, "bandpass", 1700 * pitch, 0.04, 0.035, 0.024, 1.2);
+      break;
+    }
+    case "puddle":
+    case "wet": {
+      // Wet water squelch + droplet splash spray
+      burst(ctx, dest, "bandpass", 1100 * pitch, 0.07, 0.055, 0, 2.0);
+      burst(ctx, dest, "highpass", 2600 * pitch, 0.06, 0.08, 0.01);
+      break;
+    }
+    case "soft":
+    case "sand":
+    case "grass": {
+      // Muffled soft scuff
+      burst(ctx, dest, "bandpass", 1500 * pitch, 0.05, 0.11);
+      break;
+    }
+    case "hard":
+    case "pavement":
+    default: {
+      // Solid pavement/floor impact tap
+      burst(ctx, dest, "lowpass", 880 * pitch, 0.09, 0.065);
+      burst(ctx, dest, "bandpass", 2400 * pitch, 0.03, 0.02);
+      break;
+    }
   }
   return true;
 }

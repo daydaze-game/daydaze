@@ -64,10 +64,12 @@ import { Doll, type WalkState } from "../avatar/Doll.tsx";
 import { hdr } from "../rooms/shared/materials.ts";
 import { driving } from "./driving.ts";
 import { ignoresKeys } from "./keyTargets.ts";
-import { playGlide, playStep } from "../../audio/worldSounds.ts";
+import { playGlide, playStep, type Surface } from "../../audio/worldSounds.ts";
 import { SKATE_SPEED, skates } from "./skates.ts";
 import { CITY_AREA } from "../../game/city/layout.ts";
-import { groundAt, type Ground } from "../../game/city/ground.ts";
+import { groundAt } from "../../game/city/ground.ts";
+import { roomSurface } from "../../game/surface.ts";
+import type { RoomId } from "../../game/roomTypes.ts";
 import { playStepFile } from "../../audio/soundFiles.ts";
 import { submergedView } from "./submerged.ts";
 import { stick } from "./joystick.ts";
@@ -204,10 +206,10 @@ const GLIDE_METRES = 2.2;
 const HIP = 0.95;
 
 /** One footstep: the recording for pavement, planks or sand once it has
- * loaded; otherwise the synthesized step (softer on sand and lawn). */
-function stepOn(ground: Ground | "floor"): void {
-  if (playStepFile(ground)) return;
-  playStep(ground === "sand" || ground === "grass" ? "soft" : "hard");
+ * loaded; otherwise the synthesized step for the material underfoot. */
+function stepOn(surface: Surface): void {
+  if (playStepFile(surface)) return;
+  playStep(surface);
 }
 
 /** How the sea holds her at a point: dry, wading or afloat (always, diving). */
@@ -290,10 +292,12 @@ export function PlayerController({
   tag,
   onPortal,
   water = null,
+  room,
 }: {
   editing?: boolean;
   player: Player;
   area: WalkArea;
+  room?: RoomId;
   look: Look;
   swim: SwimLook | null;
   body: BodyShape;
@@ -446,6 +450,7 @@ export function PlayerController({
     }
     let moving = false;
     let quick = 1;
+    let wet: WaterState = "dry";
     if (rideMood) {
       // the slide drew the pose; the walker waits for the splash to end
       player.acc = 0;
@@ -513,7 +518,7 @@ export function PlayerController({
       const [bx, bz] = player.before.pos;
       const [x, z] = player.walk.pos;
       // in the sea she wades, or floats at the surface, or hangs in the deep
-      const wet = stateIn(water, player.walk.pos);
+      wet = stateIn(water, player.walk.pos);
       // diving puts the sound under water; the store only notifies on a change
       const under = !!water?.dive;
       if (submergedView.get().on !== under) submergedView.set({ on: under });
@@ -538,10 +543,15 @@ export function PlayerController({
       if (stepDist.current > (skating ? GLIDE_METRES : STEP_METRES)) {
         stepDist.current = 0;
         if (skating) playGlide();
-        else
-          stepOn(
-            area === CITY_AREA ? groundAt(player.pos.x, player.pos.z) : "floor",
-          );
+        else {
+          const underfoot: Surface =
+            wet === "wade"
+              ? "puddle"
+              : area === CITY_AREA || !room || room === "city"
+                ? groundAt(player.pos.x, player.pos.z)
+                : roomSurface(room);
+          stepOn(underfoot);
+        }
       }
     }
     lastPos.current.copy(player.pos);
