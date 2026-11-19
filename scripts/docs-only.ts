@@ -1,6 +1,8 @@
 // Decides whether a change touches only files the browser suites cannot
-// notice: docs, editor and lint config, Python scripts. The Tests workflow
-// reads it from stdin to skip the slow Playwright steps on such a change:
+// notice: docs, editor, lint and agent config, scripts, Blender sources and
+// workflows other than the suites' own. server/ is not on the list: the client
+// imports server/src/chatFilter.ts. The Tests workflow reads it from stdin to
+// skip the slow Playwright steps on such a change:
 //
 //   git diff --name-only origin/main...HEAD | node --experimental-strip-types scripts/docs-only.ts
 //
@@ -19,6 +21,15 @@ const DOCS_ONLY: readonly RegExp[] = [
   /^(LICENSE|NOTICE|COPYING)(\..+)?$/,
   /^(cspell\.config\.yaml|cspell-words\.txt|ruff\.toml)$/,
   /\.py$/,
+  // every workflow except the browser suites' own (playwright.yml)
+  /^\.github\/workflows\/(?!playwright\.yml$)/,
+  // repo scripts and Blender sources: neither the client nor the suites import
+  // or run them (the dev server runs no build hooks)
+  /^scripts\//,
+  /^art\//,
+  // lint, hook and agent config
+  /^(eslint\.config\.mjs|knip\.jsonc|lefthook\.yml|\.dependency-cruiser\.cjs|opencode\.json|\.mcp\.json)$/,
+  /^\.(agents|claude|codex)\//,
 ];
 
 /** True when every changed file is on the allowlist (an empty change is not docs-only). */
