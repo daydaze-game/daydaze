@@ -6,7 +6,15 @@
 // back (CameraRig's CLOSE), so the building fills the frame behind her.
 import type { Spawn } from "../rooms.ts";
 import { yawTowards, type Vec2 } from "../walk.ts";
-import { BUILDINGS, ROAD_EDGES, ROAD_NODES } from "./layout.ts";
+import { isBlocked } from "../area.ts";
+import {
+  BUILDINGS,
+  CITY_AREA,
+  PROPS,
+  ROAD_EDGES,
+  ROAD_NODES,
+} from "./layout.ts";
+import { FURNITURE, PARKED_CARS } from "./dressing.ts";
 
 /** Meters past the door's trigger radius, so no enter prompt shows. */
 const DOOR_GAP = 2;
@@ -14,6 +22,56 @@ const DOOR_GAP = 2;
 const KERB_GAP = 1.5;
 
 const nodes = new Map(ROAD_NODES.map((n) => [n.id, n.position]));
+
+type Obstacle = { at: Vec2; r: number };
+
+const THINGS: readonly Obstacle[] = [
+  ...FURNITURE.map((f): Obstacle => ({ at: [f.x, f.z], r: 1.5 })),
+  ...PROPS.map((p): Obstacle => ({
+    at: [p.position[0], p.position[1]],
+    r: 1.5,
+  })),
+  ...PARKED_CARS.map((c): Obstacle => ({ at: [c.x, c.z], r: 2.0 })),
+];
+
+/** Where the full-look camera stands relative to the player (CameraRig's CLOSE). */
+const cameraFor = (pos: Vec2, yaw: number): Vec2 => [
+  pos[0] + 0.6 * Math.cos(yaw) + 4.1 * Math.sin(yaw),
+  pos[1] - 0.6 * Math.sin(yaw) + 4.1 * Math.cos(yaw),
+];
+
+function isClear(pos: Vec2, yaw: number): boolean {
+  if (isBlocked(CITY_AREA, pos)) return false;
+  const cam = cameraFor(pos, yaw);
+  if (isBlocked(CITY_AREA, cam)) return false;
+  const mid: Vec2 = [(pos[0] + cam[0]) / 2, (pos[1] + cam[1]) / 2];
+  for (const t of THINGS) {
+    if (Math.hypot(t.at[0] - pos[0], t.at[1] - pos[1]) < t.r) return false;
+    if (Math.hypot(t.at[0] - cam[0], t.at[1] - cam[1]) < t.r) return false;
+    if (Math.hypot(t.at[0] - mid[0], t.at[1] - mid[1]) < t.r) return false;
+  }
+  return true;
+}
+
+const SIDE_NUDGES = [0, 1.5, -1.5, 3.0, -3.0, 4.5, -4.5] as const;
+const FWD_NUDGES = [0, 1.0, -1.0, 2.0] as const;
+
+function clearSpot(base: Vec2, yaw: number): Vec2 {
+  if (isClear(base, yaw)) return base;
+  const right: Vec2 = [Math.cos(yaw), -Math.sin(yaw)];
+  const fwd: Vec2 = [Math.sin(yaw), Math.cos(yaw)];
+  for (const f of FWD_NUDGES) {
+    for (const s of SIDE_NUDGES) {
+      if (f === 0 && s === 0) continue;
+      const cand: Vec2 = [
+        base[0] + right[0] * s + fwd[0] * f,
+        base[1] + right[1] * s + fwd[1] * f,
+      ];
+      if (isClear(cand, yaw)) return cand;
+    }
+  }
+  return base;
+}
 
 /** The closest point on segment a-b to p. */
 function closestOn(p: Vec2, a: Vec2, b: Vec2): Vec2 {
@@ -56,7 +114,8 @@ export function spotFor(id: string): Spawn | null {
   ];
   if (b.door) {
     const door = b.door.position;
-    const position = step(door, center, -(b.door.radius + DOOR_GAP));
+    const base = step(door, center, -(b.door.radius + DOOR_GAP));
+    const position = clearSpot(base, awayFrom(base, door));
     return { position, yaw: awayFrom(position, door) };
   }
   // the nearest road centerline, then back onto its sidewalk
@@ -70,8 +129,9 @@ export function spotFor(id: string): Spawn | null {
     if (!best || d < best.d) best = { at, width: e.width, d };
   }
   // no roads at all: stand 20 m south (+z) of the building
-  const position: Vec2 = best
+  const base: Vec2 = best
     ? step(best.at, center, best.width / 2 + KERB_GAP)
     : [center[0], center[1] + 20];
+  const position = clearSpot(base, awayFrom(base, center));
   return { position, yaw: awayFrom(position, center) };
 }
