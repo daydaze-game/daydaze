@@ -104,6 +104,26 @@
   }
 }
 
+/* Short landscape screens keep each tray section reachable by scrolling. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .food-tray {
+    top: 0.5rem;
+    bottom: 12rem;
+    max-height: calc(100dvh - 12.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+  }
+
+  .food-tray > * {
+    flex-shrink: 0;
+  }
+
+  .food-needs p {
+    display: none;
+  }
+}
+
 .food-held {
   pointer-events: auto;
   flex-wrap: wrap;

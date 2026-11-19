@@ -3627,6 +3627,7 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
 }) => {
   test.setTimeout(300_000);
   const errors = collectErrors(page);
+  await page.clock.install();
   // Advance the existing dev modules, without waiting through a whole joint.
   const call = async (
     source: string,
@@ -3688,6 +3689,24 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await page.screenshot({
     path: test.info().outputPath("weed-food-tray-mobile.png"),
   });
+  await page.setViewportSize({ width: 568, height: 320 });
+  await expect(page.locator(".food-tray")).toBeInViewport({ ratio: 1 });
+  const courier = page
+    .getByRole("status")
+    .filter({ hasText: "The courier dropped off Adobo rice bowl." });
+  // Renew the same message before inspecting the small-screen stack.
+  await call(food, "showToast", ["The courier dropped off Adobo rice bowl."]);
+  await courier.scrollIntoViewIfNeeded();
+  await expect(courier).toBeInViewport({ ratio: 1 });
+  await needs.scrollIntoViewIfNeeded();
+  await expect(needs).toBeInViewport({ ratio: 1 });
+  await held.getByRole("button", { name: "Eat it" }).scrollIntoViewIfNeeded();
+  await expect(held.getByRole("button", { name: "Eat it" })).toBeInViewport({
+    ratio: 1,
+  });
+  await page.screenshot({
+    path: test.info().outputPath("weed-food-tray-landscape.png"),
+  });
   await held.getByRole("button", { name: "Eat it" }).click();
   await expect(
     page
@@ -3713,6 +3732,21 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
       .filter({ hasText: "A cool drink feels extra refreshing." }),
   ).toBeVisible();
   await expect(needs).toHaveCount(0);
+  await call(food, "showToast", ["A cool drink feels extra refreshing."]);
+  await page.clock.fastForward(3000);
+  await call(food, "showToast", ["A cool drink feels extra refreshing."]);
+  await page.clock.fastForward(2000);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "A cool drink feels extra refreshing." }),
+  ).toBeVisible();
+  await page.clock.fastForward(2100);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "A cool drink feels extra refreshing." }),
+  ).toHaveCount(0);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(VELVET);
   await expect(roomTitle(page)).toHaveText("The Velvet Room");

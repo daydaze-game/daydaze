@@ -45,7 +45,7 @@ export function FoodHud() {
     if (food.toast === null) return;
     const id = window.setTimeout(clearToast, TOAST_MS);
     return () => window.clearTimeout(id);
-  }, [food.toast]);
+  }, [food.toast, food.toastId]);
 
   const held = food.held;
   const showNeeds =

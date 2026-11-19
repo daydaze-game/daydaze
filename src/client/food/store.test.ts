@@ -132,3 +132,25 @@ test("alcohol does not satisfy dry mouth, and the teen gate clears needs", () =>
   ageBuzz(100_000);
   resetFood();
 });
+
+test("each repeated toast is a new event, including identical snack relief", () => {
+  resetFood();
+  showToast("Same hint");
+  const first = getFoodState().toastId;
+  showToast("Same hint");
+  assert.equal(getFoodState().toastId, first + 1);
+  setActiveTier("adult");
+  take("joint");
+  ageHigh(110);
+  tickNeeds(60);
+  consumeFood("food");
+  const snack = getFoodState();
+  tickNeeds(1);
+  assert.equal(getFoodState().toastId, snack.toastId);
+  consumeFood("food");
+  assert.equal(getFoodState().toast, snack.toast);
+  assert.equal(getFoodState().toastId, snack.toastId + 1);
+  ageHigh(100_000);
+  setActiveTier("teen");
+  resetFood();
+});
