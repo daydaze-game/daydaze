@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit, the automatic AI reviewer on every pull request (free on public
+# repos). It reviews against the "Code Review Rules" in AGENTS.md; formatting
+# and lint belong to CI and autofix.ci, so it skips them, and binary assets and
+# generated files aren't reviewed at all. Agents answer its comments like any
+# review (AGENTS.md, Issues and pull requests).
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  in_progress_fortune: false
+  sequence_diagrams: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!**/*.glb"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.webp"
+    - "!**/*.hdr"
+    - "!**/*.ogg"
+    - "!**/*.mp3"
+    - "!package-lock.json"
+    - "!server/worker-configuration.d.ts"
+    - "!docs/screenshots/**"
+  path_instructions:
+    - path: "**/*"
+      instructions: >-
+        Review against the "Code Review Rules" section of AGENTS.md, most
+        serious first: age gating (alcohol, drugs, 18+ only behind ADULT_OK),
+        network or localStorage data used without validation, `any`/`as`/`!`, render cost
+        (allocations in useFrame, over four real lights, missed instancing),
+        handwritten-dialogue and asset-credit rules, the new-room checklist,
+        missing tests and missing header comments. Don't comment on formatting
+        or lint; CI and autofix.ci handle those. Use American spelling.
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - AGENTS.md
+chat:
+  auto_reply: true
