@@ -13,9 +13,9 @@ import {
 } from "./nightLook.ts";
 
 test("every look belongs to a real night and stays within sane ranges", () => {
-  const ids = new Set(CLUB_NIGHTS.map((n) => n.id));
+  const ids = new Set<string>(CLUB_NIGHTS.map((n) => n.id));
   for (const [id, look] of Object.entries(NIGHT_LOOKS)) {
-    assert.ok(ids.has(id as (typeof CLUB_NIGHTS)[number]["id"]), id);
+    assert.ok(ids.has(id), id);
     for (const k of [look.lights, look.key]) {
       assert.ok(k >= 0 && k <= 1, `${id} scale ${k}`);
     }

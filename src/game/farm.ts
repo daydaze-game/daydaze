@@ -1,6 +1,7 @@
 // Sunny Acres Farm: crop plots, growth stages, watering, harvesting, farm stand sales, and animal pens.
 import type { Vec2 } from "./walk.ts";
 import { rectFenceSpots } from "./zoo.ts";
+import { typedKeys } from "./typed.ts";
 
 export type CropId = "carrot" | "tomato" | "corn" | "wheat";
 
@@ -54,7 +55,7 @@ export const CROPS: Record<CropId, CropDef> = {
   },
 };
 
-export const CROP_IDS = Object.keys(CROPS) as readonly CropId[];
+export const CROP_IDS = typedKeys(CROPS);
 
 export function isCropId(value: unknown): value is CropId {
   return typeof value === "string" && Object.hasOwn(CROPS, value);

@@ -19,6 +19,7 @@ import {
 } from "./farmersMarket.ts";
 import { MARKET_GREEN, PATH_NS } from "./park.ts";
 import type { Vec2 } from "../walk.ts";
+import { typedKeys } from "../typed.ts";
 
 test("the market opens on weekends from 8 to 4 on the player's clock", () => {
   // Date.getDay: 0 Sunday .. 6 Saturday
@@ -107,7 +108,7 @@ test("buying takes coins and adds a bunch to the farm's groceries", () => {
 });
 
 test("the market never pays: a bunch costs more than the farm stand gives", () => {
-  for (const crop of Object.keys(CROPS) as CropId[]) {
+  for (const crop of typedKeys(CROPS)) {
     const bought = buyProduce(createDefaultFarm(), 1000, crop);
     assert.ok(bought);
     const sold = sellProduce(bought.farm, crop, 1);

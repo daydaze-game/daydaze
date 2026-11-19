@@ -26,6 +26,7 @@ import {
   plotGrowth,
   waterPlot,
 } from "./garden.ts";
+import { must } from "./typed.ts";
 
 test("creates a fresh community garden with plot 0 claimed and 7 unclaimed plots", () => {
   const garden = createDefaultGarden();
@@ -87,7 +88,7 @@ test("plantSeed plants a seed on a claimed empty plot and deducts cost", () => {
 test("plotGrowth returns stage 0 for unwatered seeds", () => {
   const garden = createDefaultGarden();
   const now = 1_000_000;
-  const planted = plantSeed(garden, 0, "herb", now)!;
+  const planted = must(plantSeed(garden, 0, "herb", now));
 
   const growth = plotGrowth(planted.garden.plots[0], now + 5000);
   assert.equal(growth.stage, 0);
@@ -99,7 +100,7 @@ test("plotGrowth returns stage 0 for unwatered seeds", () => {
 test("waterPlot waters an unwatered plot and enables growth", () => {
   const garden = createDefaultGarden();
   const t0 = 1_000_000;
-  const planted = plantSeed(garden, 0, "strawberry", t0)!;
+  const planted = must(plantSeed(garden, 0, "strawberry", t0));
   const watered = waterPlot(planted.garden, 0, t0);
   assert.ok(watered);
   assert.equal(watered.plots[0].wateredAt, t0);
@@ -124,8 +125,8 @@ test("waterPlot waters an unwatered plot and enables growth", () => {
 test("plants left dry too long wilt, but recover when watered", () => {
   const garden = createDefaultGarden();
   const t0 = 1_000_000;
-  const planted = plantSeed(garden, 0, "pepper", t0)!;
-  const watered = waterPlot(planted.garden, 0, t0)!;
+  const planted = must(plantSeed(garden, 0, "pepper", t0));
+  const watered = must(waterPlot(planted.garden, 0, t0));
 
   // Let soil dry out and exceed wilting threshold
   const tWilt = t0 + SOIL_DRY_MS + WILTING_THRESHOLD_MS + 1000;
@@ -146,8 +147,8 @@ test("plants left dry too long wilt, but recover when watered", () => {
 test("harvestPlot yields produce, rewards coins, and clears soil", () => {
   const garden = createDefaultGarden();
   const t0 = 1_000_000;
-  const planted = plantSeed(garden, 0, "sunflower", t0)!;
-  const watered = waterPlot(planted.garden, 0, t0)!;
+  const planted = must(plantSeed(garden, 0, "sunflower", t0));
+  const watered = must(waterPlot(planted.garden, 0, t0));
 
   const duration = GARDEN_CROPS.sunflower.growthDurationMs;
   const tReady = t0 + duration + 100;
@@ -228,8 +229,8 @@ test("cleanGarden validates and salvages corrupted save data", () => {
 test("fastForwardGarden advances planted crop growth timestamps", () => {
   const garden = createDefaultGarden();
   const now = 1_000_000;
-  const planted = plantSeed(garden, 0, "herb", now)!;
-  const watered = waterPlot(planted.garden, 0, now)!;
+  const planted = must(plantSeed(garden, 0, "herb", now));
+  const watered = must(waterPlot(planted.garden, 0, now));
   const before = plotGrowth(watered.plots[0], now);
   assert.equal(before.stage, 0);
   assert.equal(before.ready, false);

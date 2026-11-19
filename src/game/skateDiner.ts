@@ -4,6 +4,7 @@
 // corner and the skaters' loop through the middle. Its door and spawn are
 // the food interiors' (food/interiors.ts), like Kamayan Hall's.
 import type { Vec2 } from "./walk.ts";
+import { vec2 } from "./typed.ts";
 
 export const FLOOR_BOUNDS = { x0: -7, x1: 7, z0: -6, z1: 5.6 } as const;
 
@@ -20,8 +21,8 @@ export const BOOTHS: readonly Vec2[] = [
 export const BOOTH_SEATS: readonly { at: Vec2; facing: Vec2 }[] =
   BOOTHS.flatMap(([x, z]) =>
     [-1, 1].map((side) => ({
-      at: [x, z + side * 0.85] as Vec2,
-      facing: [x, z] as Vec2,
+      at: vec2(x, z + side * 0.85),
+      facing: vec2(x, z),
     })),
   );
 /** The jukebox in the east corner. */
