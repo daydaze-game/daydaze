@@ -39,8 +39,7 @@ export function propParts(
   const parts = partsOf(scene, null, Math.max(1, spots.length));
   for (const mesh of parts) {
     const color =
-      tinted?.(mesh.material as THREE.Material) === true &&
-      mesh.material instanceof THREE.MeshStandardMaterial;
+      !Array.isArray(mesh.material) && tinted?.(mesh.material) === true;
     if (color && mesh.material instanceof THREE.MeshStandardMaterial) {
       mesh.material.color.set("#ffffff");
       mesh.material.userData.base = mesh.material.color.clone();

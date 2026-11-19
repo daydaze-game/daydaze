@@ -263,13 +263,7 @@ function CamOverrideControl() {
     const camera = canvas.camera();
     if (!camera) return;
     const eye = camera.position;
-    const dd = (
-      window as unknown as {
-        __dd?: { get?: () => { controls?: { target?: THREE.Vector3 } } };
-      }
-    ).__dd;
-    const controls = dd?.get?.()?.controls;
-    const look = controls?.target ?? new THREE.Vector3(0, 0, 0);
+    const look = canvas.lookTarget() ?? new THREE.Vector3(0, 0, 0);
     setCamOverride({ eye, look });
   };
 

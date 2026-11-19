@@ -18,6 +18,7 @@ import { spend } from "../wallet.ts";
 import type { Vec2 } from "../walk.ts";
 import { hash, pick } from "./hash.ts";
 import { MARKET_GREEN } from "./park.ts";
+import { typedKeys } from "../typed.ts";
 
 /** The days it opens (Date.getDay: 0 Sunday, 6 Saturday) and the hours. */
 export const OPEN_DAYS: readonly number[] = [0, 6];
@@ -63,7 +64,7 @@ export const PRODUCE_SIZE = {
   Bread: 0.34,
 } as const;
 export type Produce = keyof typeof PRODUCE_SIZE;
-export const PRODUCE = Object.keys(PRODUCE_SIZE) as Produce[];
+export const PRODUCE = typedKeys(PRODUCE_SIZE);
 
 export type MarketStall = {
   id: string;

@@ -161,7 +161,8 @@ function CoverModels() {
     if (!source) throw new Error("Sci-fi crate has no mesh");
     const geometry = bakedGeometry(source);
     geometry.computeBoundingBox();
-    const bounds = geometry.boundingBox!;
+    const bounds = geometry.boundingBox;
+    if (!bounds) throw new Error("Sci-fi crate has no bounding box");
     const size = bounds.getSize(new THREE.Vector3());
     const center = bounds.getCenter(new THREE.Vector3());
     geometry.translate(-center.x, -bounds.min.y, -center.z);

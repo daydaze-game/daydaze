@@ -15,9 +15,10 @@ import {
 import { djBank } from "./dialogue/dj.ts";
 import { regularBank } from "./dialogue/regular.ts";
 import { ROOMS } from "./rooms.ts";
+import { isOneOf, must } from "./typed.ts";
 
 const at = (iso: string) => Date.parse(iso);
-const night = (id: string) => CLUB_NIGHTS.find((n) => n.id === id)!;
+const night = (id: string) => must(CLUB_NIGHTS.find((n) => n.id === id));
 
 test("Y2K night runs Friday 23:00 to Saturday 05:00 UTC", () => {
   const y2k = night("y2k-night");
@@ -52,16 +53,16 @@ test("no two nights share a club at the same time", () => {
 test("the schedule counts down to each night, and down to its end once on", () => {
   // Thursday 21:00 UTC: chiptune in 2 h; Y2K a day and 2 h out
   const rows = schedule(at("2026-10-22T21:00:00Z"));
-  const chip = rows.find((r) => r.id === "chiptune-night")!;
+  const chip = must(rows.find((r) => r.id === "chiptune-night"));
   assert.deepEqual([chip.on, chip.inMs], [false, 2 * 3_600_000]);
-  const y2k = rows.find((r) => r.id === "y2k-night")!;
+  const y2k = must(rows.find((r) => r.id === "y2k-night"));
   assert.equal(y2k.inMs, 26 * 3_600_000);
   // soonest first
   assert.equal(rows[0]?.id, "chiptune-night");
   // during it: on, with the time left
-  const on = schedule(at("2026-10-23T01:00:00Z")).find(
-    (r) => r.id === "chiptune-night",
-  )!;
+  const on = must(
+    schedule(at("2026-10-23T01:00:00Z")).find((r) => r.id === "chiptune-night"),
+  );
   assert.deepEqual([on.on, on.inMs, on.leftMs], [true, 0, 4 * 3_600_000]);
 });
 
@@ -138,7 +139,7 @@ test("the new nights change their rooms: decor, light and music", () => {
   const decors = new Set<string>();
   for (const n of added) {
     assert.ok(n.decor, `${n.id} has no decor`);
-    assert.ok((NIGHT_DECORS as readonly string[]).includes(n.decor));
+    assert.ok(isOneOf(NIGHT_DECORS, n.decor));
     decors.add(n.decor);
   }
   // not one look repeated for every night
@@ -155,13 +156,13 @@ test("drag brunch is a daytime show: Sunday 16:00 to 20:00 UTC, over before the 
   assert.equal(nightOn(brunch, at("2026-10-25T20:00:00Z")), false);
   assert.equal(nightOn(brunch, at("2026-10-26T01:00:00Z")), false);
   // its countdown counts to 16:00, and to 20:00 once on
-  const before = schedule(at("2026-10-25T10:00:00Z")).find(
-    (r) => r.id === "drag-brunch",
-  )!;
+  const before = must(
+    schedule(at("2026-10-25T10:00:00Z")).find((r) => r.id === "drag-brunch"),
+  );
   assert.equal(before.inMs, 6 * 3_600_000);
-  const on = schedule(at("2026-10-25T17:00:00Z")).find(
-    (r) => r.id === "drag-brunch",
-  )!;
+  const on = must(
+    schedule(at("2026-10-25T17:00:00Z")).find((r) => r.id === "drag-brunch"),
+  );
   assert.equal(on.leftMs, 3 * 3_600_000);
 });
 

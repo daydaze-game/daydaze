@@ -12,6 +12,7 @@ import {
   type LineEntry,
   type RoleBank,
 } from "./types.ts";
+import { isOneOf, typedKeys } from "../typed.ts";
 
 const REQUIRED_SITUATIONS: DialogueSituation[] = [
   "greeting-first",
@@ -98,9 +99,10 @@ function textOf(entry: LineEntry): string {
 function entriesOf(
   bank: RoleBank,
 ): Array<[DialogueSituation, readonly LineEntry[]]> {
-  return Object.entries(bank) as Array<
-    [DialogueSituation, readonly LineEntry[]]
-  >;
+  return typedKeys(bank).flatMap((situation) => {
+    const entries = bank[situation];
+    return entries ? [[situation, entries]] : [];
+  });
 }
 
 test("every role has a line bank and no extra banks exist", () => {
@@ -125,7 +127,7 @@ for (const role of ROLE_IDS) {
     const seen = new Set<string>();
     for (const [situation, entries] of entriesOf(LINE_BANKS[role])) {
       assert.ok(
-        (SITUATION_IDS as readonly string[]).includes(situation),
+        isOneOf(SITUATION_IDS, situation),
         `${role} has unknown ${situation}`,
       );
       for (const entry of entries) {

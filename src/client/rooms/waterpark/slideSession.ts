@@ -16,15 +16,22 @@ import { createStore } from "../shared/store.ts";
 /** A speed slide race: tuck as you hit each bend, then the times. */
 export type Phase = "off" | "sliding" | "over";
 
-const OFF = {
-  phase: "off" as Phase,
-  run: [] as Run,
-  seed: 0,
+const OFF: {
+  phase: Phase;
+  run: Run;
+  seed: number;
   /** performance.now() of the push-off, or of the finish once it's over. */
-  since: 0,
+  since: number;
   /** performance.now() of the push-off, kept after the finish. */
+  pushedOff: number;
+  last: Swing | null;
+} = {
+  phase: "off",
+  run: [],
+  seed: 0,
+  since: 0,
   pushedOff: 0,
-  last: null as Swing | null,
+  last: null,
 };
 
 export const slide = createStore(OFF);

@@ -13,8 +13,9 @@ import {
   verdict,
 } from "./friendRace.ts";
 import { TRACKS } from "./track.ts";
+import { must } from "../typed.ts";
 
-const KART = carById("zip-kart")!;
+const KART = must(carById("zip-kart"));
 const TICK_MS = 1000 / TICK_HZ;
 const IDLE = { throttle: 0, brake: 0, steer: 0 };
 

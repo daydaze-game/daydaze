@@ -10,6 +10,8 @@
     "docs/agents/investigations/**",
     "node_modules/**",
     "docs/assets.md",
+    // owner-only notes, git-excluded, so CI never sees them
+    "STEPS-FOR-OWNER.md",
   ],
   "gitignore": true,
   "config": {

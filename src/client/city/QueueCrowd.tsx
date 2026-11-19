@@ -11,7 +11,6 @@ import {
   QUEUE_NEAR_LOW,
   QUEUE_SPOTS,
   type QueueLook,
-  type QueueSpot,
 } from "../../game/city/queues.ts";
 import { hash } from "../../game/city/hash.ts";
 import { PERSON_SCALE, usePersonAt } from "../rooms/speedway/peopleModel.ts";
@@ -42,7 +41,7 @@ function Look({
     const mesh = ref.current;
     if (!mesh) return;
     let n = 0;
-    for (const s of mine as readonly QueueSpot[]) {
+    for (const s of mine) {
       if (Math.hypot(s.x - at[0], s.z - at[1]) > near) continue;
       dummy.position.set(s.x, GROUND, s.z);
       dummy.rotation.set(0, s.yaw, 0);

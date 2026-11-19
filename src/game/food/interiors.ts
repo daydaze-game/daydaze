@@ -2,6 +2,7 @@
 // on the back wall, the entrance at the front and one exit to the street.
 // Pure numbers, so the rooms and the city's storefront doors agree.
 import type { Vec2 } from "../walk.ts";
+import { vec2 } from "../typed.ts";
 
 /** The walkable floor; the counter's front edge is the back boundary. */
 export const INTERIOR_FLOOR: readonly Vec2[] = [
@@ -12,7 +13,7 @@ export const INTERIOR_FLOOR: readonly Vec2[] = [
 ];
 
 /** Where the doll arrives from the street, facing the counter. */
-export const INTERIOR_SPAWN = { position: [0, 3.8] as Vec2, yaw: Math.PI };
+export const INTERIOR_SPAWN = { position: vec2(0, 3.8), yaw: Math.PI };
 
 /** The step back out to the street, one meter past the spawn. */
 export const INTERIOR_EXIT: Vec2 = [0, 5.0];

@@ -39,6 +39,7 @@ export default defineConfig(
       "coverage/",
       "test-results/",
       "playwright-report/",
+      "blob-report/",
       ".worktrees/",
       // agent and harness scratch (git-excluded)
       ".claude/",
@@ -48,6 +49,15 @@ export default defineConfig(
       ".impeccable/",
       "skills/",
       "tmp/",
+      ".tripo-home/",
+      ".playwright/",
+      ".playwright-mcp/",
+      ".playwright-cli/",
+      ".venv/",
+      // git-ignored local downloads and workspaces (CI never sees them)
+      "local-assets/",
+      "recordings/",
+      "test-map/",
       "art/",
       // early exploration builds, kept for reference
       "prototypes/",
@@ -68,6 +78,12 @@ export default defineConfig(
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+      // no `as` or `!`: narrow with type guards and checks (`as const` is fine)
+      "@typescript-eslint/consistent-type-assertions": [
+        "error",
+        { assertionStyle: "never" },
+      ],
+      "@typescript-eslint/no-non-null-assertion": "error",
     },
   },
   // Type-aware rules: the project service finds each file's tsconfig
