@@ -6,7 +6,7 @@ import {
   type Order,
 } from "../../game/food/delivery.ts";
 import { menuItemById, type MenuItem } from "../../game/food/venues.ts";
-import { relieve, setSoftDrinkListener } from "../effects/drunk.ts";
+import { drink, relieve, setSoftDrinkListener } from "../effects/drunk.ts";
 
 export type FoodState = {
   held: MenuItem | null;
@@ -39,11 +39,12 @@ export function holdItem(item: MenuItem): void {
   set({ ...state, held: item, toast: null });
 }
 
-/** Eats or sips the held item and empties the tray. */
+/** Eats or sips the held item and empties the tray; 18+ alcohol raises the buzz. */
 export function eatHeld(): void {
   const held = state.held;
   if (!held) return;
-  relieve(held.kind);
+  if (held.alcohol) drink(held.alcohol);
+  else relieve(held.kind);
   set({ ...state, held: null });
 }
 

@@ -45,6 +45,7 @@ import { HumanDoll } from "./human/HumanDoll.tsx";
 import { pose, type Rig } from "./pose.ts";
 import { gaitOf } from "../../game/gaits.ts";
 import { hairTime, makeHair, makeToon } from "./toon.ts";
+import { isMesh } from "../world/guards.ts";
 
 type Mat = THREE.Material;
 type PartProps = {
@@ -189,7 +190,7 @@ const worldPos = new THREE.Vector3();
 
 function setLod(root: THREE.Object3D, far: boolean) {
   root.traverse((o) => {
-    if (!(o instanceof THREE.Mesh)) return;
+    if (!isMesh(o)) return;
     const geo: THREE.BufferGeometry | undefined = o.geometry;
     if (!geo) return;
     const outline = o.material === OUTLINE || o.material === HAIR_OUTLINE;

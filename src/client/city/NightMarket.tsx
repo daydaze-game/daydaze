@@ -20,6 +20,7 @@ import { Doll } from "../avatar/Doll.tsx";
 import { useReducedMotion } from "../motion.ts";
 import { Batch } from "../rooms/shared/batch.ts";
 import type { Player } from "../world/PlayerController.tsx";
+import { isMesh } from "../world/guards.ts";
 
 /** Full dolls drawn at once: the vendors and shoppers nearest the player. */
 const DRAWN = 3;
@@ -311,7 +312,7 @@ export function NightMarket({ player }: { player: Player }) {
       puffGeom.dispose();
       cords.geometry.dispose();
       stalls.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (isMesh(o)) o.geometry.dispose();
       });
     },
     [atlas, stalls, cords, lanternGeom, puffGeom],

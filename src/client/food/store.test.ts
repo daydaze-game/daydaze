@@ -12,7 +12,7 @@ import {
   resetFood,
   tickDeliveries,
 } from "./store.ts";
-import { FOOD_VENUES } from "../../game/food/venues.ts";
+import { FOOD_VENUES, foodVenuesFor } from "../../game/food/venues.ts";
 import { DELIVERY_SECONDS } from "../../game/food/delivery.ts";
 import { setActiveTier } from "../../game/age.ts";
 import { ageBuzz, getBuzz, drink } from "../effects/drunk.ts";
@@ -57,4 +57,20 @@ test("a 13+ drink toasts a mocktail and leaves no buzz", () => {
   drink("cocktail");
   assert.match(getFoodState().toast ?? "", /^You sip /);
   assert.equal(getBuzz(), before);
+});
+
+test("an 18+ sake flight raises the buzz instead of easing it", () => {
+  resetFood();
+  setActiveTier("adult");
+  const flight = foodVenuesFor("adult")
+    .flatMap((v) => v.menu)
+    .find((m) => m.name === "Sake flight");
+  assert.ok(flight);
+  const before = getBuzz();
+  holdItem(flight);
+  eatHeld();
+  ageBuzz(60);
+  assert.ok(getBuzz() > before);
+  setActiveTier("teen");
+  ageBuzz(100_000); // tests share one process
 });

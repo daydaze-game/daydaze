@@ -5,6 +5,7 @@
 import { activeTier, byTier, type ContentTier } from "../age.ts";
 import type { RoomId } from "../rooms.ts";
 import type { NeighborhoodId } from "../dialogue/types.ts";
+import type { Drink } from "../effects/buzz.ts";
 
 export type MenuItem = {
   id: string;
@@ -12,6 +13,8 @@ export type MenuItem = {
   /** Placeholder coins; food is free until the wallet lands. */
   price: number;
   kind: "food" | "drink";
+  /** The buzz drink an 18+ alcoholic item counts as; absent for everything else. */
+  alcohol?: Drink;
 };
 
 export type FoodGroup = "food-street" | "cafe" | "restaurant";
@@ -28,7 +31,12 @@ export type FoodVenue = {
   room?: RoomId;
 };
 
-type Entry = readonly [name: string, price: number, kind?: "food" | "drink"];
+type Entry = readonly [
+  name: string,
+  price: number,
+  kind?: "food" | "drink",
+  alcohol?: Drink | undefined,
+];
 
 function venue(
   id: string,
@@ -45,11 +53,12 @@ function venue(
     cuisine,
     group,
     neighborhood,
-    menu: menu.map(([itemName, price, kind = "food"]) => ({
+    menu: menu.map(([itemName, price, kind = "food", alcohol]) => ({
       id: `${id}/${itemName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
       name: itemName,
       price,
       kind,
+      ...(alcohol ? { alcohol } : {}),
     })),
     ...(room ? { room } : {}),
   };
@@ -255,7 +264,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
       ["Ham and cheese galette", 7],
       ["Nutella crêpe", 5],
       ["Lemon sugar crêpe", 4],
-      [pick("Cider, sparkling", "Sparkling apple juice"), 4, "drink"],
+      [
+        pick("Cider, sparkling", "Sparkling apple juice"),
+        4,
+        "drink",
+        pick("beer", undefined),
+      ],
     ]),
     venue(
       "hole-story-bagels",
@@ -560,7 +574,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Chicken karaage", 7],
         ["Agedashi tofu", 6],
         ["Seaweed salad", 5],
-        [pick("Sake flight", "Tea flight"), 6, "drink"],
+        [
+          pick("Sake flight", "Tea flight"),
+          6,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
     ),
     venue(
@@ -573,7 +592,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Chicken thigh skewers, two", 5],
         ["Chicken meatball skewer", 4],
         ["Shishito peppers", 4],
-        [pick("Yuzu sour", "Yuzu soda"), 5, "drink"],
+        [
+          pick("Yuzu sour", "Yuzu soda"),
+          5,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
     ),
     venue(
@@ -599,7 +623,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Soy garlic fried chicken", 13],
         ["Spicy sweet chicken", 13],
         ["Pickled radish", 2],
-        [pick("Makgeolli", "Sweet rice punch"), 6, "drink"],
+        [
+          pick("Makgeolli", "Sweet rice punch"),
+          6,
+          "drink",
+          pick("beer", undefined),
+        ],
       ],
     ),
     venue(
@@ -644,7 +673,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Chili con queso", 6],
         ["Cheese enchiladas", 9],
         ["Chips and salsa", 4],
-        [pick("Frozen margarita", "Frozen limeade"), 6, "drink"],
+        [
+          pick("Frozen margarita", "Frozen limeade"),
+          6,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
     ),
     venue(
@@ -787,7 +821,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Strip steak", 28],
         ["Creamed spinach", 7],
         ["Baked potato", 5],
-        [pick("Old fashioned", "Smoked orange soda"), 9, "drink"],
+        [
+          pick("Old fashioned", "Smoked orange soda"),
+          9,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
     ),
     venue(
@@ -878,7 +917,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Patatas bravas", 6],
         ["Gambas al ajillo", 10],
         ["Jamon board", 12],
-        [pick("Sangria jug", "Fruit punch jug"), 9, "drink"],
+        [
+          pick("Sangria jug", "Fruit punch jug"),
+          9,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
     ),
     venue(
@@ -969,7 +1013,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Steak frites", 16],
         ["Onion soup", 7],
         ["Croque monsieur", 8],
-        [pick("Kir royale", "Cassis soda"), 7, "drink"],
+        [
+          pick("Kir royale", "Cassis soda"),
+          7,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
       "bistro",
     ),
@@ -996,7 +1045,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Soft pretzel with mustard", 5],
         ["Schnitzel plate", 12],
         ["Sausage platter", 10],
-        [pick("Lager stein", "Malt soda stein"), 5, "drink"],
+        [
+          pick("Lager stein", "Malt soda stein"),
+          5,
+          "drink",
+          pick("beer", undefined),
+        ],
       ],
     ),
     venue(
@@ -1048,7 +1102,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Half dozen oysters", 12],
         ["Seafood tower for two", 30],
         ["Lobster roll", 15],
-        [pick("Dry martini", "Cucumber sparkler"), 9, "drink"],
+        [
+          pick("Dry martini", "Cucumber sparkler"),
+          9,
+          "drink",
+          pick("cocktail", undefined),
+        ],
       ],
     ),
     venue(
@@ -1061,7 +1120,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
         ["Chef's selection, five courses", 40],
         ["Seasonal sashimi plate", 22],
         ["Miso soup", 4],
-        [pick("Sake pour", "Hot barley tea"), 8, "drink"],
+        [
+          pick("Sake pour", "Hot barley tea"),
+          8,
+          "drink",
+          pick("shot", undefined),
+        ],
       ],
     ),
     venue(
@@ -1072,7 +1136,12 @@ function buildVenues(tier: ContentTier): readonly FoodVenue[] {
       UPTOWN,
       [
         ["Seven-course tasting menu", 45],
-        [pick("Wine pairing", "Juice pairing"), 20, "drink"],
+        [
+          pick("Wine pairing", "Juice pairing"),
+          20,
+          "drink",
+          pick("cocktail", undefined),
+        ],
         ["Bread and butter course", 5],
         ["Dessert trio", 9],
       ],

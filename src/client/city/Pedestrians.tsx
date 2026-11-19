@@ -166,7 +166,7 @@ function CrowdFigures({
   }, []);
   const pose = useRef<PedestrianPose>({ x: 0, z: 0, yaw: 0 });
   const counts = useRef<number[]>(
-    new Array(LOOKS.length * STRIDES.length).fill(0),
+    new Array<number>(LOOKS.length * STRIDES.length).fill(0),
   );
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;

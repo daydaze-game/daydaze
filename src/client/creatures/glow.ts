@@ -12,7 +12,7 @@ export function lit(material: THREE.Material, k: number): THREE.Material {
     return material;
   }
   let byK = cache.get(material);
-  if (!byK) cache.set(material, (byK = new Map()));
+  if (!byK) cache.set(material, (byK = new Map<number, THREE.Material>()));
   let made = byK.get(k);
   if (!made) {
     const m = material.clone();

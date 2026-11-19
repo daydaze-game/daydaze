@@ -37,6 +37,7 @@ import { PortalPads } from "./shared/PortalPads.tsx";
 import { Prop } from "./shared/Prop.tsx";
 import { Sparkles } from "./shared/Sparkles.tsx";
 import { OrbitNpcs } from "./orbit/Npcs.tsx";
+import { isMesh } from "../world/guards.ts";
 
 const WALL_X = 8;
 const FRONT_Z = 7.2;
@@ -201,7 +202,7 @@ function Outside() {
   const sphere = useMemo(() => {
     const out = stars.scene.clone(true);
     out.traverse((o) => {
-      if (o instanceof THREE.Mesh) {
+      if (isMesh(o)) {
         o.frustumCulled = false;
         const m = o.material;
         if (m instanceof THREE.MeshStandardMaterial) {
@@ -218,7 +219,7 @@ function Outside() {
   const world = useMemo(() => {
     const out = planet.scene.clone(true);
     out.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
+      if (!isMesh(o)) return;
       o.frustumCulled = false;
       const m = o.material;
       if (m instanceof THREE.MeshStandardMaterial) {
@@ -237,7 +238,7 @@ function Outside() {
     () => () => {
       for (const root of [sphere, world])
         root.traverse((o) => {
-          if (o instanceof THREE.Mesh && o.material instanceof THREE.Material)
+          if (isMesh(o) && o.material instanceof THREE.Material)
             o.material.dispose();
         });
     },

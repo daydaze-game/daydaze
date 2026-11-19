@@ -8,6 +8,7 @@ import { useEffect, useMemo, type JSX } from "react";
 import { InstancedMesh2 } from "@three.ez/instanced-mesh";
 import * as THREE from "three";
 import type { Placed } from "../../../game/dive.ts";
+import { isMesh } from "../../world/guards.ts";
 
 export const REEF_URL = "/models/ocean/reef.glb";
 
@@ -19,11 +20,7 @@ export function usePart(name: string): Part | null {
   return useMemo(() => {
     let found: Part | null = null;
     gltf.scene.traverse((o) => {
-      if (
-        o instanceof THREE.Mesh &&
-        o.name === name &&
-        !Array.isArray(o.material)
-      )
+      if (isMesh(o) && o.name === name && !Array.isArray(o.material))
         found = { geometry: o.geometry, material: o.material };
     });
     return found;

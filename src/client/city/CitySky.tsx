@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { hash } from "../../game/city/dressing.ts";
 import { SHORE_Z } from "../../game/city/layout.ts";
 import { CITY_CLOCK } from "./shaders.ts";
+import { isMesh, isPoints } from "../world/guards.ts";
 
 const RADIUS = 440;
 const STARS = 420;
@@ -234,7 +235,7 @@ export function CitySky({ night }: { night: number }) {
 
 function disposeSky(root: THREE.Group) {
   for (const child of root.children) {
-    if (child instanceof THREE.Mesh || child instanceof THREE.Points) {
+    if (isMesh(child) || isPoints(child)) {
       child.geometry.dispose();
       (child.material as THREE.Material).dispose();
     }

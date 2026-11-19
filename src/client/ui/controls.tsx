@@ -132,7 +132,7 @@ export function Tiles<T extends string>({
       role="radiogroup"
       aria-label={label}
     >
-      {options.map((o) => (
+      {options.map((o, idx) => (
         <button
           key={o.id}
           type="button"
@@ -144,7 +144,8 @@ export function Tiles<T extends string>({
           <img
             src={`/closet/${tiles}-${o.id}.webp`}
             alt=""
-            loading="lazy"
+            loading={idx < 6 ? undefined : "lazy"}
+            decoding="async"
             onError={(e) => {
               e.currentTarget.hidden = true;
             }}
