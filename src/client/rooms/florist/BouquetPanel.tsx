@@ -12,7 +12,6 @@ import {
   STEMS,
   WRAPS,
   validateBouquet,
-  type Stem,
 } from "../../../game/florist.ts";
 import {
   buyDraft,
@@ -20,12 +19,11 @@ import {
   counter,
   floristDesk,
   pickStem,
+  STEM_IDS,
   setRibbon,
   setWrap,
   undoStem,
 } from "./session.ts";
-
-const STEM_IDS = Object.keys(STEMS) as Stem[];
 
 export function BouquetPanel(): JSX.Element {
   const { draft, status } = counter.use();

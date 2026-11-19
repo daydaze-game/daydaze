@@ -18,12 +18,17 @@ import { peerCard } from "./peerCard.ts";
 type Who2 = { id: string; name: string };
 
 /** Crazy Eights with another player: an invite either way, then the game. */
-export const duel = createStore({
+export const duel = createStore<{
+  invite: (Who2 & { seed: number }) | null;
+  asked: (Who2 & { seed: number }) | null;
+  game: (Who2 & { seat: Who; table: Table; moves: number }) | null;
+  note: string;
+}>({
   /** Someone asked you to play. */
-  invite: null as (Who2 & { seed: number }) | null,
+  invite: null,
   /** You asked someone, and they haven't answered. */
-  asked: null as (Who2 & { seed: number }) | null,
-  game: null as (Who2 & { seat: Who; table: Table; moves: number }) | null,
+  asked: null,
+  game: null,
   note: "",
 });
 

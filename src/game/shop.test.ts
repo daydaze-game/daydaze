@@ -44,7 +44,7 @@ const catalogs = {
 
 test("every shop item is a real catalog option in its slot", () => {
   for (const item of SHOP_ITEMS) {
-    const options = catalogs[item.slot] as readonly { id: string }[];
+    const options: readonly { id: string }[] = catalogs[item.slot];
     assert.ok(
       options.some((option) => option.id === item.id),
       `${item.id} is not a ${item.slot} option`,

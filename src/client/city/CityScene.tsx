@@ -81,9 +81,8 @@ const NO_BAYS = new URLSearchParams(location.search).get("bays") === "0";
 
 // Enough for the busiest view of the whole city, so meshes never reallocate.
 const WHOLE_CITY = planCity(ALL_CELLS, 0, [0, 0]);
-const CAPACITY = Object.fromEntries(
-  KINDS.map((k) => [k, Math.max(1, WHOLE_CITY.instances[k].length)]),
-) as Record<Kind, number>;
+const capacity = (kind: Kind): number =>
+  Math.max(1, WHOLE_CITY.instances[kind].length);
 
 /**
  * The downtown slice. Cells within VIEW_RADIUS of the player are written into
@@ -125,7 +124,7 @@ export function CityScene({
   // the key light is the World's; these are the city's real lights
   const lightCount = tier === "high" ? POINT_LIGHTS.high : POINT_LIGHTS.low;
   const atlas = useMemo(() => createLabelAtlas(), []);
-  const meshes = useMemo(() => createKindMeshes(CAPACITY, atlas), [atlas]);
+  const meshes = useMemo(() => createKindMeshes(capacity, atlas), [atlas]);
   // the ground between the surfaces: worn concrete, patchy at long range
   const groundMaterial = useMemo(
     () =>

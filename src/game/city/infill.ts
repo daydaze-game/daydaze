@@ -16,6 +16,7 @@
 import { pointInPolygon, type Vec2 } from "../walk.ts";
 import { hash } from "./hash.ts";
 import type { BuildingStyle, Neighborhood } from "./buildingTypes.ts";
+import { typedKeys } from "../typed.ts";
 
 /** Meters per cell of the occupancy grid. */
 const CELL = 2;
@@ -506,7 +507,7 @@ export function planInfill(input: InfillInput): InfillPlan {
   const count = { n: 0 };
   const onStreet = (p: Vec2) =>
     input.surfaces.some((poly) => pointInPolygon(poly, p));
-  const built = new Set<Neighborhood>(Object.keys(HEIGHTS) as Neighborhood[]);
+  const built = new Set<Neighborhood>(typedKeys(HEIGHTS));
   for (const gap of freeRects(input)) {
     const neighborhood = input.neighborhoodAt([
       (gap.x0 + gap.x1) / 2,

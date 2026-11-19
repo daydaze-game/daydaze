@@ -4,6 +4,7 @@
 // server brings out the courses. Its door and spawn are the food
 // interiors' (food/interiors.ts), so the street storefront lands you here.
 import type { Vec2 } from "./walk.ts";
+import { vec2 } from "./typed.ts";
 
 export const BOUNDS = { x0: -6, x1: 6, z0: -5, z1: 5.6 } as const;
 
@@ -19,8 +20,8 @@ export const CHAIR_HEIGHT = 0.47;
 export const CHAIRS: readonly { at: Vec2; facing: Vec2; table: number }[] =
   TABLES.flatMap(([x, z], table) =>
     [-1, 1].map((side) => ({
-      at: [x, z + side * CHAIR_OFFSET] as Vec2,
-      facing: [x, z] as Vec2,
+      at: vec2(x, z + side * CHAIR_OFFSET),
+      facing: vec2(x, z),
       table,
     })),
   );

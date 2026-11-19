@@ -48,6 +48,11 @@ export function eatHeld(): void {
   set({ ...state, held: null });
 }
 
+/** Shows `text` in the toast line (a hint, not courier news). */
+export function showToast(text: string): void {
+  set({ ...state, toast: text });
+}
+
 /** Places an order for a menu item; unknown items are ignored. */
 export function orderItem(itemId: string, now: number): void {
   const order = placeOrder(itemId, now);

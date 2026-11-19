@@ -2,10 +2,11 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { test } from "node:test";
-import { MESHY_PROPS, meshyDir, type MeshyProp } from "./meshyModels.ts";
+import { MESHY_PROPS, meshyDir } from "./meshyModels.ts";
+import { typedKeys } from "./typed.ts";
 
 test("every named Meshy prop has a model file in its folder", () => {
-  for (const name of Object.keys(MESHY_PROPS) as MeshyProp[]) {
+  for (const name of typedKeys(MESHY_PROPS)) {
     assert.ok(
       existsSync(`public/models/${meshyDir(name)}/${name}.glb`),
       `${name}.glb`,

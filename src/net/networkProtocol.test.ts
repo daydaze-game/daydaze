@@ -48,14 +48,15 @@ test("standard delta is under 48 UTF-8 bytes and rounds to centimeters and milli
 
 test("delta decoder validates every field and never coerces corrupt values", () => {
   const valid: unknown[] = ["a1", 12, -8, 0, "idle", 1728000000000];
-  for (const [index, values] of [
+  const corrupt: [number, unknown[]][] = [
     [0, ["", "a".repeat(33), 12]],
     [1, [NaN, Infinity, -100001, 100001, "1"]],
     [2, [null, -Infinity, 100001]],
     [3, [NaN, Infinity, -Infinity, "0", null]],
     [4, ["", "a".repeat(25), {}]],
     [5, [NaN, Infinity, -1, "123"]],
-  ] as [number, unknown[]][]) {
+  ];
+  for (const [index, values] of corrupt) {
     for (const value of values) {
       const tuple = [...valid];
       tuple[index] = value;
