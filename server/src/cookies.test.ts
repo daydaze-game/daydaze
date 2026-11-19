@@ -1,3 +1,4 @@
+// Tests for server/src/cookies.ts: session cookie serialization, parsing and clearing.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

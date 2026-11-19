@@ -1,3 +1,4 @@
+// Tests for server/src/routes.ts: HTTP method and path routing for the Worker API.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { matchRoute } from "./routes.ts";
