@@ -39,7 +39,7 @@ All music and sound is synthesized in the browser. NPC lines are handwritten.
 Taken on GitHub's runners (CPU-rendered, low tier) from `main` on
 2026-11-14 with `gh workflow run screenshots.yml`; every shot is listed in
 `scripts/screenshots.ts`, and more live in [`docs/screenshots/`](docs/screenshots/).
-The [latest screenshots of every room and door](https://github.com/dpologdvinity/daydaze/tree/screenshots/main)
+The [latest screenshots of every room and door](https://github.com/daydaze-game/daydaze/tree/screenshots/main)
 are retaken on each push to `main` that changes the game.
 
 |                                                                                                                         |                                                                                           |

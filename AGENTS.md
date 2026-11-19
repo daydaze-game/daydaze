@@ -121,7 +121,7 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - Screenshots: `gh workflow run screenshots.yml --ref <branch> -f shots="<tokens>"`
     (registry names, raw queries like `room=city&at=10,5&turn=4`, `spot=<building>`,
     or `tour`; see `docs/dev-tools.md`), then `gh run download <id> -n screenshots`
-    or open `https://github.com/dpologdvinity/daydaze/tree/screenshots/<branch-with-dashes>`.
+    or open `https://github.com/daydaze-game/daydaze/tree/screenshots/<branch-with-dashes>`.
     Look at every screenshot. `tree/screenshots/main` is the whole game as of
     the last game-affecting push to `main`.
     PRs that change room, city, avatar or HUD code get the matching shots

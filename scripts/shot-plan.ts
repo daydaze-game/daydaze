@@ -264,7 +264,7 @@ if (import.meta.main) {
       galleryMarkdown(readdirSync(a), parseStats(stats), {
         ref: b,
         sha: c,
-        repo: process.env.GITHUB_REPOSITORY ?? "dpologdvinity/daydaze",
+        repo: process.env.GITHUB_REPOSITORY ?? "daydaze-game/daydaze",
         time: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
       }),
     );
