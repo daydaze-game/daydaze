@@ -1,0 +1,44 @@
+name: auto-update
+# Keeps the auto-merge line moving. main only merges a PR that is up to date
+# and green, and nothing updates a PR by itself on a personal repo, so this
+# brings the oldest auto-merge PR that fell behind up to date (scripts/
+# next-update.ts picks it), one at a time so CI isn't flooded; GitHub's
+# auto-merge then merges it once its checks pass.
+# The update must be pushed with the owner's token (LANDER_TOKEN, a
+# fine-grained PAT with Contents and Pull requests read/write on this repo):
+# GitHub runs no workflows for pushes made with the job's own GITHUB_TOKEN,
+# so the PR's checks would never re-run. Without the secret this does nothing.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+concurrency:
+  group: auto-update
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - name: Update the next PR in line
+        env:
+          GH_TOKEN: ${{ secrets.LANDER_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "LANDER_TOKEN is not set: nothing to do."; exit 0; fi
+          next=$(gh pr list --state open --limit 100 \
+            --json number,createdAt,isDraft,autoMergeRequest,mergeStateStatus,statusCheckRollup \
+            | node --experimental-strip-types scripts/next-update.ts)
+          if [ -z "$next" ]; then echo "Nothing to update: the line is waiting or empty."; exit 0; fi
+          echo "Updating #$next with main."
+          gh pr update-branch "$next"
