@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please don't open a public issue for a security problem. Report it privately
-through GitHub's [private vulnerability reporting](https://github.com/daydaze-game/daydaze/security/advisories/new)
+through GitHub's [private vulnerability reporting](https://github.com/dpologdvinity/daydaze/security/advisories/new)
 or by email to <kaitlynbassford@gmail.com>.
 
 Include what you found, how to reproduce it, and what it affects. You'll get
