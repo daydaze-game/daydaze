@@ -6,7 +6,7 @@
 // compared across independent transcriptions), moved to a singable key and
 // cut at a cadence; the `source:` comments name where each came from.
 
-import type { KaraokeSong } from "../karaokeSongs.ts";
+import type { KaraokeSong } from "../karaokeTypes.ts";
 
 export const CLASSIC: readonly KaraokeSong[] = [
   // source: trillian.mit.edu/~jc/music/abc/mirror/folkinfo.org/All_Through_the_Night/0000

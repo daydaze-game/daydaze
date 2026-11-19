@@ -17,7 +17,7 @@ import { ROOMS, type RoomId } from "../../game/rooms.ts";
 import { ADULT_OK } from "../adult.ts";
 import { createStore } from "../rooms/shared/store.ts";
 import { friends, friendship, refreshFriends } from "./friends.ts";
-import { joinCopy, onlineSession } from "./online.ts";
+import { joinCopy, onlineSession } from "./session.ts";
 import { peerCard } from "./peerCard.ts";
 
 type Who = { id: string; name: string };

@@ -4,7 +4,6 @@ import type { JSX, ReactNode } from "react";
 import { useRef } from "react";
 import { HdriLight } from "../shared/HdriLight.tsx";
 import type { Look } from "../../../game/look.ts";
-import type { DialogueRole } from "../../../game/dialogue/types.ts";
 import { ROOMS, type RoomId } from "../../../game/rooms.ts";
 import type { FoodVenue } from "../../../game/food/venues.ts";
 import { holdItem } from "../../food/store.ts";
@@ -21,6 +20,8 @@ import {
 } from "../../../game/seats.ts";
 import { Doll } from "../../avatar/Doll.tsx";
 import { surface } from "../../city/worldTexture.ts";
+import type { FoodPalette, CounterStaff } from "./palette.ts";
+export type { FoodPalette, CounterStaff } from "./palette.ts";
 
 /** Regulars at the tables; each room seats a different pair. */
 const DINER_LOOKS: readonly Look[] = (
@@ -70,26 +71,6 @@ function Diners({ room }: { room: RoomId }) {
     </>
   );
 }
-
-export type FoodPalette = {
-  room: RoomId;
-  background: string;
-  fog: string;
-  sky: string;
-  ground: string;
-  light: string;
-  floor: string;
-  wall: string;
-  counter: string;
-  accent: string;
-};
-
-export type CounterStaff = {
-  name: string;
-  role: DialogueRole;
-  look: Look;
-  seed: number;
-};
 
 /**
  * A counter-service food room: walls, floor, a neon sign and a counter with

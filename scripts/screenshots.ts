@@ -1,8 +1,16 @@
 // Captures review screenshots of each room into docs/screenshots/.
 // Needs a dev server: `npm run dev -- --port 5195 --strictPort`, then
-// `node --experimental-strip-types scripts/screenshots.ts [name...]`.
+// `node --experimental-strip-types scripts/screenshots.ts <token...>`
+// (`--matrix "<tokens>" <shards>` instead prints the workflow's shards).
+// A token is a SHOTS name below, a raw query of client URL flags
+// (`room=city&at=10,5&yaw=1.57&view=full`), or a preset (`all-rooms`,
+// `all-spots`, `tour`); script-only params `name=`, `turn=N` and `w=&h=`
+// shape a query. The language is in scripts/shot-plan.ts. An unknown name
+// or a bad token stops the run before any browser starts. With SHOT_STATS
+// set, each shot appends its frames, draw calls, triangles and seconds as a
+// JSON line to that file (the gallery's numbers).
 import { execFileSync } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { appendFileSync, writeFileSync } from "node:fs";
 import { chromium, expect, type Page } from "@playwright/test";
 import { DEFAULT_LOOK } from "../src/game/look.ts";
 import { dockAction } from "../tests/dock.ts";
@@ -15,6 +23,7 @@ import {
   placeFurniture,
   type Furniture,
 } from "../src/game/home/decor.ts";
+import { expandShots, shard } from "./shot-plan.ts";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:5195";
 /** Waits for the street furniture models and street pieces (CityFurniture sets data-furniture, StreetPieces data-street). */
@@ -2558,7 +2567,6 @@ const SHOTS: {
   },
 ];
 
-const only = process.argv.slice(2);
 // hair-<name>, doll-suit-<name> and doll-face shots are the lineup page's
 // (scripts/hair-shots.ts), which writes docs/screenshots/<prefix>-<name>.png
 // like any other shot
@@ -2568,86 +2576,124 @@ const prefixOf = (n: string) =>
     : n.startsWith("doll-suit-") || n === "doll-face"
       ? "doll-"
       : "";
-const hairShots = only.filter((n) => prefixOf(n));
-if (hairShots.length) {
-  execFileSync(
-    process.execPath,
-    [
-      "--experimental-strip-types",
-      "scripts/hair-shots.ts",
-      ...hairShots.map((n) => n.slice(prefixOf(n).length)),
-    ],
-    { stdio: "inherit" },
+
+const registry = new Set(SHOTS.map((s) => s.name));
+const isRegistered = (n: string) => registry.has(n) || prefixOf(n) !== "";
+
+if (process.argv[2] === "--matrix") {
+  // the workflow's plan: `--matrix "<tokens>" <shards>` prints
+  // [{"shard":0,"shots":"<tokens>"}, ...]; a bad token fails here, before a browser starts
+  const tokens = (process.argv[3] ?? "").split(/\s+/).filter(Boolean);
+  const chunks = shard(
+    expandShots(tokens, isRegistered),
+    Number(process.argv[4]),
   );
-  if (hairShots.length === only.length) process.exit(0);
-}
-const browser = await chromium.launch({
-  args: [
-    "--use-gl=angle",
-    "--use-angle=swiftshader",
-    "--enable-unsafe-swiftshader",
-  ],
-});
-for (const shot of SHOTS) {
-  if (only.length && !only.includes(shot.name)) continue;
-  // a phone shot needs touch on, so the stick shows and pointer:coarse matches
-  const page = await browser.newPage({
-    viewport: shot.viewport ?? { width: 1280, height: 800 },
-    isMobile: shot.touch ?? false,
-    hasTouch: shot.touch ?? false,
-  });
-  page.on("pageerror", (e) => console.error("page error:", e.message));
-  // a fresh save would show the first-visit walkthrough in every shot
-  await page.addInitScript(() => {
-    const key = "daydaze-save-v1";
-    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
-    const save: Record<string, unknown> =
-      typeof parsed === "object" && parsed !== null
-        ? Object.fromEntries(Object.entries(parsed))
-        : {};
-    if (!("onboarded" in save))
-      localStorage.setItem(key, JSON.stringify({ ...save, onboarded: true }));
-  });
-  const started = Date.now();
-  await page.setViewportSize(shot.viewport ?? { width: 1280, height: 800 });
-  const still = shot.live ? "" : "&still=1";
-  // the low tier unless the shot picks its own (quality=high)
-  const tier = shot.query.includes("quality=") ? "" : "quality=low";
-  await page.goto(`${BASE}/?${tier}${still}&${shot.query}`, {
-    timeout: 300_000,
-  });
-  if (shot.act) await shot.act(page);
-  const canvas = page.getByRole("img", { name: "3D room view" });
-  await expect(canvas).toHaveAttribute("data-frames", /\d+/, {
-    timeout: 600_000,
-  });
-  // wait until the demand loop has rendered and then gone quiet for 8 s
-  let last = "";
-  let quietSince = Date.now();
-  while (Date.now() - quietSince < 8000) {
-    await page.waitForTimeout(1000);
-    const frames =
-      (await page
-        .locator("canvas")
-        .getAttribute("data-frames")
-        .catch(() => null)) ?? "";
-    if (frames !== last) {
-      last = frames;
-      quietSince = Date.now();
-    }
-    if (Date.now() - started > 600_000) break;
-  }
-  // a live frame loop can make the capture wait a long time on SwiftShader
-  await page.screenshot({
-    path: `docs/screenshots/${shot.name}.png`,
-    timeout: 180_000,
-  });
-  // renderer stats for the first frames: draw calls and triangles
-  const calls = await canvas.getAttribute("data-calls");
-  const triangles = await canvas.getAttribute("data-triangles");
   console.log(
-    `${shot.name}: ${last} frames, ${calls} draw calls, ${triangles} triangles, ${((Date.now() - started) / 1000).toFixed(0)} s`,
+    JSON.stringify(chunks.map((c, i) => ({ shard: i, shots: c.join(" ") }))),
   );
-  await page.close();
+} else {
+  const planned = expandShots(process.argv.slice(2), isRegistered);
+  const only = planned.map((p) => p.name);
+  const hairShots = only.filter((n) => prefixOf(n));
+  if (hairShots.length) {
+    execFileSync(
+      process.execPath,
+      [
+        "--experimental-strip-types",
+        "scripts/hair-shots.ts",
+        ...hairShots.map((n) => n.slice(prefixOf(n).length)),
+      ],
+      { stdio: "inherit" },
+    );
+    if (hairShots.length === only.length) process.exit(0);
+  }
+  // registry shots in SHOTS order (all of them when no tokens), then the queries
+  const run: (typeof SHOTS)[number][] = [
+    ...SHOTS.filter((s) => !only.length || only.includes(s.name)),
+    ...planned.flatMap(({ name, query, viewport }) =>
+      query === undefined
+        ? []
+        : [{ name, query, ...(viewport ? { viewport } : {}) }],
+    ),
+  ];
+  const browser = await chromium.launch({
+    args: [
+      "--use-gl=angle",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+    ],
+  });
+  for (const shot of run) {
+    // a phone shot needs touch on, so the stick shows and pointer:coarse matches
+    const page = await browser.newPage({
+      viewport: shot.viewport ?? { width: 1280, height: 800 },
+      isMobile: shot.touch ?? false,
+      hasTouch: shot.touch ?? false,
+    });
+    page.on("pageerror", (e) => console.error("page error:", e.message));
+    // a fresh save would show the first-visit walkthrough in every shot
+    await page.addInitScript(() => {
+      const key = "daydaze-save-v1";
+      const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "{}");
+      const save: Record<string, unknown> =
+        typeof parsed === "object" && parsed !== null
+          ? Object.fromEntries(Object.entries(parsed))
+          : {};
+      if (!("onboarded" in save))
+        localStorage.setItem(key, JSON.stringify({ ...save, onboarded: true }));
+    });
+    const started = Date.now();
+    await page.setViewportSize(shot.viewport ?? { width: 1280, height: 800 });
+    const still = shot.live ? "" : "&still=1";
+    // the low tier unless the shot picks its own (quality=high)
+    const tier = shot.query.includes("quality=") ? "" : "quality=low";
+    await page.goto(`${BASE}/?${tier}${still}&${shot.query}`, {
+      timeout: 300_000,
+    });
+    if (shot.act) await shot.act(page);
+    const canvas = page.getByRole("img", { name: "3D room view" });
+    await expect(canvas).toHaveAttribute("data-frames", /\d+/, {
+      timeout: 600_000,
+    });
+    // wait until the demand loop has rendered and then gone quiet for 8 s
+    let last = "";
+    let quietSince = Date.now();
+    while (Date.now() - quietSince < 8000) {
+      await page.waitForTimeout(1000);
+      const frames =
+        (await page
+          .locator("canvas")
+          .getAttribute("data-frames")
+          .catch(() => null)) ?? "";
+      if (frames !== last) {
+        last = frames;
+        quietSince = Date.now();
+      }
+      if (Date.now() - started > 600_000) break;
+    }
+    // a live frame loop can make the capture wait a long time on SwiftShader
+    await page.screenshot({
+      path: `docs/screenshots/${shot.name}.png`,
+      timeout: 180_000,
+    });
+    // renderer stats for the first frames: draw calls and triangles
+    const calls = await canvas.getAttribute("data-calls");
+    const triangles = await canvas.getAttribute("data-triangles");
+    const seconds = Math.round((Date.now() - started) / 1000);
+    console.log(
+      `${shot.name}: ${last} frames, ${calls} draw calls, ${triangles} triangles, ${seconds} s`,
+    );
+    if (process.env.SHOT_STATS) {
+      const stats = {
+        name: shot.name,
+        frames: Number(last),
+        calls: Number(calls),
+        triangles: Number(triangles),
+        seconds,
+      };
+      appendFileSync(process.env.SHOT_STATS, `${JSON.stringify(stats)}\n`);
+    }
+    await page.close();
+  }
+  await browser.close();
 }
-await browser.close();
