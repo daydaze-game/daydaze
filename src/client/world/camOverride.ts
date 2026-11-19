@@ -63,9 +63,10 @@ export function parseCamOverride(input: unknown): CamShot | null {
     ) {
       return null;
     }
+    const nums = input as readonly number[];
     return {
-      eye: new THREE.Vector3(input[0], input[1], input[2]),
-      look: new THREE.Vector3(input[3], input[4], input[5]),
+      eye: new THREE.Vector3(nums[0], nums[1], nums[2]),
+      look: new THREE.Vector3(nums[3], nums[4], nums[5]),
     };
   }
 
