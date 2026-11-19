@@ -2,7 +2,7 @@
 // you.
 import type { Friends } from "../../net/friends.ts";
 import { createStore } from "../rooms/shared/store.ts";
-import { onlineSession } from "./online.ts";
+import { onlineSession } from "./session.ts";
 
 /** The friends list as last fetched, and whether its panel is open. */
 export const friends = createStore({
