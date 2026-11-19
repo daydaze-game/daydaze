@@ -704,6 +704,8 @@ oscs
 outerspace
 outpiston
 overcorrecting
+overlined
+overlining
 pabitin
 padala
 pagdating
