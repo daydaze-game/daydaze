@@ -1,6 +1,10 @@
 // The architectural replacement must actually load and render in every
 // region, without shader errors or losing the existing venue entrances.
 import { expect, test } from "@playwright/test";
+import { recordTestMap } from "./test-map.ts";
+
+// on main, record which files each test loads (scripts/select-tests.ts)
+recordTestMap(test);
 
 test("dream city: architecture loads across distinct streets and keeps venue doors", async ({
   page,
