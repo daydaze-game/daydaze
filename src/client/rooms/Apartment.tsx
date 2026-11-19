@@ -79,7 +79,7 @@ export function Apartment({
       {/* a window on the back wall, showing the sky at the city hour */}
       <mesh position={[-1.5, 1.7, -2.93]}>
         <boxGeometry args={[2, 1.2, 0.05]} />
-        <meshStandardMaterial color={sky} emissive={sky} />
+        <meshBasicMaterial color={sky} toneMapped={false} />
       </mesh>
       <mesh
         position={[3.4, 1.1, -2.2]}

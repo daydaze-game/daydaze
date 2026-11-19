@@ -1208,11 +1208,11 @@ const SHOTS: {
   },
   {
     name: "window-sky-kamayan-noon",
-    query: "room=kamayan-hall&quality=low&time=12:00",
+    query: "room=kamayan-hall&quality=low&time=12:00&cam=0,1.7,1,0,2,-6",
   },
   {
     name: "window-sky-kamayan-night",
-    query: "room=kamayan-hall&quality=low&time=23:00",
+    query: "room=kamayan-hall&quality=low&time=23:00&cam=0,1.7,1,0,2,-6",
   },
   { name: "galleria", query: "room=galleria" },
   { name: "roller-rink", query: "room=roller-rink" },
