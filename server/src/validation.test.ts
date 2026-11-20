@@ -2,6 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK } from "../../src/game/look.ts";
+import { presetGraphics } from "../../src/game/graphics.ts";
 import { createDefaultSave, serializeSave } from "../../src/game/save.ts";
 import {
   MAX_SAVE_BYTES,
@@ -55,7 +56,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
   const save = {
     ...createDefaultSave("Kai"),
     settings: {
-      quality: "low",
+      graphics: presetGraphics("performance"),
       muted: true,
       effects: "low",
       panelOpen: false,
@@ -68,7 +69,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
   const reordered = JSON.stringify({
     settings: {
       muted: true,
-      quality: "low",
+      graphics: save.settings.graphics,
       effects: "low",
       panelOpen: false,
       strictChat: false,
