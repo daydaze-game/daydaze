@@ -169,6 +169,11 @@ const DevPanel = import.meta.env.DEV
     )
   : null;
 
+/** The streak calendar and celebration, loaded on first use. */
+const StreakPanel = lazy(() =>
+  import("./ui/StreakPanel.tsx").then((m) => ({ default: m.StreakPanel })),
+);
+
 /**
  * The whole game: the 3D World, the overlay UI and the panels around it. Travel
  * to an 18+ room is refused with a notice unless the age gate allows it.
@@ -492,6 +497,22 @@ export function App() {
     postPrize(prize, daily.coins);
     playFanfare(prize.grade === "S" ? 1 : prize.grade === "A" ? 0.6 : 0);
   }, [pending]);
+  // opening the game on a new day counts toward the streak (and again if the
+  // tab stays open past midnight); a milestone pays and celebrates
+  useEffect(() => {
+    let live = true;
+    const count = () =>
+      // the rules load on demand, not with the first download
+      void import("./streakCheckIn.ts").then(
+        (m) => live && m.countToday(latest, setSave),
+      );
+    count();
+    const id = window.setInterval(count, 60_000);
+    return () => {
+      live = false;
+      window.clearInterval(id);
+    };
+  }, []);
   const saved = save.settings.quality;
   const quality = flags.quality ?? (saved === "auto" ? null : saved);
 
@@ -500,6 +521,9 @@ export function App() {
       <main className="app">
         <LoadingVeil />
         <PrizeCard />
+        <Suspense fallback={null}>
+          <StreakPanel streak={save.streak} />
+        </Suspense>
         <UpdatePrompt />
         <Collections
           visited={save.visited}
