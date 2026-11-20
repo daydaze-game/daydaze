@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { PIT_BOX_X, PIT_LANE_Z } from "../../../game/speedway/track.ts";
 import { useCanvasTexture } from "./canvasTextures.ts";
-import { CREW_MODEL, PERSON_SCALE, usePerson } from "./peopleModel.ts";
+import { CREW_MODEL, usePersonAt } from "./peopleModel.ts";
 
 const GARAGE_URL = "/models/speedway/pits-garage.glb";
 useGLTF.preload(GARAGE_URL);
@@ -52,7 +52,7 @@ export function PitRoad({
   origin?: readonly [number, number];
 }) {
   const { scene: garageScene } = useGLTF(GARAGE_URL);
-  const person = usePerson(CREW_MODEL);
+  const person = usePersonAt(CREW_MODEL);
   const crewRef = useRef<THREE.InstancedMesh>(null);
   const lane = useCanvasTexture("pit-lane", 2048, 128, paintLane);
 
@@ -67,7 +67,6 @@ export function PitRoad({
       for (const dx of [-1.9, 1.9, 0]) {
         dummy.position.set(bx + dx, 0, CREW_Z);
         dummy.rotation.set(0, Math.PI, 0);
-        dummy.scale.setScalar(PERSON_SCALE * 0.62);
         dummy.updateMatrix();
         mesh.setMatrixAt(idx, dummy.matrix);
         idx++;
