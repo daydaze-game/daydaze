@@ -47,6 +47,7 @@ art/motels/.cache/
 *.local.*
 *.local
 credentials*.json
+STEPS-FOR-OWNER.md
 
 # Agent scratch output: subagent logs and screenshots, browser-MCP dumps, harness worktrees
 .superpowers/
