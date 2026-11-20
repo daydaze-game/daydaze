@@ -1,7 +1,7 @@
 // The park's band shell (src/game/city/bandShell.ts): the white half-dome
 // (Sketchfab "Cartoon Open Air Stage", CC BY), folding chairs, the band's
 // instruments and music stands, and, while the park band is on stage (it plays
-// every half hour from 10:00 to 17:30 on the player's clock; `?time=HH:MM`
+// every half hour from 10:00 to 17:30 on the city (New York) clock; `?time=HH:MM`
 // pins and runs it), the band and the audience as dolls, seated on the picnic
 // blankets and chairs or swaying at the edge. The music comes from
 // src/audio/parkBand.ts, louder the closer you are. Mounted only near the
@@ -36,6 +36,7 @@ import {
   type BandNow,
 } from "../../game/city/bandShell.ts";
 import { BAND_SHELL } from "../../game/city/park.ts";
+import { citySecondsOf } from "../../game/city/cityClock.ts";
 import { parseTimeFlag } from "../../game/city/daylight.ts";
 import { ParkBand } from "../../audio/parkBand.ts";
 import { Doll } from "../avatar/Doll.tsx";
@@ -72,7 +73,7 @@ const held = Number(
   new URLSearchParams(location.search).get("band") ?? Number.NaN,
 );
 /**
- * Seconds into the day on the player's clock. A `?time=` pin runs on from
+ * Seconds into the day on the city (New York) clock. A `?time=` pin runs on from
  * there; `?band=30` holds the clock 30 s into the day's first set (10:00), so
  * a screenshot or test catches the band mid-tune however long the page takes
  * to load.
@@ -82,8 +83,7 @@ export function bandClock(): number {
   const dev = devDaySeconds();
   if (dev !== null) return dev;
   if (pinned !== null) return pinned * 3600 + (Date.now() - loadedAt) / 1000;
-  const d = new Date();
-  return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
+  return citySecondsOf(new Date());
 }
 
 export function BandShell({ player }: { player: Player }): JSX.Element | null {
