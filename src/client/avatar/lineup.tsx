@@ -631,6 +631,7 @@ function measure(root: THREE.Object3D) {
 const PREVIEW_EXPRESSIONS = [
   ["blink", 0.04],
   ["smile", 0],
+  ["gurn", 0],
 ] as const;
 
 function NeutralPreview() {
