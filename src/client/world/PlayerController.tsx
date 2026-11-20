@@ -3,12 +3,14 @@
 import { useFrame } from "@react-three/fiber";
 import { playerSpot } from "./playerSpot.ts";
 import { liftOf, mirrored, roleMove } from "../../game/dance/together.ts";
+import { faceHeight } from "../../game/dance/reach.ts";
+import { onlineSession } from "../net/session.ts";
 import { pairUp } from "../net/together.ts";
 import { gameClip } from "../rooms/shared/game3d/gameClip.ts";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
 import { clampToArea, type WalkArea } from "../../game/area.ts";
-import type { BodyShape } from "../../game/body.ts";
+import { DEFAULT_BODY, type BodyShape } from "../../game/body.ts";
 import {
   stillClipsOf,
   type DanceMoveId,
@@ -319,6 +321,14 @@ export function PlayerController({
     gameMove ?? (paired ? roleMove(paired.e, paired.role) : pickedDance);
   // a piggyback rider is up on the lead's back, carried wherever they go
   const lift = paired?.role === "follow" ? liftOf(paired.e) : 0;
+  // kissing someone: the face this doll bends or rises to meet (reach.ts); a
+  // peer's doll is drawn at the default body
+  const partnerLook = paired
+    ? onlineSession()?.remotePlayers.get(paired.id)?.look
+    : null;
+  const partnerFace = partnerLook
+    ? faceHeight(partnerLook, DEFAULT_BODY)
+    : undefined;
   const g = useRef<THREE.Group>(null);
   const gait = useRef<WalkState>({ speed: 0 });
   // her walking speed, m/s: a stroll at her style's pace, a hurry on long trips
@@ -633,6 +643,7 @@ export function PlayerController({
           mood={riding === "lay" ? "sit" : (riding ?? mood)}
           dance={dance}
           couple={paired && mirrored(paired.e) ? paired.role : undefined}
+          partnerFace={partnerFace}
           hold={
             riding === "lay"
               ? LAY_HOLD

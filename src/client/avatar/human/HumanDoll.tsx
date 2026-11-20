@@ -8,10 +8,19 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { couplePoseAt, type CoupleRole } from "../../../game/dance/couple.ts";
+import { pairNow } from "../pairClock.ts";
+import {
+  applyReach,
+  faceDepth,
+  faceHeight,
+  leanIn,
+  reachFor,
+} from "../../../game/dance/reach.ts";
 import {
   stillClipsOf,
   createPose,
   danceMove,
+  eyesShut,
   poseAt,
   type DanceMoveId,
   type Pose,
@@ -229,6 +238,8 @@ type Props = {
   mood: Mood;
   dance?: DanceMoveId | undefined;
   couple?: CoupleRole | undefined;
+  /** Kissing: the partner's face height, met by bending or rising (reach.ts). */
+  partnerFace?: number | undefined;
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
   hold?: string | undefined;
   buzzed?: boolean | undefined;
@@ -925,6 +936,7 @@ export function HumanDoll({
   mood,
   dance = "groove",
   couple,
+  partnerFace,
   hold: picked,
   buzzed = false,
   under,
@@ -939,6 +951,16 @@ export function HumanDoll({
   const gl = useThree((s) => s.gl);
   const invalidate = useThree((s) => s.invalidate);
   const heightScale = bodyScales(shape).height;
+  // a kiss with someone taller or shorter: this doll's share of meeting them
+  const ownFace = faceHeight(look, shape);
+  const ownDepth = faceDepth(look);
+  const reach = useMemo(
+    () =>
+      partnerFace === undefined
+        ? null
+        : reachFor(ownFace, partnerFace, ownDepth),
+    [ownFace, ownDepth, partnerFace],
+  );
   const lowTierNpc = useQuality() === "low" && !own;
   const lodNear = lowTierNpc ? LOW_TIER_NEAR : LOD_NEAR;
   const lodFar = lowTierNpc ? LOW_TIER_FAR : LOD_FAR;
@@ -1098,6 +1120,8 @@ export function HumanDoll({
       farParts.current = isFar;
     }
     const t = state.clock.elapsedTime + seed * 7.3;
+    // eyes closed for the moment a kiss's lips meet (set with the built pose)
+    let kissShut = false;
     const speed = walk?.current.speed ?? 0;
     const moving = speed > MOVING;
     // the built stride's phase, for the hand-made walk worn until the clips load
@@ -1300,11 +1324,16 @@ export function HumanDoll({
       if (a.action) a.mixer.update(animDt);
       if (a.built > 0) {
         const move = mood === "dance" && !moving ? danceMove(dance) : null;
+        // a kiss runs on the pair clock, so both partners lean in together
+        const mt = move?.synced ? pairNow() : t;
+        kissShut = move ? eyesShut(move, mt) : false;
         const danced = !move
           ? null
           : couple
-            ? couplePoseAt(move, couple, t, sampled)
-            : poseAt(move, t, sampled);
+            ? couplePoseAt(move, couple, mt, sampled)
+            : poseAt(move, mt, sampled);
+        if (danced && move?.synced && reach)
+          applyReach(danced, reach, leanIn(danced));
         pose(
           proxy,
           gait.seated ? "sit" : moving ? "walk" : mood,
@@ -1396,7 +1425,7 @@ export function HumanDoll({
       : 0;
     // weed lowers the lids (heavyLid), quantized like the rest
     const heavy = meters ? Math.round(heavyLid(meters) * 50) / 50 : 0;
-    const lid = closed ? 1 : REST_LID - wide * WIDE_LID + heavy;
+    const lid = closed || kissShut ? 1 : REST_LID - wide * WIDE_LID + heavy;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;
