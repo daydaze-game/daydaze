@@ -1,11 +1,14 @@
 // City traffic: cars follow lanes, keep right, brake for the car ahead and for
-// red lights, yield to the player and turn at junctions. Pure and
-// allocation-free, so the scene can step it every frame.
+// red lights, brake for a person in the road after a driver's reaction time
+// (and hit her when she steps out too close), and turn at junctions. Pure
+// and allocation-free (but for the rare hit), so the scene can step it every
+// frame.
 import type { Vec2 } from "../walk.ts";
 import { neighborhoodAt } from "./cells.ts";
 import { hash } from "./hash.ts";
 import { ROAD_EDGES, ROAD_NODES, type RoadEdge } from "./layout.ts";
 import { shortest, snapToRoad } from "./taxi.ts";
+import { DRIVER_REACTION, HARD_BRAKE, MIN_HIT_SPEED } from "./carHits.ts";
 import {
   HEAVY_MIX,
   TRAFFIC_MIX,
@@ -15,7 +18,8 @@ import {
 
 /**
  * City traffic: cars drive one lane each way on every road edge, keep right,
- * follow the car ahead, stop at red lights, yield to the player, and pick a
+ * follow the car ahead, stop at red lights, brake for the player on foot
+ * once their driver has reacted (or yield to her car), and pick a
  * turn at every junction (a U-turn at the map edge). Some of them are
  * jeepneys, most of all on Little Manila's roads. Pure and allocation-free
  * per step, so the client can run it at the fixed walking rate.
@@ -154,9 +158,26 @@ export type TrafficCar = {
   next: Lane | null;
   /** Set on a taxi: where it is going and whether it has got there. */
   trip?: CabTrip;
+  /** Seconds its driver has seen the player on foot in its path (0: none);
+   * the brakes answer only from DRIVER_REACTION on. */
+  seen: number;
+  /** Seconds it stays stopped after hitting someone (0: driving on). */
+  halt: number;
 };
 
-export type Traffic = { cars: TrafficCar[]; time: number };
+/** `alarms` counts the hard stops for a person in the road (the client
+ * screeches the tires and honks on each new one). */
+export type Traffic = { cars: TrafficCar[]; time: number; alarms: number };
+
+/** A car hitting the player on foot: which, how fast at contact (m/s), and
+ * where it was and which way it faced. */
+export type TrafficHit = {
+  car: TrafficCar;
+  speed: number;
+  x: number;
+  z: number;
+  yaw: number;
+};
 
 /** Car paint: mostly real-world colors with a few of the city's neons. */
 export const CAR_COLORS = [
@@ -289,9 +310,11 @@ export function createTraffic(count: number, seed = 1): Traffic {
       turns: Math.floor(hash(i * 3, seed) * 1000),
       id: i,
       next: null,
+      seen: 0,
+      halt: 0,
     });
   }
-  return { cars, time: 0 };
+  return { cars, time: 0, alarms: 0 };
 }
 
 function chooseNext(car: TrafficCar): Lane {
@@ -430,6 +453,37 @@ function playerRoom(car: TrafficCar, player: Vec2 | null): number {
   return along - VEHICLE_LENGTH[car.kind] / 2 - 1.5;
 }
 
+/** How far ahead a driver watches for someone in the road, meters. */
+const LOOK = 45;
+/** Half a car's width plus a person's, for contact; a driver brakes for
+ * anyone a little wider than that. */
+const CONTACT_HALF_WIDTH = 1.25;
+const SEEN_HALF_WIDTH = 1.8;
+/** Seconds a car stands after hitting someone: the driver's shout. */
+const HALT_AFTER_HIT = 4;
+/** A hard stop from this speed (m/s) screeches. */
+const ALARM_SPEED = 4;
+
+/**
+ * Where the person at `at` is from the car: meters ahead of its center
+ * along its heading, and meters to the side, into `out`.
+ */
+function relative(
+  car: TrafficCar,
+  at: Vec2,
+  out: { along: number; across: number },
+) {
+  carPose(car, pose);
+  const fx = Math.cos(pose.yaw);
+  const fz = -Math.sin(pose.yaw);
+  const px = at[0] - pose.x;
+  const pz = at[1] - pose.z;
+  out.along = px * fx + pz * fz;
+  out.across = Math.abs(-px * fz + pz * fx);
+}
+
+const rel = { along: 0, across: 0 };
+
 /** Meters left before a cab's stopping place, Infinity if it is not on its
  * last lane yet. */
 function stopRoom(car: TrafficCar): number {
@@ -455,37 +509,96 @@ export function syncClock(t: Traffic, wall: number): void {
   t.time = wall;
 }
 
-/** Advances every car by dt seconds at simulation time t.time + dt. */
+/**
+ * Room before the player on foot, once the driver has seen her for a
+ * reaction time (a car at rest sees her at once); counts the seeing in
+ * `car.seen` and an alarm on the moment the brakes bite hard.
+ */
+function walkerRoom(
+  t: Traffic,
+  car: TrafficCar,
+  walker: Vec2 | null,
+  dt: number,
+): number {
+  if (!walker) {
+    car.seen = 0;
+    return Infinity;
+  }
+  relative(car, walker, rel);
+  const half = VEHICLE_LENGTH[car.kind] / 2;
+  if (rel.along < -half || rel.along > LOOK || rel.across > SEEN_HALF_WIDTH) {
+    car.seen = 0;
+    return Infinity;
+  }
+  const was = car.seen;
+  car.seen += dt;
+  if (car.seen < DRIVER_REACTION && car.speed >= MIN_HIT_SPEED) return Infinity;
+  if (was < DRIVER_REACTION && car.speed > ALARM_SPEED) t.alarms++;
+  return rel.along - half - 1.5;
+}
+
+/** The hit, if the player on foot is inside the car's outline now and the car
+ * is moving fast enough to matter. Allocates only on a hit. */
+function contact(car: TrafficCar, walker: Vec2 | null): TrafficHit | null {
+  if (!walker || car.speed < MIN_HIT_SPEED) return null;
+  relative(car, walker, rel);
+  const half = VEHICLE_LENGTH[car.kind] / 2;
+  if (rel.along < -half || rel.along > half + 0.3) return null;
+  if (rel.across > CONTACT_HALF_WIDTH) return null;
+  // a driver who hits someone has seen her, whatever happened before
+  car.seen = Math.max(car.seen, DRIVER_REACTION);
+  car.halt = HALT_AFTER_HIT;
+  return { car, speed: car.speed, x: pose.x, z: pose.z, yaw: pose.yaw };
+}
+
+/**
+ * Advances every car by dt seconds at simulation time t.time + dt. The
+ * player on foot is braked for like a person, after the driver's reaction
+ * time and at a real stopping distance; `playerInCar` says she is driving,
+ * and then traffic yields to her car as it always has (car-on-car crashes
+ * are their own rules). Returns a car that hit her on foot, if one did.
+ */
 export function stepTraffic(
   t: Traffic,
   dt: number,
   player: Vec2 | null,
   bus: Vec2 | null = null,
   truck: Vec2 | null = null,
-): void {
+  playerInCar = false,
+): TrafficHit | null {
   t.time += dt;
+  const walker = playerInCar ? null : player;
+  let hit: TrafficHit | null = null;
   for (const car of t.cars) {
     const len = laneLength(car.lane);
     // a cab on its last lane stops short of the junction: no turn to pick
     if (!car.next && car.s > len - TURN - 20 && stopRoom(car) === Infinity)
       car.next = chooseNext(car);
     const limit = EDGES[car.lane.edge].speedLimit;
+    const person = walkerRoom(t, car, walker, dt);
     const room = Math.min(
       headroom(t, car, 60),
       lightRoom(t, car),
-      playerRoom(car, player),
+      playerInCar ? playerRoom(car, player) : Infinity,
       playerRoom(car, bus) - 3,
       playerRoom(car, truck) - 2,
       stopRoom(car),
     );
     // the speed from which the car can still stop within `room`
     const safe = room <= 0 ? 0 : Math.sqrt(2 * BRAKE * room * 0.8);
-    const target = Math.min(limit, safe);
+    // for a person in the road, as hard as the brakes go
+    const urgent = person <= 0 ? 0 : Math.sqrt(2 * HARD_BRAKE * person);
+    // after a hit the driver stops dead and stays put a moment
+    if (car.halt > 0) car.halt = Math.max(0, car.halt - dt);
+    const stopping = car.halt > 0 ? 0 : urgent;
+    const target = Math.min(limit, safe, stopping);
+    const brake = stopping < safe ? HARD_BRAKE : BRAKE;
     car.speed =
       car.speed < target
         ? Math.min(target, car.speed + ACCEL * dt)
-        : Math.max(target, car.speed - BRAKE * dt);
+        : Math.max(target, car.speed - brake * dt);
     car.s += car.speed * dt;
+    hit ??= contact(car, walker);
     const trip = car.trip;
     if (trip && !trip.arrived && stopRoom(car) < 0.5 && car.speed < 1.5) {
       trip.arrived = true;
@@ -498,6 +611,7 @@ export function stepTraffic(
       car.next = null;
     }
   }
+  return hit;
 }
 
 // ------------------------------------------------------------------- taxis
@@ -550,6 +664,8 @@ export function cabAtCurb(id: number, curb: Vec2, rider: Vec2): TrafficCar {
     turns: 0,
     id,
     next: null,
+    seen: 0,
+    halt: 0,
     trip: { path: [], stop: { lane, s }, arrived: false },
   };
 }
