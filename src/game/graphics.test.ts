@@ -7,6 +7,7 @@ import {
   changeAdvanced,
   cleanGraphics,
   defaultGraphics,
+  detailOf,
   forcedGraphics,
   presetGraphics,
 } from "./graphics.ts";
@@ -101,4 +102,10 @@ test("garbage gives auto; the old quality setting migrates", () => {
     cleanGraphics(presetGraphics("realistic"), "low").preset,
     "realistic",
   );
+});
+
+test("two-entry tables use high's numbers for Balanced and Realistic", () => {
+  assert.equal(detailOf("low"), "low");
+  assert.equal(detailOf("high"), "high");
+  assert.equal(detailOf("ultra"), "high");
 });

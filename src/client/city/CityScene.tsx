@@ -17,7 +17,7 @@ import type { Vec2 } from "../../game/walk.ts";
 import type { PickHandler } from "../rooms/shared/Floor.tsx";
 import { useReducedMotion } from "../motion.ts";
 import type { Player } from "../world/PlayerController.tsx";
-import { useGraphics, useQuality } from "../world/quality.ts";
+import { useDetail, useGraphics } from "../world/quality.ts";
 import { DRAW_FAR } from "../../game/graphics.ts";
 import { StreetFood } from "./StreetFood.tsx";
 import { StreetDealer } from "./StreetDealer.tsx";
@@ -119,7 +119,7 @@ export function CityScene({
       delete canvas.dataset.dressings;
     };
   }, [canvas, dressingNames]);
-  const tier = useQuality();
+  const tier = useDetail();
   const far = DRAW_FAR[useGraphics().distance];
   const reduced = useReducedMotion();
   // the key light is the World's; these are the city's real lights

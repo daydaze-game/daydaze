@@ -107,6 +107,14 @@ const TIER_PRESET: Record<QualityTier, Exclude<Preset, "auto">> = {
   ultra: "realistic",
 };
 
+/**
+ * The detail level scenes with a two-entry table (counts, radii) index by:
+ * Performance is low, and both Balanced and Realistic get high's numbers.
+ */
+export function detailOf(tier: QualityTier): "low" | "high" {
+  return tier === "low" ? "low" : "high";
+}
+
 /** A fresh copy of a preset's values. */
 export function presetGraphics(preset: Preset): Graphics {
   return preset === "auto"

@@ -3,7 +3,11 @@
 // Balanced when no provider is mounted.
 
 import { createContext, useContext } from "react";
-import { presetGraphics, type Graphics } from "../../game/graphics.ts";
+import {
+  detailOf,
+  presetGraphics,
+  type Graphics,
+} from "../../game/graphics.ts";
 
 export type { QualityTier } from "../../game/graphics.ts";
 
@@ -19,6 +23,9 @@ export const QualityContext = createContext(BALANCED.tier);
 
 /** The current quality tier from QualityContext. */
 export const useQuality = () => useContext(QualityContext);
+
+/** The tier as "low" or "high", for tables with one entry per detail level. */
+export const useDetail = () => detailOf(useQuality());
 
 /** The tier plus the advanced switches (reflections, shadows ...) in force. */
 export const GraphicsContext = createContext<Graphics>(BALANCED);
