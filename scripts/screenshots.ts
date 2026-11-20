@@ -334,6 +334,22 @@ function walkStrip(
 }
 
 /**
+ * Clicks the debug panel's "Debug: a minute later" button from the DOM, so it
+ * still works while the panel is hidden for a recording (a display:none button
+ * fails Playwright's visibility check).
+ */
+async function debugLater(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find(
+      (el) => el.textContent?.trim() === "Debug: a minute later",
+    );
+    if (!(button instanceof HTMLButtonElement))
+      throw new Error("no 'Debug: a minute later' button on the page");
+    button.click();
+  });
+}
+
+/**
  * A frame strip of a room action (the ladder climb, the overhand throw): runs
  * `setup` (open the game), then records a CDP screencast while `go` fires the
  * move, saving docs/screenshots/<name>-<nn>.png.
@@ -358,6 +374,9 @@ function actionStrip(
         { timeout: 300_000 },
       );
       await setup(page);
+      // the strip shows the scene a player sees: the debug buttons go while
+      // recording, and `go` clicks "a minute later" through the DOM (debugLater)
+      await page.addStyleTag({ content: "nav.debug { display: none }" });
       const cdp = await page.context().newCDPSession(page);
       const frames: Buffer[] = [];
       cdp.on("Page.screencastFrame", (f) => {
@@ -875,7 +894,7 @@ const SHOTS: {
     },
     // a minute on in the peak
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -892,7 +911,7 @@ const SHOTS: {
       for (let i = 0; i < 4; i++) await later.click();
     },
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -910,7 +929,7 @@ const SHOTS: {
       for (let i = 0; i < 1; i++) await later.click();
     },
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
