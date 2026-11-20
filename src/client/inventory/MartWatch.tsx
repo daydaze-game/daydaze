@@ -9,9 +9,7 @@ import { dealerNear } from "../../game/city/dealer.ts";
 import { counterAt } from "../../game/city/gasStations.ts";
 import { driving } from "../world/driving.ts";
 import type { Player } from "../world/PlayerController.tsx";
-import { martNear } from "./martNear.ts";
-
-export const DEALER_NAME = "Street dealer";
+import { DEALER_NAME, martNear } from "./martNear.ts";
 
 export function MartWatch({ player }: { player: Player }): JSX.Element | null {
   useEffect(() => () => martNear.set({ name: "" }), []);

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { CREDITS } from "./credits.ts";
-import { MOCAP_CLIPS } from "./dance/mocap.ts";
+import { MOCAP_SOURCES } from "./dance/mocapSources.ts";
 
 /** All pipe-table rows are assets; prose and headings can change freely. */
 function assetRows(markdown: string): string[][] {
@@ -80,11 +80,11 @@ test("every shipped motion capture provider has a credit", () => {
   const credited = CREDITS.flatMap((group) =>
     group.entries.map((entry) => entry.title),
   );
-  for (const clip of MOCAP_CLIPS) {
-    const provider = clip.source.split(" ")[0];
+  for (const source of Object.values(MOCAP_SOURCES)) {
+    const provider = source.split(" ")[0];
     assert.ok(
       credited.includes(titles[provider]),
-      `missing attribution for ${clip.source}`,
+      `missing attribution for ${source}`,
     );
   }
 });
