@@ -171,7 +171,7 @@ export function Pool() {
   const calm = useReducedMotion();
   const water = useMemo(makeWater, []);
   const geometry = useMemo(() => {
-    const seg = quality === "high" ? 2 : 1;
+    const seg = quality !== "low" ? 2 : 1;
     const g = new THREE.PlaneGeometry(W, D, 52 * seg, 32 * seg);
     g.rotateX(-Math.PI / 2);
     return g;

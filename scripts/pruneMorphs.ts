@@ -23,14 +23,14 @@ const STILL = 1e-4;
 
 /**
  * Hair is a stack of thin cards: the face-feature keys (eyes, nose, lips,
- * blink, smile) move it by a few millimeters at most and a lid should not
+ * blink, smile, gurn) move it by a few millimeters at most and a lid should not
  * drag a fringe along, and targets under 2.5 mm are invisible on it. Hair also
  * loses its target normals, which is most of what its sliders cost to download.
  * Bare mode (the far-LOD twins of hair) drops every target: nobody sees a 5 mm
  * head-shape shift on a doll that far away.
  */
 const HAIR_STILL = 2.5e-3;
-const FEATURE_KEY = /^(eye|nose|lips|blink|smile|cheeks|jaw|plus)/;
+const FEATURE_KEY = /^(eye|nose|lips|blink|smile|gurn|cheeks|jaw|plus)/;
 
 interface Accessor {
   min?: number[];

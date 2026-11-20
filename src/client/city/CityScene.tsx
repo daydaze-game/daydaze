@@ -17,7 +17,8 @@ import type { Vec2 } from "../../game/walk.ts";
 import type { PickHandler } from "../rooms/shared/Floor.tsx";
 import { useReducedMotion } from "../motion.ts";
 import type { Player } from "../world/PlayerController.tsx";
-import { useQuality } from "../world/quality.ts";
+import { useDetail, useGraphics } from "../world/quality.ts";
+import { DRAW_FAR } from "../../game/graphics.ts";
 import { StreetFood } from "./StreetFood.tsx";
 import { StreetDealer } from "./StreetDealer.tsx";
 import { CitySky } from "./CitySky.tsx";
@@ -119,10 +120,12 @@ export function CityScene({
       delete canvas.dataset.dressings;
     };
   }, [canvas, dressingNames]);
-  const tier = useQuality();
+  const tier = useDetail();
+  const { distance, shadows } = useGraphics();
+  const far = DRAW_FAR[distance];
   const reduced = useReducedMotion();
   // the key light is the World's; these are the city's real lights
-  const lightCount = tier === "high" ? POINT_LIGHTS.high : POINT_LIGHTS.low;
+  const lightCount = tier !== "low" ? POINT_LIGHTS.high : POINT_LIGHTS.low;
   const atlas = useMemo(() => createLabelAtlas(), []);
   const meshes = useMemo(() => createKindMeshes(capacity, atlas), [atlas]);
   // the ground between the surfaces: worn concrete, patchy at long range
@@ -169,9 +172,10 @@ export function CityScene({
       fog.current.color.setRGB(...day.fog);
       // clear days see far; night closes in
       fog.current.near = 120 + 120 * day.sun;
-      // the fog is thick by the camera's far plane (600 in World.tsx), so
-      // the city's edge dissolves into the horizon instead of ending in a cut
-      fog.current.far = Math.min(420 + 320 * day.sun, 590);
+      // the fog is thick by the camera's far plane (600 at the Medium render
+      // distance, see World.tsx), so the city's edge dissolves into the
+      // horizon instead of ending in a cut
+      fog.current.far = Math.min(420 + 320 * day.sun, 590) * (far / 600);
     }
     if (sun.current) {
       // celestial directional light: sun by day, reused as cool moonlight at
@@ -217,7 +221,7 @@ export function CityScene({
       hemi.current.intensity = day.hemi;
     }
     dimForDay(meshes, day.neon);
-  }, [day, background, meshes]);
+  }, [day, background, meshes, far]);
 
   useFrame(({ gl, clock, camera }) => {
     CITY_CLOCK.uTime.value = clock.elapsedTime;
@@ -297,7 +301,7 @@ export function CityScene({
         intensity={0}
       />
       {/* high tier at night: a real night street lights skin, cars and glass */}
-      {tier === "high" && day.neon > 0.5 && (
+      {tier !== "low" && day.neon > 0.5 && (
         <Suspense fallback={null}>
           <CityHdri />
         </Suspense>
@@ -324,6 +328,7 @@ export function CityScene({
         ]}
         onClick={click}
         name="city-ground"
+        receiveShadow={shadows}
       >
         {/* the city's land up to the waterline; the Ocean takes over past it
             and the Outskirts' grass around it (a dark plane that ran on to

@@ -1,12 +1,12 @@
-// The grandstand crowd: Kenney Mini Characters (baked posed, see
-// peopleModel.ts), four looks standing with arms folded or cheering, seated
-// in rows. Each of the eight poses is one InstancedMesh, so the whole crowd is
-// eight draw calls.
+// The grandstand crowd: baked doll people (peopleModel.ts), four looks
+// standing or cheering, in rows. Each of the eight poses is one
+// InstancedMesh, so the whole crowd is eight draw calls.
 
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { seeded } from "./canvasTextures.ts";
-import { FAN_MODELS, PERSON_SCALE, usePerson } from "./peopleModel.ts";
+import { FAN_MODELS, usePersonAt } from "./peopleModel.ts";
+import { FAN_LOOKS } from "../../../game/crowd.ts";
 
 const ROWS = 6;
 const COLS = 26;
@@ -21,7 +21,7 @@ function seatPlan(): Seat[][] {
     for (let c = 0; c < COLS; c++) {
       // an empty seat now and then
       if (rand() < 0.08) continue;
-      const look = Math.floor(rand() * 4);
+      const look = Math.floor(rand() * FAN_LOOKS.length);
       const cheers = rand() < 0.28 ? 1 : 0;
       plan[look * 2 + cheers]?.push({
         x: -21 + (c / (COLS - 1)) * 42 + (rand() - 0.5) * 0.2,
@@ -29,15 +29,16 @@ function seatPlan(): Seat[][] {
         z: -r * 1.1 + 0.15,
         // facing the track (-z), a little each way
         yaw: Math.PI + (rand() - 0.5) * 0.4,
-        scale: PERSON_SCALE * (0.88 + rand() * 0.12) * 0.9,
+        // a little taller or shorter than the next fan
+        scale: 0.94 + rand() * 0.12,
       });
     }
   }
   return plan;
 }
 
-function Pose({ name, seats }: { name: string; seats: Seat[] }) {
-  const person = usePerson(name);
+function Pose({ url, seats }: { url: string; seats: Seat[] }) {
+  const person = usePersonAt(url);
   const ref = useRef<THREE.InstancedMesh>(null);
   useEffect(() => {
     const mesh = ref.current;
@@ -71,8 +72,8 @@ export function Crowd({
   const plan = useMemo(seatPlan, []);
   return (
     <group position={[origin[0], 0, origin[1]]}>
-      {FAN_MODELS.map((name, i) => (
-        <Pose key={name} name={name} seats={plan[i] ?? []} />
+      {FAN_MODELS.map((url, i) => (
+        <Pose key={url} url={url} seats={plan[i] ?? []} />
       ))}
     </group>
   );

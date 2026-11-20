@@ -514,6 +514,57 @@ export function heavyLid(meters: Readonly<Meters>): number {
   );
 }
 
+// How far each substance at full strength opens the pupils and sets the jaw,
+// 0..1, from the research's signs table: dilated pupils with MDMA (marked),
+// cocaine, LSD and psilocybin; jaw clench with MDMA (strong), cocaine and LSD
+// (mild). Weed does neither (its eyes are red and heavy-lidded instead).
+const PUPIL: Record<Substance, number> = {
+  high: 0,
+  trip: 0.6,
+  acid: 0.7,
+  molly: 1,
+  cocaine: 0.6,
+};
+const JAW: Record<Substance, number> = {
+  high: 0,
+  trip: 0,
+  acid: 0.25,
+  molly: 1,
+  cocaine: 0.5,
+};
+
+const strongestOf = (
+  meters: Readonly<Meters>,
+  scale: Record<Substance, number>,
+): number => {
+  let top = 0;
+  for (const s of SUBSTANCES)
+    top = Math.max(top, clamp01(meters[s].level) * scale[s]);
+  return top;
+};
+
+/** How wide her pupils open, 0 (her own) to 1 (blown): the strongest felt
+ * substance's share at its meter. The doll's eye shader reads it. */
+export const pupilDilation = (meters: Readonly<Meters>): number =>
+  strongestOf(meters, PUPIL);
+
+/** How hard her jaw clenches, 0..1 (the doll's `gurn` key, pulsed as
+ * grinding by the client): molly's gurning, less for cocaine and acid. */
+export const jawClench = (meters: Readonly<Meters>): number =>
+  strongestOf(meters, JAW);
+
+/** The reddest the whites of the eyes get at full weed (0..1 blend). */
+export const RED_EYES_MAX = 0.6;
+
+/** How red the sclera is from weed (dilated conjunctival vessels, docs/research
+ * /substances.md section 2), 0 to RED_EYES_MAX. Scales with the high level and
+ * is zero sober and for every other substance. Own doll only. */
+export function redEyes(meters: Readonly<Meters>): number {
+  const { level, phase } = meters.high;
+  if (!phase) return 0;
+  return Math.min(RED_EYES_MAX, clamp01(level) * RED_EYES_MAX);
+}
+
 /** Weed's time stretch ("a minute feels like ten"): a faint afterimage trail,
  * so moments linger. A fade, never a flash; molly's is 0.3, acid's 0.85. */
 export const WEED_TRACER = 0.2;

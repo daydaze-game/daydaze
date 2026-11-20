@@ -21,6 +21,7 @@ import {
   Suspense,
 } from "react";
 import * as THREE from "three";
+import { cityTime } from "../../game/city/cityClock.ts";
 import { hash } from "../../game/city/hash.ts";
 import {
   LANE_X,
@@ -81,7 +82,8 @@ const BUNTING = [
 
 /** Whether the market is open now: `?market=1|0`, else a weekend morning on the clock. */
 const readOpen = () =>
-  marketFlag(location.search) ?? marketOpen(new Date().getDay(), cityHour());
+  marketFlag(location.search) ??
+  marketOpen(cityTime(new Date()).weekday, cityHour());
 
 /** The market's open state, refreshed every 30 s like the daylight. */
 export function useMarketOpen(): boolean {

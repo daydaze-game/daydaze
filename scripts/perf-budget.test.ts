@@ -1,3 +1,4 @@
+// Tests for scripts/perf-budget.ts: initial script extraction and bundle budget checks.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { initialScripts } from "./perf-budget.ts";

@@ -1,3 +1,4 @@
+// Tests for server/src/security.ts: allowed origin parsing and security header application.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
