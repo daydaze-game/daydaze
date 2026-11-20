@@ -3706,6 +3706,9 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await expect
     .poll(async () => Number(await hunger.getAttribute("value")))
     .toBeGreaterThan(initialHunger);
+  // The live timer has advanced. Freeze time through the slow software-rendered
+  // screenshots and delivery controls; advance toast lifetimes explicitly below.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
   await page.screenshot({
     path: test.info().outputPath("weed-needs-desktop.png"),
   });
@@ -3728,9 +3731,6 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await page.screenshot({
     path: test.info().outputPath("weed-food-tray-mobile.png"),
   });
-  // Freeze the four-second announcement while the software renderer resizes
-  // and captures the tray. Its lifetime is advanced explicitly below.
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
   await page.setViewportSize({ width: 568, height: 320 });
   await expect(page.locator(".food-tray")).toBeInViewport({ ratio: 1 });
   const courier = page
@@ -3741,7 +3741,8 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await courier.scrollIntoViewIfNeeded();
   await expect(courier).toBeInViewport({ ratio: 1 });
   await needs.scrollIntoViewIfNeeded();
-  await expect(needs).toBeInViewport({ ratio: 1 });
+  // Scrolling can leave a fraction of a border pixel outside the clipped tray.
+  await expect(needs).toBeInViewport({ ratio: 0.99 });
   await held.getByRole("button", { name: "Eat it" }).scrollIntoViewIfNeeded();
   await expect(held.getByRole("button", { name: "Eat it" })).toBeInViewport({
     ratio: 1,
