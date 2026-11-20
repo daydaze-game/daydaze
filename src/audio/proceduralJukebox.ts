@@ -7,6 +7,10 @@
 import type { TrackId } from "../game/trackId.ts";
 import { getAudioContextClass } from "./audioContextClass.ts";
 import { getSharedAudioBus } from "./audioBus.ts";
+import {
+  peekSharedJukeboxController,
+  setSharedJukeboxController,
+} from "./sharedJukebox.ts";
 
 export type { TrackId };
 
@@ -1335,26 +1339,20 @@ export function createJukeboxController(
   return new JukeboxControllerImpl(resolved, musicDestination);
 }
 
-let sharedController: JukeboxController | null = null;
-
-/** The shared controller if something has made it, without waking audio: the
- * dancers' beat clock reads it and must not start an AudioContext. */
-export function peekSharedJukeboxController(): JukeboxController | null {
-  return sharedController;
-}
-
 /**
  * Lazily creates one controller shared by AudioControls and JukeboxModal.
  * Routes through the shared AudioBus music destination so the global
  * Music mute/volume control reaches jukebox playback.
  */
 export function getSharedJukeboxController(): JukeboxController {
-  if (!sharedController) {
+  let controller = peekSharedJukeboxController();
+  if (!controller) {
     const bus = getSharedAudioBus();
-    sharedController = createJukeboxController(
+    controller = createJukeboxController(
       bus.getContext(),
       bus.getMusicDestination(),
     );
+    setSharedJukeboxController(controller);
   }
-  return sharedController;
+  return controller;
 }
