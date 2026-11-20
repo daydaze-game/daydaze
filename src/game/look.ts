@@ -1,11 +1,12 @@
 // The doll's look: every closet catalog (skin, hair, makeup, outfits, shoes,
-// face, piercings, swimsuits), the Look type, its validator, and the short
+// face, piercings, swimsuits; garments by slot are in wardrobe.ts), the Look type, its validator, and the short
 // codes that pack a face, makeup, piercings and swimsuit into strings. Looks go
 // over the network as flat maps of short strings, so new parts are optional
 // fields with codes that older looks can omit. Catalog ids double as shop item
 // ids (shop.ts).
 
 import { isGait } from "./gaits.ts";
+import { decodeWear } from "./wardrobe.ts";
 /** A full RGB color, validated at the storage and network boundary. */
 export function isColor(value: unknown): value is string {
   return (
@@ -952,6 +953,9 @@ export type Look = {
   beard?: Beard;
   /** encodeLimbs' code (prostheses); looks without one are all natural. */
   limbs?: string;
+  /** encodeWear's code (wardrobe.ts): the garments worn, slot by slot;
+   * looks without one wear their outfit's top and bottom. */
+  wear?: string;
 };
 
 /** The two builds: separate dolls, each with its own body, skeleton and
@@ -1034,6 +1038,7 @@ const LOOK_CATALOGS: {
       | "body"
       | "beard"
       | "limbs"
+      | "wear"
     >
   ]: readonly {
     readonly id: Look[K];
@@ -1075,6 +1080,7 @@ export function validateLook(value: unknown): value is Look {
   const hasBody = fields.has("body");
   const hasBeard = fields.has("beard");
   const hasLimbs = fields.has("limbs");
+  const hasWear = fields.has("wear");
   return (
     fields.size ===
       catalogs.length +
@@ -1088,7 +1094,9 @@ export function validateLook(value: unknown): value is Look {
         (hasPronouns ? 1 : 0) +
         (hasBody ? 1 : 0) +
         (hasBeard ? 1 : 0) +
-        (hasLimbs ? 1 : 0) &&
+        (hasLimbs ? 1 : 0) +
+        (hasWear ? 1 : 0) &&
+    (!hasWear || decodeWear(fields.get("wear")) !== null) &&
     (!hasBrowColor || isColor(fields.get("browColor"))) &&
     (!hasLimbs || decodeLimbs(fields.get("limbs")) !== null) &&
     (!hasBody || isId(BODIES, fields.get("body"))) &&
