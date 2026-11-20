@@ -69,8 +69,13 @@ jobs:
         run: |
           sudo apt-get install -y --no-install-recommends \
             libxi6 libxkbcommon0 libxrender1 libxxf86vm1 libxfixes3 libgl1 libsm6 libegl1
-          curl -fsSL "https://download.blender.org/release/Blender${BLENDER%.*}/blender-${BLENDER}-linux-x64.tar.xz" |
-            tar -xJ -C "$RUNNER_TEMP"
+          # nine jobs at once can trip blender.org's rate limit: retry, then a mirror
+          file="blender-${BLENDER}-linux-x64.tar.xz"
+          for base in https://download.blender.org/release https://mirrors.ocf.berkeley.edu/blender/release; do
+            curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o "$RUNNER_TEMP/$file" \
+              "$base/Blender${BLENDER%.*}/$file" && break
+          done
+          tar -xJf "$RUNNER_TEMP/$file" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/blender-${BLENDER}-linux-x64" >> "$GITHUB_PATH"
           pipx install uv
       - run: bash art/crowd/build-crowd.sh "$LOOK"
