@@ -6,6 +6,7 @@
 
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { carExtras } from "./carExtras.ts";
+import { cancelCarApproach } from "./carApproach.ts";
 import { useEffect, useRef } from "react";
 import type { Group } from "three";
 import { clampToArea } from "../../game/area.ts";
@@ -116,6 +117,7 @@ export function PlayerCar({
       ) <= REACH;
     const request = driving.request;
     if (fishing.get().phase !== "off") {
+      cancelCarApproach(player.walk, heading.current);
       heading.current = false;
       if (request === "city-drive") {
         leaveFishing();

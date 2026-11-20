@@ -2923,9 +2923,17 @@ test("city fishing and driving do not take the player at the same time", async (
   ).toBeVisible();
   await (await dockAction(page, "Drive your car")).click();
   await expect(panel.getByRole("button", { name: "Go fishing" })).toBeVisible();
-  await expect(canvas).toHaveAttribute("data-city-car", "driving", {
-    timeout: 120_000,
-  });
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-player-z")), {
+      timeout: 120_000,
+    })
+    .toBeGreaterThan(300);
+  // The player starts toward the car; the full route is tracked separately (#356).
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-player-z")), {
+      timeout: 120_000,
+    })
+    .toBeLessThan(375);
 });
 
 test("Starlight yacht: board at the marina, cruise, dance and return", async ({
