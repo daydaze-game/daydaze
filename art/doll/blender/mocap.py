@@ -1,5 +1,6 @@
 """Bakes Mixamo clips onto the doll's own skeleton and writes them as one
-animation-only GLB, plus the clip catalog src/game/dance/mocap.ts.
+animation-only GLB, plus the clip catalog src/game/dance/mocap.ts (and
+mocapSources.ts, the credits data).
 
     blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/build_doll.py
     blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/mocap.py
@@ -59,6 +60,7 @@ SUFFIX = "-m" if SEX == "male" else ""
 RIG_BLEND = os.path.join(HERE, ".cache", f"rig{SUFFIX}.blend")
 OUT = os.path.join(HERE, ".cache", "out", f"anims{SUFFIX}.glb")
 CATALOG = os.path.join(ROOT, "src", "game", "dance", "mocap.ts")
+SOURCES = os.path.join(ROOT, "src", "game", "dance", "mocapSources.ts")
 MIXAMO = os.path.join(ROOT, "mixamo")
 FPS = 30
 
@@ -583,6 +585,15 @@ def write_catalog():
         with open(path) as f:
             metas += json.load(f)
     by = lambda *kinds: [m["id"] for m in metas if m["kind"] in kinds]
+    # the take each clip came from is credits data, kept out of the first load
+    sources = {m["id"]: m["source"] for m in metas}
+    metas = [{k: v for k, v in m.items() if k != "source"} for m in metas]
+    with open(SOURCES, "w") as f:
+        f.write(
+            head + "\n// The take each clip was baked from, led by its provider\n"
+            "// (\"Mixamo <take>\"); only the credits test reads it.\n"
+            f"export const MOCAP_SOURCES: Readonly<Record<string, string>> = {json.dumps(sources)};\n"
+        )
     with open(CATALOG, "w") as f:
         f.write(
             head + 'import type { MocapClip } from "./mocapTypes.ts";\n\n'

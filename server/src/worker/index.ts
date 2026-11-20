@@ -19,7 +19,7 @@ import {
 } from "../cookies.ts";
 import type { AuthAction, LimitScope } from "../authLimits.ts";
 import { checkLogin, hashPassword } from "../passwords.ts";
-import { matchRoute, type Route } from "../routes.ts";
+import { matchRoute, needsOriginCheck, type Route } from "../routes.ts";
 import {
   applySecurityHeaders,
   isAllowedOrigin,
@@ -557,7 +557,7 @@ export default {
     let response: Response;
     if (!route) response = error(404, "not-found");
     else if (
-      (request.method !== "GET" || route.kind === "ws") &&
+      needsOriginCheck(request.method, route) &&
       !isAllowedOrigin(
         request.headers.get("Origin"),
         url.origin,

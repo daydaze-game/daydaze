@@ -1,7 +1,7 @@
 // The clock dancers share (game/dance/sync.ts): the club's beat clock while
 // music plays, the wall clock otherwise. It never starts audio of its own.
 
-import { peekSharedJukeboxController } from "../../audio/proceduralJukebox.ts";
+import { peekSharedJukeboxController } from "../../audio/sharedJukebox.ts";
 import type { Tempo } from "../../game/dance/sync.ts";
 
 /** Now, and the track's grid when its audio clock is running (else null). */
