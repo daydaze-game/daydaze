@@ -15,6 +15,7 @@ import {
   rewardVisit,
   rewardLegacy,
   rewardXp,
+  prizeXp,
 } from "./activities.ts";
 
 test("every scored activity has a ladder and grades increase XP", () => {
@@ -154,4 +155,10 @@ test("a room outside the album pays no first-visit XP, however often", () => {
   for (let i = 0; i < 5; i++) s = rewardVisit(s, "jail", -1, false);
   assert.equal(s.progression.xp.street, 0);
   assert.ok(!s.visited.includes("jail"));
+});
+
+test("prizeXp is the grade's XP plus 25 for a personal best", () => {
+  assert.equal(prizeXp("C", false), 25);
+  assert.equal(prizeXp("S", false), 100);
+  assert.equal(prizeXp("A", true), 95);
 });
