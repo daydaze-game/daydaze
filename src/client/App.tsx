@@ -21,6 +21,7 @@ import {
   type Holds,
 } from "../game/dance/moves.ts";
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
+import type { Graphics } from "../game/graphics.ts";
 import { getBuzz } from "./effects/drunk.ts";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
 import { leaveParty } from "./net/party.ts";
@@ -331,6 +332,8 @@ export function App() {
     setSave((s) => ({ ...s, settings: { ...s.settings, muted } }));
   const setEffects = (effects: Intensity) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, effects } }));
+  const setGraphics = (graphics: Graphics) =>
+    setSave((s) => ({ ...s, settings: { ...s.settings, graphics } }));
   // signed in, every change goes up to the account a few seconds later.
   // A restored account save remounts the rank-up watcher, so ranks it brings
   // back aren't celebrated as new ones.
@@ -528,8 +531,6 @@ export function App() {
       window.clearInterval(id);
     };
   }, []);
-  const saved = save.settings.quality;
-  const quality = flags.quality ?? (saved === "auto" ? null : saved);
 
   return (
     <ReducedMotionContext.Provider value={reducedMotion}>
@@ -589,7 +590,8 @@ export function App() {
           onMove={() => setMood((m) => (m === "dance" ? "idle" : m))}
           view={view}
           tag={tag}
-          quality={quality}
+          quality={flags.quality}
+          graphics={save.settings.graphics}
           still={flags.still}
           onPortal={(portal) => travel(portal.target, portal.targetSpawn)}
           home={shownHome}
@@ -681,6 +683,8 @@ export function App() {
           onCityTravel={(spawn) => travel("city", spawn)}
           muted={save.settings.muted}
           setMuted={setMuted}
+          graphics={save.settings.graphics}
+          setGraphics={setGraphics}
           mood={mood}
           setMood={setMood}
           dance={dance}

@@ -25,11 +25,8 @@ import {
 } from "../../../game/dance/clips.ts";
 import {
   modelSuffix,
-  FACE_PRESETS,
   limbsOf,
   LIMB_SPOTS,
-  FIGURES,
-  FACE_SLIDERS,
   faceOf,
   seededFace,
   piercingsOf,
@@ -58,11 +55,11 @@ import { useReducedMotion } from "../../motion.ts";
 import {
   DEFAULT_BODY,
   bodyScales,
-  figureMorphs,
+  dollShapeKeys,
   type BodyShape,
 } from "../../../game/body.ts";
 import { pose, type Rig } from "../pose.ts";
-import { useQuality } from "../../world/quality.ts";
+import { useGraphics, useQuality } from "../../world/quality.ts";
 import { NPC_GAITS, gaitOf } from "../../../game/gaits.ts";
 import { BUILT_STRIDE, walkPhaseRate } from "../../../game/dance/stride.ts";
 import { syncOffset } from "../../../game/dance/sync.ts";
@@ -797,7 +794,8 @@ function Part({
   full?: boolean;
 }) {
   const gltfLo = useGLTF(full ? url : lodOf(url));
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
+  const { shadows } = useGraphics();
   const { color, kind } = tint;
   const lo = useMemo(
     () => buildPart(gltfLo.scene, bones, { color, kind }, full && rich),
@@ -813,6 +811,9 @@ function Part({
     if (lo.group.visible !== showLo) lo.group.visible = showLo;
     if (near && near.group.visible === showLo) near.group.visible = !showLo;
   });
+  useEffect(() => {
+    castShadows(lo.group, shadows);
+  }, [lo, shadows]);
   useEffect(() => {
     onMeshes(
       near
@@ -854,12 +855,16 @@ function NearPart({
 }) {
   const gltf = useGLTF(url);
   // the glossy hair shading and its soft-edge pass are for capable GPUs
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
+  const { shadows } = useGraphics();
   const { color, kind } = tint;
   const part = useMemo(
     () => buildPart(gltf.scene, bones, { color, kind }, rich),
     [gltf, bones, color, kind, rich],
   );
+  useEffect(() => {
+    castShadows(part.group, shadows);
+  }, [part, shadows]);
   useEffect(() => {
     // hidden until Part decides, so it never shows alongside the twin
     part.group.visible = false;
@@ -870,6 +875,13 @@ function NearPart({
     };
   }, [part, onBuilt]);
   return <primitive object={part.group} />;
+}
+
+/** Sets whether every mesh under `group` casts the key light's shadow. */
+function castShadows(group: THREE.Object3D, on: boolean) {
+  group.traverse((o) => {
+    if (o instanceof THREE.Mesh) o.castShadow = on;
+  });
 }
 
 /** A part's scene re-bound to the body's bones, with the doll's materials. */
@@ -1005,6 +1017,12 @@ export function HumanDoll({
     [look, seed],
   );
   const body = useBody(painted, face.eyeColor);
+  // on Realistic every doll casts the key light's shadow; each part sets its
+  // own when it mounts, so only the body is covered here
+  const { shadows } = useGraphics();
+  useEffect(() => {
+    if (root.current) castShadows(root.current, shadows);
+  }, [body, shadows]);
   const gait = gaitOf(
     look.gait ?? (seed ? NPC_GAITS[seed % NPC_GAITS.length] : undefined),
   );
@@ -1053,30 +1071,8 @@ export function HumanDoll({
   const bodyMeshes = useMemo(() => morphMeshes(body.scene), [body]);
   const worn = useRef(new Map<string, THREE.Mesh[]>());
   const wornList = useRef<THREE.Mesh[]>([]);
-  // every face and body key with its value: face sliders, figure, face
-  // presets (the picked option at 1, the group's others at 0) and the closet
-  // body sliders (50 is the base shape, 0 and 100 the key at -1 and 1)
-  const shapeKeys = useMemo((): readonly (readonly [string, number])[] => {
-    const keys: [string, number][] = [];
-    for (const s of FACE_SLIDERS) keys.push([s.id, face[s.id]]);
-    const figure = figureMorphs(shape, face.figure);
-    for (const b of FIGURES)
-      if (b.id !== "classic") keys.push([b.id, figure[b.id]]);
-    for (const g of FACE_PRESETS)
-      for (const o of g.options.slice(1))
-        keys.push([`${g.key}_${o.id}`, face[g.field] === o.id ? 1 : 0]);
-    // the monolid has no key of its own: a deep fold-down (the hooded key)
-    // with a slight lift at the outer corners
-    if (face.eyeShape === "monolid") {
-      keys.push(["eye_hooded", 0.9]);
-      keys.push(["eye_upturned", 0.3]);
-    }
-    // the man's body has no bust key (setMorph skips a missing key)
-    keys.push(["bust", (shape.bust - 50) / 50]);
-    keys.push(["hips", (shape.hips - 50) / 50]);
-    keys.push(["waist", (shape.waist - 50) / 50]);
-    return keys;
-  }, [face, shape]);
+  // every face and body key with its value (dollShapeKeys)
+  const shapeKeys = useMemo(() => dollShapeKeys(face, shape), [face, shape]);
   const shapedFor = useRef<THREE.Mesh[] | null>(null);
   const shapedWith = useRef<typeof shapeKeys | null>(null);
   const lift = useRef(0);

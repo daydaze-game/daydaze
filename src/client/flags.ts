@@ -26,7 +26,7 @@ export type CamFlag =
 
 /** Every URL flag, already validated. */
 export type Flags = {
-  /** `?quality=low|high` forces a tier. */
+  /** `?quality=low|high|ultra` forces a tier. */
   quality: QualityTier | null;
   /** `?still=1` renders a few frames and stops, for screenshots. */
   still: boolean;
@@ -97,7 +97,10 @@ export function readFlags(search: string): Flags {
   const heistend =
     heistendRaw === "caught" || heistendRaw === "escape" ? heistendRaw : null;
   return {
-    quality: quality === "low" || quality === "high" ? quality : null,
+    quality:
+      quality === "low" || quality === "high" || quality === "ultra"
+        ? quality
+        : null,
     still: q.get("still") === "1",
     debug: q.get("debug") === "1",
     room: spot ? "city" : isRoomId(room) ? room : null,
@@ -165,6 +168,8 @@ export function bootTier(
   search: string,
   rawSave: string | null,
 ): QualityTier | null {
-  const saved = loadSave(rawSave, "").settings.quality;
-  return readFlags(search).quality ?? (saved === "auto" ? null : saved);
+  const saved = loadSave(rawSave, "").settings.graphics;
+  return (
+    readFlags(search).quality ?? (saved.preset === "auto" ? null : saved.tier)
+  );
 }

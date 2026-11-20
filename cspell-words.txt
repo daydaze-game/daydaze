@@ -889,6 +889,7 @@ skyeboat
 slerp
 slushie
 slushies
+smaa
 smaug
 snris
 soju

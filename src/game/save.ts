@@ -37,6 +37,7 @@ import { cleanBests, type Bests } from "./prizes.ts";
 import { validatePet, type PetSave } from "./pet.ts";
 import { cleanParkedCar, type ParkedCar } from "./city/drive.ts";
 import { cleanGarage, STARTER } from "./garage.ts";
+import { cleanGraphics, defaultGraphics, type Graphics } from "./graphics.ts";
 import { cleanRecords, type RecordId } from "./records.ts";
 import { cleanWardrobe, unlockedLook } from "./shop.ts";
 import { isCoins, STARTING_COINS } from "./wallet.ts";
@@ -45,9 +46,6 @@ import {
   freshProgression,
   type Progression,
 } from "./progression/progression.ts";
-
-/** The graphics quality setting; auto picks a tier from the device. */
-export type Quality = "auto" | "high" | "low";
 
 /** Everything a player keeps between sessions. */
 export type SaveV1 = {
@@ -60,7 +58,8 @@ export type SaveV1 = {
   wardrobe: string[];
   body: BodyShape;
   settings: {
-    quality: Quality;
+    /** The Graphics menu: a preset or custom switches (graphics.ts). */
+    graphics: Graphics;
     muted: boolean;
     effects: Intensity;
     /** The dressing-room drawer; closed on a new save. */
@@ -109,16 +108,6 @@ export type SaveV1 = {
 /** The localStorage key the save lives under. */
 export const SAVE_KEY = "daydaze-save-v1";
 
-const QUALITIES: readonly unknown[] = [
-  "auto",
-  "high",
-  "low",
-] satisfies Quality[];
-
-function isQuality(value: unknown): value is Quality {
-  return QUALITIES.includes(value);
-}
-
 /**
  * A fresh save for a new player named `name`, with fresh copies of every
  * default (nothing shared).
@@ -133,7 +122,7 @@ export function createDefaultSave(name: string): SaveV1 {
     wardrobe: [],
     body: { ...DEFAULT_BODY },
     settings: {
-      quality: "auto",
+      graphics: defaultGraphics(),
       muted: false,
       effects: "full",
       strictChat: false,
@@ -190,7 +179,11 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
   const bouquet = save.get("bouquet");
   const wardrobe = cleanWardrobe(save.get("wardrobe"));
   const garage = cleanGarage(save.get("garage"));
-  const quality = settings.get("quality");
+  // saves from before the Graphics menu hold a plain auto/high/low `quality`
+  const graphics = cleanGraphics(
+    settings.get("graphics"),
+    settings.get("quality"),
+  );
   const muted = settings.get("muted");
   const effects = settings.get("effects");
   const panelOpen = settings.get("panelOpen");
@@ -208,7 +201,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     wardrobe,
     body: cleanBody(save.get("body")),
     settings: {
-      quality: isQuality(quality) ? quality : defaults.settings.quality,
+      graphics,
       muted: typeof muted === "boolean" ? muted : defaults.settings.muted,
       // saves from before the drunk effects have no effects field yet
       effects: isIntensity(effects) ? effects : defaults.settings.effects,

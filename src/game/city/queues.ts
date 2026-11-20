@@ -1,14 +1,16 @@
 // The people waiting outside the clubs: three in the queue, four behind them
 // and a bouncer at each end of the door (buildings with `queue: true`). Pure
-// positions and looks; src/client/city/QueueCrowd.tsx draws them as Kenney
-// Mini Characters (CC0), one instanced mesh per look. They stand facing the door.
+// positions and looks; src/client/city/QueueCrowd.tsx draws them as baked
+// doll people (src/game/crowd.ts), one instanced mesh per look. They stand
+// facing the door.
 
 import { BUILDINGS } from "./layout.ts";
 import { frontOf } from "./dressing.ts";
 import { hash } from "./hash.ts";
+import { CROWD_TRIS, type CrowdLook } from "../crowd.ts";
 
-/** The baked looks (public/models/speedway/people-<look>-idle.glb). */
-export const QUEUE_LOOKS = [
+/** The looks in line (crowdUrl(look, "idle", "near")). */
+export const QUEUE_LOOKS: readonly CrowdLook[] = [
   "male-a",
   "female-c",
   "male-d",
@@ -17,13 +19,13 @@ export const QUEUE_LOOKS = [
   "male-e",
   "female-b",
   "female-d",
-] as const;
+];
 /** Queues farther than this (meters, from where the plan was cut) are not drawn: on the low tier, and elsewhere. */
 export const QUEUE_NEAR_LOW = 80;
 export const QUEUE_NEAR = 130;
-/** The dearest baked person's triangles (public/models/speedway/people-*-idle.glb; budget.test.ts checks). */
-export const QUEUE_PERSON_TRIS = 880;
-export type QueueLook = (typeof QUEUE_LOOKS)[number];
+/** The dearest queued person's triangles (budget.test.ts checks the files). */
+export const QUEUE_PERSON_TRIS = CROWD_TRIS.near;
+export type QueueLook = CrowdLook;
 /** The bouncers are always these two. */
 const BOUNCERS: readonly QueueLook[] = ["male-d", "male-e"];
 

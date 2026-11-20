@@ -38,7 +38,7 @@ export function WaterPark({
       <color attach="background" args={["#8fdcff"]} />
       <fog attach="fog" args={["#cdeefc", 40, 110]} />
       {/* high tier: a real sky in the water and on wet skin */}
-      {quality === "high" ? (
+      {quality !== "low" ? (
         <Suspense fallback={null}>
           <Environment
             files="/hdri/kloofendal_48d_partly_cloudy_puresky.hdr"
