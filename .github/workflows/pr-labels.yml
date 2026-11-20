@@ -1,0 +1,77 @@
+name: pr-labels
+# A pull request carries the same labels as the issues it links: "Closes #n",
+# "Fixes #n", "Resolves #n" or "Refs #n" in its body. Issues hold the routing
+# labels (area, model, effort, mcp, skill), so this copies them onto the PR
+# when it opens or its body changes, and keeps them in step when an issue
+# gains or loses a label later.
+# pull_request_target gives the job a token that may label; it never checks
+# out or runs the PR's code, and the body is read only through env.
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, ready_for_review]
+  issues:
+    types: [labeled, unlabeled]
+permissions: {}
+jobs:
+  from-issues:
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Copy the linked issues' labels onto the PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          issues=$(grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?):?[[:space:]]+#[0-9]+' <<<"$BODY" | grep -oE '[0-9]+$' | sort -u || true)
+          for n in $issues; do
+            # a "#n" that is a pull request, or missing, has no labels to copy
+            gh api "repos/$REPO/issues/$n" -q 'select(.pull_request == null) | .labels[].name' 2>/dev/null |
+              while IFS= read -r label; do
+                gh api -X POST "repos/$REPO/issues/$PR/labels" -f "labels[]=$label" > /dev/null
+              done
+          done
+  to-prs:
+    # issues events fire for issues only; a PR's own label changes are left alone
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Match the label on open PRs that link this issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE: ${{ github.event.issue.number }}
+          LABEL: ${{ github.event.label.name }}
+        # Decide from the current labels of every issue the PR links, not from
+        # the event: a delayed run can't undo a newer change, and a label that
+        # another linked issue still has stays on the PR.
+        run: |
+          prs=$(gh pr list -R "$REPO" --state open --limit 100 --search "$ISSUE in:body" --json number,body,isCrossRepository \
+            -q ".[] | select(.isCrossRepository | not) | select(.body | test(\"(?i)(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?):?\\\\s+#$ISSUE\\\\b\")) | .number")
+          for pr in $prs; do
+            body=$(gh api "repos/$REPO/pulls/$pr" -q .body)
+            issues=$(grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?):?[[:space:]]+#[0-9]+' <<<"$body" | grep -oE '[0-9]+$' | sort -u || true)
+            want=false
+            for n in $issues; do
+              if gh api "repos/$REPO/issues/$n" -q 'select(.pull_request == null) | .labels[].name' 2>/dev/null | grep -qxF -- "$LABEL"; then
+                want=true
+                break
+              fi
+            done
+            if [ "$want" = true ]; then
+              gh api -X POST "repos/$REPO/issues/$pr/labels" -f "labels[]=$LABEL" > /dev/null
+            else
+              gh api -X DELETE "repos/$REPO/issues/$pr/labels/$(jq -rn --arg l "$LABEL" '$l|@uri')" > /dev/null 2>&1 || true
+            fi
+          done
