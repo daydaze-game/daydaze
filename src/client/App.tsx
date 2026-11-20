@@ -24,19 +24,11 @@ import {
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
 import { getBuzz } from "./effects/drunk.ts";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
-import { DuelPanel } from "./net/DuelPanel.tsx";
-import { TogetherPanel } from "./net/TogetherPanel.tsx";
-import { CookOffInvite } from "./net/CookOffInvite.tsx";
-import { PartyPanel } from "./net/PartyPanel.tsx";
-import { RidePanel } from "./net/RidePanel.tsx";
-import { RacePanel } from "./net/RacePanel.tsx";
 import { leaveParty } from "./net/party.ts";
 import { endVisit, homeVisit, listenForHomes } from "./net/home.ts";
-import { ConnectionNote } from "./net/ConnectionNote.tsx";
 import { chatPrefs } from "./net/chatPrefs.ts";
 import { useCloudSave } from "./net/cloudSave.ts";
 import { FriendsPanel } from "./net/FriendsPanel.tsx";
-import { PeerCard } from "./net/PeerCard.tsx";
 import type { MinigameId } from "../game/hotspots.ts";
 import { isJailed } from "../game/jail/jail.ts";
 import { jailAfterArrest } from "../game/police/arrest.ts";
@@ -129,6 +121,11 @@ const DevPanel = import.meta.env.DEV
       import("./world/DevTools.tsx").then((m) => ({ default: m.DevPanel })),
     )
   : null;
+
+/** Another player's card and the online invites, for online play only. */
+const OnlinePanels = lazy(() =>
+  import("./net/OnlinePanels.tsx").then((m) => ({ default: m.OnlinePanels })),
+);
 
 /** Room jumps for `?debug=1` only, so other visits never download them. */
 const DebugPanel = lazy(() =>
@@ -528,7 +525,6 @@ export function App() {
           )}
           <p className="nametag">{save.name}</p>
         </div>
-        <PeerCard />
         <FriendsPanel
           onGo={(room) => travel(room, ROOMS[room].spawn)}
           strictChat={save.settings.strictChat}
@@ -536,13 +532,11 @@ export function App() {
           save={save}
           onSave={setSave}
         />
-        {ONLINE && <DuelPanel />}
-        {ONLINE && <TogetherPanel />}
-        {ONLINE && <CookOffInvite />}
-        {ONLINE && <PartyPanel onGo={goWithParty} />}
-        {ONLINE && <RidePanel />}
-        {ONLINE && <RacePanel />}
-        {ONLINE && <ConnectionNote />}
+        {ONLINE && (
+          <Suspense fallback={null}>
+            <OnlinePanels onGo={goWithParty} />
+          </Suspense>
+        )}
         <div className="fade" data-on={fading} aria-hidden="true" />
         {notice && (
           <p className="notice" role="status">
