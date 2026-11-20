@@ -1,13 +1,13 @@
 // The walkable floor every room stands on: a plane that turns a click into a
-// walk order, mirrored with MeshReflectorMaterial on high quality and a plain
-// glossy material on low. A drag (over 6 px) is taken as a camera orbit and
+// walk order, mirrored with MeshReflectorMaterial when reflections are on and a plain
+// glossy material when off. A drag (over 6 px) is taken as a camera orbit and
 // ignored.
 
 import { MeshReflectorMaterial } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
 import type * as THREE from "three";
 import type { Vec2 } from "../../../game/walk.ts";
-import { useQuality } from "../../world/quality.ts";
+import { useGraphics } from "../../world/quality.ts";
 import { tiledMaps } from "../../city/worldTexture.ts";
 
 /**
@@ -17,7 +17,7 @@ import { tiledMaps } from "../../city/worldTexture.ts";
 export type PickHandler = (point: Vec2) => void;
 
 /**
- * The walkable ground. High quality mirrors the room in it; low quality
+ * The walkable ground. With reflections on it mirrors the room; off, it
  * keeps the same color as a plain glossy surface.
  */
 export function Floor({
@@ -49,11 +49,11 @@ export function Floor({
   roughness?: number | undefined;
   /** How strongly the room's environment map shows in the glossy surface. */
   envMapIntensity?: number | undefined;
-  /** Low quality has no mirror; a big glossy plane can flood with specular. */
+  /** Without reflections there is no mirror; a big glossy plane can flood with specular. */
   low?: { metalness: number; roughness: number } | undefined;
   onPick: PickHandler;
 }) {
-  const quality = useQuality();
+  const { reflections, shadows } = useGraphics();
   const set = texture && tiledMaps(texture.id, width, depth, texture.scale);
   const maps = set
     ? { ...set, map: map ?? set.map }
@@ -70,9 +70,10 @@ export function Floor({
       position={[center[0], 0, center[1]]}
       onClick={click}
       name="floor"
+      receiveShadow={shadows}
     >
       <planeGeometry args={[width, depth]} />
-      {quality === "low" ? (
+      {!reflections ? (
         <meshStandardMaterial
           color={color}
           map={maps.map ?? null}

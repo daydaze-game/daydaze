@@ -120,7 +120,7 @@ In development, press `` ` `` for the dev panel: FPS and draw calls,
 wireframe, a free camera, jumps to any room, game or event, a live clock, an
 object inspector and more. See [docs/dev-tools.md](docs/dev-tools.md).
 
-URL flags: `?quality=low|high` forces a quality tier, `?still=1` renders a
+URL flags: `?quality=low|high|ultra` forces a quality tier, `?still=1` renders a
 few frames and stops (for screenshots), `?debug=1` shows room jump buttons,
 `?online=1` turns on online play, `?timescale=0.1` slows game time for frame
 strips. The full list is in [docs/dev-tools.md](docs/dev-tools.md#url-flags).
