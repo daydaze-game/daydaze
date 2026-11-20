@@ -323,6 +323,8 @@ export function PlayerController({
   const lift = paired?.role === "follow" ? liftOf(paired.e) : 0;
   // kissing someone: the face this doll bends or rises to meet (reach.ts); a
   // peer's doll is drawn at the default body
+  // shortcut: read when the pair changes, so a partner whose look arrives
+  // after that gets no reach until the next render; subscribe if seen
   const partnerLook = paired
     ? onlineSession()?.remotePlayers.get(paired.id)?.look
     : null;

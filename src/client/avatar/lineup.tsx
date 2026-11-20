@@ -104,8 +104,9 @@ const DANCES = (
 const pairQuery = new URLSearchParams(location.search);
 const EMOTE = ((e) => (isTogetherId(e) ? e : "kiss"))(pairQuery.get("emote"));
 const shutAt = danceMove(roleMove(EMOTE, "lead")).shut;
+const pinAt = Number(pairQuery.get("at") ?? Number.NaN);
 pinPairClock(
-  Number(pairQuery.get("at") ?? (shutAt ? (shutAt[0] + shutAt[1]) / 2 : 0)),
+  Number.isFinite(pinAt) ? pinAt : shutAt ? (shutAt[0] + shutAt[1]) / 2 : 0,
 );
 // the together shot's couples, side on, each placed as the game places a
 // pair (together.ts): even heights, a tall lead with a short follow, and a

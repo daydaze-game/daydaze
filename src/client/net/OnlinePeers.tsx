@@ -85,15 +85,10 @@ function partnerFace(
   let best: number | undefined;
   let bestDist = 1.5;
   for (const [id, p] of session.remotePlayers) {
-    const s = id === peerId || !p.look ? null : session.sample(id);
+    if (id === peerId || !p.look) continue;
+    const s = session.sample(id);
     const other = s ? decodeAction(s.action).pair : undefined;
-    if (
-      !s ||
-      !p.look ||
-      other?.emote !== pair.emote ||
-      other.role === pair.role
-    )
-      continue;
+    if (!s || other?.emote !== pair.emote || other.role === pair.role) continue;
     const dist = Math.hypot(s.x - at.x, s.z - at.z);
     if (dist < bestDist) {
       bestDist = dist;

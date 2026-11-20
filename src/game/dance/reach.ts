@@ -1,7 +1,7 @@
 // A kiss between dolls of different heights: the shorter rises on their toes
 // and lifts their chin, the taller bends their knees and bows their head, so
 // the faces meet in the middle. Each side works out its half from the two face
-// heights alone, so both screens agree. Pure.
+// heights alone, so the two dolls on a screen agree on who does what. Pure.
 import { bodyScales, type BodyShape } from "../body.ts";
 import { modelSuffix, type Look } from "../look.ts";
 import type { Joint, Pose } from "./moves.ts";
@@ -48,6 +48,8 @@ export function reachFor(own: number, partner: number, back = 0): Reach {
   // the shorter does half, up to tiptoe; the taller does the rest it can
   const rise = Math.min(d / 2, MAX_RISE);
   const drop = Math.min(d - rise, MAX_DROP);
+  // a radian of bow for every meter of difference (a tenth of a meter gives
+  // 0.1 rad), capped: the knees and toes close the gap, the head only aims
   const nod = Math.min(0.15, d);
   return own > partner
     ? { drop, rise: 0, nod, back }
