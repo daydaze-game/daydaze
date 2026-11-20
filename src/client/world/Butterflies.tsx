@@ -22,7 +22,7 @@ import {
 import { hash } from "../../game/city/hash.ts";
 import { useReducedMotion } from "../motion.ts";
 import type { Player } from "./PlayerController.tsx";
-import { useQuality } from "./quality.ts";
+import { useDetail } from "./quality.ts";
 
 const URL = "/models/butterfly/butterfly.glb";
 /** Wing beats per second, and how far the tips lift (of the half-span). */
@@ -94,7 +94,7 @@ export function Butterflies({
   sun?: number;
   seed?: number;
 }): JSX.Element | null {
-  const tier = useQuality();
+  const tier = useDetail();
   const calm = useReducedMotion();
   const out = isOut(sun) && !calm;
   const time = useMemo(() => ({ value: 0 }), []);

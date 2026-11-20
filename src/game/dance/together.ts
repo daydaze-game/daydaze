@@ -1,6 +1,7 @@
 // Emotes for two players: one invites over the `game` relay, the other
 // accepts and steps to the spot by the inviter (the lead), and both play the
-// pose with mirrored roles (see couple.ts), except a piggyback: the lead
+// pose with mirrored roles (see couple.ts), except the kisses (one move,
+// unmirrored, on a shared clock) and a piggyback: the lead
 // carries, the follow rides on their back, each with a move of their own, and
 // the rider stays on wherever the lead walks. Pure.
 import { MAX_GAME_DATA } from "../../net/networkProtocol.ts";
@@ -27,6 +28,28 @@ export const TOGETHER = [
     gap: 0.36,
     side: false,
     ...PAIRED,
+  },
+  // the kisses play one move on both sides, unmirrored: a mirror image would
+  // tilt both heads the same way, nose into nose
+  {
+    id: "cheek-kiss",
+    label: "Cheek kiss",
+    move: "cheek-kiss",
+    follow: "cheek-kiss",
+    gap: 0.8,
+    side: false,
+    lift: 0,
+    behind: false,
+  },
+  {
+    id: "kiss",
+    label: "Kiss",
+    move: "kiss",
+    follow: "kiss",
+    gap: 0.84,
+    side: false,
+    lift: 0,
+    behind: false,
   },
   {
     id: "slow-dance",

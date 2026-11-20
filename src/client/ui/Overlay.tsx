@@ -5,6 +5,8 @@
 // restores the old view on close.
 
 import { byTier } from "../../game/age.ts";
+import type { Progression } from "../../game/progression/progression.ts";
+import { ProgressionHud, LadderPanel } from "./Progression.tsx";
 import { ActionDock, DockAction } from "./ActionDock.tsx";
 import { ClubNightTicker } from "./EventCalendar.tsx";
 import { InviteButton } from "../net/InviteButton.tsx";
@@ -12,6 +14,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { type Look, type Mood, type SwimLook } from "../../game/look.ts";
 import type { DanceMoveId, Holds } from "../../game/dance/moves.ts";
 import { type Intensity } from "../../game/effects/buzz.ts";
+import type { Graphics } from "../../game/graphics.ts";
 import { CarPicker } from "../city/CarPicker.tsx";
 import { driving } from "../world/driving.ts";
 import { collectionsBook } from "./Collections.tsx";
@@ -287,6 +290,8 @@ export function Overlay({
   swim,
   setSwim,
   coins,
+  progression,
+  onTitle,
   wardrobe,
   onBuy,
   crime,
@@ -298,6 +303,8 @@ export function Overlay({
   onPlayGame,
   onCityTravel,
   muted,
+  graphics,
+  setGraphics,
   setMuted,
   mood,
   setMood,
@@ -327,6 +334,8 @@ export function Overlay({
   swim: SwimLook;
   setSwim: (swim: SwimLook) => void;
   coins: number;
+  progression: Progression;
+  onTitle: (title: string | null) => void;
   wardrobe: readonly string[];
   onBuy: (id: string, store?: ShopId, day?: number) => PurchaseResult;
   crime: CrimeSave;
@@ -340,6 +349,8 @@ export function Overlay({
   onCityTravel: (spawn: Spawn) => void;
   muted: boolean;
   setMuted: (muted: boolean) => void;
+  graphics: Graphics;
+  setGraphics: (graphics: Graphics) => void;
   mood: Mood;
   setMood: (mood: Mood) => void;
   dance: DanceMoveId;
@@ -422,6 +433,7 @@ export function Overlay({
         <p className="coins" aria-label={`${coins} coins`}>
           {coins} coins
         </p>
+        <ProgressionHud progression={progression} />
       </header>
 
       {phone && (
@@ -696,7 +708,8 @@ export function Overlay({
             onPick={setMood}
             options={PLAYER_MOODS}
           />
-          <GameMenu>
+          <GameMenu graphics={graphics} setGraphics={setGraphics}>
+            <LadderPanel progression={progression} onTitle={onTitle} />
             <div className="game-menu-items" role="group" aria-label="Game">
               <button
                 type="button"
