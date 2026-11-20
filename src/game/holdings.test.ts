@@ -14,6 +14,7 @@ import {
   storageCap,
   totalIncomeRate,
   upgradePrice,
+  type HoldingId,
   type HoldingsState,
 } from "./holdings.ts";
 import { MAX_COINS } from "./wallet.ts";
@@ -23,6 +24,16 @@ const HOUR = 3_600_000;
 function owned(id: "boba-shop" | "club" = "boba-shop"): HoldingsState {
   const r = applyHoldingAction({}, 100_000, { type: "buy", id }, 0);
   return r.state;
+}
+
+/** The holding `id` from `state`, failing the test if it isn't owned. */
+function ownedHolding(
+  state: HoldingsState,
+  id: HoldingId,
+): NonNullable<HoldingsState[HoldingId]> {
+  const holding = state[id];
+  assert.ok(holding, `${id} should be owned`);
+  return holding;
 }
 
 test("buying costs the price, grants XP, and only once", () => {
@@ -60,19 +71,18 @@ test("prices climb from home to club", () => {
 
 test("income accrues with time and stops at the cap", () => {
   const s = owned();
-  const o = s["boba-shop"]!;
+  const o = ownedHolding(s, "boba-shop");
   assert.equal(pending("boba-shop", o, 2 * HOUR), 60);
   const cap = storageCap("boba-shop", 1);
   assert.equal(pending("boba-shop", o, 1000 * HOUR), Math.floor(cap));
 });
 
 test("time going backwards adds nothing", () => {
-  const o = applyHoldingAction(
-    {},
-    5000,
-    { type: "buy", id: "boba-shop" },
-    10 * HOUR,
-  ).state["boba-shop"]!;
+  const o = ownedHolding(
+    applyHoldingAction({}, 5000, { type: "buy", id: "boba-shop" }, 10 * HOUR)
+      .state,
+    "boba-shop",
+  );
   assert.equal(pending("boba-shop", o, 0), 0);
 });
 
@@ -86,7 +96,7 @@ test("collecting moves whole coins and keeps the fraction", () => {
   );
   assert.equal(r.collected, Math.floor(30 / 7));
   assert.equal(r.coins, r.collected);
-  const left = r.state["boba-shop"]!.stored;
+  const left = ownedHolding(r.state, "boba-shop").stored;
   assert.ok(left >= 0 && left < 1);
   const empty = applyHoldingAction(
     r.state,
@@ -117,7 +127,10 @@ test("collecting never pushes the wallet past MAX_COINS", () => {
   );
   assert.equal(r.coins, MAX_COINS);
   assert.equal(r.collected, 10);
-  assert.ok(r.state.club!.stored > 1000, "the rest stays in the till");
+  assert.ok(
+    ownedHolding(r.state, "club").stored > 1000,
+    "the rest stays in the till",
+  );
   const full = applyHoldingAction(
     r.state,
     MAX_COINS,
@@ -136,12 +149,14 @@ test("upgrades raise income and the cap, and bank income at the old rate", () =>
     HOUR,
   );
   assert.equal(r.failure, null);
-  const o = r.state["boba-shop"]!;
+  const o = ownedHolding(r.state, "boba-shop");
   assert.equal(o.level, 2);
   assert.equal(o.stored, 30);
   assert.ok(incomeRate("boba-shop", 2, 0) > incomeRate("boba-shop", 1, 0));
   assert.ok(storageCap("boba-shop", 2) > storageCap("boba-shop", 1));
-  assert.equal(r.coins, 5000 - upgradePrice("boba-shop", 1)!);
+  const price = upgradePrice("boba-shop", 1);
+  assert.ok(price !== null);
+  assert.equal(r.coins, 5000 - price);
 });
 
 test("upgrades stop at the max level and need coins", () => {
@@ -163,7 +178,7 @@ test("upgrades stop at the max level and need coins", () => {
     state = r.state;
     coins = r.coins;
   }
-  assert.equal(state["boba-shop"]!.level, MAX_LEVEL);
+  assert.equal(ownedHolding(state, "boba-shop").level, MAX_LEVEL);
   assert.equal(
     applyHoldingAction(state, coins, { type: "upgrade", id: "boba-shop" }, 0)
       .failure,
