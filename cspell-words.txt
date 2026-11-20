@@ -206,6 +206,7 @@ clocktower
 clownfish
 cmaj
 cocaethylene
+coderabbit
 colinhume
 colormap
 colormass
@@ -1090,3 +1091,4 @@ zzpebble
 Хмара
 anthropics
 elif
+webp

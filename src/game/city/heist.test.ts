@@ -144,3 +144,8 @@ test("every player sees the same heist", () => {
   heistFrame(t, b);
   assert.deepEqual(a, b);
 });
+
+test("heistInto is free of float jitter on large clock values", () => {
+  const start = heistStart(1000);
+  assert.equal(heistInto(start + 74.9), 74.9);
+});
