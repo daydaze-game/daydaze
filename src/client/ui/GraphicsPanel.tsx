@@ -3,7 +3,7 @@
 // stays open over the live world, so a change shows at once; changing any
 // advanced switch moves the preset to Custom.
 
-import { useEffect, type JSX } from "react";
+import { useEffect, useRef, type JSX } from "react";
 import {
   changeAdvanced,
   FRAME_CAPS,
@@ -94,7 +94,7 @@ function Field({
 }): JSX.Element {
   return (
     <div className="graphics-field">
-      <span>{label}</span>
+      <span aria-hidden="true">{label}</span>
       {children}
     </div>
   );
@@ -109,7 +109,14 @@ export function GraphicsPanel({
   onChange: (graphics: Graphics) => void;
   onClose: () => void;
 }): JSX.Element {
-  const { fps, tier } = renderStats.use();
+  const { fps, tier, active, forced } = renderStats.use();
+  // what is really rendering (Auto may have stepped down) is what the switches
+  // show and what a change builds on, so touching one never jumps the look back up
+  const shown = active ?? graphics;
+  const close = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    close.current?.focus();
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -124,7 +131,7 @@ export function GraphicsPanel({
   if (graphics.preset === "custom")
     presets.push({ id: "custom", label: PRESET_LABELS.custom });
   const set = (patch: Partial<Advanced>) =>
-    onChange(changeAdvanced(graphics, patch));
+    onChange(changeAdvanced(shown, patch));
   return (
     <section
       className="game-menu graphics-panel"
@@ -133,7 +140,12 @@ export function GraphicsPanel({
     >
       <div className="game-menu-head">
         <h2>Graphics</h2>
-        <button type="button" aria-label="Close graphics" onClick={onClose}>
+        <button
+          ref={close}
+          type="button"
+          aria-label="Close graphics"
+          onClick={onClose}
+        >
           Close
         </button>
       </div>
@@ -141,6 +153,12 @@ export function GraphicsPanel({
         {fps > 0 ? `${fps} frames per second` : "Measuring frame rate"}
         {tier && ` · ${TIER_NAME[tier]} look`}
       </p>
+      {forced && (
+        <p className="graphics-hint" role="note">
+          The address sets the quality (?quality=), so changes here wait until
+          it is removed.
+        </p>
+      )}
       <Segmented
         className="graphics-presets"
         label="Graphics preset"
@@ -158,7 +176,7 @@ export function GraphicsPanel({
           <label key={key} className="graphics-switch">
             <input
               type="checkbox"
-              checked={graphics[key]}
+              checked={shown[key]}
               onChange={(e) => set(flip(key, e.target.checked))}
             />
             <span>{label}</span>
@@ -166,19 +184,21 @@ export function GraphicsPanel({
           </label>
         ))}
       </div>
-      <Slider
-        label={`Bloom strength: ${graphics.bloom.toFixed(2)}`}
-        value={graphics.bloom}
-        min={0}
-        max={MAX_BLOOM}
-        step={0.05}
-        onChange={(bloom) => set({ bloom })}
-      />
+      <fieldset className="graphics-bloom" disabled={!shown.post}>
+        <Slider
+          label={`Bloom strength: ${shown.bloom.toFixed(2)}`}
+          value={shown.bloom}
+          min={0}
+          max={MAX_BLOOM}
+          step={0.05}
+          onChange={(bloom) => set({ bloom })}
+        />
+      </fieldset>
       <Field label="Render distance">
         <Segmented
           className="graphics-row"
           label="Render distance"
-          value={graphics.distance}
+          value={shown.distance}
           options={DISTANCE_OPTIONS}
           onPick={(distance) => set({ distance })}
         />
@@ -187,7 +207,7 @@ export function GraphicsPanel({
         <Segmented
           className="graphics-row"
           label="Resolution scale"
-          value={String(graphics.scale)}
+          value={String(shown.scale)}
           options={SCALE_OPTIONS}
           onPick={(id) => set({ scale: Number(id) })}
         />
@@ -196,7 +216,7 @@ export function GraphicsPanel({
         <Segmented
           className="graphics-row"
           label="Frame-rate cap"
-          value={String(graphics.fpsCap)}
+          value={String(shown.fpsCap)}
           options={CAP_OPTIONS}
           onPick={(id) =>
             set({ fpsCap: FRAME_CAPS.find((c) => String(c) === id) ?? 0 })

@@ -2994,6 +2994,17 @@ button:focus-visible {
   font-size: 13px;
 }
 
+.graphics-bloom {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.graphics-bloom:disabled {
+  opacity: 0.45;
+}
+
 .graphics-field {
   display: grid;
   gap: 4px;

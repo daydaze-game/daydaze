@@ -451,7 +451,7 @@ function KeyLight({ player, shadows }: { player: Player; shadows: boolean }) {
       l.position.set(2, 5, 6);
       target.position.set(0, 0, 0);
     };
-  }, [target]);
+  }, [target, shadows]);
   useFrame(() => {
     const l = light.current;
     if (!l || !shadows) return;
@@ -500,11 +500,13 @@ function DrawDistance({ far }: { far: number }) {
  * a 144 Hz screen runs near 48), fine until someone asks for exact pacing.
  */
 function FrameCap({ cap }: { cap: number }) {
-  const setFrameloop = useThree((s) => s.setFrameloop);
+  const set = useThree((s) => s.set);
   const invalidate = useThree((s) => s.invalidate);
   useEffect(() => {
     if (cap === 0) return;
-    setFrameloop("demand");
+    // `set`, not `setFrameloop`: that one rewinds the clock to zero, which
+    // freezes every timer that compares against elapsed time
+    set({ frameloop: "demand" });
     // a millisecond of slack, so a display's frame jitter never skips a frame
     const gap = 1000 / cap - 1;
     let last = 0;
@@ -519,9 +521,9 @@ function FrameCap({ cap }: { cap: number }) {
     id = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(id);
-      setFrameloop("always");
+      set({ frameloop: "always" });
     };
-  }, [cap, invalidate, setFrameloop]);
+  }, [cap, invalidate, set]);
   return null;
 }
 
@@ -802,6 +804,14 @@ export function World({
     [quality, graphics, step],
   );
   const tier = active.tier;
+  // the menu shows what is really rendering, and says when the URL overrides it
+  useEffect(() => {
+    renderStats.set({ active, forced: quality !== null });
+  }, [active, quality]);
+  // choosing Auto again starts from Balanced, not from an old step-down
+  useEffect(() => {
+    if (graphics.preset !== "auto") setStep(0);
+  }, [graphics.preset]);
   const def = ROOMS[room];
   const area = useMemo(() => areaOf(def), [def]);
   // a fresh player per arrival, so a portal can only fire once per visit
@@ -832,7 +842,7 @@ export function World({
       frameloop={still ? "demand" : "always"}
       // the renderer's shadow maps stay ready; nothing is drawn into one until
       // a light casts (the key light, on Realistic), so other tiers pay nothing
-      shadows="soft"
+      shadows="percentage"
       // the resolution scale is the most device pixels per CSS pixel: Balanced
       // stops at 1.5x (2x quadrupled the pixels the bloom chain works through),
       // Auto steps down to 1x before the effects go; native MSAA smooths edges
@@ -966,13 +976,17 @@ export function World({
             <Confetti />
             {!dressing &&
               (active.post || active.ao ? (
-                <Effects
-                  key={`fx-${active.post}-${active.ao}`}
-                  room={room}
-                  post={active.post}
-                  ao={active.ao}
-                  bloom={active.bloom}
-                />
+                // its own boundary: the first live switch to it loads a chunk,
+                // and the world must not blink out while that arrives
+                <Suspense fallback={null}>
+                  <Effects
+                    key={`fx-${active.post}-${active.ao}`}
+                    room={room}
+                    post={active.post}
+                    ao={active.ao}
+                    bloom={active.bloom}
+                  />
+                </Suspense>
               ) : (
                 <NeonClamp key={`clamp-${room}`} />
               ))}

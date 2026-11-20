@@ -59,7 +59,8 @@ export const MAX_BLOOM = 2;
 
 /** The camera far plane per distance setting, in meters. */
 export const DRAW_FAR: Record<DrawDistance, number> = {
-  near: 300,
+  // past the city's sky dome (radius 440), which the fog does not hide
+  near: 480,
   medium: 600,
   far: 900,
 };
