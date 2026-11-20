@@ -1,3 +1,4 @@
+// Tests for server/src/roomCore.ts: room copy state, messaging, visibility and moderation.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
