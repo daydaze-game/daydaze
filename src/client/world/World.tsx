@@ -877,6 +877,8 @@ export function World({
             <OnlinePeers
               room={room}
               player={player}
+              look={look}
+              body={body}
               mood={mood}
               dance={dance}
               sitHold={holds.sit}
