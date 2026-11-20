@@ -71,7 +71,7 @@ test("directional celestial light never reaches zero intensity", () => {
 });
 
 test("the hour comes from the local clock, or ?time=HH:MM for screenshots", () => {
-  assert.equal(hourOf(new Date(2026, 9, 26, 14, 30)), 14.5);
+  assert.equal(hourOf(new Date("2026-10-26T18:30:00Z")), 14.5);
   assert.equal(parseTimeFlag("?time=21:15"), 21.25);
   assert.equal(parseTimeFlag("?time=8"), 8);
   assert.equal(parseTimeFlag("?time=25"), null);
