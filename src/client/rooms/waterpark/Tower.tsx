@@ -79,7 +79,7 @@ function supports(path: readonly Vec3[]) {
 
 /** Ribs across the trough, one arc per frame; LOD sets their spacing. */
 function ribMatrices(curve: THREE.CatmullRomCurve3, quality: QualityTier) {
-  const spacing = quality === "high" ? 0.6 : 1.2;
+  const spacing = quality !== "low" ? 0.6 : 1.2;
   const n = Math.max(2, Math.round(curve.getLength() / spacing));
   return Array.from({ length: n }, (_, i) => {
     const { p, side, down, t } = frameAt(curve, (i + 0.5) / n, TROUGH_R);

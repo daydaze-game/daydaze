@@ -23,7 +23,7 @@ export type Surface =
   | "grass"
   | "sand";
 
-function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
+export function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
   try {
     const bus = getSharedAudioBus();
     const ctx = bus.getContext();
@@ -64,7 +64,7 @@ function rampDown(
   source.connect(gain).connect(dest);
 }
 
-function burst(
+export function burst(
   ctx: AudioContext,
   dest: AudioNode,
   type: BiquadFilterType,

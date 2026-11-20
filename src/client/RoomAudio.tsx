@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { eventTrack } from "../game/events.ts";
 import { nightClock } from "./city/eventClocks.ts";
 import { getSharedAudioBus } from "../audio/audioBus.ts";
-import {
-  getSharedJukeboxController,
-  type TrackId,
-} from "../audio/proceduralJukebox.ts";
+import type { TrackId } from "../audio/proceduralJukebox.ts";
 import {
   playClick,
   startAmbience,
@@ -186,17 +183,27 @@ export function RoomAudio({ room, muted }: { room: RoomId; muted: boolean }) {
   const hasBed = !!(
     fileLevels["music-boardwalk"] || fileLevels["music-lounge"]
   );
+  // the synthesizer loads with the first unlock, not with the first paint
   useEffect(() => {
     if (!unlocked) return;
-    const jukebox = getSharedJukeboxController();
-    // music sits under the room, not over it
-    jukebox.setMusicVolume(0.35);
-    // a file music bed stands in for the room's default track
-    const track = pick ?? nightTrack ?? (hasBed ? undefined : MUSIC[room]);
-    if (track) {
-      if (jukebox.getCurrentTrack() !== track || !jukebox.isPlaying())
-        jukebox.playTrack(track);
-    } else jukebox.stopTrack();
+    let live = true;
+    void import("../audio/proceduralJukebox.ts").then(
+      ({ getSharedJukeboxController }) => {
+        if (!live) return;
+        const jukebox = getSharedJukeboxController();
+        // music sits under the room, not over it
+        jukebox.setMusicVolume(0.35);
+        // a file music bed stands in for the room's default track
+        const track = pick ?? nightTrack ?? (hasBed ? undefined : MUSIC[room]);
+        if (track) {
+          if (jukebox.getCurrentTrack() !== track || !jukebox.isPlaying())
+            jukebox.playTrack(track);
+        } else jukebox.stopTrack();
+      },
+    );
+    return () => {
+      live = false;
+    };
   }, [room, unlocked, pick, nightTrack, hasBed]);
 
   // the effect re-runs only when a level really changes

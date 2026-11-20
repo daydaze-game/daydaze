@@ -11,7 +11,7 @@ import {
   nearestChatGroups,
 } from "../../game/city/chatGroups.ts";
 import { CHAT_DOLLS, CHAT_RADIUS } from "../../game/city/tuning.ts";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 import type { Player } from "../world/PlayerController.tsx";
 import { ChatGroup } from "../rooms/shared/ChatGroup.tsx";
 import { cityHour } from "./daylight.ts";
@@ -20,7 +20,7 @@ import { cityHour } from "./daylight.ts";
 const REPICK = 1;
 
 export function ChatGroups({ player }: { player: Player }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const [shown, setShown] = useState<readonly number[]>([]);
   const last = useRef(-Infinity);
   useFrame(({ clock, gl }) => {
