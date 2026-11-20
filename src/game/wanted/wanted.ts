@@ -7,6 +7,7 @@ import {
   sentence,
   type JailSave,
 } from "../jail/jail.ts";
+import { isRecord } from "../typed.ts";
 
 export const MAX_STARS = 5;
 
@@ -162,8 +163,8 @@ const clean = (value: unknown, max: number): number =>
 
 // Saved wanted state is untrusted: finite, non-negative and capped.
 export function validateWanted(value: unknown): WantedState {
-  if (typeof value !== "object" || value === null) return NOT_WANTED;
-  const { heat, unseenMs, hidingMs } = value as Record<string, unknown>;
+  if (!isRecord(value)) return NOT_WANTED;
+  const { heat, unseenMs, hidingMs } = value;
   const h = clean(heat, MAX_HEAT);
   if (h === 0) return NOT_WANTED;
   return {

@@ -7,14 +7,14 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { PARKED_CARS, parkedRange } from "../../game/city/dressing.ts";
 import type { Player } from "../world/PlayerController.tsx";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 import { NEAR_BODY, useTrafficBodies } from "./trafficBodies.ts";
 
 /** She must move this far before the cars are repacked. */
 const REPACK = 2;
 
 export function ParkedCars({ player }: { player: Player }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const bodies = useTrafficBodies(PARKED_CARS.length);
   const colors = useMemo(
     () => PARKED_CARS.map((car) => new THREE.Color(car.color)),

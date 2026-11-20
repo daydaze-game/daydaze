@@ -230,6 +230,9 @@ type DollProps = {
   dance?: DanceMoveId | undefined;
   /** Set on one partner of a couple dance; the other doll takes the other role. */
   couple?: CoupleRole | undefined;
+  /** Kissing: the partner's face height (game/dance/reach.ts), met by bending
+   * or rising (the 3D doll's alone). */
+  partnerFace?: number | undefined;
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
   hold?: string | undefined;
   /** Wobbles with the local player's buzz. */
@@ -253,6 +256,7 @@ export function ToonDoll({
   mood,
   dance = "groove",
   couple,
+  partnerFace: _partnerFace, // the 3D doll's alone
   hold: _hold, // the 3D doll's alone
   joins: _joins, // the 3D doll's alone
   under: _under, // the 3D doll's alone

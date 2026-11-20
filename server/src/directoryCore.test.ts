@@ -1,3 +1,4 @@
+// Tests for server/src/directoryCore.ts: room copy assignment and listing.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { listCopies } from "./directoryCore.ts";

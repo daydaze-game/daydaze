@@ -130,7 +130,7 @@ export function Palms({ palms }: { palms: readonly PalmSpec[] }) {
   const quality = useQuality();
   const { wood, leaves } = useMemo(
     () =>
-      quality === "high" ? buildPalms(palms, 10, 9) : buildPalms(palms, 6, 7),
+      quality !== "low" ? buildPalms(palms, 10, 9) : buildPalms(palms, 6, 7),
     [palms, quality],
   );
   return (

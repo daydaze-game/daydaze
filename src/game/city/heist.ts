@@ -6,6 +6,7 @@
 // a different minute each time. Pure and deterministic on the clock, so every
 // player sees the same heist.
 import type { Vec2 } from "../walk.ts";
+import { secondsSince } from "../clock.ts";
 import { WEST_EDGE } from "./layout.ts";
 import { hash } from "./hash.ts";
 
@@ -218,7 +219,7 @@ export function heistSlotWith(outcome: HeistOutcome, from = 1000): number {
 
 /** Seconds into the heist under way at `t`, or null when none is. */
 export function heistInto(t: number): number | null {
-  const into = t - heistStart(Math.floor(t / HEIST_SLOT));
+  const into = secondsSince(t, heistStart(Math.floor(t / HEIST_SLOT)));
   return into >= 0 && into < HEIST_LENGTH ? into : null;
 }
 

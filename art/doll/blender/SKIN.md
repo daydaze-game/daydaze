@@ -13,7 +13,9 @@ bash scripts/optimize-doll.sh
 ```
 
 `skin_detail.py` reprojects the original MakeHuman UVs onto the existing face
-atlas. It normalizes the source complexion around neutral gray, preserving
+atlas, keeping the nearest surface per texel so hidden eye-socket faces
+never paint the visible lids (`test_skin_detail.py` checks this in Blender).
+It normalizes the source complexion around neutral gray, preserving
 relative pigmentation and pores, and fades the projection boundary. The client
 uses a soft-light composite underneath its optional makeup, retaining selectable
 skin tones and the existing single skin material. Both bodies need their own

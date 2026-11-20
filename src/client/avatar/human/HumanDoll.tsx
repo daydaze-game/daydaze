@@ -8,10 +8,19 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { couplePoseAt, type CoupleRole } from "../../../game/dance/couple.ts";
+import { pairNow } from "../pairClock.ts";
+import {
+  applyReach,
+  faceDepth,
+  faceHeight,
+  leanIn,
+  reachFor,
+} from "../../../game/dance/reach.ts";
 import {
   stillClipsOf,
   createPose,
   danceMove,
+  eyesShut,
   poseAt,
   type DanceMoveId,
   type Pose,
@@ -25,11 +34,8 @@ import {
 } from "../../../game/dance/clips.ts";
 import {
   modelSuffix,
-  FACE_PRESETS,
   limbsOf,
   LIMB_SPOTS,
-  FIGURES,
-  FACE_SLIDERS,
   faceOf,
   seededFace,
   piercingsOf,
@@ -44,9 +50,13 @@ import {
 } from "../../../game/look.ts";
 import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
+import { ADULT_OK } from "../../adult.ts";
 import {
   heavyLid,
+  jawClench,
   peakBody,
+  pupilDilation,
+  redEyes,
   type Substance,
 } from "../../../game/effects/substances.ts";
 import { bodyFor } from "../../../game/effects/buzz.ts";
@@ -54,11 +64,11 @@ import { useReducedMotion } from "../../motion.ts";
 import {
   DEFAULT_BODY,
   bodyScales,
-  figureMorphs,
+  dollShapeKeys,
   type BodyShape,
 } from "../../../game/body.ts";
 import { pose, type Rig } from "../pose.ts";
-import { useQuality } from "../../world/quality.ts";
+import { useGraphics, useQuality } from "../../world/quality.ts";
 import { NPC_GAITS, gaitOf } from "../../../game/gaits.ts";
 import { BUILT_STRIDE, walkPhaseRate } from "../../../game/dance/stride.ts";
 import { syncOffset } from "../../../game/dance/sync.ts";
@@ -90,6 +100,8 @@ import { ScubaGear } from "./ScubaGear.tsx";
 import {
   acquireFace,
   acquireIris,
+  IRIS_R,
+  PUPIL_R,
   readMarks,
   releaseFace,
   releaseIris,
@@ -118,6 +130,10 @@ const REST_LID = 0.04;
 // Full effect opens the remaining upper lid; cocaine is 70% as wide.
 const WIDE_LID = REST_LID;
 const COCAINE_STARE = 0.7;
+// Fully blown pupils are this much wider than her own (about 70% of the iris).
+const PUPIL_GROW = 1.2;
+// Gurning grinds: the clench eases and sets again about once a second.
+const GRIND_HZ = 1.1;
 
 // the baked clips come in their own file (a big one), fetched once the first
 // room shows, so they don't share the bandwidth it loads over; dolls wear
@@ -229,6 +245,8 @@ type Props = {
   mood: Mood;
   dance?: DanceMoveId | undefined;
   couple?: CoupleRole | undefined;
+  /** Kissing: the partner's face height, met by bending or rising (reach.ts). */
+  partnerFace?: number | undefined;
   /** A held motion-capture pose (STILL_CLIPS id) for the pose and sit moods. */
   hold?: string | undefined;
   buzzed?: boolean | undefined;
@@ -419,6 +437,42 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       map: acquireIris(DEFAULT_EYE),
       roughness: 0.3,
     });
+    // pupil size (0 her own, 1 blown): the dark disc grows and the iris's
+    // fibers squeeze into the ring left, as a real iris does, so the one
+    // painted texture serves every size
+    const pupil: THREE.IUniform<number> = { value: 0 };
+    // weed reddens the whites: a uniform on this doll's own eye material
+    // (no texture repaint, no extra draw call) blends near-white texels
+    // (the sclera, #f4ece8) toward a bloodshot red
+    const redness: THREE.IUniform<number> = { value: 0 };
+    eye.onBeforeCompile = (shader) => {
+      shader.uniforms.uPupil = pupil;
+      shader.uniforms.uRed = redness;
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "void main() {",
+          "uniform float uPupil;\nuniform float uRed;\nvoid main() {",
+        )
+        .replace(
+          "#include <map_fragment>",
+          [
+            "#ifdef USE_MAP",
+            "vec2 pupilD = vMapUv - 0.5;",
+            "float pupilR = length(pupilD);",
+            `float pupilTo = ${PUPIL_R.toFixed(4)} * (1.0 + uPupil * ${PUPIL_GROW.toFixed(2)});`,
+            "float pupilFrom = pupilR < pupilTo",
+            `  ? pupilR * ${PUPIL_R.toFixed(4)} / pupilTo`,
+            `  : mix(${PUPIL_R.toFixed(4)}, ${IRIS_R.toFixed(4)}, clamp((pupilR - pupilTo) / (${IRIS_R.toFixed(4)} - pupilTo), 0.0, 1.0));`,
+            // the sclera and the back of the ball keep their own texels
+            `if (pupilR >= ${IRIS_R.toFixed(4)}) pupilFrom = pupilR;`,
+            "diffuseColor *= texture2D(map, 0.5 + pupilD * (pupilFrom / max(pupilR, 1e-5)));",
+            "#endif",
+            "float whites = smoothstep(0.8, 0.92, min(diffuseColor.r, min(diffuseColor.g, diffuseColor.b)));",
+            "diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.85, 0.22, 0.2), uRed * whites);",
+          ].join("\n"),
+        );
+    };
+    eye.customProgramCacheKey = () => "doll-eye";
     const cornea = new THREE.MeshStandardMaterial({
       color: "#ffffff",
       roughness: 0.02,
@@ -491,6 +545,8 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       restInverse,
       skin,
       eye,
+      pupil,
+      redness,
       materials: [skin, lashes, eye, cornea],
     };
   }, [gltf, loGltf, m, surface]);
@@ -749,7 +805,8 @@ function Part({
   full?: boolean;
 }) {
   const gltfLo = useGLTF(full ? url : lodOf(url));
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
+  const { shadows } = useGraphics();
   const { color, kind } = tint;
   const lo = useMemo(
     () => buildPart(gltfLo.scene, bones, { color, kind }, full && rich),
@@ -765,6 +822,9 @@ function Part({
     if (lo.group.visible !== showLo) lo.group.visible = showLo;
     if (near && near.group.visible === showLo) near.group.visible = !showLo;
   });
+  useEffect(() => {
+    castShadows(lo.group, shadows);
+  }, [lo, shadows]);
   useEffect(() => {
     onMeshes(
       near
@@ -806,12 +866,16 @@ function NearPart({
 }) {
   const gltf = useGLTF(url);
   // the glossy hair shading and its soft-edge pass are for capable GPUs
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
+  const { shadows } = useGraphics();
   const { color, kind } = tint;
   const part = useMemo(
     () => buildPart(gltf.scene, bones, { color, kind }, rich),
     [gltf, bones, color, kind, rich],
   );
+  useEffect(() => {
+    castShadows(part.group, shadows);
+  }, [part, shadows]);
   useEffect(() => {
     // hidden until Part decides, so it never shows alongside the twin
     part.group.visible = false;
@@ -822,6 +886,13 @@ function NearPart({
     };
   }, [part, onBuilt]);
   return <primitive object={part.group} />;
+}
+
+/** Sets whether every mesh under `group` casts the key light's shadow. */
+function castShadows(group: THREE.Object3D, on: boolean) {
+  group.traverse((o) => {
+    if (o instanceof THREE.Mesh) o.castShadow = on;
+  });
 }
 
 /** A part's scene re-bound to the body's bones, with the doll's materials. */
@@ -925,6 +996,7 @@ export function HumanDoll({
   mood,
   dance = "groove",
   couple,
+  partnerFace,
   hold: picked,
   buzzed = false,
   under,
@@ -939,6 +1011,16 @@ export function HumanDoll({
   const gl = useThree((s) => s.gl);
   const invalidate = useThree((s) => s.invalidate);
   const heightScale = bodyScales(shape).height;
+  // a kiss with someone taller or shorter: this doll's share of meeting them
+  const ownFace = faceHeight(look, shape);
+  const ownDepth = faceDepth(look);
+  const reach = useMemo(
+    () =>
+      partnerFace === undefined
+        ? null
+        : reachFor(ownFace, partnerFace, ownDepth),
+    [ownFace, ownDepth, partnerFace],
+  );
   const lowTierNpc = useQuality() === "low" && !own;
   const lodNear = lowTierNpc ? LOW_TIER_NEAR : LOD_NEAR;
   const lodFar = lowTierNpc ? LOW_TIER_FAR : LOD_FAR;
@@ -957,6 +1039,12 @@ export function HumanDoll({
     [look, seed],
   );
   const body = useBody(painted, face.eyeColor);
+  // on Realistic every doll casts the key light's shadow; each part sets its
+  // own when it mounts, so only the body is covered here
+  const { shadows } = useGraphics();
+  useEffect(() => {
+    if (root.current) castShadows(root.current, shadows);
+  }, [body, shadows]);
   const gait = gaitOf(
     look.gait ?? (seed ? NPC_GAITS[seed % NPC_GAITS.length] : undefined),
   );
@@ -971,6 +1059,9 @@ export function HumanDoll({
   const calm = useReducedMotion();
   const phase = useRef(0);
   const blinkAt = useRef(2 + seed);
+  // in a kiss (no look into the camera), and its eyes-closed moment: set with
+  // the built pose, which a far doll poses only every third frame
+  const kiss = useRef({ on: false, shut: false });
   const sampled = useMemo<Pose>(createPose, []);
   // one mixer per body, made and torn down with it
   const anim = useRef<Anim | null>(null);
@@ -1005,30 +1096,8 @@ export function HumanDoll({
   const bodyMeshes = useMemo(() => morphMeshes(body.scene), [body]);
   const worn = useRef(new Map<string, THREE.Mesh[]>());
   const wornList = useRef<THREE.Mesh[]>([]);
-  // every face and body key with its value: face sliders, figure, face
-  // presets (the picked option at 1, the group's others at 0) and the closet
-  // body sliders (50 is the base shape, 0 and 100 the key at -1 and 1)
-  const shapeKeys = useMemo((): readonly (readonly [string, number])[] => {
-    const keys: [string, number][] = [];
-    for (const s of FACE_SLIDERS) keys.push([s.id, face[s.id]]);
-    const figure = figureMorphs(shape, face.figure);
-    for (const b of FIGURES)
-      if (b.id !== "classic") keys.push([b.id, figure[b.id]]);
-    for (const g of FACE_PRESETS)
-      for (const o of g.options.slice(1))
-        keys.push([`${g.key}_${o.id}`, face[g.field] === o.id ? 1 : 0]);
-    // the monolid has no key of its own: a deep fold-down (the hooded key)
-    // with a slight lift at the outer corners
-    if (face.eyeShape === "monolid") {
-      keys.push(["eye_hooded", 0.9]);
-      keys.push(["eye_upturned", 0.3]);
-    }
-    // the man's body has no bust key (setMorph skips a missing key)
-    keys.push(["bust", (shape.bust - 50) / 50]);
-    keys.push(["hips", (shape.hips - 50) / 50]);
-    keys.push(["waist", (shape.waist - 50) / 50]);
-    return keys;
-  }, [face, shape]);
+  // every face and body key with its value (dollShapeKeys)
+  const shapeKeys = useMemo(() => dollShapeKeys(face, shape), [face, shape]);
   const shapedFor = useRef<THREE.Mesh[] | null>(null);
   const shapedWith = useRef<typeof shapeKeys | null>(null);
   const lift = useRef(0);
@@ -1041,6 +1110,8 @@ export function HumanDoll({
   const lidMeshes = useRef<THREE.Mesh[] | null>(null);
   const smileShown = useRef(-1);
   const smileMeshes = useRef<THREE.Mesh[] | null>(null);
+  const gurnShown = useRef(-1);
+  const gurnMeshes = useRef<THREE.Mesh[] | null>(null);
   // a far doll's skeleton updates every third frame (thinned): the time owed
   const owed = useRef({ dt: 0, tick: 0 });
   useEffect(() => {
@@ -1298,13 +1369,21 @@ export function HumanDoll({
       gaze.on = false;
       body.built.restore();
       if (a.action) a.mixer.update(animDt);
+      kiss.current.on = false;
+      kiss.current.shut = false;
       if (a.built > 0) {
         const move = mood === "dance" && !moving ? danceMove(dance) : null;
+        // a kiss runs on the pair clock, so both partners lean in together
+        const mt = move?.synced ? pairNow() : t;
+        kiss.current.on = move?.synced === true;
+        kiss.current.shut = move ? eyesShut(move, mt) : false;
         const danced = !move
           ? null
           : couple
-            ? couplePoseAt(move, couple, t, sampled)
-            : poseAt(move, t, sampled);
+            ? couplePoseAt(move, couple, mt, sampled)
+            : poseAt(move, mt, sampled);
+        if (danced && move?.synced && reach)
+          applyReach(danced, reach, leanIn(danced));
         pose(
           proxy,
           gait.seated ? "sit" : moving ? "walk" : mood,
@@ -1333,9 +1412,9 @@ export function HumanDoll({
           .multiply(turn.setFromEuler(sway));
       }
       // her own doll, up close: she looks into the camera (cameraZoom.ts),
-      // whatever way the clip has her head
+      // whatever way the clip has her head, except mid-kiss
       const head = body.head;
-      if (own && head?.parent && root.current) {
+      if (own && !kiss.current.on && head?.parent && root.current) {
         const parent = head.parent;
         head.getWorldPosition(headAt);
         head.getWorldQuaternion(headQ);
@@ -1396,7 +1475,14 @@ export function HumanDoll({
       : 0;
     // weed lowers the lids (heavyLid), quantized like the rest
     const heavy = meters ? Math.round(heavyLid(meters) * 50) / 50 : 0;
-    const lid = closed ? 1 : REST_LID - wide * WIDE_LID + heavy;
+    // red eyes: own doll only, behind ADULT_OK; set only on change
+    const red = meters && ADULT_OK ? Math.round(redEyes(meters) * 50) / 50 : 0;
+    if (body.redness.value !== red) {
+      body.redness.value = red;
+      invalidate();
+    }
+    const lid =
+      closed || kiss.current.shut ? 1 : REST_LID - wide * WIDE_LID + heavy;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;
@@ -1409,6 +1495,25 @@ export function HumanDoll({
       smileShown.current = molly;
       smileMeshes.current = wornList.current;
       setMorph(wornList.current, "smile", Math.min(1, molly * 1.5));
+    }
+    // molly's big pupils and gurning jaw, less for cocaine and the
+    // psychedelics (pupilDilation, jawClench); the clench grinds in and out
+    // unless motion is reduced, when it holds; own doll only, behind ADULT_OK
+    const adult = meters && ADULT_OK ? meters : null;
+    const dilate = adult ? Math.round(pupilDilation(adult) * 50) / 50 : 0;
+    if (body.pupil.value !== dilate) {
+      body.pupil.value = dilate;
+      invalidate();
+    }
+    const clench = adult ? jawClench(adult) : 0;
+    const grind = calm
+      ? 0.8
+      : 0.65 + 0.35 * Math.sin(tm * GRIND_HZ * Math.PI * 2 + seed);
+    const gurn = Math.round(clench * grind * 50) / 50;
+    if (gurnShown.current !== gurn || gurnMeshes.current !== wornList.current) {
+      gurnShown.current = gurn;
+      gurnMeshes.current = wornList.current;
+      setMorph(wornList.current, "gurn", gurn);
     }
     // face and body shape change rarely: set them only when they, or the
     // worn meshes (parts mount later), change, never every frame
