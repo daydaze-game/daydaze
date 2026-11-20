@@ -1,6 +1,6 @@
 // The game menu: one button in the dock that opens a sheet holding every
 // control you reach for now and then (sound, photo, map, phone, collections,
-// friends, invite, skates, your car's options, mood and camera). The screen
+// friends, invite, skates, your car's options, mood, camera and graphics). The screen
 // itself keeps only the place, your coins, chat, the dressing room and what
 // the moment needs (a drink at the bar, a seat, a game). The sheet closes on
 // Escape, on the Close button, and after an item that opens something else.
@@ -14,7 +14,9 @@ import {
   type JSX,
   type ReactNode,
 } from "react";
+import type { Graphics } from "../../game/graphics.ts";
 import { createStore } from "../rooms/shared/store.ts";
+import { GraphicsPanel } from "./GraphicsPanel.tsx";
 
 // the credits ledger is 50 KB of text nobody needs until they open it
 const CreditsPanel = lazy(() =>
@@ -26,9 +28,18 @@ export const gameMenu = createStore({ open: false });
 /** Closes the menu: for items that open a panel of their own. */
 export const closeMenu = () => gameMenu.set({ open: false });
 
-export function GameMenu({ children }: { children: ReactNode }): JSX.Element {
+export function GameMenu({
+  children,
+  graphics,
+  setGraphics,
+}: {
+  children: ReactNode;
+  graphics: Graphics;
+  setGraphics: (graphics: Graphics) => void;
+}): JSX.Element {
   const { open } = gameMenu.use();
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const [graphicsOpen, setGraphicsOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -73,6 +84,17 @@ export function GameMenu({ children }: { children: ReactNode }): JSX.Element {
               aria-haspopup="dialog"
               onClick={() => {
                 closeMenu();
+                setGraphicsOpen(true);
+              }}
+            >
+              Graphics
+            </button>
+            <button
+              type="button"
+              className="drink"
+              aria-haspopup="dialog"
+              onClick={() => {
+                closeMenu();
                 setCreditsOpen(true);
               }}
             >
@@ -80,6 +102,16 @@ export function GameMenu({ children }: { children: ReactNode }): JSX.Element {
             </button>
           </div>
         </section>
+      )}
+      {graphicsOpen && (
+        <GraphicsPanel
+          graphics={graphics}
+          onChange={setGraphics}
+          onClose={() => {
+            setGraphicsOpen(false);
+            toggle.current?.focus();
+          }}
+        />
       )}
       {creditsOpen && (
         <Suspense fallback={null}>

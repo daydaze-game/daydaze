@@ -2958,6 +2958,73 @@ button:focus-visible {
   font-size: 14px;
 }
 
+/* The Graphics sheet sits at the left, so the live world stays in view while
+   a setting changes. */
+.graphics-panel {
+  right: auto;
+  left: 28px;
+  bottom: 84px;
+  width: min(380px, calc(100vw - 28px));
+  color: var(--champagne);
+}
+
+.graphics-panel h3 {
+  margin: 4px 0 0;
+  font-size: 16px;
+}
+
+.graphics-fps,
+.graphics-hint {
+  margin: 0;
+  font-size: 14px;
+}
+
+.graphics-hint,
+.graphics-switch small {
+  color: #d6b7d2;
+}
+
+.graphics-panel .seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+
+.graphics-panel .seg button {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.graphics-field {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.graphics-switches {
+  display: grid;
+  gap: 8px;
+}
+
+.graphics-switch {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.graphics-switch small {
+  grid-column: 2;
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .graphics-panel {
+    left: 14px;
+    bottom: 76px;
+  }
+}
+
 /* the reef dive: air gauge and the species checklist */
 .air-gauge {
   position: relative;

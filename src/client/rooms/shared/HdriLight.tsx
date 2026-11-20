@@ -13,7 +13,7 @@ export function HdriLight({
   file: string;
   intensity?: number;
 }) {
-  if (useQuality() !== "high") return null;
+  if (useQuality() === "low") return null;
   return (
     <Suspense fallback={null}>
       <Environment

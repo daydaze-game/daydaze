@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";
 import { useReducedMotion } from "../../motion.ts";
-import { useQuality } from "../../world/quality.ts";
+import { useGraphics } from "../../world/quality.ts";
 import { Batch } from "../shared/batch.ts";
 import { Floor, type PickHandler } from "../shared/Floor.tsx";
 import { canvasTex, GOLD, hdr, LACQUER } from "../shared/materials.ts";
@@ -175,7 +175,7 @@ function buildStreet() {
 }
 
 export function Street({ onPick }: { onPick: PickHandler }) {
-  const quality = useQuality();
+  const { reflections } = useGraphics();
   const ground = useMemo(groundTex, []);
   const street = useMemo(buildStreet, []);
   const calm = useReducedMotion();
@@ -201,7 +201,7 @@ export function Street({ onPick }: { onPick: PickHandler }) {
         low={{ metalness: 0.2, roughness: 0.75 }}
         onPick={onPick}
       />
-      {quality === "low" && <FakeReflections />}
+      {!reflections && <FakeReflections />}
       <primitive object={street} />
     </>
   );

@@ -749,7 +749,7 @@ function Part({
   full?: boolean;
 }) {
   const gltfLo = useGLTF(full ? url : lodOf(url));
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
   const { color, kind } = tint;
   const lo = useMemo(
     () => buildPart(gltfLo.scene, bones, { color, kind }, full && rich),
@@ -806,7 +806,7 @@ function NearPart({
 }) {
   const gltf = useGLTF(url);
   // the glossy hair shading and its soft-edge pass are for capable GPUs
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
   const { color, kind } = tint;
   const part = useMemo(
     () => buildPart(gltf.scene, bones, { color, kind }, rich),
