@@ -35,8 +35,6 @@ export type MocapClip = {
     | "back"
     | "trans";
   label: string;
-  /** The take it was baked from, led by its provider ("Mixamo <take>"). */
-  source: string;
   /** Loop length, seconds; 0 for a held pose. */
   period: number;
   /** A walk's natural ground speed, m/s (see stride.ts). */
