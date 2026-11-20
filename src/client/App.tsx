@@ -627,7 +627,6 @@ export function App() {
           setView={setView}
           panelOpen={save.settings.panelOpen}
           challenges={save.challenges}
-          streak={save.streak}
           setPanelOpen={setPanelOpen}
           car={parkedOrHome(save.car)}
           setCar={setCar}

@@ -7,11 +7,18 @@
 import type { StreakReward } from "../../game/streak.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
-/** Whether the panel is open, and the milestone being celebrated (if any). */
-export const streakDesk = createStore({
-  open: false,
-  celebrate: null as StreakReward | null,
+interface StreakDesk {
+  open: boolean;
+  /** The milestone being celebrated, if any. */
+  celebrate: StreakReward | null;
   /** The freeze saved the streak on this check-in. */
+  froze: boolean;
+}
+
+/** Whether the panel is open, and the news from the latest check-in. */
+export const streakDesk = createStore<StreakDesk>({
+  open: false,
+  celebrate: null,
   froze: false,
 });
 

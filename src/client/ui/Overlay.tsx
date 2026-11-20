@@ -74,7 +74,7 @@ import { INTENSITIES, type Intensity } from "../../game/effects/buzz.ts";
 import { CarPicker } from "../city/CarPicker.tsx";
 import { driving } from "../world/driving.ts";
 import { collectionsBook } from "./Collections.tsx";
-import type { StreakSave } from "../../game/streakSave.ts";
+import { openStreak } from "./Streak.tsx";
 import { GameMenu, closeMenu } from "./GameMenu.tsx";
 import type { CrimeSave } from "../../game/crime/record.ts";
 import type { Caught } from "./ShopliftPanel.tsx";
@@ -139,9 +139,6 @@ import { ONLINE } from "../net/online.ts";
 
 // Panels only some rooms show, loaded with first use so the first load stays
 // small; each renders inside a Suspense that shows nothing meanwhile.
-const StreakChip = lazy(() =>
-  import("./StreakPanel.tsx").then((m) => ({ default: m.StreakChip })),
-);
 const ElPanel = lazy(() =>
   import("../city/ElPanel.tsx").then((m) => ({ default: m.ElPanel })),
 );
@@ -858,7 +855,6 @@ export function Overlay({
   panelOpen,
   setPanelOpen,
   challenges,
-  streak,
   car,
   setCar,
   onSpend,
@@ -900,8 +896,6 @@ export function Overlay({
   panelOpen: boolean;
   setPanelOpen: (open: boolean) => void;
   challenges: ChallengeSave;
-  /** The daily streak, for the HUD counter. */
-  streak: StreakSave;
   /** Your car in the city, and its picker's changes. */
   car: ParkedCar;
   setCar: (car: ParkedCar) => void;
@@ -968,9 +962,6 @@ export function Overlay({
         <p className="coins" aria-label={`${coins} coins`}>
           {coins} coins
         </p>
-        <Suspense fallback={null}>
-          <StreakChip streak={streak} />
-        </Suspense>
       </header>
 
       {phone && (
@@ -1298,6 +1289,17 @@ export function Overlay({
                 }}
               >
                 Collections
+              </button>
+              <button
+                type="button"
+                className="drink"
+                aria-haspopup="dialog"
+                onClick={() => {
+                  closeMenu();
+                  openStreak();
+                }}
+              >
+                Daily streak
               </button>
               {ONLINE && (
                 <button

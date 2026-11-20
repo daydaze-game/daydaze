@@ -1,7 +1,7 @@
-// The daily streak on screen: the compact HUD counter (a flame that burns
-// bigger and hotter as the streak grows), the panel and celebration: the 30-day calendar, the milestone
-// ladder and the weekly freeze, and a card with a burst and a chime on days 3,
-// 7, 14 and 30. Loaded on demand (App.tsx, Overlay.tsx); the store is Streak.tsx.
+// The daily streak on screen: the panel and celebration. The panel is the
+// 30-day calendar, the milestone ladder and the weekly freeze; the celebration
+// is a card with a burst and a chime on days 3, 7, 14 and 30. Loaded on demand
+// (App.tsx); the menu's Daily streak button opens it; the store is Streak.tsx.
 // With prefers-reduced-motion the burst is left out (styles.css stills the rest).
 
 import { useEffect, useRef, type CSSProperties, type JSX } from "react";
@@ -21,7 +21,7 @@ import {
   type DayState,
 } from "../../game/streakCalendar.ts";
 import { usePrefersReducedMotion } from "../motion.ts";
-import { openStreak, streakDesk } from "./Streak.tsx";
+import { streakDesk } from "./Streak.tsx";
 
 /** A flame in layers; `tier` 0..5 sets its size, color and glow (CSS). */
 export function Flame({ tier }: { tier: number }): JSX.Element {
@@ -48,26 +48,6 @@ export function Flame({ tier }: { tier: number }): JSX.Element {
         d="M12 19c.5 2 2.5 3 2.5 5.2a2.5 2.5 0 0 1-5 0C9.5 22 11.5 21 12 19z"
       />
     </svg>
-  );
-}
-
-/** The compact HUD counter; it opens the panel. */
-export function StreakChip({ streak }: { streak: StreakSave }): JSX.Element {
-  const count = liveStreak(streak, dayOf(Date.now()));
-  const tier = flameTier(count);
-  const label =
-    count > 0 ? `Daily streak: ${count} days` : "Daily streak: start one today";
-  return (
-    <button
-      type="button"
-      className="streak-chip"
-      data-tier={tier}
-      aria-label={label}
-      onClick={openStreak}
-    >
-      <Flame tier={tier} />
-      <span className="streak-chip-count">{count}</span>
-    </button>
   );
 }
 

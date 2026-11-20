@@ -3178,42 +3178,6 @@ button:focus-visible {
 
 /* ------------------------------------------------------------ daily streak */
 
-/* the compact HUD counter: a flame and a number; the glow grows with the tier */
-.streak-chip {
-  --glow: 0 0 0 transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 6px;
-  padding: 2px 10px 2px 6px;
-  border: 1px solid rgb(255 176 46 / 0.35);
-  border-radius: 999px;
-  background: rgb(20 10 40 / 0.7);
-  color: var(--champagne);
-  font-weight: 800;
-  box-shadow: var(--glow);
-  cursor: pointer;
-}
-
-.streak-chip[data-tier="2"] {
-  --glow: 0 0 8px rgb(255 176 46 / 0.45);
-}
-.streak-chip[data-tier="3"] {
-  --glow: 0 0 12px rgb(255 140 46 / 0.65);
-}
-.streak-chip[data-tier="4"] {
-  --glow: 0 0 16px 2px rgb(255 100 60 / 0.75);
-}
-.streak-chip[data-tier="5"] {
-  --glow: 0 0 20px 3px rgb(255 47 154 / 0.85);
-  border-color: var(--fuchsia);
-}
-
-.streak-chip .streak-flame {
-  width: 15px;
-  height: 20px;
-}
-
 /* the flame: three layers, hotter and bigger by tier, always gently alive */
 .streak-flame {
   overflow: visible;
