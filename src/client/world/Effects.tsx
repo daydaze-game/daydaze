@@ -31,17 +31,12 @@ export default function Effects({
 }) {
   // 2x MSAA: at 1.5x resolution 4x samples cost more than they showed. The
   // occlusion pass reads the depth buffer, which MSAA cannot resolve, so with
-  // it the edges are smoothed by SMAA instead.
+  // it the edges are smoothed by SMAA instead. No halfRes: n8ao's half-size
+  // target is a shim that three 0.187 rejects (it threw on every frame).
   return (
     <EffectComposer multisampling={ao ? 0 : 2}>
       {ao && (
-        <N8AO
-          aoRadius={1.2}
-          distanceFalloff={1}
-          intensity={2}
-          quality="medium"
-          halfRes
-        />
+        <N8AO aoRadius={1.2} distanceFalloff={1} intensity={2} quality="low" />
       )}
       {post && (
         <Bloom
