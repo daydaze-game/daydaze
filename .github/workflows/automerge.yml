@@ -1,0 +1,31 @@
+name: automerge
+# Turns on auto-merge for every ready pull request, so nobody has to remember
+# `gh pr merge --auto --merge`. GitHub then merges the PR once every required
+# check is green; auto-update.yml keeps it up to date with main in the
+# meantime, and a catch-up merge re-runs only the fast checks
+# (scripts/main-merged-only.sh). Drafts wait until they are marked ready.
+# Dependabot has its own, stricter rule (dependabot-automerge.yml), and forks
+# are skipped. Auto-merge never bypasses branch protection.
+# pull_request_target gives the job a token that can enable auto-merge; it
+# never checks out or runs the PR's code, and uses no third-party actions.
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, ready_for_review]
+permissions: {}
+jobs:
+  automerge:
+    if: >-
+      !github.event.pull_request.draft &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --merge "$PR_URL"

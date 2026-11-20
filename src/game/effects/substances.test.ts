@@ -23,6 +23,8 @@ import {
   profileOf,
   pupilDilation,
   readMeters,
+  RED_EYES_MAX,
+  redEyes,
   soberMeters,
   spent,
   STRAIN_BODY,
@@ -492,6 +494,27 @@ test("weed lowers the lids: heavier with more, heavier for indica, sleepiest on 
   const m = soberMeters();
   m.molly = { level: 1, phase: "peak", strain: "hybrid" };
   assert.equal(heavyLid(m), 0);
+});
+
+test("red eyes: the whites redden with the weed level, never for other substances", () => {
+  const red = (
+    level: number,
+    phase: "comeup" | "peak" | "comedown" | null = "peak",
+  ) => {
+    const m = soberMeters();
+    m.high = { level, phase, strain: "hybrid" };
+    return redEyes(m);
+  };
+  assert.equal(redEyes(soberMeters()), 0);
+  assert.equal(red(0.5, null), 0);
+  assert.ok(red(0.2) > 0 && red(0.6) > red(0.2));
+  for (const level of [0.5, 1, 5, -1, NaN]) {
+    const v = red(level);
+    assert.ok(v >= 0 && v <= RED_EYES_MAX, String(level));
+  }
+  const m = soberMeters();
+  m.molly = { level: 1, phase: "peak", strain: "hybrid" };
+  assert.equal(redEyes(m), 0);
 });
 
 test("dry mouth and the munchies: every weed style has a consume tic after the come-up", () => {

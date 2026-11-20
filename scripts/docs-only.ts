@@ -28,7 +28,7 @@ const DOCS_ONLY: readonly RegExp[] = [
   /^scripts\//,
   /^art\//,
   // lint, hook and agent config
-  /^(eslint\.config\.mjs|knip\.jsonc|lefthook\.yml|\.dependency-cruiser\.cjs|opencode\.json|\.mcp\.json)$/,
+  /^(eslint\.config\.mjs|knip\.jsonc|lefthook\.yml|\.dependency-cruiser\.cjs|opencode\.json|\.mcp\.json|\.coderabbit\.yaml)$/,
   /^\.(agents|claude|codex)\//,
 ];
 

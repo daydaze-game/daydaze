@@ -37,6 +37,7 @@ test("workflows other than the browser suites' own, scripts, art and tool config
       ".claude/settings.json",
       ".codex/config.toml",
       "opencode.json",
+      ".coderabbit.yaml",
       ".mcp.json",
     ]),
     true,

@@ -44,11 +44,13 @@ import {
 } from "../../../game/look.ts";
 import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
+import { ADULT_OK } from "../../adult.ts";
 import {
   heavyLid,
   jawClench,
   peakBody,
   pupilDilation,
+  redEyes,
   type Substance,
 } from "../../../game/effects/substances.ts";
 import { bodyFor } from "../../../game/effects/buzz.ts";
@@ -431,10 +433,18 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
     // fibers squeeze into the ring left, as a real iris does, so the one
     // painted texture serves every size
     const pupil: THREE.IUniform<number> = { value: 0 };
+    // weed reddens the whites: a uniform on this doll's own eye material
+    // (no texture repaint, no extra draw call) blends near-white texels
+    // (the sclera, #f4ece8) toward a bloodshot red
+    const redness: THREE.IUniform<number> = { value: 0 };
     eye.onBeforeCompile = (shader) => {
       shader.uniforms.uPupil = pupil;
+      shader.uniforms.uRed = redness;
       shader.fragmentShader = shader.fragmentShader
-        .replace("void main() {", "uniform float uPupil;\nvoid main() {")
+        .replace(
+          "void main() {",
+          "uniform float uPupil;\nuniform float uRed;\nvoid main() {",
+        )
         .replace(
           "#include <map_fragment>",
           [
@@ -449,10 +459,12 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
             `if (pupilR >= ${IRIS_R.toFixed(4)}) pupilFrom = pupilR;`,
             "diffuseColor *= texture2D(map, 0.5 + pupilD * (pupilFrom / max(pupilR, 1e-5)));",
             "#endif",
+            "float whites = smoothstep(0.8, 0.92, min(diffuseColor.r, min(diffuseColor.g, diffuseColor.b)));",
+            "diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.85, 0.22, 0.2), uRed * whites);",
           ].join("\n"),
         );
     };
-    eye.customProgramCacheKey = () => "doll-eye-pupil";
+    eye.customProgramCacheKey = () => "doll-eye";
     const cornea = new THREE.MeshStandardMaterial({
       color: "#ffffff",
       roughness: 0.02,
@@ -526,6 +538,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       skin,
       eye,
       pupil,
+      redness,
       materials: [skin, lashes, eye, cornea],
     };
   }, [gltf, loGltf, m, surface]);
@@ -1433,6 +1446,12 @@ export function HumanDoll({
       : 0;
     // weed lowers the lids (heavyLid), quantized like the rest
     const heavy = meters ? Math.round(heavyLid(meters) * 50) / 50 : 0;
+    // red eyes: own doll only, behind ADULT_OK; set only on change
+    const red = meters && ADULT_OK ? Math.round(redEyes(meters) * 50) / 50 : 0;
+    if (body.redness.value !== red) {
+      body.redness.value = red;
+      invalidate();
+    }
     const lid = closed ? 1 : REST_LID - wide * WIDE_LID + heavy;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
@@ -1449,9 +1468,14 @@ export function HumanDoll({
     }
     // molly's big pupils and gurning jaw, less for cocaine and the
     // psychedelics (pupilDilation, jawClench); the clench grinds in and out
-    // unless motion is reduced, when it holds
-    body.pupil.value = meters ? pupilDilation(meters) : 0;
-    const clench = meters ? jawClench(meters) : 0;
+    // unless motion is reduced, when it holds; own doll only, behind ADULT_OK
+    const adult = meters && ADULT_OK ? meters : null;
+    const dilate = adult ? Math.round(pupilDilation(adult) * 50) / 50 : 0;
+    if (body.pupil.value !== dilate) {
+      body.pupil.value = dilate;
+      invalidate();
+    }
+    const clench = adult ? jawClench(adult) : 0;
     const grind = calm
       ? 0.8
       : 0.65 + 0.35 * Math.sin(tm * GRIND_HZ * Math.PI * 2 + seed);
