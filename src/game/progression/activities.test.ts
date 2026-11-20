@@ -8,7 +8,9 @@ import { createDefaultSave, loadSave, serializeSave } from "../save.ts";
 import { freshProgression, totalXp } from "./progression.ts";
 import {
   GAME_LADDERS,
+  applyPrize,
   finishPrize,
+  scorePrize,
   rewardSteal,
   rewardVisit,
   rewardLegacy,
@@ -130,4 +132,19 @@ test("a lift pays Street XP once per item, so re-stealing can't farm it", () => 
   assert.ok(once.wardrobe.includes("tee-pink"));
   const twice = rewardSteal(once, "tee-pink", "thrift");
   assert.equal(twice.progression.xp.street, 75);
+});
+
+test("a scored prize commits exactly what its card shows, on a newer save", () => {
+  const graded = createDefaultSave("Mango");
+  const result = scorePrize(graded, "hoops", 30, 0);
+  assert.ok(result);
+  // a discovery lands between grading and committing
+  const newer = rewardVisit(graded, "city", 0, false);
+  const saved = applyPrize(newer, "hoops", result);
+  assert.equal(
+    totalXp(saved.progression),
+    totalXp(newer.progression) + result.xp,
+  );
+  assert.equal(saved.coins, newer.coins + result.prize.coins + result.daily);
+  assert.ok(saved.visited.includes("city"));
 });

@@ -2412,6 +2412,11 @@ button:focus-visible {
   font-weight: 800;
 }
 
+.prize-xp {
+  color: var(--lilac);
+  font-weight: 700;
+}
+
 .prize-card button {
   align-self: flex-start;
   border: 0;

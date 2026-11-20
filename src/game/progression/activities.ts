@@ -94,7 +94,9 @@ export function rewardLegacy(
   );
 }
 
-export function finishPrize(
+/** Grades a finished game against the save: what the prize card shows.
+ * Null for a score no game can produce. */
+export function scorePrize(
   s: SaveV1,
   game: PrizeGame,
   score: number,
@@ -105,17 +107,33 @@ export function finishPrize(
   const daily = completeChallenge(s.challenges, dayOf(now), game, score);
   const xp =
     GRADE_XP[prize.grade] + (prize.best ? 25 : 0) + (daily.coins > 0 ? 75 : 0);
-  const save = rewardXp(
+  return { prize, daily: daily.coins, challenges: daily.save, xp };
+}
+export type ScoredPrize = NonNullable<ReturnType<typeof scorePrize>>;
+
+/** Commits a graded prize, so the save pays exactly what the card showed
+ * even when other updates landed after grading. */
+export function applyPrize(s: SaveV1, game: PrizeGame, r: ScoredPrize): SaveV1 {
+  return rewardXp(
     {
       ...s,
-      coins: earn(s.coins, prize.coins + daily.coins),
-      bests: prize.best ? { ...s.bests, [game]: score } : s.bests,
-      challenges: daily.save,
+      coins: earn(s.coins, r.prize.coins + r.daily),
+      bests: r.prize.best ? { ...s.bests, [game]: r.prize.score } : s.bests,
+      challenges: r.challenges,
     },
     GAME_LADDERS[game],
-    xp,
+    r.xp,
   );
-  return { save, prize, daily: daily.coins, xp };
+}
+
+export function finishPrize(
+  s: SaveV1,
+  game: PrizeGame,
+  score: number,
+  now: number,
+) {
+  const r = scorePrize(s, game, score, now);
+  return r && { ...r, save: applyPrize(s, game, r) };
 }
 
 export function rewardVisit(

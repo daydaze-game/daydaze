@@ -74,6 +74,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
     },
     bests: save.bests,
     challenges: save.challenges,
+    progression: save.progression,
     car: save.car,
     garage: save.garage,
     records: save.records,

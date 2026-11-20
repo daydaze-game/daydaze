@@ -82,7 +82,8 @@ import { RoomAudio } from "./RoomAudio.tsx";
 import { playSoundFile } from "../audio/soundFiles.ts";
 import { playFanfare } from "../audio/worldSounds.ts";
 import {
-  finishPrize,
+  applyPrize,
+  scorePrize,
   rewardSteal,
   rewardVisit,
   rewardLegacy,
@@ -449,17 +450,12 @@ export function App() {
   useEffect(() => {
     if (!pending) return;
     const now = Date.now();
-    const result = finishPrize(
-      latest.current,
-      pending.game,
-      pending.score,
-      now,
-    );
+    const result = scorePrize(latest.current, pending.game, pending.score, now);
     if (!result) {
       prizeDesk.set({ pending: null });
       return;
     }
-    setSave((s) => finishPrize(s, pending.game, pending.score, now)?.save ?? s);
+    setSave((s) => applyPrize(s, pending.game, result));
     postPrize(result.prize, result.daily, result.xp);
     if (!latest.current.settings.muted)
       playFanfare(

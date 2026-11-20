@@ -31,7 +31,7 @@ export function ProgressionHud({ progression }: { progression: Progression }) {
   const gained = xp - levelStart(level);
   const needed = levelStart(level + 1) - levelStart(level);
   return (
-    <div className="level-hud" aria-label="Your level">
+    <div className="level-hud" role="group" aria-label="Your level">
       <span>Level {level}</span>
       <progress
         aria-label="XP to next level"

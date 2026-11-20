@@ -38,7 +38,7 @@ export function PrizeCard() {
         <p className="prize-game">{table.label}</p>
         <p className="prize-score">{table.format(shown.score)}</p>
         <p className="prize-coins">+{shown.coins} coins</p>
-        {xp > 0 && <p className="prize-best">+{xp} XP</p>}
+        {xp > 0 && <p className="prize-xp">+{xp} XP</p>}
         {shown.best && <p className="prize-best">New personal best!</p>}
         {challenge > 0 && (
           <p className="prize-best">Daily challenge done! +{challenge}</p>
