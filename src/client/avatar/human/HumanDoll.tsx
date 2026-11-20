@@ -68,7 +68,7 @@ import {
   type BodyShape,
 } from "../../../game/body.ts";
 import { pose, type Rig } from "../pose.ts";
-import { useQuality } from "../../world/quality.ts";
+import { useGraphics, useQuality } from "../../world/quality.ts";
 import { NPC_GAITS, gaitOf } from "../../../game/gaits.ts";
 import { BUILT_STRIDE, walkPhaseRate } from "../../../game/dance/stride.ts";
 import { syncOffset } from "../../../game/dance/sync.ts";
@@ -805,7 +805,8 @@ function Part({
   full?: boolean;
 }) {
   const gltfLo = useGLTF(full ? url : lodOf(url));
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
+  const { shadows } = useGraphics();
   const { color, kind } = tint;
   const lo = useMemo(
     () => buildPart(gltfLo.scene, bones, { color, kind }, full && rich),
@@ -821,6 +822,9 @@ function Part({
     if (lo.group.visible !== showLo) lo.group.visible = showLo;
     if (near && near.group.visible === showLo) near.group.visible = !showLo;
   });
+  useEffect(() => {
+    castShadows(lo.group, shadows);
+  }, [lo, shadows]);
   useEffect(() => {
     onMeshes(
       near
@@ -862,12 +866,16 @@ function NearPart({
 }) {
   const gltf = useGLTF(url);
   // the glossy hair shading and its soft-edge pass are for capable GPUs
-  const rich = useQuality() === "high";
+  const rich = useQuality() !== "low";
+  const { shadows } = useGraphics();
   const { color, kind } = tint;
   const part = useMemo(
     () => buildPart(gltf.scene, bones, { color, kind }, rich),
     [gltf, bones, color, kind, rich],
   );
+  useEffect(() => {
+    castShadows(part.group, shadows);
+  }, [part, shadows]);
   useEffect(() => {
     // hidden until Part decides, so it never shows alongside the twin
     part.group.visible = false;
@@ -878,6 +886,13 @@ function NearPart({
     };
   }, [part, onBuilt]);
   return <primitive object={part.group} />;
+}
+
+/** Sets whether every mesh under `group` casts the key light's shadow. */
+function castShadows(group: THREE.Object3D, on: boolean) {
+  group.traverse((o) => {
+    if (o instanceof THREE.Mesh) o.castShadow = on;
+  });
 }
 
 /** A part's scene re-bound to the body's bones, with the doll's materials. */
@@ -1024,6 +1039,12 @@ export function HumanDoll({
     [look, seed],
   );
   const body = useBody(painted, face.eyeColor);
+  // on Realistic every doll casts the key light's shadow; each part sets its
+  // own when it mounts, so only the body is covered here
+  const { shadows } = useGraphics();
+  useEffect(() => {
+    if (root.current) castShadows(root.current, shadows);
+  }, [body, shadows]);
   const gait = gaitOf(
     look.gait ?? (seed ? NPC_GAITS[seed % NPC_GAITS.length] : undefined),
   );

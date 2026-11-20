@@ -17,7 +17,7 @@ import {
   PEDESTRIAN_DOLL_RADIUS,
 } from "../../game/city/tuning.ts";
 import { wallSeconds } from "../../game/clock.ts";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 import { Doll } from "../avatar/Doll.tsx";
 import { Creature, type CreaturePose } from "../creatures/Creature.tsx";
 import type { Player } from "../world/PlayerController.tsx";
@@ -166,7 +166,7 @@ function CrowdFigures({
   player: Player;
   dolls: React.RefObject<readonly number[]>;
 }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const drawn = PEDESTRIAN_DOLLS[tier];
   const bikers = useRef<readonly number[]>([]);
   const meshes = useRef<(THREE.InstancedMesh | null)[]>([]);
@@ -241,7 +241,7 @@ function CrowdFigures({
  * she comes back into range.
  */
 export function Pedestrians({ player }: { player: Player }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const drawn = PEDESTRIAN_DOLLS[tier];
   const radius = PEDESTRIAN_DOLL_RADIUS[tier];
   const [shown, setShown] = useState<readonly number[]>([]);

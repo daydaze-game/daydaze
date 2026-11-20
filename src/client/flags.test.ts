@@ -12,12 +12,21 @@ test("the boot tier is the ?quality flag first, then the saved setting", () => {
   assert.equal(bootTier("?quality=low", saveWith("high")), "low");
   assert.equal(bootTier("?quality=high", saveWith("low")), "high");
   assert.equal(bootTier("", saveWith("low")), "low");
+  assert.equal(bootTier("?quality=ultra", saveWith("low")), "ultra");
+});
+
+test("the boot tier follows a saved Graphics menu choice", () => {
+  const graphics = (preset: string) =>
+    JSON.stringify({ version: 1, settings: { graphics: { preset } } });
+  assert.equal(bootTier("", graphics("realistic")), "ultra");
+  assert.equal(bootTier("", graphics("performance")), "low");
+  assert.equal(bootTier("", graphics("auto")), null);
 });
 
 test("no flag and an auto, missing or broken save leave the tier open", () => {
   assert.equal(bootTier("", saveWith("auto")), null);
   assert.equal(bootTier("", null), null);
-  assert.equal(bootTier("?quality=ultra", "{not json"), null);
+  assert.equal(bootTier("?quality=extreme", "{not json"), null);
 });
 
 test("?join=<room>.<copy> names a friend's room copy", () => {
