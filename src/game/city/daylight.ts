@@ -1,9 +1,11 @@
-// The city's day and night, on the player's own clock: a blue sky and a warm
+// The city's day and night, on the shared New York city clock: a blue sky and a warm
 // sun by day, a gold evening, and the neon of Nightlife Row by night. Each
 // key hour sets the sky, fog and light colors, how strong the sun is, how
 // gold the light is, and how lit the neon and windows are; hours between keys
 // ease from one to the next, so the light never jumps. `?time=HH:MM` pins the
 // hour for screenshots and tests. Pure: colors are [r, g, b] in 0..1.
+
+import { cityHourOf } from "./cityClock.ts";
 
 export type Rgb = readonly [number, number, number];
 
@@ -163,8 +165,8 @@ export function daylightAt(hour: number): Daylight {
   };
 }
 
-/** The local hour of `date`, with minutes as a fraction. */
-export const hourOf = (date: Date) => date.getHours() + date.getMinutes() / 60;
+/** The city (New York) hour of `date`, with minutes as a fraction. */
+export const hourOf = cityHourOf;
 
 /** `?time=HH` or `?time=HH:MM` from a query string, or null. */
 export function parseTimeFlag(search: string): number | null {
