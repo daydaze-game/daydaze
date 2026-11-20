@@ -535,7 +535,7 @@ export function App() {
             </p>
           )}
           <p className="nametag">
-            {save.name} · {levelOf(totalXp(save.progression))}
+            {save.name} · Lv {levelOf(totalXp(save.progression))}
             {titleLabel(save.progression) && (
               <small className="player-title">
                 {titleLabel(save.progression)}
