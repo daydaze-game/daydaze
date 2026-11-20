@@ -23,7 +23,8 @@ export type ReactionId =
   | "trip"
   | "trip-fall"
   | "get-up"
-  | "hard-landing";
+  | "hard-landing"
+  | "hard-fall";
 
 export const REACTIONS: Readonly<Record<ReactionId, Reaction>> = {
   "hit-front": { clip: "react-hit-front" },
@@ -35,6 +36,8 @@ export const REACTIONS: Readonly<Record<ReactionId, Reaction>> = {
   "trip-fall": { clip: "react-trip-fall", then: "get-up" },
   "get-up": { clip: "react-get-up" },
   "hard-landing": { clip: "react-hard-landing" },
+  // thrown by a fast car (game/city/carHits.ts): down hard, then up again
+  "hard-fall": { clip: "react-hard-landing", then: "get-up" },
 };
 
 /** Whether `id` (from the network, say) names a reaction. */
