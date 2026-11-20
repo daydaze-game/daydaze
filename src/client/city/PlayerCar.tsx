@@ -6,9 +6,10 @@
 
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { carExtras } from "./carExtras.ts";
-import { cancelCarApproach } from "./carApproach.ts";
+import { cancelCarApproach, ownsCarApproach } from "./carApproach.ts";
 import { useEffect, useRef } from "react";
 import type { Group } from "three";
+import type { Vec2 } from "../../game/walk.ts";
 import { clampToArea } from "../../game/area.ts";
 import {
   exitPoint,
@@ -57,7 +58,7 @@ export function PlayerCar({
   const group = useRef<Group>(null);
   const spec = carById(parked.id) ?? FALLBACK;
   // walking over to the car, to get in on arrival
-  const heading = useRef(false);
+  const heading = useRef<Vec2 | null>(null);
   const session = useRef<CitySession | null>(null);
   const live = useRef(false);
   const onParkRef = useRef(onPark);
@@ -87,7 +88,7 @@ export function PlayerCar({
     );
     session.current = s;
     driving.session = s;
-    heading.current = false;
+    heading.current = null;
     releaseControls();
   };
 
@@ -118,7 +119,7 @@ export function PlayerCar({
     const request = driving.request;
     if (fishing.get().phase !== "off") {
       cancelCarApproach(player.walk, heading.current);
-      heading.current = false;
+      heading.current = null;
       if (request === "city-drive") {
         leaveFishing();
         return;
@@ -131,19 +132,20 @@ export function PlayerCar({
       } else if (!session.current) {
         if (near) getIn();
         else {
-          heading.current = true;
           walkTo(
             player,
             CITY_AREA,
             exitPoint({ position: parked.at, yaw: parked.yaw, speed: 0 }),
           );
+          heading.current = player.walk.target;
         }
       }
     }
     // a new tap or key took the player elsewhere: forget the car
     if (heading.current && !session.current) {
-      if (near) getIn();
-      else if (!player.walk.target) heading.current = false;
+      if (!ownsCarApproach(player.walk, heading.current))
+        heading.current = null;
+      else if (near) getIn();
     }
     setData(canvas.dataset, "cityCar", session.current ? "driving" : "parked");
     const s = session.current;
