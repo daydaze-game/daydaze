@@ -2,7 +2,7 @@
 
 ## Work queue
 
-- [Crowd replacement #13](https://github.com/dpologdvinity/daydaze/issues/13): the Kenney crowd figures still differ from the human avatars.
+- [Crowd replacement #13](https://github.com/dpologdvinity/daydaze/issues/13): done. The crowds are baked doll people (`art/crowd/`).
 - [Clothing clipping #14](https://github.com/dpologdvinity/daydaze/issues/14): skin pokes through the default flared pants. Root cause remains unconfirmed.
 - [Dependency alerts #15](https://github.com/dpologdvinity/daydaze/issues/15): unrelated security maintenance; no dependency changes belong in the avatar task.
 - The owner's requested eyebrow/eye/lip additions are the next separate task. Partial eyebrow work is preserved at `64f3cd90` on `feat/face-shapes`; it is not part of the initial editor merge.
@@ -14,6 +14,8 @@ The owner wants one active worktree per agent: finish, test, commit, merge, and
 remove it before starting the next task. Open GitHub issues for unrelated findings.
 
 ## Rejected crowd experiments
+
+Superseded by `art/crowd/` (see its README); kept as a record.
 
 The `.txt` source attachments are diagnostic recipes, not runtime assets or an
 approved production pipeline. Copy them into an ignored `tmp/crowd-study/`

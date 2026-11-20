@@ -214,6 +214,14 @@ it (and Quaternius' CC0 Universal Animation Library) into
 (clip tables in `art/doll/blender/mocap_clips.py`) and lists them in
 `src/game/dance/mocap.ts`. Sources and licenses: `docs/assets.md`.
 
+Crowds (club queues, the street's far walkers and cyclists, stands, the pit
+crew) are the same doll, baked: `src/game/crowd.ts` names nine looks and
+their poses, and `art/crowd/build-crowd.sh` paints their faces with the
+game's own painter, poses each from the doll's clips, remeshes it into one
+closed low-poly surface (3,000 triangles near, 880 far) and Cycles-bakes its
+colors onto that, writing one single-mesh GLB per look and pose into
+`public/models/crowd/` for the client to instance.
+
 The sea: `art/ocean/fetch_ocean.py` downloads the reef and sea-life models
 (Poly Pizza), `art/ocean/build_ocean.py` joins and fits the reef props and
 gulls, `art/animals/build_animals.py` bakes the grouper, crab and turtle, and

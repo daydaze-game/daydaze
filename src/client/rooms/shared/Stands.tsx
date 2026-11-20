@@ -5,11 +5,7 @@ import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useReducedMotion } from "../../motion.ts";
 import { surface } from "../../city/worldTexture.ts";
-import {
-  FAN_MODELS,
-  PERSON_SCALE,
-  usePerson,
-} from "../speedway/peopleModel.ts";
+import { FAN_MODELS, usePersonAt } from "../speedway/peopleModel.ts";
 
 // poured-concrete steps, painted
 const STEPS = surface("brushed_concrete", {
@@ -37,7 +33,7 @@ const WAVE_SECONDS = 7;
 
 const STEP_DEPTH = 0.9;
 const STEP_RISE = 0.5;
-/** A Kenney fan is about a meter across, so seats are wider apart than the old pills (and cost ~700 triangles each). */
+/** A seat each, a meter apart (a baked fan costs up to 880 triangles). */
 const SEAT_GAP = 1;
 /** Share of `fill` that really sit down, to stay inside the render budget. */
 const CROWD_THIN = 0.75;
@@ -66,15 +62,15 @@ const scratch = {
 
 /** One baked fan pose as an instanced mesh, handed to Stands to place each frame. */
 function FanMesh({
-  name,
+  url,
   capacity,
   mesh,
 }: {
-  name: string;
+  url: string;
   capacity: number;
   mesh: (m: THREE.InstancedMesh | null) => void;
 }) {
-  const person = usePerson(name);
+  const person = usePersonAt(url);
   if (!person || capacity === 0) return null;
   return (
     <instancedMesh
@@ -147,7 +143,7 @@ export function Stands({
             yaw: bank.yaw,
             // four looks, about a quarter of them cheering
             model: Math.floor(rand() * 4) * 2 + (rand() < 0.28 ? 1 : 0),
-            size: 0.88 + rand() * 0.12,
+            size: 0.94 + rand() * 0.12,
           });
         }
       }
@@ -186,7 +182,7 @@ export function Stands({
       const wave = calm || front > 1.2 ? 0 : Math.exp(-d * d) * 0.45;
       q.setFromAxisAngle(up, f.yaw);
       p.set(f.x, f.y + bob + wave, f.z);
-      s.setScalar(PERSON_SCALE * 0.9 * f.size);
+      s.setScalar(f.size);
       mesh.setMatrixAt(slots[i], m.compose(p, q, s));
     }
     for (const mesh of poses.current) {
@@ -222,10 +218,10 @@ export function Stands({
         <boxGeometry />
         <primitive object={STEPS} attach="material" />
       </instancedMesh>
-      {FAN_MODELS.map((name, i) => (
-        <Suspense key={name} fallback={null}>
+      {FAN_MODELS.map((url, i) => (
+        <Suspense key={url} fallback={null}>
           <FanMesh
-            name={name}
+            url={url}
             capacity={perPose[i] ?? 0}
             mesh={(m) => {
               poses.current[i] = m;
