@@ -32,11 +32,19 @@ const formatter = new Intl.DateTimeFormat("en-US", {
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/** `date` as the city clock shows it. */
-export function cityTime(date: Date): CityTime {
+// One-entry cache: callers read the clock every frame, so format once a second.
+let cachedSecond = Number.NaN;
+let cached: Readonly<CityTime> | null = null;
+
+/** `date` as the city clock shows it (the object is shared: do not mutate). */
+export function cityTime(date: Date): Readonly<CityTime> {
+  const second = Math.floor(date.getTime() / 1000);
+  if (cached && second === cachedSecond) return cached;
+  const parts = formatter.formatToParts(date);
   const part = (type: Intl.DateTimeFormatPartTypes): string =>
-    formatter.formatToParts(date).find((p) => p.type === type)?.value ?? "";
-  return {
+    parts.find((p) => p.type === type)?.value ?? "";
+  cachedSecond = second;
+  cached = {
     year: Number(part("year")),
     month: Number(part("month")),
     day: Number(part("day")),
@@ -45,6 +53,7 @@ export function cityTime(date: Date): CityTime {
     minute: Number(part("minute")),
     second: Number(part("second")),
   };
+  return cached;
 }
 
 /** The city hour of `date`, with minutes as a fraction. */

@@ -22,6 +22,15 @@ test("the date and weekday follow New York, not UTC", () => {
   );
 });
 
+test("the same second reuses one object; the next second is new", () => {
+  const a = cityTime(new Date("2026-07-15T16:30:05.100Z"));
+  const b = cityTime(new Date("2026-07-15T16:30:05.900Z"));
+  assert.equal(a, b);
+  const c = cityTime(new Date("2026-07-15T16:30:06Z"));
+  assert.equal(c.second, 6);
+  assert.equal(c.hour, 12);
+});
+
 test("both DST changeovers", () => {
   // Spring forward 2026-03-08: 06:59Z is 01:59 EST, 07:00Z is 03:00 EDT.
   assert.equal(cityHourOf(new Date("2026-03-08T06:59:00Z")), 1 + 59 / 60);
