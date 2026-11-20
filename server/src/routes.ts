@@ -75,3 +75,14 @@ export function matchRoute(method: string, pathname: string): Route | null {
   if (home?.[1]) return { kind: "home", ownerId: home[1] };
   return null;
 }
+
+/**
+ * Whether a request's Origin header must be verified. Anything that changes
+ * state (non-GET) and every WebSocket upgrade, room or apartment, qualifies:
+ * browsers don't apply the same-origin policy to sockets, so without the check
+ * any site could open one with the visitor's cookie (cross-site WebSocket
+ * hijacking).
+ */
+export function needsOriginCheck(method: string, route: Route): boolean {
+  return method !== "GET" || route.kind === "ws" || route.kind === "home";
+}

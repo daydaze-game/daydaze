@@ -22,7 +22,7 @@ export function trackedCodeFiles(): string[] {
       "ls-files",
       "--",
       ...["src", "server/src", "scripts", "tests"].flatMap((d) =>
-        ["ts", "tsx", "mjs", "js"].map((e) => `${d}/**/*.${e}`),
+        ["ts", "tsx", "mjs", "js"].map((e) => `:(glob)${d}/**/*.${e}`),
       ),
     ],
     { encoding: "utf8" },
