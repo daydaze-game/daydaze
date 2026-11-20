@@ -110,6 +110,19 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 
 ## Agent workflow
 
+- **Always work in a worktree.** Other agents are working in the main checkout
+  (`~/git/daydaze`) at the same time. It always stays on `main`. Never switch
+  its branch, and never commit, stash or discard anything in it. Only read
+  there (`git status`, `log`, `diff`, `fetch`). Start every change, even one
+  line, with `git worktree add -b <type>/<name> .worktrees/<name> origin/main`.
+- **You own your PR until it merges.** When your issue is done, open a PR.
+  - If a check fails, fix it.
+  - If CodeRabbit comments, consider each suggestion: fix it, or reply why not.
+  - When every check is green, update the branch with `main` and bypass-merge
+    it (`gh pr merge <n> --admin --merge`), unless there is a reason to wait for
+    the checks again (for example, the update brought in conflicts you fixed).
+  - You are not done until the PR is merged. Then delete your worktree and
+    branch.
 - Parallel agents each work in a git worktree, `.worktrees/<name>` on
   `feat/<name>`, with `node_modules` symlinked from the main checkout (never
   `npm install` in a worktree). Build agents get `docs/agents/agent-rules.md` as
@@ -149,7 +162,11 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 - Merge gate: nobody pushes to `main`. GitHub merges a PR only when it is up
   to date with `main` and every required check passes (the browser suites
   included), so two PRs that are green alone cannot merge into a red `main`.
-  To land a PR, turn on auto-merge: `gh pr merge <n> --auto --merge`, or
+  The one exception is the bypass-merge above: a PR that was all green and
+  only took `main` in may merge without waiting for the checks again. The
+  `automerge` workflow turns auto-merge on for every PR that is not a
+  draft (when it opens or is marked ready). To do it by hand:
+  `gh pr merge <n> --auto --merge`, or
   `docs/agents/scripts/land.sh <branch> <worktree> "<message>"`, which pushes,
   opens the PR, turns auto-merge on, waits for the merge and removes the
   worktree and branch. The `auto-update` workflow brings the oldest
@@ -197,10 +214,11 @@ request. Use the `gh` CLI.
   title and `.github/pull_request_template.md` filled in: what and why, how it
   was checked (verify, the touched feature's Playwright tests, screenshots you
   looked at), and the linked issue. Open it as a draft while the work is in
-  progress. `docs/agents/scripts/land.sh` opens the PR for you when it lands a
-  branch, so agents that may not push (see `docs/agents/agent-rules.md`) leave
-  a clean branch and the main session opens or lands the PR.
-- **Reviews and CI**: do not merge a PR with a red or missing check, and do not
+  progress. `docs/agents/scripts/land.sh` can open and land it for you. The
+  Claude GitHub Action can't open PRs, so it leaves a branch and the main
+  session opens the PR.
+- **Reviews and CI**: do not merge a PR with a red check, or with checks that
+  never ran (the bypass-merge after updating from `main` is fine), and do not
   push to `main` around CI. Answer review comments with a commit or a reply,
   and resolve the thread. Close issues you have fixed with a comment pointing
   at the commit or PR.

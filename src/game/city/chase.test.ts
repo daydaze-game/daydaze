@@ -117,3 +117,8 @@ test("chaseFrame mutates blankChase without crashing and handles states", () => 
   assert.equal(after, false);
   assert.equal(frame.active, false);
 });
+
+test("chaseInto is free of float jitter on large clock values", () => {
+  const start = chaseStart(1000);
+  assert.equal(chaseInto(start + 74.9), 74.9);
+});

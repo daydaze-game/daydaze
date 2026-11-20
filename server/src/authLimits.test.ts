@@ -1,3 +1,4 @@
+// Tests for server/src/authLimits.ts: rate-limiting auth actions by IP and player.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BUCKET_PRUNE_AFTER_MS, createAuthLimiter } from "./authLimits.ts";

@@ -1,3 +1,4 @@
+// Token-bucket rate limiter for auth endpoints and sensitive actions.
 import {
   BLOCK_ADDRESS_LIMIT,
   BLOCK_LIMIT,

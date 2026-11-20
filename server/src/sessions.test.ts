@@ -1,3 +1,4 @@
+// Tests for server/src/sessions.ts: session token generation, hashing and player IDs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { isNetworkId } from "../../src/net/networkProtocol.ts";
