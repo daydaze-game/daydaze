@@ -2859,6 +2859,15 @@ test("city fishing and driving do not take the player at the same time", async (
   await expect(canvas).toHaveAttribute("data-city-car", "parked", {
     timeout: 180_000,
   });
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 180_000,
+  });
+  await expect(canvas).toHaveAttribute("data-avatar", "ready", {
+    timeout: 180_000,
+  });
+  await expect(canvas).toHaveAttribute("data-street", "ready", {
+    timeout: 180_000,
+  });
   await (await dockAction(page, "Drive your car")).click();
   await expect(canvas).toHaveAttribute("data-city-car", "driving", {
     timeout: 120_000,
