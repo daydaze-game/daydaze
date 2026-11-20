@@ -7,6 +7,7 @@ import { DEFAULT_BODY } from "./body.ts";
 import { STARTING_COINS } from "./wallet.ts";
 import { createDefaultFarm } from "./farm.ts";
 import { createDefaultGarden } from "./garden.ts";
+import { changeAdvanced, defaultGraphics, presetGraphics } from "./graphics.ts";
 import {
   SAVE_KEY,
   createDefaultSave,
@@ -38,7 +39,7 @@ test("createDefaultSave uses the default look and auto quality", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "auto",
+      graphics: defaultGraphics(),
       muted: false,
       effects: "full",
       panelOpen: false,
@@ -88,7 +89,7 @@ test("a save round-trips through serializeSave and loadSave", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "low",
+      graphics: presetGraphics("performance"),
       muted: true,
       effects: "off",
       panelOpen: true,
@@ -179,7 +180,7 @@ test("a save from before the swimsuit slot still loads", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "low",
+      graphics: presetGraphics("performance"),
       muted: true,
       effects: "full",
       panelOpen: false,
@@ -255,7 +256,7 @@ test("loadSave keeps a valid name when the look is bad", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "high",
+      graphics: presetGraphics("balanced"),
       muted: true,
       effects: "full",
       panelOpen: false,
@@ -305,7 +306,7 @@ test("loadSave keeps a valid look when the name is bad", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "auto",
+      graphics: defaultGraphics(),
       muted: false,
       effects: "full",
       panelOpen: false,
@@ -348,7 +349,7 @@ test("loadSave repairs settings field by field", () => {
     settings: { quality: "ultra", muted: true },
   });
   assert.deepEqual(loadSave(raw, "Fallback").settings, {
-    quality: "auto",
+    graphics: defaultGraphics(),
     muted: true,
     effects: "full",
     panelOpen: false,
@@ -361,7 +362,7 @@ test("loadSave repairs settings field by field", () => {
     settings: { quality: "low", muted: "yes" },
   });
   assert.deepEqual(loadSave(badMuted, "Fallback").settings, {
-    quality: "low",
+    graphics: presetGraphics("performance"),
     muted: false,
     effects: "full",
     panelOpen: false,
@@ -393,7 +394,7 @@ test("loadSave repairs the effects setting without touching the rest", () => {
     },
   });
   assert.deepEqual(loadSave(raw, "Fallback").settings, {
-    quality: "low",
+    graphics: presetGraphics("performance"),
     muted: true,
     effects: "full",
     panelOpen: false,
@@ -774,4 +775,25 @@ test("a teen save keeps its pouch: loading never strips it", () => {
     loadSave(serializeSave(save), "Fallback").inventory,
     save.inventory,
   );
+});
+
+test("a save from before the Graphics menu migrates its quality setting", () => {
+  for (const [quality, preset] of [
+    ["auto", "auto"],
+    ["high", "balanced"],
+    ["low", "performance"],
+  ] as const) {
+    const old = JSON.stringify({ version: 1, settings: { quality } });
+    assert.equal(loadSave(old, "Fallback").settings.graphics.preset, preset);
+  }
+});
+
+test("custom graphics settings survive a save and load", () => {
+  const save = createDefaultSave("Kept Name");
+  save.settings.graphics = changeAdvanced(presetGraphics("realistic"), {
+    ao: false,
+    fpsCap: 30,
+  });
+  const loaded = loadSave(JSON.stringify(save), "Fallback");
+  assert.deepEqual(loaded.settings.graphics, save.settings.graphics);
 });

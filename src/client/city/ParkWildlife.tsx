@@ -12,14 +12,14 @@ import {
 } from "../../game/city/parkWildlife.ts";
 import { WanderingCreature } from "../creatures/Wanderer.tsx";
 import type { Player } from "../world/PlayerController.tsx";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 
 export function ParkWildlife({
   player,
 }: {
   player: Player;
 }): JSX.Element | null {
-  const tier = useQuality();
+  const tier = useDetail();
   const [near, setNear] = useState(false);
   useFrame(() => {
     const now = wildlifeNear(player.pos.x, player.pos.z);

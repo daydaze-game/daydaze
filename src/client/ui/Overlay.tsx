@@ -12,6 +12,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { type Look, type Mood, type SwimLook } from "../../game/look.ts";
 import type { DanceMoveId, Holds } from "../../game/dance/moves.ts";
 import { type Intensity } from "../../game/effects/buzz.ts";
+import type { Graphics } from "../../game/graphics.ts";
 import { CarPicker } from "../city/CarPicker.tsx";
 import { driving } from "../world/driving.ts";
 import { collectionsBook } from "./Collections.tsx";
@@ -298,6 +299,8 @@ export function Overlay({
   onPlayGame,
   onCityTravel,
   muted,
+  graphics,
+  setGraphics,
   setMuted,
   mood,
   setMood,
@@ -340,6 +343,8 @@ export function Overlay({
   onCityTravel: (spawn: Spawn) => void;
   muted: boolean;
   setMuted: (muted: boolean) => void;
+  graphics: Graphics;
+  setGraphics: (graphics: Graphics) => void;
   mood: Mood;
   setMood: (mood: Mood) => void;
   dance: DanceMoveId;
@@ -696,7 +701,7 @@ export function Overlay({
             onPick={setMood}
             options={PLAYER_MOODS}
           />
-          <GameMenu>
+          <GameMenu graphics={graphics} setGraphics={setGraphics}>
             <div className="game-menu-items" role="group" aria-label="Game">
               <button
                 type="button"

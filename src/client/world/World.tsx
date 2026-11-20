@@ -53,7 +53,18 @@ import {
   walkTo,
   type Player,
 } from "./PlayerController.tsx";
-import { QualityContext, type QualityTier } from "./quality.ts";
+import {
+  autoGraphics,
+  DRAW_FAR,
+  forcedGraphics,
+  type Graphics,
+} from "../../game/graphics.ts";
+import {
+  GraphicsContext,
+  QualityContext,
+  type QualityTier,
+} from "./quality.ts";
+import { renderStats } from "./fps.ts";
 import { Seats } from "./Seats.tsx";
 import { isSceneReady, setSceneReady } from "./ready.ts";
 import { CompileGate } from "./compileGate.ts";
@@ -403,6 +414,120 @@ function FrameCount({ still }: { still: boolean }) {
 }
 
 /**
+ * Measures the frame rate twice a second into `renderStats` for the Graphics
+ * menu, and says which tier is in force (Auto's choice changes it).
+ */
+function FpsMeter({ tier }: { tier: QualityTier }) {
+  const frames = useRef(0);
+  const seconds = useRef(0);
+  useEffect(() => {
+    renderStats.set({ tier });
+  }, [tier]);
+  useFrame((_, delta) => {
+    frames.current += 1;
+    seconds.current += delta;
+    if (seconds.current < 0.5) return;
+    renderStats.set({ fps: Math.round(frames.current / seconds.current) });
+    frames.current = 0;
+    seconds.current = 0;
+  });
+  return null;
+}
+
+/**
+ * The key light, shared so a doll looks the same in every room. With shadows
+ * on it casts them, riding along with the player so a small map around the doll
+ * stays sharp wherever she walks.
+ */
+function KeyLight({ player, shadows }: { player: Player; shadows: boolean }) {
+  const light = useRef<THREE.DirectionalLight>(null);
+  const target = useMemo(() => new THREE.Object3D(), []);
+  useEffect(() => {
+    const l = light.current;
+    if (!l) return;
+    l.target = target;
+    // off again: back to the fixed light, which lights exactly the same way
+    return () => {
+      l.position.set(2, 5, 6);
+      target.position.set(0, 0, 0);
+    };
+  }, [target, shadows]);
+  useFrame(() => {
+    const l = light.current;
+    if (!l || !shadows) return;
+    const { x, y, z } = player.pos;
+    l.position.set(x + 2, y + 5, z + 6);
+    target.position.set(x, y, z);
+    target.updateMatrixWorld();
+  });
+  return (
+    <>
+      <primitive object={target} />
+      <directionalLight
+        ref={light}
+        position={[2, 5, 6]}
+        color="#fff1f4"
+        intensity={2.2}
+        castShadow={shadows}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-left={-9}
+        shadow-camera-right={9}
+        shadow-camera-top={9}
+        shadow-camera-bottom={-9}
+        shadow-camera-near={0.5}
+        shadow-camera-far={30}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.02}
+      />
+    </>
+  );
+}
+
+/** Sets the camera's far plane to the render distance, live. */
+function DrawDistance({ far }: { far: number }) {
+  const camera = useThree((s) => s.camera);
+  useEffect(() => {
+    camera.far = far;
+    camera.updateProjectionMatrix();
+  }, [camera, far]);
+  return null;
+}
+
+/**
+ * The frame-rate cap: draws on demand and asks for a frame on the display's
+ * own refresh, no more often than the cap. Does nothing when uncapped.
+ * shortcut: the cap lands on a whole number of display refreshes (a 60 cap on
+ * a 144 Hz screen runs near 48), fine until someone asks for exact pacing.
+ */
+function FrameCap({ cap }: { cap: number }) {
+  const set = useThree((s) => s.set);
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    if (cap === 0) return;
+    // `set`, not `setFrameloop`: that one rewinds the clock to zero, which
+    // freezes every timer that compares against elapsed time
+    set({ frameloop: "demand" });
+    // a millisecond of slack, so a display's frame jitter never skips a frame
+    const gap = 1000 / cap - 1;
+    let last = 0;
+    let id = 0;
+    const tick = (now: number) => {
+      if (now - last >= gap) {
+        last = now;
+        invalidate();
+      }
+      id = requestAnimationFrame(tick);
+    };
+    id = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(id);
+      set({ frameloop: "always" });
+    };
+  }, [cap, invalidate, set]);
+  return null;
+}
+
+/**
  * Compiles every shader in the freshly loaded room off the main thread
  * (KHR_parallel_shader_compile) before showing it. Drawing a room for the
  * first time otherwise compiles 30-odd shader programs in one blocking
@@ -615,8 +740,10 @@ export type WorldProps = {
   onMove: () => void;
   view: View;
   tag: RefObject<HTMLDivElement | null>;
-  /** A forced tier from the URL or settings; null lets the frame rate decide. */
+  /** A tier forced by the URL's `?quality=` flag; null follows `graphics`. */
   quality: QualityTier | null;
+  /** The Graphics menu's settings (Auto lets the frame rate decide). */
+  graphics: Graphics;
   still: boolean;
   onPortal: (portal: Portal) => void;
   home: HomeSave;
@@ -652,6 +779,7 @@ export function World({
   view,
   tag,
   quality,
+  graphics,
   still,
   onPortal,
   home,
@@ -662,11 +790,28 @@ export function World({
 }: WorldProps) {
   // dev free camera (always false in production, where nothing sets it)
   const freeCam = useFreeCam();
-  const [auto, setAuto] = useState<QualityTier>("high");
-  // a struggling machine first gives up the extra resolution, then the
-  // high tier's effects: two steps down instead of one big one
-  const [sharp, setSharp] = useState(true);
-  const tier = quality ?? auto;
+  // Auto: a struggling machine first gives up the extra resolution, then the
+  // high tier's effects (two steps down instead of one big one)
+  const [step, setStep] = useState(0);
+  const autoMode = quality === null && graphics.preset === "auto";
+  const active = useMemo(
+    () =>
+      quality !== null
+        ? forcedGraphics(quality)
+        : graphics.preset === "auto"
+          ? autoGraphics(step)
+          : graphics,
+    [quality, graphics, step],
+  );
+  const tier = active.tier;
+  // the menu shows what is really rendering, and says when the URL overrides it
+  useEffect(() => {
+    renderStats.set({ active, forced: quality !== null });
+  }, [active, quality]);
+  // choosing Auto again starts from Balanced, not from an old step-down
+  useEffect(() => {
+    if (graphics.preset !== "auto") setStep(0);
+  }, [graphics.preset]);
   const def = ROOMS[room];
   const area = useMemo(() => areaOf(def), [def]);
   // a fresh player per arrival, so a portal can only fire once per visit
@@ -695,10 +840,13 @@ export function World({
     <Canvas
       className="world"
       frameloop={still ? "demand" : "always"}
-      // sharp: device resolution up to 1.5x on the high tier (2x quadrupled
-      // the pixels the bloom chain works through), stepping down to 1x before
-      // the effects go; native MSAA smooths edges on low
-      dpr={tier === "high" && sharp ? [1, 1.5] : 1}
+      // the renderer's shadow maps stay ready; nothing is drawn into one until
+      // a light casts (the key light, on Realistic), so other tiers pay nothing
+      shadows="percentage"
+      // the resolution scale is the most device pixels per CSS pixel: Balanced
+      // stops at 1.5x (2x quadrupled the pixels the bloom chain works through),
+      // Auto steps down to 1x before the effects go; native MSAA smooths edges
+      dpr={[Math.min(1, active.scale), active.scale]}
       // native MSAA stays on: it is fixed when the context is made, and an
       // auto session starts on high and may step down to low, which needs it
       gl={{ antialias: true, powerPreference: "high-performance" }}
@@ -713,132 +861,147 @@ export function World({
       }}
     >
       <QualityContext.Provider value={tier}>
-        {quality === null && !still && (
-          <PerformanceMonitor
-            bounds={() => [45, 60]}
-            onDecline={() => (sharp ? setSharp(false) : setAuto("low"))}
-          />
-        )}
-        <FrameCount still={still} />
-        <Photo />
-        <Suspense fallback={null}>
-          <OnlinePeers
-            room={room}
-            player={player}
-            mood={mood}
-            dance={dance}
-            sitHold={holds.sit}
-          />
-        </Suspense>
-        <DrunkState intensity={effects} />
-        <Dancing mood={mood} move={dance} />
-        <Wearing style={swimFor(def, swim)?.style ?? "outfit"} />
-        {/* the key light, shared so a doll looks the same in every room */}
-        <directionalLight
-          position={[2, 5, 6]}
-          color="#fff1f4"
-          intensity={2.2}
-        />
-        {/* a weekly night on here tints the light and fills the air */}
-        {room !== "city" && (
-          <Suspense fallback={null}>
-            <NightDecor room={room} />
-          </Suspense>
-        )}
-        <Suspense fallback={null}>
-          {room === "city" ? (
-            <CityScene
-              key={room}
-              player={player}
-              onPick={onPick}
-              car={car}
-              onPark={onPark}
+        <GraphicsContext.Provider value={active}>
+          {autoMode && !still && (
+            <PerformanceMonitor
+              bounds={() => [45, 60]}
+              onDecline={() => setStep((n) => Math.min(n + 1, 2))}
             />
-          ) : Room ? (
-            <Room
-              key={room}
-              onPick={onPick}
-              onRide={onRide}
-              onGame={onGame}
-              player={player}
-              home={home}
-              onShelf={onShelf}
-            />
-          ) : null}
-          {/* a pet waits on the shore: it can't swim out or dive with you */}
-          {pet && !WATER[room] && (
-            <Suspense fallback={null}>
-              <PetFollower pet={pet} room={room} area={area} player={player} />
-            </Suspense>
           )}
-          <Seats room={room} player={player} area={area} home={home} />
+          <FrameCount still={still} />
+          <FpsMeter tier={tier} />
+          <DrawDistance far={DRAW_FAR[active.distance]} />
+          {!still && <FrameCap cap={active.fpsCap} />}
+          <Photo />
           <Suspense fallback={null}>
-            <VendingWatch room={room} player={player} />
-            {room === "city" && <MartWatch player={player} />}
-          </Suspense>
-          <PlayerController
-            editing={dressing}
-            player={player}
-            area={area}
-            look={look}
-            swim={swimFor(def, swim)}
-            body={body}
-            mood={mood}
-            dance={dance}
-            holds={holds}
-            onMove={onMove}
-            tag={tag}
-            water={WATER[room] ?? null}
-            onPortal={(portal) => {
-              // a shut door (an 18+ venue): step back off it and stay
-              if (
-                !mayEnter(portal.target, ADULT_OK) ||
-                !mayDive(portal.target, scuba.get().rented)
-              ) {
-                const back = 1.6;
-                placePlayer(
-                  player,
-                  player.walk.pos[0] - Math.sin(player.walk.yaw) * back,
-                  player.walk.pos[1] - Math.cos(player.walk.yaw) * back,
-                );
-                player.walk.leaving = false;
-              }
-              onPortal(portal);
-            }}
-          />
-          {DevProbe && (
-            // its own boundary: loading it never holds up the room
-            <Suspense fallback={null}>
-              <DevProbe player={player} area={area} />
-            </Suspense>
-          )}
-          {!dressing && !freeCam && (
-            <CameraRig
-              player={player}
-              view={view}
+            <OnlinePeers
               room={room}
-              body={bodyOf(look)}
+              player={player}
+              mood={mood}
+              dance={dance}
+              sitHold={holds.sit}
+            />
+          </Suspense>
+          <DrunkState intensity={effects} />
+          <Dancing mood={mood} move={dance} />
+          <Wearing style={swimFor(def, swim)?.style ?? "outfit"} />
+          <KeyLight player={player} shadows={active.shadows} />
+          {/* a weekly night on here tints the light and fills the air */}
+          {room !== "city" && (
+            <Suspense fallback={null}>
+              <NightDecor room={room} />
+            </Suspense>
+          )}
+          <Suspense fallback={null}>
+            {room === "city" ? (
+              <CityScene
+                key={room}
+                player={player}
+                onPick={onPick}
+                car={car}
+                onPark={onPark}
+              />
+            ) : Room ? (
+              <Room
+                key={room}
+                onPick={onPick}
+                onRide={onRide}
+                onGame={onGame}
+                player={player}
+                home={home}
+                onShelf={onShelf}
+              />
+            ) : null}
+            {/* a pet waits on the shore: it can't swim out or dive with you */}
+            {pet && !WATER[room] && (
+              <Suspense fallback={null}>
+                <PetFollower
+                  pet={pet}
+                  room={room}
+                  area={area}
+                  player={player}
+                />
+              </Suspense>
+            )}
+            <Seats room={room} player={player} area={area} home={home} />
+            <Suspense fallback={null}>
+              <VendingWatch room={room} player={player} />
+              {room === "city" && <MartWatch player={player} />}
+            </Suspense>
+            <PlayerController
+              editing={dressing}
+              player={player}
+              area={area}
+              look={look}
+              swim={swimFor(def, swim)}
+              body={body}
+              mood={mood}
+              dance={dance}
+              holds={holds}
+              onMove={onMove}
+              tag={tag}
+              water={WATER[room] ?? null}
+              onPortal={(portal) => {
+                // a shut door (an 18+ venue): step back off it and stay
+                if (
+                  !mayEnter(portal.target, ADULT_OK) ||
+                  !mayDive(portal.target, scuba.get().rented)
+                ) {
+                  const back = 1.6;
+                  placePlayer(
+                    player,
+                    player.walk.pos[0] - Math.sin(player.walk.yaw) * back,
+                    player.walk.pos[1] - Math.cos(player.walk.yaw) * back,
+                  );
+                  player.walk.leaving = false;
+                }
+                onPortal(portal);
+              }}
+            />
+            {DevProbe && (
+              // its own boundary: loading it never holds up the room
+              <Suspense fallback={null}>
+                <DevProbe player={player} area={area} />
+              </Suspense>
+            )}
+            {!dressing && !freeCam && (
+              <CameraRig
+                player={player}
+                view={view}
+                room={room}
+                body={bodyOf(look)}
+              />
+            )}
+            {!dressing && <CreatorFrame />}
+            <Confetti />
+            {!dressing &&
+              (active.post || active.ao ? (
+                // its own boundary: the first live switch to it loads a chunk,
+                // and the world must not blink out while that arrives
+                <Suspense fallback={null}>
+                  <Effects
+                    key={`fx-${active.post}-${active.ao}`}
+                    room={room}
+                    post={active.post}
+                    ao={active.ao}
+                    bloom={active.bloom}
+                  />
+                </Suspense>
+              ) : (
+                <NeonClamp key={`clamp-${room}`} />
+              ))}
+            <Warmup key={`warm-${room}`} />
+            <LateWarmup key={`late-${room}`} />
+          </Suspense>
+          {dressing && (
+            <DressingStudio
+              look={look}
+              body={body}
+              swim={swimFor(def, swim)}
+              view={view}
             />
           )}
-          {!dressing && <CreatorFrame />}
-          <Confetti />
-          {!dressing &&
-            (tier === "high" ? (
-              <Effects room={room} />
-            ) : (
-              <NeonClamp key={`clamp-${room}`} />
-            ))}
-          <Warmup key={`warm-${room}`} />
-          <LateWarmup key={`late-${room}`} />
-        </Suspense>
-        {dressing && (
-          <DressingStudio
-            look={look}
-            body={body}
-            swim={swimFor(def, swim)}
-            view={view}
-          />
-        )}
+        </GraphicsContext.Provider>
       </QualityContext.Provider>
     </Canvas>
   );
