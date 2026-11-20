@@ -21,6 +21,7 @@
     "server",
     "tests",
     "scripts",
+    "art/crowd",
     "vite.config.ts",
     "playwright.config.ts",
     "playwright.minigames.config.ts",

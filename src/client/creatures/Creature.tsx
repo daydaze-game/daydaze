@@ -21,7 +21,7 @@ import {
 import { clipToPlay } from "../../game/creature.ts";
 import { lit } from "./glow.ts";
 import { useReducedMotion } from "../motion.ts";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 import { isMesh, isSkinnedMesh } from "../world/guards.ts";
 
 /** Where a creature stands, which way it faces and what it is doing. */
@@ -75,7 +75,7 @@ export function Creature({
   glow?: number | undefined;
 }): JSX.Element {
   const calm = useReducedMotion();
-  const tier = useQuality();
+  const tier = useDetail();
   const gltf = useGLTF(creatureUrl(kind));
   const rig = useMemo(() => {
     const root = cloneSkinned(gltf.scene);

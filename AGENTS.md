@@ -63,7 +63,7 @@ Node.js 22.18 or newer (`.nvmrc` pins 24).
 | `npm run smoke:server`              | End-to-end check of a throwaway local Worker                                                                                                    |
 | `npm run perf:budget`               | Check `dist/` against the performance budget (run after build)                                                                                  |
 
-Client URL flags: `?quality=low|high`, `?still=1` (render a few frames and
+Client URL flags: `?quality=low|high|ultra`, `?still=1` (render a few frames and
 stop, for screenshots), `?debug=1` (room jump buttons), `?time=HH:MM` (pin the
 hour), `?night=<club-night-id>`, `?online=1` (multiplayer), `?adult=1`
 (dev-only 18+ preview), `?timescale=0.1` (slow the player and every doll to a
@@ -208,8 +208,11 @@ request. Use the `gh` CLI.
   `security`, `performance`, and one `area: *`) and assign it to the owner
   (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
-  reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
-  stays open). When you finish something that has no issue, the PR is enough.
+  reference it in the PR description with `Closes #n` (or `Refs #n` if it
+  stays open), and in the commit body if you like. The PR then gets the
+  issue's labels automatically
+  (`pr-labels.yml`), and keeps them in step if the issue's labels change.
+  When you finish something that has no issue, the PR is enough.
 - **One pull request per branch**, with the Conventional Commit subject as the
   title and `.github/pull_request_template.md` filled in: what and why, how it
   was checked (verify, the touched feature's Playwright tests, screenshots you
