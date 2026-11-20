@@ -816,6 +816,7 @@ test("loadSave preserves highAudio setting when boolean and defaults when invali
     settings: { highAudio: "yes" },
   });
   assert.equal(loadSave(invalid, "Fallback").settings.highAudio, true);
+});
 
 test("a save from before the Graphics menu migrates its quality setting", () => {
   for (const [quality, preset] of [
