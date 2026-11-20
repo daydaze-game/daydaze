@@ -30,6 +30,7 @@ import { TaxiPanel } from "../city/TaxiPanel.tsx";
 import { driverSays, taxiRide } from "../city/taxiStore.ts";
 import { fareFor, planRoute, routeLength } from "../../game/city/taxi.ts";
 import { FuelStop } from "../city/FuelStop.tsx";
+import { SmokingPrompt } from "../city/SmokingPrompt.tsx";
 import type { ParkedCar } from "../../game/city/drive.ts";
 import type { RoomId, Spawn } from "../../game/rooms.ts";
 import { type BodyShape } from "../../game/body.ts";
@@ -486,6 +487,7 @@ export function Overlay({
       )}
       <VendingPanel coins={coins} onSpend={onSpend} />
       <PouchPanel />
+      <SmokingPrompt room={room} />
       {room === "city" && <GasMartPanel />}
       {room === "green-haze" && (
         <WeedShopPanel shop="dispensary" title="Dispensary" />

@@ -3388,6 +3388,30 @@ button:focus-visible {
   left: 16px;
 }
 
+.smoking-spot-panel {
+  right: auto;
+  left: 16px;
+  top: auto;
+  bottom: 5.5rem;
+  background: rgba(20, 24, 33, 0.9);
+  border: 1px solid #4a5568;
+  color: #f7fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  z-index: 20;
+}
+.smoking-spot-panel button.drink {
+  background: #2d3748;
+  color: #edf2f7;
+  border: 1px solid #718096;
+  border-radius: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+.smoking-spot-panel button.drink:hover {
+  background: #4a5568;
+}
+
 /* Street counters stay legible over the city, with accessible menu controls. */
 .food-vendor-panel {
   position: fixed;
