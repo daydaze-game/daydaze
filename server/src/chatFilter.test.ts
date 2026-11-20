@@ -1,3 +1,4 @@
+// Tests for server/src/chatFilter.ts: slur masking and username validation.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateGuestName } from "../../src/game/save.ts";
