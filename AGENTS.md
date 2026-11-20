@@ -194,7 +194,8 @@ request. Use the `gh` CLI.
   (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
   reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
-  stays open). When you finish something that has no issue, the PR is enough.
+  stays open). The PR then gets the issue's labels automatically
+  (`pr-labels.yml`), and keeps them in step if the issue's labels change. When you finish something that has no issue, the PR is enough.
 - **One pull request per branch**, with the Conventional Commit subject as the
   title and `.github/pull_request_template.md` filled in: what and why, how it
   was checked (verify, the touched feature's Playwright tests, screenshots you
