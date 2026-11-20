@@ -11,8 +11,6 @@ import { driving } from "../world/driving.ts";
 import type { Player } from "../world/PlayerController.tsx";
 import { DEALER_NAME, martNear } from "./martNear.ts";
 
-export { DEALER_NAME };
-
 export function MartWatch({ player }: { player: Player }): JSX.Element | null {
   useEffect(() => () => martNear.set({ name: "" }), []);
   useFrame(() => {

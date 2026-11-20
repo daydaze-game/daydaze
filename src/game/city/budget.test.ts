@@ -12,6 +12,7 @@ import { DREAM_LANDMARK_COST } from "./dreamLandmarkCosts.generated.ts";
 import { DREAM_MODEL_COST } from "./dreamCosts.generated.ts";
 import { dreamTriangles } from "./dreamCosts.ts";
 import { QUEUE_LOOKS, QUEUE_PERSON_TRIS } from "./queues.ts";
+import { CROWD_BAKES, CROWD_TRIS, crowdUrl } from "../crowd.ts";
 import {
   worstViewDreamTriangles,
   BAYS_CAMERA,
@@ -87,10 +88,24 @@ test("the seasonal models' costs match the shipped GLBs", () => {
     assert.deepEqual(cost, glbCost(path), path);
 });
 
-test("the queue people are one part each and no dearer than the budget says", () => {
+/** A baked crowd file's path under public/models, as glbCost takes it. */
+const crowdPath = (...a: Parameters<typeof crowdUrl>) =>
+  crowdUrl(...a).replace(/^\/models\/(.*)\.glb$/, "$1");
+
+test("every baked crowd person is one part, within its tier's triangles", () => {
+  for (const { look, pose, tier } of CROWD_BAKES) {
+    const cost = glbCost(crowdPath(look, pose, tier));
+    assert.equal(cost.parts, 1, `${look}-${pose}-${tier}`);
+    assert.ok(
+      cost.tris <= CROWD_TRIS[tier],
+      `${look}-${pose}-${tier}: ${cost.tris}`,
+    );
+  }
+});
+
+test("the queue people are no dearer than the budget says", () => {
   for (const look of QUEUE_LOOKS) {
-    const cost = glbCost(`speedway/people-${look}-idle`);
-    assert.equal(cost.parts, 1, look);
+    const cost = glbCost(crowdPath(look, "idle", "near"));
     assert.ok(cost.tris <= QUEUE_PERSON_TRIS, `${look}: ${cost.tris}`);
   }
 });

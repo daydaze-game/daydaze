@@ -1,19 +1,34 @@
-// The render quality tier (high or low) as React context, so scenes can pick
-// detail levels. Defaults to high when no provider is mounted.
+// The render quality as React context, so scenes can pick detail levels: the
+// content tier (low, high or ultra) and the advanced switches. Defaults to
+// Balanced when no provider is mounted.
 
 import { createContext, useContext } from "react";
+import {
+  detailOf,
+  presetGraphics,
+  type Graphics,
+} from "../../game/graphics.ts";
+
+export type { QualityTier } from "../../game/graphics.ts";
+
+const BALANCED = presetGraphics("balanced");
 
 /**
- * The two render tiers. Low must stay inside the low-tier budget (under 250
- * draw calls, 300k triangles, 4 lights).
+ * Provides the active tier to the scene; World sets it from the Graphics
+ * menu, the frame-rate monitor or the `?quality=` flag. Only Performance is
+ * "low": a scene that adds detail asks `tier !== "low"`, so ultra gets all
+ * of high's.
  */
-export type QualityTier = "high" | "low";
-
-/**
- * Provides the active tier to the scene; the app sets it from the device or the
- * `?quality=` flag.
- */
-export const QualityContext = createContext<QualityTier>("high");
+export const QualityContext = createContext(BALANCED.tier);
 
 /** The current quality tier from QualityContext. */
 export const useQuality = () => useContext(QualityContext);
+
+/** The tier as "low" or "high", for tables with one entry per detail level. */
+export const useDetail = () => detailOf(useQuality());
+
+/** The tier plus the advanced switches (reflections, shadows ...) in force. */
+export const GraphicsContext = createContext<Graphics>(BALANCED);
+
+/** The graphics settings in force, after Auto and the URL flag are applied. */
+export const useGraphics = () => useContext(GraphicsContext);

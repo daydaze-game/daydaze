@@ -20,7 +20,7 @@ npm run dev               # client at http://localhost:5173
 npm run dev:server        # optional: the Worker on 8787, for ?online=1
 ```
 
-Useful URL flags: `?quality=low|high`, `?still=1` (a few frames, for
+Useful URL flags: `?quality=low|high|ultra`, `?still=1` (a few frames, for
 screenshots), `?debug=1` (room jump buttons), `?online=1`.
 
 Press `` ` `` in the running game for the dev panel: draw calls and FPS,

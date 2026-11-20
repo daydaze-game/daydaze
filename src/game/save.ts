@@ -32,16 +32,20 @@ import {
   NO_CHALLENGES,
   type ChallengeSave,
 } from "./challenges.ts";
+import { cleanStreak, NO_STREAK, type StreakSave } from "./streakSave.ts";
 import { cleanBests, type Bests } from "./prizes.ts";
 import { validatePet, type PetSave } from "./pet.ts";
 import { cleanParkedCar, type ParkedCar } from "./city/drive.ts";
 import { cleanGarage, STARTER } from "./garage.ts";
+import { cleanGraphics, defaultGraphics, type Graphics } from "./graphics.ts";
 import { cleanRecords, type RecordId } from "./records.ts";
 import { cleanWardrobe, unlockedLook } from "./shop.ts";
 import { isCoins, STARTING_COINS } from "./wallet.ts";
-
-/** The graphics quality setting; auto picks a tier from the device. */
-export type Quality = "auto" | "high" | "low";
+import {
+  cleanProgression,
+  freshProgression,
+  type Progression,
+} from "./progression/progression.ts";
 
 /** Everything a player keeps between sessions. */
 export type SaveV1 = {
@@ -54,7 +58,8 @@ export type SaveV1 = {
   wardrobe: string[];
   body: BodyShape;
   settings: {
-    quality: Quality;
+    /** The Graphics menu: a preset or custom switches (graphics.ts). */
+    graphics: Graphics;
     muted: boolean;
     effects: Intensity;
     /** The dressing-room drawer; closed on a new save. */
@@ -72,6 +77,7 @@ export type SaveV1 = {
   bests: Bests;
   /** Today's challenges already reached. */
   challenges: ChallengeSave;
+  progression: Progression;
   /** Your car where you last parked it; null waits at the home spot. */
   car: ParkedCar | null;
   /** The road cars you own; the starter always. */
@@ -97,20 +103,12 @@ export type SaveV1 = {
   inventory: Inventory;
   /** The day (challenges.ts `dayOf`) the friend's free item was last taken. */
   giftDay: number;
+  /** The daily streak (streak.ts); saves from before it start with none. */
+  streak: StreakSave;
 };
 
 /** The localStorage key the save lives under. */
 export const SAVE_KEY = "daydaze-save-v1";
-
-const QUALITIES: readonly unknown[] = [
-  "auto",
-  "high",
-  "low",
-] satisfies Quality[];
-
-function isQuality(value: unknown): value is Quality {
-  return QUALITIES.includes(value);
-}
 
 /**
  * A fresh save for a new player named `name`, with fresh copies of every
@@ -126,7 +124,7 @@ export function createDefaultSave(name: string): SaveV1 {
     wardrobe: [],
     body: { ...DEFAULT_BODY },
     settings: {
-      quality: "auto",
+      graphics: defaultGraphics(),
       muted: false,
       effects: "full",
       strictChat: false,
@@ -138,6 +136,8 @@ export function createDefaultSave(name: string): SaveV1 {
     crime: { ...DEFAULT_CRIME, bans: {}, stolen: {} },
     bests: {},
     challenges: { ...NO_CHALLENGES, done: [] },
+    progression: freshProgression(),
+    streak: { ...NO_STREAK, days: [], frozen: [] },
     car: null,
     garage: [STARTER],
     records: [],
@@ -182,7 +182,11 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
   const bouquet = save.get("bouquet");
   const wardrobe = cleanWardrobe(save.get("wardrobe"));
   const garage = cleanGarage(save.get("garage"));
-  const quality = settings.get("quality");
+  // saves from before the Graphics menu hold a plain auto/high/low `quality`
+  const graphics = cleanGraphics(
+    settings.get("graphics"),
+    settings.get("quality"),
+  );
   const muted = settings.get("muted");
   const effects = settings.get("effects");
   const panelOpen = settings.get("panelOpen");
@@ -201,7 +205,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     wardrobe,
     body: cleanBody(save.get("body")),
     settings: {
-      quality: isQuality(quality) ? quality : defaults.settings.quality,
+      graphics,
       muted: typeof muted === "boolean" ? muted : defaults.settings.muted,
       // saves from before the drunk effects have no effects field yet
       effects: isIntensity(effects) ? effects : defaults.settings.effects,
@@ -224,6 +228,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     crime: validateCrime(save.get("crime")),
     bests: cleanBests(save.get("bests")),
     challenges: cleanChallenges(save.get("challenges")),
+    progression: cleanProgression(save.get("progression")),
     car: cleanParkedCar(save.get("car"), (id) => garage.includes(id)),
     garage,
     records: cleanRecords(save.get("records")),
@@ -242,6 +247,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     garden: cleanGarden(save.get("garden")),
     inventory: cleanInventory(save.get("inventory")),
     giftDay: cleanGiftDay(save.get("giftDay")),
+    streak: cleanStreak(save.get("streak")),
   };
 }
 

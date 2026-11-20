@@ -9,3 +9,6 @@ export const DEALER_NAME = "Street dealer";
 const none: { name: string; shop: Shop } = { name: "", shop: "gas" };
 
 export const martNear = createStore(none);
+
+/** The street dealer's counter name (a gas station's is its own name). */
+export const DEALER_NAME = "Street dealer";

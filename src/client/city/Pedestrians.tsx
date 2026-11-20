@@ -17,12 +17,13 @@ import {
   PEDESTRIAN_DOLL_RADIUS,
 } from "../../game/city/tuning.ts";
 import { wallSeconds } from "../../game/clock.ts";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 import { Doll } from "../avatar/Doll.tsx";
 import { Creature, type CreaturePose } from "../creatures/Creature.tsx";
 import type { Player } from "../world/PlayerController.tsx";
 import { cityHour } from "./daylight.ts";
-import { PERSON_SCALE, usePersonAt } from "../rooms/speedway/peopleModel.ts";
+import { usePersonAt } from "../rooms/speedway/peopleModel.ts";
+import { FAN_LOOKS, RIDER_LOOKS, crowdUrl } from "../../game/crowd.ts";
 
 /** Seconds between re-picking who is nearest. */
 const REPICK = 0.75;
@@ -60,10 +61,13 @@ function Walker({ index }: { index: number }) {
 }
 
 /** Per look and stride: 4 looks x 2 strides, each its own instanced mesh. */
-const LOOKS = ["male-a", "female-c", "male-d", "female-a"] as const;
+// the stands' four looks walk the street too
+const LOOKS = FAN_LOOKS;
 const STRIDES = ["walk-a", "walk-b"] as const;
-const walkerUrl = (look: string, stride: string) =>
-  `/models/street/walker-${look}-${stride}.glb`;
+const walkerUrl = (
+  look: (typeof LOOKS)[number],
+  stride: (typeof STRIDES)[number],
+) => crowdUrl(look, stride, "far");
 for (const l of LOOKS)
   for (const s of STRIDES) useGLTF.preload(walkerUrl(l, s));
 /** Steps per second of the far crowd's two-pose walk. */
@@ -75,8 +79,8 @@ function WalkerMesh({
   stride,
   mesh,
 }: {
-  look: string;
-  stride: string;
+  look: (typeof LOOKS)[number];
+  stride: (typeof STRIDES)[number];
   mesh: (m: THREE.InstancedMesh | null) => void;
 }) {
   const person = usePersonAt(walkerUrl(look, stride));
@@ -91,12 +95,20 @@ function WalkerMesh({
 }
 
 const BIKE_URL = "/models/street/bicycle.glb";
-const rideUrl = (look: string) => `/models/street/walker-${look}-ride.glb`;
+// a cyclist's number picks the first rider when even, the second when odd
+const [RIDER_A, RIDER_B] = RIDER_LOOKS.map((look) =>
+  crowdUrl(look, "ride", "far"),
+);
 useGLTF.preload(BIKE_URL);
-useGLTF.preload(rideUrl("male-a"));
-useGLTF.preload(rideUrl("female-c"));
+useGLTF.preload(RIDER_A);
+useGLTF.preload(RIDER_B);
+/** Where the baked rider's feet go so they sit on the saddle (meters, bike
+ * space: the saddle is 1.04 m up at x -0.41, a seated rider's hips 0.47 m
+ * over their feet), and the turn that faces them along the bike (+x). */
+const SADDLE: readonly [number, number, number] = [-0.41, 0.57, 0];
+const ALONG_BIKE = Math.PI / 2;
 
-/** One cyclist: a downloaded bicycle with a posed Kenney rider, riding the deck. */
+/** One cyclist: a downloaded bicycle with a baked doll rider, riding the deck. */
 function Cyclist({
   slot,
   bikers,
@@ -107,15 +119,15 @@ function Cyclist({
   const group = useRef<THREE.Group>(null);
   const pose = useRef<PedestrianPose>({ x: 0, z: 0, yaw: 0 });
   const bike = useGLTF(BIKE_URL).scene;
-  const male = useGLTF(rideUrl("male-a")).scene;
-  const female = useGLTF(rideUrl("female-c")).scene;
+  const riderA = useGLTF(RIDER_A).scene;
+  const riderB = useGLTF(RIDER_B).scene;
   const parts = useMemo(
     () => ({
       bike: bike.clone(true),
-      male: male.clone(true),
-      female: female.clone(true),
+      a: riderA.clone(true),
+      b: riderB.clone(true),
     }),
-    [bike, male, female],
+    [bike, riderA, riderB],
   );
   useFrame(() => {
     const g = group.current;
@@ -127,23 +139,23 @@ function Cyclist({
     g.position.set(pose.current.x, 0.14, pose.current.z);
     g.rotation.y = pose.current.yaw;
     // the rider is the one this walker's number picks
-    parts.male.visible = i % 2 === 0;
-    parts.female.visible = i % 2 === 1;
+    parts.a.visible = i % 2 === 0;
+    parts.b.visible = i % 2 === 1;
   });
   return (
     <group ref={group} visible={false}>
       <primitive object={parts.bike} />
-      <group position={[0, 0.02, -0.05]} scale={PERSON_SCALE}>
-        <primitive object={parts.male} />
-        <primitive object={parts.female} />
+      <group position={SADDLE} rotation-y={ALONG_BIKE}>
+        <primitive object={parts.a} />
+        <primitive object={parts.b} />
       </group>
     </group>
   );
 }
 
 /**
- * The crowd past the nearest dolls: Kenney Mini Characters (CC0) baked in two
- * stride poses (art/speedway/build_people.py), instanced per look and pose.
+ * The crowd past the nearest dolls: doll people baked in two stride poses
+ * (art/crowd/, the far tier), instanced per look and pose.
  * Each walker swaps between the two poses as she goes, so the far deck reads
  * as people walking. Allocates nothing per frame.
  */
@@ -154,17 +166,13 @@ function CrowdFigures({
   player: Player;
   dolls: React.RefObject<readonly number[]>;
 }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const drawn = PEDESTRIAN_DOLLS[tier];
   const bikers = useRef<readonly number[]>([]);
   const meshes = useRef<(THREE.InstancedMesh | null)[]>([]);
   const picked = useRef<readonly number[]>([]);
   const last = useRef(-Infinity);
-  const dummy = useMemo(() => {
-    const d = new THREE.Object3D();
-    d.scale.setScalar(PERSON_SCALE);
-    return d;
-  }, []);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
   const pose = useRef<PedestrianPose>({ x: 0, z: 0, yaw: 0 });
   const counts = useRef<number[]>(
     new Array<number>(LOOKS.length * STRIDES.length).fill(0),
@@ -233,7 +241,7 @@ function CrowdFigures({
  * she comes back into range.
  */
 export function Pedestrians({ player }: { player: Player }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const drawn = PEDESTRIAN_DOLLS[tier];
   const radius = PEDESTRIAN_DOLL_RADIUS[tier];
   const [shown, setShown] = useState<readonly number[]>([]);
