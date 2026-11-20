@@ -1,4 +1,4 @@
-// The crowd bake's first step, run in a browser by art/crowd/paint.mjs: paints
+// The crowd bake's first step, run in a browser by art/crowd/paint-run.ts: paints
 // each crowd person's face and irises with the game's own painter
 // (faceCanvas.ts) and writes the recipe build_crowd.py follows (parts, shape
 // keys, tints, poses), so the baked people match the live dolls.
@@ -16,7 +16,7 @@ import {
   CROWD_PEOPLE,
   CROWD_TRIS,
   POSE_CLIPS,
-  crowdFace,
+  type CrowdPerson,
 } from "../../src/game/crowd.ts";
 import { MOCAP_CLIPS } from "../../src/game/dance/mocap.ts";
 import { packFile } from "../../src/client/avatar/human/anims.ts";
@@ -25,7 +25,9 @@ import {
   encodeFace,
   encodeMakeup,
   modelSuffix,
+  seededFace,
   seededMakeup,
+  type Face,
   shoesOf,
 } from "../../src/game/look.ts";
 
@@ -41,6 +43,12 @@ async function marksOf(suffix: string): Promise<Marks> {
   if (!marks) throw new Error(`body${suffix}.glb has no face landmarks`);
   return marks;
 }
+
+/** A crowd person's face: their seed's, as an NPC doll's, with their build. */
+const crowdFace = (person: CrowdPerson): Face => ({
+  ...seededFace(person.seed),
+  figure: person.figure,
+});
 
 const png = (canvas: unknown): string => {
   if (!(canvas instanceof HTMLCanvasElement))

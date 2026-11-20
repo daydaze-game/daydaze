@@ -23,7 +23,7 @@ import { Creature, type CreaturePose } from "../creatures/Creature.tsx";
 import type { Player } from "../world/PlayerController.tsx";
 import { cityHour } from "./daylight.ts";
 import { usePersonAt } from "../rooms/speedway/peopleModel.ts";
-import { RIDER_LOOKS, WALKER_LOOKS, crowdUrl } from "../../game/crowd.ts";
+import { FAN_LOOKS, RIDER_LOOKS, crowdUrl } from "../../game/crowd.ts";
 
 /** Seconds between re-picking who is nearest. */
 const REPICK = 0.75;
@@ -61,7 +61,8 @@ function Walker({ index }: { index: number }) {
 }
 
 /** Per look and stride: 4 looks x 2 strides, each its own instanced mesh. */
-const LOOKS = WALKER_LOOKS;
+// the stands' four looks walk the street too
+const LOOKS = FAN_LOOKS;
 const STRIDES = ["walk-a", "walk-b"] as const;
 const walkerUrl = (
   look: (typeof LOOKS)[number],
@@ -94,6 +95,7 @@ function WalkerMesh({
 }
 
 const BIKE_URL = "/models/street/bicycle.glb";
+// a cyclist's number picks the first rider when even, the second when odd
 const [RIDER_A, RIDER_B] = RIDER_LOOKS.map((look) =>
   crowdUrl(look, "ride", "far"),
 );

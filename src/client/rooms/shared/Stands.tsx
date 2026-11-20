@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { useReducedMotion } from "../../motion.ts";
 import { surface } from "../../city/worldTexture.ts";
 import { FAN_MODELS, usePersonAt } from "../speedway/peopleModel.ts";
+import { FAN_LOOKS } from "../../../game/crowd.ts";
 
 // poured-concrete steps, painted
 const STEPS = surface("brushed_concrete", {
@@ -142,7 +143,9 @@ export function Stands({
             turn: 0,
             yaw: bank.yaw,
             // four looks, about a quarter of them cheering
-            model: Math.floor(rand() * 4) * 2 + (rand() < 0.28 ? 1 : 0),
+            model:
+              Math.floor(rand() * FAN_LOOKS.length) * 2 +
+              (rand() < 0.28 ? 1 : 0),
             size: 0.94 + rand() * 0.12,
           });
         }

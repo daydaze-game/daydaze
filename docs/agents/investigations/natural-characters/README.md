@@ -54,7 +54,7 @@ tests and inspect game renders before admitting any new crowd models.
    baked poses. Its outputs stay under `tmp/crowd-study/out/`.
 5. Inspect atlas alpha/UV handling, hair coverage, facial detail, real height,
    and garment occlusion. The prototype's hardcoded 0.4 scale preserves the
-   existing client `PERSON_SCALE=2.5`; changing one requires changing the other.
+   client `PERSON_SCALE=2.5` of the time (gone since; the crowd is baked at real size).
 
 Do not promote a model just because the bake/export succeeds or its triangle
 count passes. Resolve the visible defects first, then record provenance,

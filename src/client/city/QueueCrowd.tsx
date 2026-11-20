@@ -1,6 +1,7 @@
 // The people waiting outside the clubs (src/game/city/queues.ts): doll people
-// baked standing by art/crowd/ (the near tier), one instanced mesh per look. Only the queues near the player are placed, when
-// the plan reloads; nothing runs per frame.
+// baked standing by art/crowd/ (the near tier), one instanced mesh per look.
+// Only the queues near the player are placed, when the plan reloads; nothing
+// runs per frame.
 
 import { useEffect, useMemo, useRef, type JSX } from "react";
 import * as THREE from "three";

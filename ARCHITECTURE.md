@@ -217,7 +217,7 @@ it (and Quaternius' CC0 Universal Animation Library) into
 Crowds (club queues, the street's far walkers and cyclists, stands, the pit
 crew) are the same doll, baked: `src/game/crowd.ts` names nine looks and
 their poses, and `art/crowd/build-crowd.sh` paints their faces with the
-game's own painter, poses each from the doll's clips, remeshes it into one
+game's own painter, poses each from the doll's clips, rebuilds it as one
 closed low-poly surface (3,000 triangles near, 880 far) and Cycles-bakes its
 colors onto that, writing one single-mesh GLB per look and pose into
 `public/models/crowd/` for the client to instance.

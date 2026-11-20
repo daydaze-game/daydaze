@@ -4,7 +4,7 @@
 // doll's own mocap clips. Pure data: the bake reads it through
 // art/crowd/paint.ts, the client draws the files it names.
 
-import { seededFace, type Face, type Figure, type Look } from "./look.ts";
+import type { Figure, Look } from "./look.ts";
 
 export const CROWD_LOOKS = [
   "female-a",
@@ -209,25 +209,18 @@ export const POSE_CLIPS: Record<
   ride: { clip: "sit-at-table", at: 0 },
 };
 
-/** A crowd person's face: their seed's, with their build. */
-export const crowdFace = (person: CrowdPerson): Face => ({
-  ...seededFace(person.seed),
-  figure: person.figure,
-});
-
 /** The baked file for a look in a pose. */
 export const crowdUrl = (look: CrowdLook, pose: CrowdPose, tier: CrowdTier) =>
   `/models/crowd/${look}-${pose}-${tier}.glb`;
 
-/** Fans in the stands: four looks, standing or cheering. */
+/** Fans in the stands, standing or cheering, and the street crowd past the
+ * dolls, walking: the same four looks. */
 export const FAN_LOOKS: readonly CrowdLook[] = [
   "male-a",
   "female-c",
   "male-d",
   "female-a",
 ];
-/** The street crowd past the dolls: the same four, walking. */
-export const WALKER_LOOKS = FAN_LOOKS;
 /** Cyclists. */
 export const RIDER_LOOKS: readonly CrowdLook[] = ["male-a", "female-c"];
 /** The Speedway pit crew. */
@@ -252,7 +245,7 @@ export const CROWD_BAKES: readonly {
       tier: "far" as const,
     })),
   ),
-  ...WALKER_LOOKS.flatMap((look) =>
+  ...FAN_LOOKS.flatMap((look) =>
     (["walk-a", "walk-b"] as const).map((pose) => ({
       look,
       pose,

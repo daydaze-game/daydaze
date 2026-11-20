@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { seeded } from "./canvasTextures.ts";
 import { FAN_MODELS, usePersonAt } from "./peopleModel.ts";
+import { FAN_LOOKS } from "../../../game/crowd.ts";
 
 const ROWS = 6;
 const COLS = 26;
@@ -20,7 +21,7 @@ function seatPlan(): Seat[][] {
     for (let c = 0; c < COLS; c++) {
       // an empty seat now and then
       if (rand() < 0.08) continue;
-      const look = Math.floor(rand() * 4);
+      const look = Math.floor(rand() * FAN_LOOKS.length);
       const cheers = rand() < 0.28 ? 1 : 0;
       plan[look * 2 + cheers]?.push({
         x: -21 + (c / (COLS - 1)) * 42 + (rand() - 0.5) * 0.2,
