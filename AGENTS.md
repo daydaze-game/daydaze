@@ -208,8 +208,9 @@ request. Use the `gh` CLI.
   `security`, `performance`, and one `area: *`) and assign it to the owner
   (`--assignee dpologdvinity`). Never put secrets in an issue.
 - **Work from an issue when one exists**: comment when you start, and
-  reference it in the commit body or PR with `Closes #n` (or `Refs #n` if it
-  stays open). The PR then gets the issue's labels automatically
+  reference it in the PR description with `Closes #n` (or `Refs #n` if it
+  stays open), and in the commit body if you like. The PR then gets the
+  issue's labels automatically
   (`pr-labels.yml`), and keeps them in step if the issue's labels change.
   When you finish something that has no issue, the PR is enough.
 - **One pull request per branch**, with the Conventional Commit subject as the

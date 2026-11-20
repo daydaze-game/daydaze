@@ -47,20 +47,29 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - name: Add or remove the label on open PRs that link this issue
+      - name: Match the label on open PRs that link this issue
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           ISSUE: ${{ github.event.issue.number }}
           LABEL: ${{ github.event.label.name }}
-          ACTION: ${{ github.event.action }}
-        # shortcut: unlabeling removes the label even if another linked issue
-        # still has it; fine while a PR links one issue, revisit if that changes.
+        # Decide from the current labels of every issue the PR links, not from
+        # the event: a delayed run can't undo a newer change, and a label that
+        # another linked issue still has stays on the PR.
         run: |
-          prs=$(gh pr list -R "$REPO" --state open --limit 100 --search "$ISSUE in:body" --json number,body \
-            -q ".[] | select(.body | test(\"(?i)(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?):?\\\\s+#$ISSUE\\\\b\")) | .number")
+          prs=$(gh pr list -R "$REPO" --state open --limit 100 --search "$ISSUE in:body" --json number,body,isCrossRepository \
+            -q ".[] | select(.isCrossRepository | not) | select(.body | test(\"(?i)(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?):?\\\\s+#$ISSUE\\\\b\")) | .number")
           for pr in $prs; do
-            if [ "$ACTION" = labeled ]; then
+            body=$(gh api "repos/$REPO/pulls/$pr" -q .body)
+            issues=$(grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?):?[[:space:]]+#[0-9]+' <<<"$body" | grep -oE '[0-9]+$' | sort -u || true)
+            want=false
+            for n in $issues; do
+              if gh api "repos/$REPO/issues/$n" -q 'select(.pull_request == null) | .labels[].name' 2>/dev/null | grep -qxF -- "$LABEL"; then
+                want=true
+                break
+              fi
+            done
+            if [ "$want" = true ]; then
               gh api -X POST "repos/$REPO/issues/$pr/labels" -f "labels[]=$LABEL" > /dev/null
             else
               gh api -X DELETE "repos/$REPO/issues/$pr/labels/$(jq -rn --arg l "$LABEL" '$l|@uri')" > /dev/null 2>&1 || true
