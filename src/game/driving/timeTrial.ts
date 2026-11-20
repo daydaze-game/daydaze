@@ -115,12 +115,15 @@ export function ghostAt(
     const a = ghost[i - 1];
     if (!a || !b || t > b.t) continue;
     const k = b.t === a.t ? 0 : (t - a.t) / (b.t - a.t);
-    const dyaw = Math.atan2(Math.sin(b.yaw - a.yaw), Math.cos(b.yaw - a.yaw));
+    const yawStep = Math.atan2(
+      Math.sin(b.yaw - a.yaw),
+      Math.cos(b.yaw - a.yaw),
+    );
     return {
       t,
       x: a.x + (b.x - a.x) * k,
       z: a.z + (b.z - a.z) * k,
-      yaw: a.yaw + dyaw * k,
+      yaw: a.yaw + yawStep * k,
     };
   }
   return last;

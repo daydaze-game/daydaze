@@ -7,7 +7,6 @@ export type Tuning = { engine: number; grip: number; nitrous: number };
 /** Nitrous tank, in seconds of burn left. */
 export type NitrousState = { fuel: number };
 
-export const TUNE_PARTS: readonly TunePart[] = ["engine", "grip", "nitrous"];
 export const MAX_TUNE_LEVEL = 5;
 export const UNTUNED: Tuning = { engine: 0, grip: 0, nitrous: 0 };
 

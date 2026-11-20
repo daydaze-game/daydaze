@@ -15,7 +15,7 @@ import {
 const race = (id: string, order: string[], fastest?: string): RaceResult => ({
   raceId: id,
   finishers: order,
-  fastestLap: fastest,
+  ...(fastest === undefined ? {} : { fastestLap: fastest }),
 });
 
 test("points follow the table and fastest lap adds a bonus", () => {
