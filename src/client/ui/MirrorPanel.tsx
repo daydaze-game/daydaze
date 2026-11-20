@@ -42,6 +42,8 @@ import {
   HAIR_COLORS,
   HAIR_STYLES,
   LIPS,
+  LIP_LINERS,
+  LIP_STYLES,
   OUTFIT_COLORS,
   OUTFITS,
   SHOES,
@@ -242,6 +244,20 @@ export function Mirror({
             value={makeup.gloss}
             onPick={(gloss) => setMakeup({ ...makeup, gloss })}
             tiles="gloss"
+          />
+          <p className="tiles-label">Lip liner</p>
+          <Chips
+            label="Lip liner"
+            options={LIP_LINERS}
+            value={makeup.lipLiner}
+            onPick={(lipLiner) => setMakeup({ ...makeup, lipLiner })}
+          />
+          <p className="tiles-label">Lip style</p>
+          <Chips
+            label="Lip style"
+            options={LIP_STYLES}
+            value={makeup.lipStyle}
+            onPick={(lipStyle) => setMakeup({ ...makeup, lipStyle })}
           />
         </section>
         <section>
