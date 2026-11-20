@@ -1,3 +1,4 @@
+// Teardown hook for online Playwright tests, clearing local D1 and Durable Object state.
 import { rmSync } from "node:fs";
 import { persist } from "../playwright.online.config.ts";
 

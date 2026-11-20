@@ -1,3 +1,4 @@
+// Tests for server/src/passwords.ts: PBKDF2 password hashing, salt validation and login checks.
 import { mock, test } from "node:test";
 import assert from "node:assert/strict";
 import {
