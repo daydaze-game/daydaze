@@ -1,4 +1,6 @@
-// The city's seasons and holidays use the player's local calendar date.
+// The city's seasons and holidays follow the city's New York calendar date.
+import { cityTime } from "./cityClock.ts";
+
 export type Season = "winter" | "spring" | "summer" | "autumn";
 export type Dressing =
   | "winter-holidays"
@@ -9,7 +11,8 @@ export type Dressing =
   | "pride";
 
 export function season(date: Date): Season {
-  const day = (date.getMonth() + 1) * 100 + date.getDate();
+  const t = cityTime(date);
+  const day = t.month * 100 + t.day;
   if (day >= 1221 || day < 320) return "winter";
   if (day < 601) return "spring";
   if (day < 922) return "summer";
@@ -23,8 +26,7 @@ const lunarCalendar = new Intl.DateTimeFormat("en-u-ca-chinese", {
 });
 
 export function dressings(date: Date): Dressing[] {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
+  const { year, month, day } = cityTime(date);
   const md = month * 100 + day;
   const result: Dressing[] = [];
   if (md >= 922 && md <= 1130) result.push("autumn");
@@ -34,7 +36,7 @@ export function dressings(date: Date): Dressing[] {
   if (month === 6) result.push("pride");
   // UTC noon represents the same calendar date regardless of the user's zone.
   const parts = lunarCalendar.formatToParts(
-    new Date(Date.UTC(date.getFullYear(), month - 1, day, 12)),
+    new Date(Date.UTC(year, month - 1, day, 12)),
   );
   const lunarMonth = parts.find((part) => part.type === "month")?.value;
   const lunarDay = Number(parts.find((part) => part.type === "day")?.value);
@@ -49,12 +51,8 @@ export function parseDateFlag(search: string): Date | null {
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);
-  const date = new Date(0);
-  date.setFullYear(year, month - 1, day);
-  date.setHours(12, 0, 0, 0);
-  return date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day
-    ? date
-    : null;
+  // 17:00 UTC is noon or 1 pm in New York, so it is that date on the city clock.
+  const date = new Date(Date.UTC(year, month - 1, day, 17));
+  const t = cityTime(date);
+  return t.year === year && t.month === month && t.day === day ? date : null;
 }
