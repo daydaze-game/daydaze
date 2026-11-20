@@ -148,3 +148,10 @@ test("a scored prize commits exactly what its card shows, on a newer save", () =
   assert.equal(saved.coins, newer.coins + result.prize.coins + result.daily);
   assert.ok(saved.visited.includes("city"));
 });
+
+test("a room outside the album pays no first-visit XP, however often", () => {
+  let s = createDefaultSave("Mango");
+  for (let i = 0; i < 5; i++) s = rewardVisit(s, "jail", -1, false);
+  assert.equal(s.progression.xp.street, 0);
+  assert.ok(!s.visited.includes("jail"));
+});

@@ -144,8 +144,10 @@ export function rewardVisit(
 ): SaveV1 {
   if (!mayEnter(room, adultOk)) return s;
   let next = s;
-  if (!s.visited.includes(room))
-    next = rewardXp({ ...s, visited: visit(s.visited, room) }, "street", 30);
+  // visit() skips rooms outside the album (jail): pay only when it records one
+  const visited = visit(s.visited, room);
+  if (visited.length > s.visited.length)
+    next = rewardXp({ ...s, visited }, "street", 30);
   if (!Number.isSafeInteger(now) || now < 0) return next;
   for (const night of schedule(now)) {
     if (!night.on || !night.clubs.includes(room)) continue;

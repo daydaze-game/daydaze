@@ -288,8 +288,15 @@ export function App() {
     setSave((s) => ({ ...s, settings: { ...s.settings, muted } }));
   const setEffects = (effects: Intensity) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, effects } }));
-  // signed in, every change goes up to the account a few seconds later
-  useCloudSave(save, setSave);
+  // signed in, every change goes up to the account a few seconds later.
+  // A restored account save remounts the rank-up watcher, so ranks it brings
+  // back aren't celebrated as new ones.
+  const [restores, setRestores] = useState(0);
+  const restoreSave = useCallback((next: SaveV1) => {
+    setSave(next);
+    setRestores((n) => n + 1);
+  }, []);
+  useCloudSave(save, restoreSave);
   // the strict chat filter: set in the Friends panel, read by the chat
   const setStrictChat = (strictChat: boolean) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, strictChat } }));
@@ -471,6 +478,7 @@ export function App() {
         <LoadingVeil />
         <PrizeCard />
         <RankMoment
+          key={restores}
           progression={save.progression}
           muted={save.settings.muted}
         />
