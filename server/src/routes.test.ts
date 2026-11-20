@@ -1,7 +1,7 @@
 // Tests for server/src/routes.ts: HTTP method and path routing for the Worker API.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { matchRoute } from "./routes.ts";
+import { matchRoute, needsOriginCheck } from "./routes.ts";
 
 test("fixed API routes match by method and path", () => {
   assert.deepEqual(matchRoute("POST", "/api/guest"), { kind: "guest" });
@@ -72,4 +72,18 @@ test("a home socket names its owner; a bad owner id matches nothing", () => {
   assert.equal(matchRoute("GET", "/ws/home/"), null);
   assert.equal(matchRoute("GET", `/ws/home/${"x".repeat(40)}`), null);
   assert.equal(matchRoute("GET", "/ws/home/a%20b"), null);
+});
+
+test("every WebSocket route and every non-GET request needs an Origin check", () => {
+  const ws = matchRoute("GET", "/ws/room/plaza/1");
+  const home = matchRoute("GET", "/ws/home/u_abc123");
+  const me = matchRoute("GET", "/api/me");
+  const guest = matchRoute("POST", "/api/guest");
+  assert.ok(ws && home && me && guest);
+  // Cross-site WebSocket hijacking: both socket kinds must be checked.
+  assert.equal(needsOriginCheck("GET", ws), true);
+  assert.equal(needsOriginCheck("GET", home), true);
+  assert.equal(needsOriginCheck("POST", guest), true);
+  // Plain reads are same-origin-policy protected, so they skip it.
+  assert.equal(needsOriginCheck("GET", me), false);
 });
