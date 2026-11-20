@@ -55,12 +55,7 @@ test("an unplayed game asks for a play, a played one for a better grade", () => 
   const history: History = { ramen: { plays: 2, best: "B" } };
   const [fresh] = pickContracts(1, {}, [], 1);
   assert.deepEqual(fresh.goal, { kind: "play" });
-  const mastered = pickContracts(
-    1,
-    { ...fullHistory(), ramen: history.ramen },
-    [],
-    1,
-  );
+  const mastered = pickContracts(1, { ...fullHistory(), ...history }, [], 1);
   assert.deepEqual(mastered[0].goal, { kind: "grade", grade: "A" });
 });
 
