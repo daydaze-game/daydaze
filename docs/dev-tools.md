@@ -168,22 +168,24 @@ Mostly for Playwright tests and screenshots; each holds something still or previ
 The doll lab is its own page, `/src/client/avatar/lineup.html` on the dev
 server (`lineup.tsx`), with its own flags:
 
-| Flag                                 | What it does                                                                                                       |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `?shot=face`                         | The shot: `lineup` (default), `face`, `body`, `far`, `men`, `hairs`, `pose`, `sit`, `lay`, `dance` or `piggyback`. |
-| `?human=1`                           | The Blender-built 3D doll instead of the toon doll.                                                                |
-| `?men=1`                             | Face, portrait and pose shots on the masculine body.                                                               |
-| `?outfit=suit`                       | With `?men=1`, dresses the pose, sit and dance dolls in that outfit.                                               |
-| `?outfits=a,b,c`                     | Dresses the body shot's three dolls.                                                                               |
-| `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot.                                                                       |
-| `?hair=waves`                        | Swaps the face shot's hair.                                                                                        |
-| `?beard=<id>`                        | Puts a beard (a `BEARDS` id) on the face shot.                                                                     |
-| `?face=<code>`                       | Puts an `encodeFace` code on the face shot's doll.                                                                 |
-| `?makeup=<code>`                     | Puts an `encodeMakeup` code on the face shot's doll.                                                               |
-| `?skin=2`                            | Picks a skin tone by its index in `SKINS`.                                                                         |
-| `?holds=a,b`                         | The held poses for the pose, sit and lay shots.                                                                    |
-| `?moves=a,b`                         | The dance shot's moves.                                                                                            |
-| `?clear=1`                           | A clear background.                                                                                                |
+| Flag                                 | What it does                                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `?shot=face`                         | The shot: `lineup` (default), `face`, `body`, `far`, `men`, `hairs`, `pose`, `sit`, `lay`, `dance`, `piggyback` or `together`.  |
+| `?emote=kiss&at=1.5`                 | The together shot's paired emote (a `TOGETHER` id, a kiss by default) and the pair clock's pinned second (mid-kiss by default). |
+| `?human=1`                           | The Blender-built 3D doll instead of the toon doll.                                                                             |
+| `?men=1`                             | Face, portrait and pose shots on the masculine body.                                                                            |
+| `?outfit=suit`                       | With `?men=1`, dresses the pose, sit and dance dolls in that outfit.                                                            |
+| `?outfits=a,b,c`                     | Dresses the body shot's three dolls.                                                                                            |
+| `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot.                                                                                    |
+| `?hair=waves`                        | Swaps the face shot's hair.                                                                                                     |
+| `?beard=<id>`                        | Puts a beard (a `BEARDS` id) on the face shot.                                                                                  |
+| `?face=<code>`                       | Puts an `encodeFace` code on the face shot's doll.                                                                              |
+| `?makeup=<code>`                     | Puts an `encodeMakeup` code on the face shot's doll.                                                                            |
+| `?skin=2`                            | Picks a skin tone by its index in `SKINS`.                                                                                      |
+| `?holds=a,b`                         | The held poses for the pose, sit and lay shots.                                                                                 |
+| `?moves=a,b`                         | The dance shot's moves.                                                                                                         |
+| `?cam=x,y,z&target=x,y,z`            | Moves the shot's camera and the point it looks at, for a close-up.                                                              |
+| `?clear=1`                           | A clear background.                                                                                                             |
 
 The minigame kit page, `/src/client/rooms/shared/game3d/kit.html`, takes
 `?freeze=1`: it stops drawing two frames after the ball first lands

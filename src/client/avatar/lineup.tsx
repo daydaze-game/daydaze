@@ -20,8 +20,21 @@ import {
 } from "../../game/look.ts";
 import { ToonDoll as Doll } from "./Doll.tsx";
 import { HumanDoll } from "./human/HumanDoll.tsx";
-import { isDanceMoveId, stillClipsOf } from "../../game/dance/moves.ts";
-import { liftOf, roleMove, together } from "../../game/dance/together.ts";
+import {
+  danceMove,
+  isDanceMoveId,
+  stillClipsOf,
+} from "../../game/dance/moves.ts";
+import {
+  followSpot,
+  isTogetherId,
+  liftOf,
+  mirrored,
+  roleMove,
+  together,
+} from "../../game/dance/together.ts";
+import { pinPairClock } from "./pairClock.ts";
+import { faceHeight } from "../../game/dance/reach.ts";
 import { GAIT_LIST } from "../../game/gaits.ts";
 import { naturalPace } from "../../game/dance/clips.ts";
 import { Environment, Lightformer, useGLTF } from "@react-three/drei";
@@ -86,6 +99,35 @@ const DANCES = (
     "groove",
   ]
 ).filter(isDanceMoveId);
+// `?emote=<TogetherId>` picks the together shot's emote (a kiss by default),
+// and `?at=<seconds>` the moment of a timed one: mid-kiss unless set
+const pairQuery = new URLSearchParams(location.search);
+const EMOTE = ((e) => (isTogetherId(e) ? e : "kiss"))(pairQuery.get("emote"));
+const shutAt = danceMove(roleMove(EMOTE, "lead")).shut;
+pinPairClock(
+  Number(pairQuery.get("at") ?? (shutAt ? (shutAt[0] + shutAt[1]) / 2 : 0)),
+);
+// the together shot's couples, side on, each placed as the game places a
+// pair (together.ts): even heights, a tall lead with a short follow, and a
+// masculine lead with a short follow
+const PAIR_HEIGHTS = [50, 50, 100, 0, 50, 0];
+const pairSpot = (i: number) => {
+  const lead: [number, number] = [
+    (Math.floor(i / 2) - 1) * 1.3 - together(EMOTE).gap / 2,
+    0,
+  ];
+  // yaw pi/2 faces +x: the camera on +z sees each pair in profile
+  const spot =
+    i % 2 === 0
+      ? { at: lead, yaw: Math.PI / 2 }
+      : followSpot(EMOTE, lead, Math.PI / 2);
+  return {
+    at: spot.at,
+    yaw: spot.yaw,
+    role: i % 2 ? "follow" : "lead",
+  } as const;
+};
+
 // held poses for the pose, sit and lay shots, one per doll; `?holds=a,b`
 // picks them instead
 const picked = new URLSearchParams(location.search).get("holds")?.split(",");
@@ -403,6 +445,21 @@ const SHOTS = {
     target: [0, 1.0, 0] as const,
     fov: 38,
   },
+  // a paired emote (`?emote=`, a kiss by default) at three height pairings
+  together: {
+    looks: [
+      LINEUP[0],
+      LINEUP[1],
+      LINEUP[2],
+      LINEUP[3],
+      { ...MEN[0], outfit: "jeans" as const },
+      LINEUP[4],
+    ],
+    x: () => 0,
+    cam: [0, 1.45, 4.2] as const,
+    target: [0, 1.35, 0] as const,
+    fov: 34,
+  },
   // every walk style, walking in place, side on
   walk: {
     looks: GAIT_LIST.map((g, i) => ({
@@ -602,14 +659,18 @@ type ShotName = keyof typeof SHOTS;
 const isShotName = (s: string): s is ShotName => Object.hasOwn(SHOTS, s);
 const plan = isShotName(shot) ? SHOTS[shot] : SHOTS.lineup;
 // `?cam=x,y,z` moves the shot's camera, to look at a pose from another side
-const camAt = new URLSearchParams(location.search)
-  .get("cam")
-  ?.split(",")
-  .map(Number);
-const cam =
-  camAt?.length === 3 && camAt.every(Number.isFinite)
-    ? ([camAt[0], camAt[1], camAt[2]] as const)
-    : plan.cam;
+// and `?target=x,y,z` the point it looks at, for a close-up of one doll
+const vecParam = (name: string) => {
+  const v = new URLSearchParams(location.search)
+    .get(name)
+    ?.split(",")
+    .map(Number);
+  return v?.length === 3 && v.every(Number.isFinite)
+    ? ([v[0], v[1], v[2]] as const)
+    : null;
+};
+const cam = vecParam("cam") ?? plan.cam;
+const target = vecParam("target") ?? plan.target;
 
 function measure(root: THREE.Object3D) {
   let calls = 0;
@@ -740,7 +801,7 @@ function Lab() {
       onCreated={({ camera, gl, scene }) => {
         // dev-only: lets a test script inspect the lab scene
         Reflect.set(window, "labScene", scene);
-        camera.lookAt(plan.target[0], plan.target[1], plan.target[2]);
+        camera.lookAt(target[0], target[1], target[2]);
         gl.setClearColor(
           studio ? "#24232a" : "#07020b",
           new URLSearchParams(location.search).get("clear") === "1" ? 0 : 1,
@@ -778,15 +839,20 @@ function Lab() {
           position={
             shot === "piggyback" && i === 1
               ? [0, liftOf("piggyback"), -together("piggyback").gap]
-              : [plan.x(i), 0, 0]
+              : shot === "together"
+                ? [pairSpot(i).at[0], 0, pairSpot(i).at[1]]
+                : [plan.x(i), 0, 0]
           }
+          rotation-y={shot === "together" ? pairSpot(i).yaw : 0}
         >
           {human ? (
             <Suspense fallback={null}>
               <HumanDoll
                 look={previewFace ? { ...look, face: previewFace } : look}
                 mood={
-                  shot === "dance" || shot === "piggyback"
+                  shot === "dance" ||
+                  shot === "piggyback" ||
+                  shot === "together"
                     ? "dance"
                     : shot === "sit" || shot === "lay"
                       ? "sit"
@@ -802,13 +868,30 @@ function Lab() {
                 dance={
                   shot === "piggyback"
                     ? roleMove("piggyback", i === 0 ? "lead" : "follow")
-                    : DANCES[i % DANCES.length]
+                    : shot === "together"
+                      ? roleMove(EMOTE, pairSpot(i).role)
+                      : DANCES[i % DANCES.length]
+                }
+                couple={
+                  shot === "together" && mirrored(EMOTE)
+                    ? pairSpot(i).role
+                    : undefined
+                }
+                partnerFace={
+                  shot === "together"
+                    ? faceHeight(plan.looks[i ^ 1] ?? look, {
+                        ...bodyParams,
+                        height: PAIR_HEIGHTS[i ^ 1] ?? 50,
+                      })
+                    : undefined
                 }
                 seed={shot === "builds" ? 0 : i}
                 body={
                   shot === "builds"
                     ? { ...bodyParams, weight: i * 50 }
-                    : bodyParams
+                    : shot === "together"
+                      ? { ...bodyParams, height: PAIR_HEIGHTS[i] ?? 50 }
+                      : bodyParams
                 }
                 // the face shot is a portrait of your own doll: she looks
                 // into the camera, as in the game's close zoom

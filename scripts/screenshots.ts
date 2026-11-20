@@ -2668,6 +2668,9 @@ const SHOTS: {
       ).toBeVisible();
     },
   },
+  // the paired kisses mid-kiss, in profile, at three height pairings
+  lineupShot("together-kiss", "emote=kiss", "together"),
+  lineupShot("together-cheek-kiss", "emote=cheek-kiss", "together"),
   // hair style rows (women, then men), from the front and from behind
   lineupShot(
     "hair-women-1",
