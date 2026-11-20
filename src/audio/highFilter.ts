@@ -24,16 +24,20 @@ export const HIGH_LOWPASS_Q = 1.8;
 const EASE = 0.5;
 
 export type HighFilterParams = {
+  dryMix: number;
+  wetMix: number;
   reverbMix: number;
   reverbFeedback: number;
   lowpassHz: number;
   resonanceQ: number;
 };
 
-/** What the filter does at a high meter level (0..1). Sober (0) is clean/transparent. */
+/** What the filter does at a high meter level (0..1). Sober (0) is pure dry bypass. */
 export function highFilterParams(level: number): HighFilterParams {
   const k = clamp01(level);
   return {
+    dryMix: 1 - k,
+    wetMix: k,
     reverbMix: HIGH_REVERB_MIX * k,
     reverbFeedback: HIGH_REVERB_FEEDBACK * k,
     lowpassHz:
@@ -50,7 +54,8 @@ export type HighFilter = {
 };
 
 /** Builds the music high filter:
- * input → lowpass → output
+ * input → dryGain → output (pure bypass when sober)
+ * input → lowpass → filterGain → output
  *         ↓ (wet echo)
  *       delay → wet → output
  *       delay ↔ feedback
@@ -58,6 +63,12 @@ export type HighFilter = {
 export function createHighFilter(ctx: AudioContext): HighFilter {
   const input = ctx.createGain();
   const output = ctx.createGain();
+
+  const dryGain = ctx.createGain();
+  dryGain.gain.value = 1;
+
+  const filterGain = ctx.createGain();
+  filterGain.gain.value = 0;
 
   const filter = ctx.createBiquadFilter();
   filter.type = "lowpass";
@@ -73,9 +84,14 @@ export function createHighFilter(ctx: AudioContext): HighFilter {
   const feedback = ctx.createGain();
   feedback.gain.value = 0;
 
-  // Dry path through lowpass
+  // Pure dry bypass path
+  input.connect(dryGain);
+  dryGain.connect(output);
+
+  // Filtered path
   input.connect(filter);
-  filter.connect(output);
+  filter.connect(filterGain);
+  filterGain.connect(output);
 
   // Wet reverb / bloom loop
   filter.connect(delay);
@@ -91,6 +107,8 @@ export function createHighFilter(ctx: AudioContext): HighFilter {
     setLevel(level) {
       const p = highFilterParams(level);
       const now = ctx.currentTime;
+      dryGain.gain.setTargetAtTime(p.dryMix, now, EASE);
+      filterGain.gain.setTargetAtTime(p.wetMix, now, EASE);
       filter.frequency.setTargetAtTime(p.lowpassHz, now, EASE);
       filter.Q.setTargetAtTime(p.resonanceQ, now, EASE);
       wet.gain.setTargetAtTime(p.reverbMix, now, EASE);

@@ -13,8 +13,10 @@ import {
   highFilterParams,
 } from "./highFilter.ts";
 
-test("sober (level 0) is transparent: no reverb mix, filter wide open", () => {
+test("sober (level 0) is transparent: full dry bypass, no filter/reverb", () => {
   assert.deepEqual(highFilterParams(0), {
+    dryMix: 1,
+    wetMix: 0,
     reverbMix: 0,
     reverbFeedback: 0,
     lowpassHz: HIGH_LOWPASS_MAX_HZ,
@@ -25,6 +27,8 @@ test("sober (level 0) is transparent: no reverb mix, filter wide open", () => {
 test("bloom and lowpass roll-off grow with level and clamp at 1", () => {
   const half = highFilterParams(0.5);
   const full = highFilterParams(1);
+  assert.equal(half.dryMix, 0.5);
+  assert.equal(half.wetMix, 0.5);
   assert.ok(half.reverbMix > 0 && half.reverbMix < full.reverbMix);
   assert.ok(
     half.reverbFeedback > 0 && half.reverbFeedback < full.reverbFeedback,
@@ -34,6 +38,8 @@ test("bloom and lowpass roll-off grow with level and clamp at 1", () => {
   );
   assert.ok(half.resonanceQ > 0 && half.resonanceQ < full.resonanceQ);
   assert.deepEqual(full, {
+    dryMix: 0,
+    wetMix: 1,
     reverbMix: HIGH_REVERB_MIX,
     reverbFeedback: HIGH_REVERB_FEEDBACK,
     lowpassHz: HIGH_LOWPASS_MIN_HZ,
