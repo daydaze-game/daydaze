@@ -53,7 +53,7 @@ export function Floor({
   low?: { metalness: number; roughness: number } | undefined;
   onPick: PickHandler;
 }) {
-  const { reflections } = useGraphics();
+  const { reflections, shadows } = useGraphics();
   const set = texture && tiledMaps(texture.id, width, depth, texture.scale);
   const maps = set
     ? { ...set, map: map ?? set.map }
@@ -70,6 +70,7 @@ export function Floor({
       position={[center[0], 0, center[1]]}
       onClick={click}
       name="floor"
+      receiveShadow={shadows}
     >
       <planeGeometry args={[width, depth]} />
       {!reflections ? (

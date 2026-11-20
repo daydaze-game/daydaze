@@ -60,7 +60,7 @@ import {
   type BodyShape,
 } from "../../../game/body.ts";
 import { pose, type Rig } from "../pose.ts";
-import { useQuality } from "../../world/quality.ts";
+import { useGraphics, useQuality } from "../../world/quality.ts";
 import { NPC_GAITS, gaitOf } from "../../../game/gaits.ts";
 import { BUILT_STRIDE, walkPhaseRate } from "../../../game/dance/stride.ts";
 import { syncOffset } from "../../../game/dance/sync.ts";
@@ -976,6 +976,13 @@ export function HumanDoll({
     [look, seed],
   );
   const body = useBody(painted, face.eyeColor);
+  // on Realistic every doll casts the key light's shadow
+  const { shadows } = useGraphics();
+  useEffect(() => {
+    root.current?.traverse((o) => {
+      if (o instanceof THREE.Mesh) o.castShadow = shadows;
+    });
+  }, [body, shadows, look, swim]);
   const gait = gaitOf(
     look.gait ?? (seed ? NPC_GAITS[seed % NPC_GAITS.length] : undefined),
   );

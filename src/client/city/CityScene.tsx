@@ -120,7 +120,8 @@ export function CityScene({
     };
   }, [canvas, dressingNames]);
   const tier = useDetail();
-  const far = DRAW_FAR[useGraphics().distance];
+  const { distance, shadows } = useGraphics();
+  const far = DRAW_FAR[distance];
   const reduced = useReducedMotion();
   // the key light is the World's; these are the city's real lights
   const lightCount = tier !== "low" ? POINT_LIGHTS.high : POINT_LIGHTS.low;
@@ -326,6 +327,7 @@ export function CityScene({
         ]}
         onClick={click}
         name="city-ground"
+        receiveShadow={shadows}
       >
         {/* the city's land up to the waterline; the Ocean takes over past it
             and the Outskirts' grass around it (a dark plane that ran on to

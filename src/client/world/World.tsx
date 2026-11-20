@@ -434,6 +434,55 @@ function FpsMeter({ tier }: { tier: QualityTier }) {
   return null;
 }
 
+/**
+ * The key light, shared so a doll looks the same in every room. With shadows
+ * on it casts them, riding along with the player so a small map around the doll
+ * stays sharp wherever she walks.
+ */
+function KeyLight({ player, shadows }: { player: Player; shadows: boolean }) {
+  const light = useRef<THREE.DirectionalLight>(null);
+  const target = useMemo(() => new THREE.Object3D(), []);
+  useEffect(() => {
+    const l = light.current;
+    if (!l) return;
+    l.target = target;
+    // off again: back to the fixed light, which lights exactly the same way
+    return () => {
+      l.position.set(2, 5, 6);
+      target.position.set(0, 0, 0);
+    };
+  }, [target]);
+  useFrame(() => {
+    const l = light.current;
+    if (!l || !shadows) return;
+    const { x, y, z } = player.pos;
+    l.position.set(x + 2, y + 5, z + 6);
+    target.position.set(x, y, z);
+    target.updateMatrixWorld();
+  });
+  return (
+    <>
+      <primitive object={target} />
+      <directionalLight
+        ref={light}
+        position={[2, 5, 6]}
+        color="#fff1f4"
+        intensity={2.2}
+        castShadow={shadows}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-left={-9}
+        shadow-camera-right={9}
+        shadow-camera-top={9}
+        shadow-camera-bottom={-9}
+        shadow-camera-near={0.5}
+        shadow-camera-far={30}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.02}
+      />
+    </>
+  );
+}
+
 /** Sets the camera's far plane to the render distance, live. */
 function DrawDistance({ far }: { far: number }) {
   const camera = useThree((s) => s.camera);
@@ -781,6 +830,9 @@ export function World({
     <Canvas
       className="world"
       frameloop={still ? "demand" : "always"}
+      // the renderer's shadow maps stay ready; nothing is drawn into one until
+      // a light casts (the key light, on Realistic), so other tiers pay nothing
+      shadows="soft"
       // the resolution scale is the most device pixels per CSS pixel: Balanced
       // stops at 1.5x (2x quadrupled the pixels the bloom chain works through),
       // Auto steps down to 1x before the effects go; native MSAA smooths edges
@@ -823,12 +875,7 @@ export function World({
           <DrunkState intensity={effects} />
           <Dancing mood={mood} move={dance} />
           <Wearing style={swimFor(def, swim)?.style ?? "outfit"} />
-          {/* the key light, shared so a doll looks the same in every room */}
-          <directionalLight
-            position={[2, 5, 6]}
-            color="#fff1f4"
-            intensity={2.2}
-          />
+          <KeyLight player={player} shadows={active.shadows} />
           {/* a weekly night on here tints the light and fills the air */}
           {room !== "city" && (
             <Suspense fallback={null}>
