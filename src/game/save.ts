@@ -41,6 +41,11 @@ import { cleanGraphics, defaultGraphics, type Graphics } from "./graphics.ts";
 import { cleanRecords, type RecordId } from "./records.ts";
 import { cleanWardrobe, unlockedLook } from "./shop.ts";
 import { isCoins, STARTING_COINS } from "./wallet.ts";
+import {
+  cleanProgression,
+  freshProgression,
+  type Progression,
+} from "./progression/progression.ts";
 
 /** Everything a player keeps between sessions. */
 export type SaveV1 = {
@@ -70,6 +75,7 @@ export type SaveV1 = {
   bests: Bests;
   /** Today's challenges already reached. */
   challenges: ChallengeSave;
+  progression: Progression;
   /** Your car where you last parked it; null waits at the home spot. */
   car: ParkedCar | null;
   /** The road cars you own; the starter always. */
@@ -127,6 +133,7 @@ export function createDefaultSave(name: string): SaveV1 {
     crime: { ...DEFAULT_CRIME, bans: {}, stolen: {} },
     bests: {},
     challenges: { ...NO_CHALLENGES, done: [] },
+    progression: freshProgression(),
     streak: { ...NO_STREAK, days: [], frozen: [] },
     car: null,
     garage: [STARTER],
@@ -213,6 +220,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     crime: validateCrime(save.get("crime")),
     bests: cleanBests(save.get("bests")),
     challenges: cleanChallenges(save.get("challenges")),
+    progression: cleanProgression(save.get("progression")),
     car: cleanParkedCar(save.get("car"), (id) => garage.includes(id)),
     garage,
     records: cleanRecords(save.get("records")),

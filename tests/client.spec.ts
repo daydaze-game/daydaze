@@ -4090,7 +4090,9 @@ test("the walkthrough names you, dresses you and shows you around", async ({
   await expect(welcome).toContainText("Play something");
   await welcome.getByRole("button", { name: "Let's go" }).click();
   await expect(welcome).toHaveCount(0);
-  await expect(page.locator(".nametag").first()).toHaveText("Velvet Kat");
+  await expect(page.locator(".nametag").first()).toHaveText(
+    /^Velvet Kat · Lv \d+/,
+  );
   const saved = await readSave(page);
   expect(saved).toMatchObject({
     name: "Velvet Kat",
