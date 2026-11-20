@@ -1,3 +1,4 @@
+// Tests for Content Security Policy and security headers in public/_headers.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
