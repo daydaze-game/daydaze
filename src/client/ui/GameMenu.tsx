@@ -16,7 +16,11 @@ import {
 } from "react";
 import type { Graphics } from "../../game/graphics.ts";
 import { createStore } from "../rooms/shared/store.ts";
-import { GraphicsPanel } from "./GraphicsPanel.tsx";
+
+// the graphics sheet and its option tables are only needed once it is opened
+const GraphicsPanel = lazy(() =>
+  import("./GraphicsPanel.tsx").then((m) => ({ default: m.GraphicsPanel })),
+);
 
 // the credits ledger is 50 KB of text nobody needs until they open it
 const CreditsPanel = lazy(() =>
@@ -104,14 +108,16 @@ export function GameMenu({
         </section>
       )}
       {graphicsOpen && (
-        <GraphicsPanel
-          graphics={graphics}
-          onChange={setGraphics}
-          onClose={() => {
-            setGraphicsOpen(false);
-            toggle.current?.focus();
-          }}
-        />
+        <Suspense fallback={null}>
+          <GraphicsPanel
+            graphics={graphics}
+            onChange={setGraphics}
+            onClose={() => {
+              setGraphicsOpen(false);
+              toggle.current?.focus();
+            }}
+          />
+        </Suspense>
       )}
       {creditsOpen && (
         <Suspense fallback={null}>
