@@ -44,9 +44,11 @@ import {
 } from "../../../game/look.ts";
 import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
+import { ADULT_OK } from "../../adult.ts";
 import {
   heavyLid,
   peakBody,
+  redEyes,
   type Substance,
 } from "../../../game/effects/substances.ts";
 import { bodyFor } from "../../../game/effects/buzz.ts";
@@ -419,6 +421,22 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       map: acquireIris(DEFAULT_EYE),
       roughness: 0.3,
     });
+    // weed reddens the whites: a uniform on this doll's own eye material
+    // (no texture repaint, no extra draw call) blends near-white texels
+    // (the sclera, #f4ece8) toward a bloodshot red
+    const redness: THREE.IUniform<number> = { value: 0 };
+    eye.onBeforeCompile = (shader) => {
+      shader.uniforms.uRed = redness;
+      shader.fragmentShader = shader.fragmentShader
+        .replace("void main() {", "uniform float uRed;\nvoid main() {")
+        .replace(
+          "#include <map_fragment>",
+          `#include <map_fragment>
+          float whites = smoothstep(0.8, 0.92, min(diffuseColor.r, min(diffuseColor.g, diffuseColor.b)));
+          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.85, 0.22, 0.2), uRed * whites);`,
+        );
+    };
+    eye.customProgramCacheKey = () => "doll-eye-red";
     const cornea = new THREE.MeshStandardMaterial({
       color: "#ffffff",
       roughness: 0.02,
@@ -491,6 +509,7 @@ function useBody(look: Look, eyeColor: Face["eyeColor"]) {
       restInverse,
       skin,
       eye,
+      redness,
       materials: [skin, lashes, eye, cornea],
     };
   }, [gltf, loGltf, m, surface]);
@@ -1396,6 +1415,12 @@ export function HumanDoll({
       : 0;
     // weed lowers the lids (heavyLid), quantized like the rest
     const heavy = meters ? Math.round(heavyLid(meters) * 50) / 50 : 0;
+    // red eyes: own doll only, behind ADULT_OK; set only on change
+    const red = meters && ADULT_OK ? Math.round(redEyes(meters) * 50) / 50 : 0;
+    if (body.redness.value !== red) {
+      body.redness.value = red;
+      invalidate();
+    }
     const lid = closed ? 1 : REST_LID - wide * WIDE_LID + heavy;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
