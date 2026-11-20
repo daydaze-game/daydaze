@@ -1,0 +1,89 @@
+name: Crowd bake
+# Bakes the crowd people (art/crowd/build-crowd.sh) on GitHub's machines, one
+# job per look, so a full rebake takes minutes and no one's laptop. Each job
+# uploads its look's compressed GLBs; gather them all with
+#   gh run download <id> -p 'crowd-*' -D /tmp/crowd && cp /tmp/crowd/*/*.glb public/models/crowd/
+# then commit them. Runs by hand, and on a push that changes the bake.
+on:
+  workflow_dispatch:
+    inputs:
+      looks:
+        description: "Looks to bake (space-separated, e.g. female-a male-d); empty for all"
+        required: false
+        default: ""
+        type: string
+  push:
+    paths:
+      - "art/crowd/*.py"
+      - "art/crowd/*.ts"
+      - "art/crowd/*.html"
+      - "art/crowd/*.sh"
+      - "src/game/crowd.ts"
+      - ".github/workflows/crowd-bake.yml"
+concurrency:
+  group: crowd-bake-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  BLENDER: "5.3.0"
+jobs:
+  plan:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    outputs:
+      looks: ${{ steps.plan.outputs.looks }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - id: plan
+        run: |
+          if [ -n "$LOOKS" ]; then
+            looks=$(printf '%s' "$LOOKS" | tr -s ' ' '\n' | jq -R . | jq -sc 'map(select(length > 0))')
+          else
+            looks=$(node --experimental-strip-types -e \
+              'import("./src/game/crowd.ts").then((m) => console.log(JSON.stringify(m.CROWD_LOOKS)))')
+          fi
+          echo "looks=$looks" >> "$GITHUB_OUTPUT"
+        env:
+          LOOKS: ${{ inputs.looks }}
+  bake:
+    needs: plan
+    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        look: ${{ fromJSON(needs.plan.outputs.looks) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Blender and uv
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            libxi6 libxkbcommon0 libxrender1 libxxf86vm1 libxfixes3 libgl1 libsm6 libegl1
+          # nine jobs at once can trip blender.org's rate limit: retry, then a mirror
+          file="blender-${BLENDER}-linux-x64.tar.xz"
+          for base in https://download.blender.org/release https://mirrors.ocf.berkeley.edu/blender/release; do
+            curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o "$RUNNER_TEMP/$file" \
+              "$base/Blender${BLENDER%.*}/$file" && break
+          done
+          tar -xJf "$RUNNER_TEMP/$file" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/blender-${BLENDER}-linux-x64" >> "$GITHUB_PATH"
+          pipx install uv
+      - run: bash art/crowd/build-crowd.sh "$LOOK"
+        env:
+          LOOK: ${{ matrix.look }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: crowd-${{ matrix.look }}
+          path: public/models/crowd/${{ matrix.look }}-*.glb
+          if-no-files-found: error
+          retention-days: 7

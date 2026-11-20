@@ -63,6 +63,14 @@ test("createDefaultSave uses the default look and auto quality", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
   });
 });
 
@@ -114,6 +122,14 @@ test("a save round-trips through serializeSave and loadSave", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
   };
   assert.deepEqual(loadSave(serializeSave(save), "Fallback"), save);
 });
@@ -188,6 +204,14 @@ test("a save from before the swimsuit slot still loads", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
   });
 });
 
@@ -256,6 +280,14 @@ test("loadSave keeps a valid name when the look is bad", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
   });
 });
 
@@ -298,6 +330,14 @@ test("loadSave keeps a valid look when the name is bad", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
   });
 });
 
@@ -482,6 +522,14 @@ test("loadSave salvages valid fields from a wrong version", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
   });
 });
 

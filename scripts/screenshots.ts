@@ -2023,7 +2023,7 @@ const SHOTS: {
     query: "room=city&quality=high&time=21:00&at=100,8&cam=100,2.2,8,150,7,-2",
     act: furnitureReady,
   },
-  // the queue outside Pulse, Kenney people on the forecourt (QueueCrowd.tsx)
+  // the queue outside Pulse, baked doll people on the forecourt (QueueCrowd.tsx)
   {
     name: "crowd-queue",
     query: "room=city&quality=high&time=21:00&at=112,6&cam=96,2.4,4,113,1.6,17",
