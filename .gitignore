@@ -38,6 +38,7 @@ coverage/
 .envrc
 art/ocean/.cache
 art/speedway/.cache/
+art/crowd/.cache/
 art/home/.cache/
 /.cache/
 art/motels/.cache/
@@ -46,6 +47,7 @@ art/motels/.cache/
 *.local.*
 *.local
 credentials*.json
+STEPS-FOR-OWNER.md
 
 # Agent scratch output: subagent logs and screenshots, browser-MCP dumps, harness worktrees
 .superpowers/

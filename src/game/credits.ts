@@ -487,7 +487,7 @@ export const CREDITS: readonly {
         license: "CC0 1.0",
         url: "https://github.com/makehumancommunity/makehuman",
         usedFor:
-          "Avatar bodies, morph targets, hair and clothing, adapted for Daydaze.",
+          "Avatar bodies, morph targets, hair and clothing, adapted for Daydaze; baked (art/crowd/) into the club queues, the street's far crowd and cyclists, the arena and Speedway stands and the pit crew.",
       },
       {
         title: "MPFB2 Mixamo-named rig",
@@ -1156,14 +1156,6 @@ export const CREDITS: readonly {
         url: "https://poly.pizza/m/df8uCl1YpK",
         usedFor:
           "Hedges and climbing-rose backing at the community garden gate.",
-      },
-      {
-        title: "Mini Characters",
-        author: "Kenney",
-        license: "CC0 1.0",
-        url: "https://kenney.nl/assets/mini-characters",
-        usedFor:
-          "Instanced grandstand crowd and pit road pit crew for the Speedway oval; the boardwalk's far crowd (walking poses) and cyclists' riders.",
       },
       {
         title: "Racing Kit",
@@ -1846,7 +1838,7 @@ export const CREDITS: readonly {
         license: "Mixamo terms",
         url: "https://www.mixamo.com/",
         usedFor:
-          "Retargeted character walks, idles, dances, gestures, talking and sitting.",
+          "Retargeted character walks, idles, dances, gestures, talking and sitting; the crowd people's baked poses.",
       },
       {
         title: "Universal Animation Library 1 and 2 (Standard)",

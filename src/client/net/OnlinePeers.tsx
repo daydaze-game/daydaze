@@ -41,7 +41,10 @@ import {
   liftOf,
   mirrored,
   together,
+  type Pair,
 } from "../../game/dance/together.ts";
+import { faceHeight } from "../../game/dance/reach.ts";
+import { DEFAULT_BODY, type BodyShape } from "../../game/body.ts";
 import { pairUp, stopTogether } from "./together.ts";
 import { keepSeat } from "./ride.ts";
 import { seatedHold } from "../../game/dance/seatActions.ts";
@@ -61,6 +64,39 @@ const LAY_HOLD = stillClipsOf("lay")[0]?.id ?? "built";
 const BUZZ = { 1: "Tipsy", 2: "Drunk", 3: "Very drunk" } as const;
 
 type Peer = { id: string; name: string | null; look: Look };
+type Me = { look: Look; body: BodyShape };
+
+/**
+ * The face height a paired peer meets in a kiss (reach.ts): this player's
+ * when they're with this player, else the nearest peer in the other role of
+ * the same emote. Peers' dolls are drawn at the default body.
+ * shortcut: worked out when this peer's action changes, so a partner whose
+ * action lands later is missed until the next; track it per frame if seen.
+ */
+function partnerFace(
+  session: OnlineSession,
+  peerId: string,
+  pair: Pair,
+  me: Me,
+): number | undefined {
+  if (pairUp.get().pair?.id === peerId) return faceHeight(me.look, me.body);
+  const at = session.sample(peerId);
+  if (!at) return undefined;
+  let best: number | undefined;
+  let bestDist = 1.5;
+  for (const [id, p] of session.remotePlayers) {
+    if (id === peerId || !p.look) continue;
+    const s = session.sample(id);
+    const other = s ? decodeAction(s.action).pair : undefined;
+    if (!s || other?.emote !== pair.emote || other.role === pair.role) continue;
+    const dist = Math.hypot(s.x - at.x, s.z - at.z);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = faceHeight(p.look, DEFAULT_BODY);
+    }
+  }
+  return best;
+}
 
 /** One other player: their doll where the session says they are, walking
  * when they move, their name over their head and what they last said. */
@@ -70,9 +106,12 @@ function PeerDoll({
   said,
   swimwear,
   player,
+  me,
 }: {
   session: OnlineSession;
   peer: Peer;
+  /** This player's look and body, for a peer kissing them. */
+  me: Me;
   said: string | null;
   /** In a swimwear room they wear the swimsuit their look carries. */
   swimwear: boolean;
@@ -204,6 +243,11 @@ function PeerDoll({
               ? doing.pair.role
               : undefined
           }
+          partnerFace={
+            doing.pair
+              ? partnerFace(session, peer.id, doing.pair, me)
+              : undefined
+          }
           under={under}
           walk={walk}
           seed={peer.id.length * 7}
@@ -257,15 +301,21 @@ export function OnlinePeers({
   mood,
   dance,
   sitHold,
+  look,
+  body,
 }: {
   room: RoomId;
   player: Player;
+  /** This player's look and body sliders, for a peer kissing them. */
+  look: Look;
+  body: BodyShape;
   mood: Mood;
   dance: DanceMoveId;
   /** The sit pose she picked ("built" for none). */
   sitHold: string;
 }): JSX.Element | null {
   const session = onlineSession();
+  const me = useMemo(() => ({ look, body }), [look, body]);
   const [peers, setPeers] = useState<Peer[]>([]);
   const [said, setSaid] = useState<
     Record<string, { text: string; at: number }>
@@ -436,6 +486,7 @@ export function OnlinePeers({
           said={said[p.id]?.text ?? null}
           swimwear={ROOMS[room].swimwear === true}
           player={player}
+          me={me}
         />
       ))}
     </Suspense>

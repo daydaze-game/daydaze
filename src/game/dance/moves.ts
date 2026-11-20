@@ -53,6 +53,13 @@ export type DanceMove = {
   keys: readonly Key[];
   /** Game clips set this false: no beat dip under a dive or an aim. */
   groove?: false;
+  /**
+   * A timed move for two (a kiss): sampled on the shared wall clock instead of
+   * each doll's own, so both partners reach the same moment together.
+   */
+  synced?: true;
+  /** Seconds of the loop when the eyes are closed (from, to). */
+  shut?: readonly [number, number];
 };
 
 export const DANCE_MOVE_IDS = [
@@ -70,6 +77,8 @@ export const DANCE_MOVE_IDS = [
   "hug",
   "hold-hands",
   "forehead-kiss",
+  "cheek-kiss",
+  "kiss",
   "piggyback-carry",
   "piggyback-ride",
   // game clips the player's doll plays in in-world games (see GAME_CLIP_IDS)
@@ -112,6 +121,22 @@ export function createPose(): Pose {
   };
   return { root: [0, 0, 0], joints, captured: false, groove: true };
 }
+
+// The body joint tips the whole doll about a point low in the legs, so a lean
+// (the kisses) also tips the legs back as far, to stand upright, and moves the
+// root forward 0.71 m a radian to keep the soles where they stood (measured on
+// the 3D doll in the doll lab's together shot).
+const SOLES = 0.71;
+/** The root of a lean of `a` radians, `shift` meters to the left. */
+const planted = (a: number, shift = 0) => ({
+  root: [shift, 0, SOLES * a] satisfies Vec3,
+});
+/** The body and legs of a lean of `a` radians. */
+const leanJoints = (a: number) => ({
+  body: [a, 0, 0] satisfies Vec3,
+  lLeg: [a, 0, 0] satisfies Vec3,
+  rLeg: [a, 0, 0] satisfies Vec3,
+});
 
 // Each move is a short loop. Arm and leg values follow pose.ts: a positive z
 // on an arm lifts it outward, a negative x on a leg bends it at the hip.
@@ -605,6 +630,154 @@ export const DANCE_MOVES: readonly DanceMove[] = [
     ],
   },
   {
+    // a greeting peck: the right hand on the partner's upper arm, a step to
+    // the right and a lean in with the head turned left, so the cheeks meet,
+    // eyes closed a moment, then back to standing close. Both play it
+    // unmirrored (together.ts), so the two heads pass on the same side.
+    id: "cheek-kiss",
+    label: "Cheek kiss",
+    period: 4,
+    groove: false,
+    synced: true,
+    shut: [0.45, 1.25],
+    keys: [
+      {
+        at: 0,
+        ...planted(0.03),
+        joints: {
+          ...leanJoints(0.03),
+          head: [0.02, 0, 0],
+          rArm: [0.02, 0, -0.12],
+          rFore: [-0.15, 0, 0],
+          lArm: [-0.6, 0, 0.45],
+          lFore: [-1.6, 0, 0],
+        },
+      },
+      {
+        at: 0.6,
+        ...planted(0.11, -0.08),
+        joints: {
+          ...leanJoints(0.11),
+          head: [0.04, 0.65, 0.14],
+          rArm: [0.02, 0, -0.12],
+          rFore: [-0.15, 0, 0],
+          lArm: [-0.51, 0, 0.45],
+          lFore: [-1.82, 0, 0],
+        },
+      },
+      {
+        at: 1.15,
+        ...planted(0.12, -0.08),
+        joints: {
+          ...leanJoints(0.12),
+          head: [0.05, 0.68, 0.15],
+          rArm: [0.02, 0, -0.12],
+          rFore: [-0.15, 0, 0],
+          lArm: [-0.5, 0, 0.45],
+          lFore: [-1.85, 0, 0],
+        },
+      },
+      {
+        at: 1.9,
+        ...planted(0.04),
+        joints: {
+          ...leanJoints(0.04),
+          head: [0.03, 0.06, -0.06],
+          rArm: [0.02, 0, -0.12],
+          rFore: [-0.15, 0, 0],
+          lArm: [-0.59, 0, 0.45],
+          lFore: [-1.63, 0, 0],
+        },
+      },
+      {
+        at: 3,
+        ...planted(0.03),
+        joints: {
+          ...leanJoints(0.03),
+          head: [0.04, -0.04, 0.03],
+          rArm: [0.02, 0, -0.12],
+          rFore: [-0.15, 0, 0],
+          lArm: [-0.6, 0, 0.45],
+          lFore: [-1.6, 0, 0],
+        },
+      },
+    ],
+  },
+  {
+    // a short, sweet kiss: the right hand on the partner's shoulder, a lean in with
+    // the head tilted, a second and a half held with eyes closed, an ease out
+    // and a linger close before the next. Unmirrored (together.ts), so the two
+    // heads tilt opposite ways and the noses pass.
+    id: "kiss",
+    label: "Kiss",
+    period: 6,
+    groove: false,
+    synced: true,
+    shut: [0.65, 2.35],
+    keys: [
+      {
+        at: 0,
+        ...planted(0.03),
+        joints: {
+          ...leanJoints(0.03),
+          head: [0.04, 0, 0.02],
+          rArm: [-0.6, 0, -0.4],
+          rFore: [-1.9, 0, 0],
+          lArm: [0.02, 0, 0.12],
+          lFore: [-0.15, 0, 0],
+        },
+      },
+      {
+        at: 0.8,
+        ...planted(0.11),
+        joints: {
+          ...leanJoints(0.11),
+          head: [0.02, 0.1, 0.25],
+          rArm: [-0.51, 0, -0.4],
+          rFore: [-2.12, 0, 0],
+          lArm: [0.02, 0, 0.12],
+          lFore: [-0.15, 0, 0],
+        },
+      },
+      {
+        at: 2.3,
+        ...planted(0.12),
+        joints: {
+          ...leanJoints(0.12),
+          head: [0.03, 0.12, 0.27],
+          rArm: [-0.5, 0, -0.4],
+          rFore: [-2.15, 0, 0],
+          lArm: [0.02, 0, 0.12],
+          lFore: [-0.15, 0, 0],
+        },
+      },
+      {
+        at: 3.1,
+        ...planted(0.04),
+        joints: {
+          ...leanJoints(0.04),
+          head: [0, 0.05, 0.06],
+          rArm: [-0.59, 0, -0.4],
+          rFore: [-1.93, 0, 0],
+          lArm: [0.02, 0, 0.12],
+          lFore: [-0.15, 0, 0],
+        },
+      },
+      {
+        at: 4.6,
+        ...planted(0.03),
+        joints: {
+          ...leanJoints(0.03),
+          head: [0.05, -0.05, 0.04],
+          rArm: [-0.6, 0, -0.4],
+          rFore: [-1.9, 0, 0],
+          lArm: [0.02, 0, 0.12],
+          lFore: [-0.15, 0, 0],
+        },
+      },
+    ],
+  },
+  {
     // the carrier: a forward lean, arms hooked back under the rider's knees,
     // a little bounce as if hitching them up
     id: "piggyback-carry",
@@ -1017,6 +1190,8 @@ const EMOTES: ReadonlySet<string> = new Set([
   "hug",
   "hold-hands",
   "forehead-kiss",
+  "cheek-kiss",
+  "kiss",
   "piggyback-carry",
   "piggyback-ride",
 ]);
@@ -1041,6 +1216,13 @@ export function danceMove(id: DanceMoveId): DanceMove {
   const move = BY_ID.get(id);
   if (!move) throw new Error(`unknown dance move: ${id}`);
   return move;
+}
+
+/** Whether a move has the eyes closed at `t` (seconds, any value, looped). */
+export function eyesShut(move: DanceMove, t: number): boolean {
+  if (!move.shut) return false;
+  const local = ((t % move.period) + move.period) % move.period;
+  return local >= move.shut[0] && local < move.shut[1];
 }
 
 export function isDanceMoveId(value: unknown): value is DanceMoveId {

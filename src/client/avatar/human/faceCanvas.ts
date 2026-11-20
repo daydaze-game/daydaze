@@ -931,6 +931,11 @@ export function sharedLashes(): THREE.Texture {
   return lashTexture;
 }
 
+/** The painted iris's and pupil's radii, in UVs from the texture's center
+ * (the doll's eye shader widens the pupil by remapping inside the iris). */
+export const IRIS_R = 0.27;
+export const PUPIL_R = 0.085;
+
 /** Sclera, iris and pupil for the eyeballs' front planar UV. */
 function paintIris(color: string) {
   const S = 512;
@@ -939,14 +944,14 @@ function paintIris(color: string) {
   ctx.fillRect(0, 0, S, S);
   const c = S / 2;
   const iris = hexRgb(color);
-  const g = ctx.createRadialGradient(c, c, 0, c, c, S * 0.27);
+  const g = ctx.createRadialGradient(c, c, 0, c, c, S * IRIS_R);
   g.addColorStop(0, rgba(mixRgb(iris, [255, 210, 120], 0.35)));
   g.addColorStop(0.55, rgba(iris));
   g.addColorStop(0.9, rgba(iris.map((v) => v * 0.55)));
   g.addColorStop(1, "rgba(20,10,8,1)");
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(c, c, S * 0.27, 0, Math.PI * 2);
+  ctx.arc(c, c, S * IRIS_R, 0, Math.PI * 2);
   ctx.fill();
   // Irregular radial fibers and crypts rather than a flat colored disk.
   let seed = 37;
@@ -978,7 +983,7 @@ function paintIris(color: string) {
   }
   ctx.fillStyle = "#070304";
   ctx.beginPath();
-  ctx.arc(c, c, S * 0.085, 0, Math.PI * 2);
+  ctx.arc(c, c, S * PUPIL_R, 0, Math.PI * 2);
   ctx.fill();
   // A soft upper shadow seats the iris under the lid. The cornea adds the
   // actual environment reflection; keep painted catchlights small.

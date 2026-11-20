@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Builds and optimizes Speedway oval assets from Quaternius Realistic Car Pack
-# and Kenney Racing Kit / Mini Characters into public/models/speedway/
+# and Kenney Racing Kit into public/models/speedway/ (the fans and pit crew are
+# baked doll people: art/crowd/build-crowd.sh)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -17,20 +18,13 @@ blender --background --factory-startup --python-exit-code 1 --python "$ART"
 echo "=== Optimizing with gltf-transform ==="
 GT=(npx -y @gltf-transform/cli@4.5.1)
 
-# Optimize cars and characters
+# Optimize cars
 for m in stock-car-1 stock-car-2 stock-car-3 stock-car-4; do
   if [ -f "$TMP/$m.glb" ]; then
     echo "Optimizing $m.glb..."
     "${GT[@]}" optimize "$TMP/$m.glb" "$OUT/$m.glb" \
       --compress meshopt --texture-compress webp --simplify false --flatten false --palette false --prune-attributes false
   fi
-done
-
-# The fans and the pit crew: Kenney's Mini Characters posed in Blender
-blender --background --factory-startup --python-exit-code 1 --python "$ROOT/art/speedway/build_people.py"
-for f in "$ROOT"/art/speedway/.cache/people/*.glb; do
-  "${GT[@]}" optimize "$f" "$OUT/people-$(basename "$f" | sed 's/^character-//')" \
-    --compress meshopt --texture-compress webp --texture-size 256 --simplify false --flatten false --palette false --prune-attributes false
 done
 
 # Optimize Kenney racing props
