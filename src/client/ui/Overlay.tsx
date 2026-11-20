@@ -15,6 +15,7 @@ import { type Intensity } from "../../game/effects/buzz.ts";
 import { CarPicker } from "../city/CarPicker.tsx";
 import { driving } from "../world/driving.ts";
 import { collectionsBook } from "./Collections.tsx";
+import { openStreak } from "./Streak.tsx";
 import { GameMenu, closeMenu } from "./GameMenu.tsx";
 import type { CrimeSave } from "../../game/crime/record.ts";
 import type { Caught } from "./ShopliftPanel.tsx";
@@ -752,6 +753,17 @@ export function Overlay({
                 }}
               >
                 Collections
+              </button>
+              <button
+                type="button"
+                className="drink"
+                aria-haspopup="dialog"
+                onClick={() => {
+                  closeMenu();
+                  openStreak();
+                }}
+              >
+                Daily streak
               </button>
               {ONLINE && (
                 <button
