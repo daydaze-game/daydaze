@@ -841,7 +841,11 @@ function Lab() {
             shot === "piggyback" && i === 1
               ? [0, liftOf("piggyback"), -together("piggyback").gap]
               : shot === "together"
-                ? [pairSpot(i).at[0], 0, pairSpot(i).at[1]]
+                ? [
+                    pairSpot(i).at[0],
+                    pairSpot(i).role === "follow" ? liftOf(EMOTE) : 0,
+                    pairSpot(i).at[1],
+                  ]
                 : [plan.x(i), 0, 0]
           }
           rotation-y={shot === "together" ? pairSpot(i).yaw : 0}

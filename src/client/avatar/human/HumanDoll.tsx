@@ -1012,6 +1012,9 @@ export function HumanDoll({
   const calm = useReducedMotion();
   const phase = useRef(0);
   const blinkAt = useRef(2 + seed);
+  // in a kiss (no look into the camera), and its eyes-closed moment: set with
+  // the built pose, which a far doll poses only every third frame
+  const kiss = useRef({ on: false, shut: false });
   const sampled = useMemo<Pose>(createPose, []);
   // one mixer per body, made and torn down with it
   const anim = useRef<Anim | null>(null);
@@ -1139,8 +1142,6 @@ export function HumanDoll({
       farParts.current = isFar;
     }
     const t = state.clock.elapsedTime + seed * 7.3;
-    // eyes closed for the moment a kiss's lips meet (set with the built pose)
-    let kissShut = false;
     const speed = walk?.current.speed ?? 0;
     const moving = speed > MOVING;
     // the built stride's phase, for the hand-made walk worn until the clips load
@@ -1341,11 +1342,14 @@ export function HumanDoll({
       gaze.on = false;
       body.built.restore();
       if (a.action) a.mixer.update(animDt);
+      kiss.current.on = false;
+      kiss.current.shut = false;
       if (a.built > 0) {
         const move = mood === "dance" && !moving ? danceMove(dance) : null;
         // a kiss runs on the pair clock, so both partners lean in together
         const mt = move?.synced ? pairNow() : t;
-        kissShut = move ? eyesShut(move, mt) : false;
+        kiss.current.on = move?.synced === true;
+        kiss.current.shut = move ? eyesShut(move, mt) : false;
         const danced = !move
           ? null
           : couple
@@ -1381,9 +1385,9 @@ export function HumanDoll({
           .multiply(turn.setFromEuler(sway));
       }
       // her own doll, up close: she looks into the camera (cameraZoom.ts),
-      // whatever way the clip has her head
+      // whatever way the clip has her head, except mid-kiss
       const head = body.head;
-      if (own && head?.parent && root.current) {
+      if (own && !kiss.current.on && head?.parent && root.current) {
         const parent = head.parent;
         head.getWorldPosition(headAt);
         head.getWorldQuaternion(headQ);
@@ -1450,7 +1454,8 @@ export function HumanDoll({
       body.redness.value = red;
       invalidate();
     }
-    const lid = closed || kissShut ? 1 : REST_LID - wide * WIDE_LID + heavy;
+    const lid =
+      closed || kiss.current.shut ? 1 : REST_LID - wide * WIDE_LID + heavy;
     if (lidShown.current !== lid || lidMeshes.current !== wornList.current) {
       lidShown.current = lid;
       lidMeshes.current = wornList.current;
