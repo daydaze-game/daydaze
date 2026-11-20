@@ -3,8 +3,7 @@
 // by MartWatch. 18+ only (the shop panel gates itself).
 
 import type { JSX } from "react";
-import { DEALER_NAME } from "./MartWatch.tsx";
-import { martNear } from "./martNear.ts";
+import { DEALER_NAME, martNear } from "./martNear.ts";
 import { WeedShopPanel } from "./WeedShopPanel.tsx";
 
 export function GasMartPanel(): JSX.Element | null {

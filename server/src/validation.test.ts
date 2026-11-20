@@ -1,3 +1,4 @@
+// Tests for server/src/validation.ts: request body, attachment and parameter validation.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK } from "../../src/game/look.ts";

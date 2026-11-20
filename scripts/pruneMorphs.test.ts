@@ -1,3 +1,4 @@
+// Tests for scripts/pruneMorphs.ts: dropping unused GLB morph targets.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { pruneMorphs, readGlb, writeGlb } from "./pruneMorphs.ts";

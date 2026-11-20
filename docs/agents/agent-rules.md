@@ -20,9 +20,9 @@
 - New on main (2026-10-26): `@three.ez/instanced-mesh` (InstancedMesh2: per-instance culling + LOD; prefer it for many instances), `toktx` on PATH (KTX2 textures via gltf-transform etc1s/uastc). Rebase to use them.
 - Code review: before reporting a feature done, run the `superpowers:requesting-code-review` skill on your branch (BASE = `git merge-base main HEAD`), fix Critical/Important findings with a test each, and list Minor ones in your report.
 - Code-review subagents you dispatch report to the lead (team-lead), not back to you. Run the `superpowers:requesting-code-review` checklist yourself inline on your diff (read the diff against its checklist) or message team-lead for the findings.
-- (2026-11-04) Owner downloads live in /home/kaitlyn/git/daydaze/local-assets/downloads/game/ (animals in /home/kaitlyn/git/daydaze/local-assets/downloads/game/animals/). Mixamo clips in ~/git/daydaze/mixamo/ are named Name_Description with dashes for spaces: check there before asking for a download. Don't spend Meshy or Tripo credits.
+- (2026-11-04) Owner downloads live in ~/git/daydaze/local-assets/downloads/game/ (animals in ~/git/daydaze/local-assets/downloads/game/animals/). Mixamo clips in ~/git/daydaze/mixamo/ are named Name_Description with dashes for spaces: check there before asking for a download. Meshy and Tripo cost credits: use them only for something no free download covers, and ask the owner first.
 - Rebasing: after resolving conflicts, `grep -rn "^<<<<<<<" .` must be empty before `git add`; never `git add -A` over unresolved code files.
-- Before reporting: rebase onto main, `npm run verify` green, your feature's Playwright tests green via flock -w 1800, screenshots looked at. Report the head SHA. Do not merge or push; the lead merges.
+- Before reporting: rebase onto main, `npm run verify` green, your feature's Playwright tests green via flock -w 1800, screenshots looked at. Then open your PR and see it through to the merge ("You own your PR until it merges" in AGENTS.md). Never push to main.
 
 ## Browser tests on GitHub (preferred, 2026-11-07)
 
