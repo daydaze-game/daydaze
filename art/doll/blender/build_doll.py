@@ -276,6 +276,10 @@ KEYS = {
     "blink": target("expression/units/caucasian/eye-left-closure.target")
     + target("expression/units/caucasian/eye-right-closure.target"),
     "smile": target("expression/units/caucasian/mouth-corner-puller.target") * 0.5,
+    # gurning (molly's jaw clench, cocaine's in part): lips drawn back and
+    # pressed tight over a set jaw; the client pulses it as grinding
+    "gurn": target("expression/units/caucasian/mouth-retraction.target") * 0.8
+    + target("expression/units/caucasian/mouth-compression.target") * 0.5,
 }
 
 

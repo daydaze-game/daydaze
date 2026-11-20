@@ -1,3 +1,4 @@
+// Playwright browser tests for 2D minigames (DJ booth, trivia, payouts and accessibility).
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 

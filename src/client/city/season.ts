@@ -1,4 +1,4 @@
-// The player's local date, with an optional preview date, refreshed while playing.
+// The city's New York date, with an optional preview date, refreshed while playing.
 import { useEffect, useState } from "react";
 import {
   dressings,

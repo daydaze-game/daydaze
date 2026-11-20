@@ -149,6 +149,9 @@ FILES=(
   $T/expression/units/caucasian/eyebrows-right-up.target
   $T/expression/units/caucasian/eyebrows-left-down.target
   $T/expression/units/caucasian/eyebrows-right-down.target
+  $T/expression/units/caucasian/mouth-retraction.target
+  $T/expression/units/caucasian/mouth-compression.target
+  $T/expression/units/caucasian/neck-platysma.target
 )
 for f in "${FILES[@]}"; do
   [ -s "$OUT/$f" ] && continue

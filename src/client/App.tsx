@@ -24,19 +24,10 @@ import {
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
 import { getBuzz } from "./effects/drunk.ts";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
-import { DuelPanel } from "./net/DuelPanel.tsx";
-import { TogetherPanel } from "./net/TogetherPanel.tsx";
-import { CookOffInvite } from "./net/CookOffInvite.tsx";
-import { PartyPanel } from "./net/PartyPanel.tsx";
-import { RidePanel } from "./net/RidePanel.tsx";
-import { RacePanel } from "./net/RacePanel.tsx";
 import { leaveParty } from "./net/party.ts";
 import { endVisit, homeVisit, listenForHomes } from "./net/home.ts";
-import { ConnectionNote } from "./net/ConnectionNote.tsx";
 import { chatPrefs } from "./net/chatPrefs.ts";
 import { useCloudSave } from "./net/cloudSave.ts";
-import { FriendsPanel } from "./net/FriendsPanel.tsx";
-import { PeerCard } from "./net/PeerCard.tsx";
 import type { MinigameId } from "../game/hotspots.ts";
 import { isJailed } from "../game/jail/jail.ts";
 import { jailAfterArrest } from "../game/police/arrest.ts";
@@ -68,14 +59,10 @@ import { buyItem } from "../game/shop.ts";
 import { CityJoystick } from "./city/CityJoystick.tsx";
 import { readFlags } from "./flags.ts";
 import { ReducedMotionContext, usePrefersReducedMotion } from "./motion.ts";
-import { ApartmentPanel } from "./ui/ApartmentPanel.tsx";
-import { ArrestSequence } from "./ui/ArrestSequence.tsx";
 import { ChatBar } from "./ui/ChatBar.tsx";
-import { DebugPanel } from "./ui/DebugPanel.tsx";
-import { JailHud } from "./ui/JailHud.tsx";
-import { GameOverlay } from "./ui/Minigames.tsx";
 import { Overlay } from "./ui/Overlay.tsx";
-import { type Caught, ShopliftPanel } from "./ui/ShopliftPanel.tsx";
+import { GameOverlay } from "./ui/Minigames.tsx";
+import type { Caught } from "./ui/ShopliftPanel.tsx";
 import type { View } from "./world/CameraRig.tsx";
 import { LoadingVeil } from "./ui/LoadingVeil.tsx";
 import { preloadLook } from "./avatar/human/HumanDoll.tsx";
@@ -124,12 +111,68 @@ function visit(room: RoomId, spawn: Spawn): Visit {
   return { room, arrival: arrive(ROOMS[room], spawn) };
 }
 
+// Panels the first frame doesn't need (online invites, room and event
+// panels): each loads when first rendered, behind a Suspense that shows nothing.
+const DuelPanel = lazy(() =>
+  import("./net/DuelPanel.tsx").then((m) => ({ default: m.DuelPanel })),
+);
+const TogetherPanel = lazy(() =>
+  import("./net/TogetherPanel.tsx").then((m) => ({ default: m.TogetherPanel })),
+);
+const CookOffInvite = lazy(() =>
+  import("./net/CookOffInvite.tsx").then((m) => ({ default: m.CookOffInvite })),
+);
+const PartyPanel = lazy(() =>
+  import("./net/PartyPanel.tsx").then((m) => ({ default: m.PartyPanel })),
+);
+const RidePanel = lazy(() =>
+  import("./net/RidePanel.tsx").then((m) => ({ default: m.RidePanel })),
+);
+const RacePanel = lazy(() =>
+  import("./net/RacePanel.tsx").then((m) => ({ default: m.RacePanel })),
+);
+const ConnectionNote = lazy(() =>
+  import("./net/ConnectionNote.tsx").then((m) => ({
+    default: m.ConnectionNote,
+  })),
+);
+const FriendsPanel = lazy(() =>
+  import("./net/FriendsPanel.tsx").then((m) => ({ default: m.FriendsPanel })),
+);
+const PeerCard = lazy(() =>
+  import("./net/PeerCard.tsx").then((m) => ({ default: m.PeerCard })),
+);
+const ApartmentPanel = lazy(() =>
+  import("./ui/ApartmentPanel.tsx").then((m) => ({
+    default: m.ApartmentPanel,
+  })),
+);
+const ArrestSequence = lazy(() =>
+  import("./ui/ArrestSequence.tsx").then((m) => ({
+    default: m.ArrestSequence,
+  })),
+);
+const DebugPanel = lazy(() =>
+  import("./ui/DebugPanel.tsx").then((m) => ({ default: m.DebugPanel })),
+);
+const JailHud = lazy(() =>
+  import("./ui/JailHud.tsx").then((m) => ({ default: m.JailHud })),
+);
+const ShopliftPanel = lazy(() =>
+  import("./ui/ShopliftPanel.tsx").then((m) => ({ default: m.ShopliftPanel })),
+);
+
 /** The dev panel (press `), loaded only in development; production drops it. */
 const DevPanel = import.meta.env.DEV
   ? lazy(() =>
       import("./world/DevTools.tsx").then((m) => ({ default: m.DevPanel })),
     )
   : null;
+
+/** The streak calendar and celebration, loaded on first use. */
+const StreakPanel = lazy(() =>
+  import("./ui/StreakPanel.tsx").then((m) => ({ default: m.StreakPanel })),
+);
 
 /**
  * The whole game: the 3D World, the overlay UI and the panels around it. Travel
@@ -454,6 +497,22 @@ export function App() {
     postPrize(prize, daily.coins);
     playFanfare(prize.grade === "S" ? 1 : prize.grade === "A" ? 0.6 : 0);
   }, [pending]);
+  // opening the game on a new day counts toward the streak (and again if the
+  // tab stays open past midnight); a milestone pays and celebrates
+  useEffect(() => {
+    let live = true;
+    const count = () =>
+      // the rules load on demand, not with the first download
+      void import("./streakCheckIn.ts").then(
+        (m) => live && m.countToday(latest, setSave),
+      );
+    count();
+    const id = window.setInterval(count, 60_000);
+    return () => {
+      live = false;
+      window.clearInterval(id);
+    };
+  }, []);
   const saved = save.settings.quality;
   const quality = flags.quality ?? (saved === "auto" ? null : saved);
 
@@ -462,6 +521,9 @@ export function App() {
       <main className="app">
         <LoadingVeil />
         <PrizeCard />
+        <Suspense fallback={null}>
+          <StreakPanel streak={save.streak} />
+        </Suspense>
         <UpdatePrompt />
         <Collections
           visited={save.visited}
@@ -524,21 +586,23 @@ export function App() {
           )}
           <p className="nametag">{save.name}</p>
         </div>
-        <PeerCard />
-        <FriendsPanel
-          onGo={(room) => travel(room, ROOMS[room].spawn)}
-          strictChat={save.settings.strictChat}
-          onStrictChat={setStrictChat}
-          save={save}
-          onSave={setSave}
-        />
-        {ONLINE && <DuelPanel />}
-        {ONLINE && <TogetherPanel />}
-        {ONLINE && <CookOffInvite />}
-        {ONLINE && <PartyPanel onGo={goWithParty} />}
-        {ONLINE && <RidePanel />}
-        {ONLINE && <RacePanel />}
-        {ONLINE && <ConnectionNote />}
+        <Suspense fallback={null}>
+          <PeerCard />
+          <FriendsPanel
+            onGo={(room) => travel(room, ROOMS[room].spawn)}
+            strictChat={save.settings.strictChat}
+            onStrictChat={setStrictChat}
+            save={save}
+            onSave={setSave}
+          />
+          {ONLINE && <DuelPanel />}
+          {ONLINE && <TogetherPanel />}
+          {ONLINE && <CookOffInvite />}
+          {ONLINE && <PartyPanel onGo={goWithParty} />}
+          {ONLINE && <RidePanel />}
+          {ONLINE && <RacePanel />}
+          {ONLINE && <ConnectionNote />}
+        </Suspense>
         <div className="fade" data-on={fading} aria-hidden="true" />
         {notice && (
           <p className="notice" role="status">
@@ -640,32 +704,34 @@ export function App() {
             You&apos;re at {visiting.owner.name}&apos;s place.
           </p>
         )}
-        {here.room === "apartment" && !visiting.owner && (
-          <ApartmentPanel
-            home={save.home}
-            onChange={setHome}
-            onShelf={() => setShopping(true)}
-          />
-        )}
-        {here.room === "apartment" && shopping && (
-          <ShopliftPanel
-            crime={save.crime}
-            now={now}
-            onCaught={caught}
-            onClose={() => setShopping(false)}
-          />
-        )}
-        {arrest && <ArrestSequence onDone={finishArrest} />}
-        {here.room === "jail" && (
-          <JailHud
-            jail={save.jail}
-            coins={save.coins}
-            onChange={setJail}
-            onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
-            onRelease={release}
-          />
-        )}
-        {game && <GameOverlay game={game} onClose={endGame} />}
+        <Suspense fallback={null}>
+          {here.room === "apartment" && !visiting.owner && (
+            <ApartmentPanel
+              home={save.home}
+              onChange={setHome}
+              onShelf={() => setShopping(true)}
+            />
+          )}
+          {here.room === "apartment" && shopping && (
+            <ShopliftPanel
+              crime={save.crime}
+              now={now}
+              onCaught={caught}
+              onClose={() => setShopping(false)}
+            />
+          )}
+          {arrest && <ArrestSequence onDone={finishArrest} />}
+          {here.room === "jail" && (
+            <JailHud
+              jail={save.jail}
+              coins={save.coins}
+              onChange={setJail}
+              onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
+              onRelease={release}
+            />
+          )}
+          {game && <GameOverlay game={game} onClose={endGame} />}
+        </Suspense>
         {here.room === "city" && touch && <CityJoystick />}
         <ChatBar
           onSay={(text) => {
@@ -687,7 +753,9 @@ export function App() {
           </Suspense>
         )}
         {flags.debug && (
-          <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
+          <Suspense fallback={null}>
+            <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
+          </Suspense>
         )}
       </main>
     </ReducedMotionContext.Provider>

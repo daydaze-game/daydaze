@@ -1,3 +1,4 @@
+// Tests for server/src/validation.ts: request body, attachment and parameter validation.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK } from "../../src/game/look.ts";
@@ -87,6 +88,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
     garden: save.garden,
     inventory: save.inventory,
     giftDay: save.giftDay,
+    streak: save.streak,
     crime: save.crime,
     jail: save.jail,
     home: save.home,
