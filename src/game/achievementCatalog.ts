@@ -2,7 +2,7 @@
 // threshold each, grouped by activity family. A "secret" row stays masked in
 // the book until it unlocks. Data only; the engine is achievements.ts.
 
-import type { Achievement, StatKey, Tier } from "./achievements.ts";
+import type { Achievement, StatKey, Tier } from "./achievementTypes.ts";
 
 type Row = readonly [
   id: string,
@@ -198,7 +198,7 @@ const ROWS: readonly Row[] = [
     "karaokeVariety",
     5,
     B,
-    "Setlist",
+    "Set List",
     "Sing 5 different songs.",
   ],
   [
@@ -298,7 +298,7 @@ const ROWS: readonly Row[] = [
     "Harvest 2,000 crops.",
   ],
   [
-    "farmdays-3",
+    "farm-days-3",
     "farmDaysTended",
     3,
     B,
@@ -306,7 +306,7 @@ const ROWS: readonly Row[] = [
     "Tend the farm on 3 different days.",
   ],
   [
-    "farmdays-14",
+    "farm-days-14",
     "farmDaysTended",
     14,
     S,
@@ -314,7 +314,7 @@ const ROWS: readonly Row[] = [
     "Tend the farm on 14 different days.",
   ],
   [
-    "farmdays-60",
+    "farm-days-60",
     "farmDaysTended",
     60,
     G,
@@ -322,7 +322,7 @@ const ROWS: readonly Row[] = [
     "Tend the farm on 60 different days.",
   ],
   [
-    "farmdays-200",
+    "farm-days-200",
     "farmDaysTended",
     200,
     P,
@@ -424,7 +424,7 @@ const ROWS: readonly Row[] = [
     "Attend 200 city events.",
   ],
   [
-    "evvar-3",
+    "event-variety-3",
     "eventVariety",
     3,
     B,
@@ -432,7 +432,7 @@ const ROWS: readonly Row[] = [
     "Attend 3 different kinds of events.",
   ],
   [
-    "evvar-6",
+    "event-variety-6",
     "eventVariety",
     6,
     S,
@@ -440,7 +440,7 @@ const ROWS: readonly Row[] = [
     "Attend 6 different kinds of events.",
   ],
   [
-    "evvar-10",
+    "event-variety-10",
     "eventVariety",
     10,
     G,

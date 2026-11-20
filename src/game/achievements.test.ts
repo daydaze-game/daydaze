@@ -10,13 +10,13 @@ import {
   newlyUnlocked,
   NO_STATS,
   raiseTo,
-  STAT_KEYS,
   TIER_XP,
   unlockedIn,
   unlockXp,
   xpFor,
 } from "./achievements.ts";
 import { ACHIEVEMENTS } from "./achievementCatalog.ts";
+import { STAT_KEYS } from "./achievementTypes.ts";
 
 test("the catalog has 100+ achievements with unique ids", () => {
   assert.ok(ACHIEVEMENTS.length >= 100);

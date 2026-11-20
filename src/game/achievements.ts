@@ -1,66 +1,34 @@
 // Achievements engine: the typed stats object, the pure reducers that move it,
 // the XP and ladder each action is worth (as data), and `newlyUnlocked`. The
-// catalog itself lives in achievementCatalog.ts. Not wired to the save or the
+// catalog itself lives in achievementCatalog.ts and the shared
+// types in achievementTypes.ts. Not wired to the save or the
 // UI yet: callers own where the stats are stored. Pure.
 
 import { ACHIEVEMENTS } from "./achievementCatalog.ts";
+import {
+  STAT_KEYS,
+  type Achievement,
+  type Condition,
+  type StatKey,
+  type Tier,
+} from "./achievementTypes.ts";
 
-/** Every counter the achievements read. All are non-negative integers. */
-export const STAT_KEYS = [
-  // Minigames
-  "gamesPlayed",
-  "gamesWon",
-  "gradesS",
-  "gameVariety",
-  // Places and collections
-  "placesVisited",
-  "closetSetsClaimed",
-  "goldStickers",
-  // Karaoke
-  "karaokeSongs",
-  "karaokeHighScores",
-  "karaokeDuets",
-  "karaokeVariety",
-  // Fishing
-  "fishCaught",
-  "fishSpecies",
-  "fishRare",
-  // Farming
-  "cropsPlanted",
-  "cropsHarvested",
-  "farmDaysTended",
-  // Cars
-  "carsOwned",
-  "milesDriven",
-  "carWrecks",
-  "nightMiles",
-  // Events
-  "eventsAttended",
-  "eventVariety",
-  "clubNights",
-  // Crime
-  "crimesCommitted",
-  "arrests",
-  "chasesEscaped",
-  "minutesInJail",
-  "bailPaid",
-  // City life
-  "coinsEarned",
-  "itemsBought",
-  "outfitsChanged",
-  "daysPlayed",
-  "wavesSent",
-  "chatsHad",
-  "secretsFound",
-] as const;
-
-export type StatKey = (typeof STAT_KEYS)[number];
 export type Stats = Record<StatKey, number>;
 
 /** A fresh player: every counter at zero. */
-export const NO_STATS: Stats = Object.freeze(
-  Object.fromEntries(STAT_KEYS.map((k) => [k, 0])),
-) as Stats;
+export const NO_STATS: Stats = zeroStats();
+
+function zeroStats(): Stats {
+  const zeros: Record<string, number> = Object.fromEntries(
+    STAT_KEYS.map((k) => [k, 0]),
+  );
+  if (!hasEveryStat(zeros)) throw new Error("a stat key is missing");
+  return Object.freeze(zeros);
+}
+
+function hasEveryStat(record: Record<string, number>): record is Stats {
+  return STAT_KEYS.every((k) => k in record);
+}
 
 export function isStatKey(value: unknown): value is StatKey {
   return typeof value === "string" && STAT_KEYS.some((k) => k === value);
@@ -141,27 +109,12 @@ export function xpFor(key: StatKey, amount = 1): ActionXp {
   return { xp: xp * Math.max(0, Math.floor(amount)), ladder };
 }
 
-export type Tier = "bronze" | "silver" | "gold" | "platinum";
-
 /** XP for unlocking an achievement of each tier. */
 export const TIER_XP: Record<Tier, number> = {
   bronze: 10,
   silver: 25,
   gold: 60,
   platinum: 120,
-};
-
-/** Unlocks when `stat` reaches `atLeast`. */
-export type Condition = { stat: StatKey; atLeast: number };
-
-export type Achievement = {
-  id: string;
-  title: string;
-  description: string;
-  /** Hidden ones show as "???" in the book until unlocked. */
-  hidden: boolean;
-  tier: Tier;
-  when: Condition;
 };
 
 export function isMet(stats: Stats, c: Condition): boolean {
