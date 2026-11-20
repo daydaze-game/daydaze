@@ -1,3 +1,4 @@
+// Playwright end-to-end tests for multiplayer rooms against a local Worker.
 import { dockAction } from "./dock.ts";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 

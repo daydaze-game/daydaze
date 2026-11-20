@@ -1,3 +1,4 @@
+// Playwright end-to-end browser tests for the 3D client, rooms, HUD and navigation.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { DEALER_AT } from "../src/game/city/dealer.ts";
