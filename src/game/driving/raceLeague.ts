@@ -43,7 +43,10 @@ export type RecordResult =
 export function newSeason(id: string, length = DEFAULT_SEASON_LENGTH): Season {
   return {
     id,
-    length: Math.max(1, Math.floor(length)),
+    // NaN and Infinity would keep a season from ever completing
+    length: Number.isFinite(length)
+      ? Math.max(1, Math.floor(length))
+      : DEFAULT_SEASON_LENGTH,
     races: [],
     complete: false,
   };
@@ -123,7 +126,13 @@ export function standings(season: Season): StandingEntry[] {
 
 /** XP for one race: `place` is 1-based, null for a driver who did not finish. */
 export function raceXp(place: number | null, fieldSize: number): number {
-  if (place === null || place < 1 || place > fieldSize) return RACE_XP.dnf;
+  if (
+    place === null ||
+    !Number.isInteger(place) ||
+    place < 1 ||
+    place > fieldSize
+  )
+    return RACE_XP.dnf;
   if (place === 1) return RACE_XP.win;
   if (place <= 3) return RACE_XP.podium;
   return RACE_XP.finish;

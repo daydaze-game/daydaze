@@ -124,7 +124,7 @@ function textFor(game: PrizeGame, goal: ContractGoal): string {
   const label = PRIZE_TABLES[game].label;
   return goal.kind === "play"
     ? `Try ${label}`
-    : `Get ${goal.grade === "A" ? "an" : "a"} ${goal.grade} at ${label}`;
+    : `Get ${goal.grade === "A" || goal.grade === "S" ? "an" : "a"} ${goal.grade} at ${label}`;
 }
 
 /** A stable hash of integers to [0, 1). */
@@ -142,7 +142,8 @@ function rand(seed: number, serial: number, index: number): number {
 /**
  * Picks `count` contracts for games not in `exclude`: each pick takes the
  * ladder fewest on the board so far (variety), then the least-played game on
- * it, ties broken by the seed. `existing` counts toward the ladder spread.
+ * it, ties broken by the seed. `existing` counts toward the ladder spread and
+ * is skipped too; `exclude` is skipped without counting.
  */
 export function pickContracts(
   seed: number,
@@ -150,8 +151,9 @@ export function pickContracts(
   existing: readonly Contract[],
   count: number,
   serial = 0,
+  exclude: readonly PrizeGame[] = [],
 ): Contract[] {
-  const taken = new Set(existing.map((c) => c.game));
+  const taken = new Set([...existing.map((c) => c.game), ...exclude]);
   const perLadder = new Map<ContractLadder, number>(
     CONTRACT_LADDERS.map((l) => [l, 0]),
   );
@@ -228,9 +230,10 @@ export function recordResult(
     ? pickContracts(
         board.seed,
         history,
-        [...kept, ...completed],
+        kept,
         need,
         board.serial,
+        completed.map((c) => c.game),
       )
     : fresh;
   return {

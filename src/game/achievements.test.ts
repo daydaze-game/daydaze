@@ -119,6 +119,8 @@ test("cleanStats drops junk from storage", () => {
 test("xp is data: scaled by amount, never negative", () => {
   assert.equal(xpFor("gamesWon", 4).xp, 4 * ACTION_XP.gamesWon.xp);
   assert.equal(xpFor("gamesWon", -3).xp, 0);
+  for (const bad of [NaN, Infinity, -Infinity])
+    assert.equal(xpFor("gamesWon", bad).xp, 0);
   assert.equal(xpFor("fishCaught").ladder, "hustle");
   assert.equal(unlockXp([]), 0);
   assert.ok(unlockXp(ACHIEVEMENTS) > 0);
