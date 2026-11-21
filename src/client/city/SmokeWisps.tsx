@@ -92,8 +92,10 @@ export function SmokeWisps({ player }: { player: Player }): JSX.Element | null {
     // Instanced smoke wisps rising and dispersing
     if (sm) {
       for (let i = 0; i < WISPS; i++) {
-        // Offset life of each wisp
-        const wispCycle = (elapsed * 0.8 + i * (1 / WISPS)) % 1.0;
+        // Offset life of each wisp; calm mode holds static phase per wisp
+        const wispCycle = calm
+          ? (i * (1 / WISPS)) % 1.0
+          : (elapsed * 0.8 + i * (1 / WISPS)) % 1.0;
         const rise = wispCycle * 0.7; // rises 0.7m
         const spread = wispCycle * 0.25;
         const sway = calm ? 0 : Math.sin(wispCycle * 8 + i * 1.5) * 0.08;

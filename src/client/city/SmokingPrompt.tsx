@@ -55,6 +55,13 @@ export function SmokingPrompt({ room }: { room: RoomId }): JSX.Element | null {
   )?.id;
 
   const handleSmoke = (itemId?: ItemId, fallbackDose?: "joint" | "vape") => {
+    // Re-verify eligibility at action time
+    if (!allows(activeTier(), "drugs") || driving.session) return;
+    const hour = cityHour();
+    if (!isAfterDark(hour)) return;
+    const currentSpot = smokingSpotAt(room, [playerSpot.x, playerSpot.z]);
+    if (!currentSpot) return;
+
     if (itemId) {
       const item = itemOf(itemId);
       const left = removeItem(inventory, itemId);
