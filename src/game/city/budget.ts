@@ -84,13 +84,15 @@ export const MODEL_COST: Readonly<
 > = {
   "doll/body-lo": { tris: 3168, parts: 1 },
   "doll/hair-bob-lo": { tris: 992, parts: 1 },
-  "doll/outfit-jeans-lo": { tris: 846, parts: 1 },
+  "doll/top-tee-lo": { tris: 504, parts: 1 },
+  "doll/bottom-skinny-jeans-lo": { tris: 341, parts: 1 },
   "doll/shoes-platforms-lo": { tris: 1286, parts: 1 },
   "vendors/truck": { tris: 3360, parts: 1 },
   "vendors/cart": { tris: 1054, parts: 1 },
   "doll/body": { tris: 31056, parts: 4 },
   "doll/hair-bob": { tris: 4976, parts: 1 },
-  "doll/outfit-jeans": { tris: 4236, parts: 1 },
+  "doll/top-tee": { tris: 2524, parts: 1 },
+  "doll/bottom-skinny-jeans": { tris: 1712, parts: 1 },
   "doll/shoes-platforms": { tris: 6436, parts: 1 },
   "nature/street-tree-1-lo": { tris: 493, parts: 2 },
   "nature/street-tree-2-lo": { tris: 509, parts: 2 },
@@ -204,13 +206,15 @@ export function modelsInBudget(): string[] {
   return [
     "doll/body-lo",
     "doll/hair-bob-lo",
-    "doll/outfit-jeans-lo",
+    "doll/top-tee-lo",
+    "doll/bottom-skinny-jeans-lo",
     "doll/shoes-platforms-lo",
     "vendors/truck",
     "vendors/cart",
     "doll/body",
     "doll/hair-bob",
-    "doll/outfit-jeans",
+    "doll/top-tee",
+    "doll/bottom-skinny-jeans",
     "doll/shoes-platforms",
     ...Array.from({ length: TREE_VARIANTS }, (_, i) => treeModel(i)),
     ...Object.keys(MODEL_COST).filter(
@@ -612,7 +616,8 @@ export function lowTierCost(
     for (const model of [
       "doll/body",
       "doll/hair-bob",
-      "doll/outfit-jeans",
+      "doll/top-tee",
+      "doll/bottom-skinny-jeans",
       "doll/shoes-platforms",
     ])
       add(model);
@@ -624,7 +629,8 @@ export function lowTierCost(
     for (const model of [
       "doll/body-lo",
       "doll/hair-bob-lo",
-      "doll/outfit-jeans-lo",
+      "doll/top-tee-lo",
+      "doll/bottom-skinny-jeans-lo",
       "doll/shoes-platforms-lo",
     ])
       add(model);

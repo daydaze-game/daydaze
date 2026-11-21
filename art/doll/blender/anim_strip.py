@@ -2,7 +2,7 @@
 a retarget by eye (Workbench, so it is quick).
 
     blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/anim_strip.py -- \
-        walk-easy /tmp/strip [frames=4] [view=side] [focus=0.5] [sex=female] [pack=social] [show=Outfit_jeans] [chest=1]
+        walk-easy /tmp/strip [frames=4] [view=side] [focus=0.5] [sex=female] [pack=social] [show=Bottom_skinny-jeans] [chest=1]
 
 Writes /tmp/strip_0.png ... one per frame, evenly over the clip; montage
 them with ImageMagick. Reads .cache/out (the raw build), not public/.
