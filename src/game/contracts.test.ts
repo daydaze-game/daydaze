@@ -127,3 +127,39 @@ test("refills are deterministic", () => {
     recordResult(board, h, g, "S"),
   );
 });
+
+test("a goal for an S reads 'an S', and one for a B reads 'a B'", () => {
+  const texts = new Set<string>();
+  for (let seed = 0; seed < 40; seed++)
+    for (const c of pickContracts(seed, fullHistory(), [], BOARD_SIZE))
+      texts.add(c.text);
+  assert.ok([...texts].some((t) => t.startsWith("Get an S at ")));
+  assert.ok(![...texts].some((t) => t.startsWith("Get a S at ")));
+  const b = pickContracts(1, { ramen: { plays: 2, best: "B" } }, [], 40);
+  assert.ok(!b.some((c) => c.text.startsWith("Get an B ")));
+});
+
+test("excluded games are skipped without counting toward the ladder spread", () => {
+  const street = PRIZE_GAMES.filter((g) => GAME_LADDER[g] === "street");
+  const fame = PRIZE_GAMES.filter((g) => GAME_LADDER[g] === "fame");
+  const hustle = PRIZE_GAMES.filter((g) => GAME_LADDER[g] === "hustle");
+  const kept = [
+    ...fame
+      .slice(0, 1)
+      .concat(hustle.slice(0, 1))
+      .map((game, i) => ({
+        id: `${game}#${i}`,
+        game,
+        ladder: GAME_LADDER[game],
+        goal: { kind: "play" as const },
+        text: "",
+        xp: { ladder: GAME_LADDER[game], amount: 1 },
+      })),
+  ];
+  // street has no contract on the board; its finished game is excluded, not counted
+  for (let seed = 0; seed < 20; seed++) {
+    const [c] = pickContracts(seed, {}, kept, 1, 0, [street[0]]);
+    assert.equal(c.ladder, "street");
+    assert.notEqual(c.game, street[0]);
+  }
+});
