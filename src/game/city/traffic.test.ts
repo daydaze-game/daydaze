@@ -208,6 +208,8 @@ test("someone stepping out inside the stopping distance gets hit", () => {
   // the car keeps braking after the hit
   for (let i = 0; i < 4 / DT; i++) stepTraffic(t, DT, null);
   assert.ok(car.speed < 3);
+  // the driver stamped on the brakes all the same: one screech
+  assert.equal(t.alarms, 1);
 });
 
 test("a hard stop for someone in the road counts as an alarm (screech and horn)", () => {

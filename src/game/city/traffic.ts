@@ -539,13 +539,19 @@ function walkerRoom(
 
 /** The hit, if the player on foot is inside the car's outline now and the car
  * is moving fast enough to matter. Allocates only on a hit. */
-function contact(car: TrafficCar, walker: Vec2 | null): TrafficHit | null {
+function contact(
+  t: Traffic,
+  car: TrafficCar,
+  walker: Vec2 | null,
+): TrafficHit | null {
   if (!walker || car.speed < MIN_HIT_SPEED) return null;
   relative(car, walker, rel);
   const half = VEHICLE_LENGTH[car.kind] / 2;
   if (rel.along < -half || rel.along > half + 0.3) return null;
   if (rel.across > CONTACT_HALF_WIDTH) return null;
-  // a driver who hits someone has seen her, whatever happened before
+  // a driver who hits someone has seen her, whatever happened before, and
+  // stamps on the brakes now if not already
+  if (car.seen < DRIVER_REACTION) t.alarms++;
   car.seen = Math.max(car.seen, DRIVER_REACTION);
   car.halt = HALT_AFTER_HIT;
   return { car, speed: car.speed, x: pose.x, z: pose.z, yaw: pose.yaw };
@@ -598,7 +604,7 @@ export function stepTraffic(
         ? Math.min(target, car.speed + ACCEL * dt)
         : Math.max(target, car.speed - brake * dt);
     car.s += car.speed * dt;
-    hit ??= contact(car, walker);
+    hit ??= contact(t, car, walker);
     const trip = car.trip;
     if (trip && !trip.arrived && stopRoom(car) < 0.5 && car.speed < 1.5) {
       trip.arrived = true;
