@@ -121,9 +121,15 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 - **You own your PR until it merges.** When your issue is done, open a PR.
   - If a check fails, fix it.
   - If CodeRabbit comments, consider each suggestion: fix it, or reply why not.
+  - If the PR produced screenshots (the `pr-screenshots.yml` comment, or runs
+    you dispatched), look at every one and judge whether it looks good enough.
+    Fix what doesn't before you mark the PR ready (auto-merge then merges it)
+    or merge it yourself.
   - Bypass-merge (`gh pr merge <n> --admin --merge`) only when all of these
     hold; otherwise leave it to auto-merge:
     - every check is green;
+    - every screenshot the PR produced has been looked at and looks good
+      enough;
     - the work is finished: every item in the issue and the PR's checklist is
       done, and the PR is not a draft;
     - every review comment is answered and its thread resolved;
