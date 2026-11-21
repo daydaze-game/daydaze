@@ -623,9 +623,10 @@ def proxy_hair(ctx, style):
     """A PROXY style fitted to the doll, its texture a tintable grey."""
     path = PROXY[style]
     # community textures range from near-black to two-tone: cap their
-    # contrast so a tint doesn't break into dark and bright patches
-    flat = style in COMMUNITY
-    img = proxies.detail_texture(diffuse(path), 1024, contrast=0.35 if flat else None)
+    # contrast so a tint doesn't break into dark and bright patches (the
+    # braid's crown is painted in broad highlight bands: flatter still)
+    contrast = {"pigtails": 0.12}.get(style, 0.35) if style in COMMUNITY else None
+    img = proxies.detail_texture(diffuse(path), 1024, contrast=contrast)
     mat = proxies.textured(f"hair_{style}", img, alpha=True)
     return proxies.build(ctx, f"Hair_{style}", path, mat, ratio=RATIO.get(style, 1.0))
 
