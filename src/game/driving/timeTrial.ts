@@ -29,7 +29,11 @@ export function personalBest(
   routeId: string,
   runner: string,
 ): TrialRun | undefined {
-  return book.routes[routeId]?.[runner];
+  // own keys only: a runner or route named "toString" has no inherited best
+  const route = Object.hasOwn(book.routes, routeId)
+    ? book.routes[routeId]
+    : undefined;
+  return route && Object.hasOwn(route, runner) ? route[runner] : undefined;
 }
 
 /** The fastest run on a route; ties go to the runner id that sorts first. */
@@ -38,7 +42,10 @@ export function routeRecord(
   routeId: string,
 ): { runner: string; run: TrialRun } | undefined {
   let best: { runner: string; run: TrialRun } | undefined;
-  for (const [runner, run] of Object.entries(book.routes[routeId] ?? {})) {
+  const route = Object.hasOwn(book.routes, routeId)
+    ? book.routes[routeId]
+    : undefined;
+  for (const [runner, run] of Object.entries(route ?? {})) {
     if (
       !best ||
       run.timeMs < best.run.timeMs ||
@@ -51,13 +58,18 @@ export function routeRecord(
 }
 
 function downsample(ghost: readonly GhostSample[]): GhostSample[] {
-  const clean = ghost.filter(
-    (s) =>
-      Number.isFinite(s.t) &&
-      Number.isFinite(s.x) &&
-      Number.isFinite(s.z) &&
-      Number.isFinite(s.yaw),
-  );
+  // copies, so the caller keeps no handle on the stored replay, in time order
+  // because ghostAt reads the first and last samples as its bounds
+  const clean = ghost
+    .filter(
+      (s) =>
+        Number.isFinite(s.t) &&
+        Number.isFinite(s.x) &&
+        Number.isFinite(s.z) &&
+        Number.isFinite(s.yaw),
+    )
+    .map(({ t, x, z, yaw }) => ({ t, x, z, yaw }))
+    .sort((a, b) => a.t - b.t);
   if (clean.length <= MAX_GHOST_SAMPLES) return clean;
   const out: GhostSample[] = [];
   for (let i = 0; i < MAX_GHOST_SAMPLES; i++) {

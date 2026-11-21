@@ -25,6 +25,12 @@ test("swings grade by how close they come to the ball's arrival", () => {
   assert.equal(gradeSwing(Number.NaN), "late");
 });
 
+test("an optional wider reach keeps the perfect window proportional", () => {
+  assert.equal(gradeSwing(REACH * 1.1, REACH * 1.25), "good");
+  assert.equal(gradeSwing(REACH * 1.3, REACH * 1.25), "late");
+  assert.equal(gradeSwing(SWEET * 1.1, REACH), "good");
+});
+
 test("the ball comes quicker as the rally goes on, but never too quick", () => {
   assert.ok(ballSeconds(3) < ballSeconds(0));
   assert.equal(ballSeconds(50), 0.75);

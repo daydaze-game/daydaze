@@ -11,7 +11,11 @@ import {
   orderItem,
   resetFood,
   tickDeliveries,
+  tickNeeds,
+  consumeFood,
+  showToast,
 } from "./store.ts";
+import { take, ageHigh, getMeters } from "../effects/high.ts";
 import { FOOD_VENUES, foodVenuesFor } from "../../game/food/venues.ts";
 import { DELIVERY_SECONDS } from "../../game/food/delivery.ts";
 import { setActiveTier } from "../../game/age.ts";
@@ -73,4 +77,80 @@ test("an 18+ sake flight raises the buzz instead of easing it", () => {
   assert.ok(getBuzz() > before);
   setActiveTier("teen");
   ageBuzz(100_000); // tests share one process
+});
+
+test("food and water satisfy weed needs, including a delivered meal, without sobering up", () => {
+  resetFood();
+  setActiveTier("adult");
+  take("joint");
+  ageHigh(110); // the joint is at its peak
+  const high = getMeters().high.level;
+  assert.ok(high > 0.15);
+  tickNeeds(60);
+  const before = getFoodState().needs;
+  assert.ok(before.hunger > 0);
+  assert.ok(before.thirst > 0);
+  showToast("Cotton mouth: a snack or water might help.");
+  assert.deepEqual(getFoodState().needs, before);
+  orderItem(item.id, 0);
+  tickDeliveries(DELIVERY_SECONDS * 1000);
+  eatHeld();
+  assert.equal(getFoodState().held, null);
+  assert.ok(getFoodState().needs.hunger < before.hunger);
+  assert.equal(getFoodState().needs.thirst, before.thirst);
+  assert.match(getFoodState().toast ?? "", /hit the spot/);
+  consumeFood("drink"); // shared by quick water and vending drinks
+  assert.equal(getFoodState().needs.thirst, 0);
+  assert.match(getFoodState().toast ?? "", /refreshing/);
+  assert.equal(getMeters().high.level, high);
+  ageHigh(100_000);
+  setActiveTier("teen");
+  resetFood();
+});
+
+test("alcohol does not satisfy dry mouth, and the teen gate clears needs", () => {
+  resetFood();
+  setActiveTier("adult");
+  take("joint");
+  ageHigh(110);
+  tickNeeds(60);
+  const before = getFoodState().needs;
+  const flight = foodVenuesFor("adult")
+    .flatMap((v) => v.menu)
+    .find((m) => m.alcohol);
+  assert.ok(flight);
+  holdItem(flight);
+  eatHeld();
+  assert.deepEqual(getFoodState().needs, before);
+  assert.equal(getFoodState().toast, null);
+  setActiveTier("teen");
+  tickNeeds(60);
+  assert.deepEqual(getFoodState().needs, { hunger: 0, thirst: 0 });
+  consumeFood("drink");
+  assert.equal(getFoodState().toast, null);
+  ageHigh(100_000);
+  ageBuzz(100_000);
+  resetFood();
+});
+
+test("each repeated toast is a new event, including identical snack relief", () => {
+  resetFood();
+  showToast("Same hint");
+  const first = getFoodState().toastId;
+  showToast("Same hint");
+  assert.equal(getFoodState().toastId, first + 1);
+  setActiveTier("adult");
+  take("joint");
+  ageHigh(110);
+  tickNeeds(60);
+  consumeFood("food");
+  const snack = getFoodState();
+  tickNeeds(1);
+  assert.equal(getFoodState().toastId, snack.toastId);
+  consumeFood("food");
+  assert.equal(getFoodState().toast, snack.toast);
+  assert.equal(getFoodState().toastId, snack.toastId + 1);
+  ageHigh(100_000);
+  setActiveTier("teen");
+  resetFood();
 });

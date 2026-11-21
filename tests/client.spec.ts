@@ -3880,6 +3880,148 @@ test("Plate Rush orders a dish and the courier drops it in hand", async ({
   expect(errors).toEqual([]);
 });
 
+test("weed munchies: delivered food and water relieve needs only at 18+", async ({
+  page,
+}) => {
+  test.setTimeout(420_000);
+  const errors = collectErrors(page);
+  await page.clock.install();
+  // Advance the existing dev modules, without waiting through a whole joint.
+  const call = async (
+    source: string,
+    name: string,
+    args: readonly unknown[],
+  ) => {
+    await page.evaluate(
+      async ({ source, name, args }) => {
+        const mod: unknown = await import(/* @vite-ignore */ source);
+        if (typeof mod !== "object" || mod === null)
+          throw new Error("Missing module");
+        const fn: unknown = Reflect.get(mod, name);
+        if (typeof fn !== "function") throw new Error(`Missing ${name}`);
+        Reflect.apply(fn, undefined, args);
+      },
+      { source, name, args },
+    );
+  };
+  const high = "/src/client/effects/high.ts";
+  const food = "/src/client/food/store.ts";
+  await page.goto(`${VELVET}&adult=1`);
+  await expect(canvasOf(page)).toHaveAttribute(
+    "data-frames",
+    /^(?:[1-9]\d{1,}|10)$/,
+  );
+  await call(high, "take", ["joint"]);
+  await call(high, "ageHigh", [110]);
+  await call(food, "tickNeeds", [90]);
+  const needs = page.getByRole("region", { name: "Food and water needs" });
+  await expect(needs).toBeVisible();
+  await expect(needs.getByRole("meter", { name: "Hunger" })).toHaveAttribute(
+    "value",
+    /0\.[3-9]/,
+  );
+  const hunger = needs.getByRole("meter", { name: "Hunger" });
+  const initialHunger = Number(await hunger.getAttribute("value"));
+  await expect
+    .poll(async () => Number(await hunger.getAttribute("value")))
+    .toBeGreaterThan(initialHunger);
+  // Freeze time for screenshots, then resume it for the lazy-loaded dialog.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
+  await page.screenshot({
+    path: test.info().outputPath("weed-needs-desktop.png"),
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(needs).toBeInViewport();
+  await page.screenshot({
+    path: test.info().outputPath("weed-needs-mobile.png"),
+  });
+  await page.clock.resume();
+  await (await fromMenu(page, "Plate Rush")).click();
+  const app = page.getByRole("dialog", { name: "Plate Rush" });
+  await app.getByRole("button", { name: /Point and Eat Kitchen/ }).click();
+  await app
+    .getByRole("button", {
+      name: "Order Adobo rice bowl from Point and Eat Kitchen",
+    })
+    .click();
+  await page.keyboard.press("Escape");
+  // Delivery is complete; freeze announcements through the remaining captures.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
+  await call(food, "tickDeliveries", [Date.now() + 120_000]);
+  const held = page.getByRole("region", { name: "Held food" });
+  await page.screenshot({
+    path: test.info().outputPath("weed-food-tray-mobile.png"),
+  });
+  await page.setViewportSize({ width: 568, height: 320 });
+  await expect(page.locator(".food-tray")).toBeInViewport({ ratio: 1 });
+  const courier = page
+    .getByRole("status")
+    .filter({ hasText: "The courier dropped off Adobo rice bowl." });
+  // Renew the same message before inspecting the small-screen stack.
+  await call(food, "showToast", ["The courier dropped off Adobo rice bowl."]);
+  await courier.scrollIntoViewIfNeeded();
+  await expect(courier).toBeInViewport({ ratio: 1 });
+  await needs.scrollIntoViewIfNeeded();
+  // Scrolling can leave a fraction of a border pixel outside the clipped tray.
+  await expect(needs).toBeInViewport({ ratio: 0.99 });
+  await held.getByRole("button", { name: "Eat it" }).scrollIntoViewIfNeeded();
+  await expect(held.getByRole("button", { name: "Eat it" })).toBeInViewport({
+    ratio: 1,
+  });
+  await page.screenshot({
+    path: test.info().outputPath("weed-food-tray-landscape.png"),
+  });
+  await held.getByRole("button", { name: "Eat it" }).click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "That snack really hit the spot." }),
+  ).toBeVisible();
+  await expect
+    .poll(async () =>
+      Number(
+        await needs
+          .getByRole("meter", { name: "Hunger" })
+          .getAttribute("value"),
+      ),
+    )
+    .toBeLessThan(0.1);
+  await call(food, "holdItem", [
+    { id: "test-water", name: "Water", price: 0, kind: "drink" },
+  ]);
+  await page.getByRole("button", { name: "Sip it", exact: true }).click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "A cool drink feels extra refreshing." }),
+  ).toBeVisible();
+  await expect(needs).toHaveCount(0);
+  await call(food, "showToast", ["A cool drink feels extra refreshing."]);
+  await page.clock.fastForward(3000);
+  await call(food, "showToast", ["A cool drink feels extra refreshing."]);
+  await page.clock.fastForward(2000);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "A cool drink feels extra refreshing." }),
+  ).toBeVisible();
+  await page.clock.fastForward(2100);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "A cool drink feels extra refreshing." }),
+  ).toHaveCount(0);
+  await page.clock.resume();
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(VELVET);
+  await expect(roomTitle(page)).toHaveText("The Velvet Room");
+  await call(high, "take", ["joint"]);
+  await call(high, "ageHigh", [110]);
+  await call(food, "tickNeeds", [90]);
+  await expect(needs).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
 test("the food rooms open from a query and show their counter staff", async ({
   page,
 }) => {
@@ -4872,6 +5014,52 @@ test("a closet that fails to load shows the reload card and keeps the game", asy
   await expect(
     page.getByRole("textbox", { name: "Chat message" }),
   ).toBeVisible();
+});
+
+test("the daily streak calendar takes focus when it opens and hands it back to the Menu on close", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  await page.goto(VELVET);
+  await (await fromMenu(page, "Daily streak")).click();
+  await expect(
+    page.getByRole("heading", { name: "Daily streak" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Daily streak" })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("button", { name: "Menu", exact: true }),
+  ).toBeFocused();
+});
+
+test("the streak milestone card keeps focus on its button until it is dismissed", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  // two days running up to yesterday: opening today makes day 3
+  const today = Math.floor(Date.now() / 86_400_000);
+  await seedSave(page, {
+    streak: {
+      count: 2,
+      best: 2,
+      last: today - 1,
+      days: [today - 2, today - 1],
+      frozen: [],
+      freezeWeek: -1,
+    },
+  });
+  await page.goto(VELVET);
+  const card = page.getByRole("dialog", { name: "Streak milestone" });
+  const done = card.getByRole("button", { name: "Keep it burning" });
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(card).toHaveCount(0);
 });
 
 test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({

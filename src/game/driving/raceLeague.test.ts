@@ -2,6 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  DEFAULT_SEASON_LENGTH,
   FASTEST_LAP_BONUS,
   POINTS_BY_FINISH,
   RACE_XP,
@@ -107,4 +108,17 @@ test("raceXp: finishing, podium and win are worth more", () => {
   assert.ok(raceXp(7, 8) === RACE_XP.finish);
   assert.equal(raceXp(null, 8), RACE_XP.dnf);
   assert.ok(RACE_XP.win > RACE_XP.podium && RACE_XP.podium > RACE_XP.finish);
+});
+
+test("newSeason falls back to the default length for a non-finite one", () => {
+  for (const bad of [NaN, Infinity, -Infinity])
+    assert.equal(newSeason("s", bad).length, DEFAULT_SEASON_LENGTH);
+  assert.equal(newSeason("s", 0).length, 1);
+  assert.equal(newSeason("s", 3.9).length, 3);
+});
+
+test("raceXp: a place that is not a whole number counts as not finishing", () => {
+  assert.equal(raceXp(2.5, 8), RACE_XP.dnf);
+  assert.equal(raceXp(NaN, 8), RACE_XP.dnf);
+  assert.equal(raceXp(Infinity, 8), RACE_XP.dnf);
 });

@@ -26,10 +26,11 @@ export function sideOf(point: number, rally: number): -1 | 1 {
 }
 
 /** A swing `error` seconds off the ball's arrival (negative: early). */
-export function gradeSwing(error: number): Swing {
+export function gradeSwing(error: number, reach = REACH): Swing {
   if (!Number.isFinite(error)) return "late";
-  if (Math.abs(error) <= SWEET) return "perfect";
-  if (Math.abs(error) <= REACH) return "good";
+  const sweet = reach * (SWEET / REACH);
+  if (Math.abs(error) <= sweet) return "perfect";
+  if (Math.abs(error) <= reach) return "good";
   return error < 0 ? "early" : "late";
 }
 

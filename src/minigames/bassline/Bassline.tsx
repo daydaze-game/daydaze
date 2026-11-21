@@ -17,7 +17,7 @@ import {
   comboMultiplier,
   findHittableNote,
   generateChart,
-  judge,
+  judgeWithin,
   laneForKey,
   resultFor,
   tally,
@@ -26,6 +26,7 @@ import {
   type Lane,
   type Result,
 } from "./engine.ts";
+import { minigameAssist } from "../../client/effects/minigameAssist.ts";
 import "./Bassline.css";
 
 declare module "react" {
@@ -136,7 +137,8 @@ export function Bassline({
     for (const note of CHART) {
       if (
         !judgedIds.current.has(note.id) &&
-        now > note.timeMs + JUDGMENT_WINDOW_MS.good
+        now >
+          note.timeMs + JUDGMENT_WINDOW_MS.good * (1 + minigameAssist() * 0.25)
       ) {
         judgedIds.current.add(note.id);
         record("miss");
@@ -187,10 +189,16 @@ export function Bassline({
     expireNotes(now);
     // Sound is optional: playInstrumentNote never throws when audio is unavailable.
     if (!muted) playInstrumentNote("drums", LANE_DRUM[lane]);
-    const note = findHittableNote(CHART, lane, judgedIds.current, now);
+    const note = findHittableNote(
+      CHART,
+      lane,
+      judgedIds.current,
+      now,
+      minigameAssist(),
+    );
     if (!note) return;
     judgedIds.current.add(note.id);
-    record(judge(now - note.timeMs));
+    record(judgeWithin(now - note.timeMs, minigameAssist()));
     const { combo } = tally(judgmentsRef.current);
     if (!muted && combo > 0 && combo % 10 === 0) {
       mixer.current?.triggerAirhorn();
