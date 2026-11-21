@@ -2958,7 +2958,7 @@ button:focus-visible {
   position: fixed;
   right: 28px;
   top: 112px;
-  z-index: 5;
+  z-index: 6;
   display: flex;
   gap: 6px;
 }
@@ -3047,8 +3047,8 @@ button:focus-visible {
 .car-extras {
   position: fixed;
   right: 16px;
-  /* under the corner buttons */
-  top: 120px;
+  /* below the city activity tabs */
+  top: 155px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
