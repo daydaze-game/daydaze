@@ -9,6 +9,7 @@ import type { MinigameId } from "../hotspots.ts";
 import { prizeFor, type PrizeGame } from "../prizes.ts";
 import type { RoomId } from "../rooms.ts";
 import type { SaveV1 } from "../save.ts";
+import { settleShift, type Job, type ShiftResult } from "../shifts.ts";
 import { earn, payoutFor, type PayGrade } from "../wallet.ts";
 import { addXp, type Ladder } from "./progression.ts";
 
@@ -134,6 +135,20 @@ export function finishPrize(
 ) {
   const r = scorePrize(s, game, score, now);
   return r && { ...r, save: applyPrize(s, game, r) };
+}
+
+/** A finished paid shift (shifts.ts): its wage and Hustle XP land in the save
+ * together with the shift count, so a reload cannot replay it. */
+export function finishShift(
+  s: SaveV1,
+  job: Job,
+  result: ShiftResult,
+  now: number,
+) {
+  const w = settleShift(s.shifts, job, result, dayOf(now));
+  if (w.shifts === s.shifts) return { ...w, save: s };
+  const paid = { ...s, coins: earn(s.coins, w.coins), shifts: w.shifts };
+  return { ...w, save: rewardXp(paid, "hustle", w.xp) };
 }
 
 export function rewardVisit(
