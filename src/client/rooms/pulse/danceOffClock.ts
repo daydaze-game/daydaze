@@ -10,8 +10,11 @@ import {
   type EventClock,
 } from "../../../game/clock.ts";
 
+// Node tests import this with no `location` global: read it only when present.
 const PREVIEW = Number(
-  new URLSearchParams(window.location.search).get("danceoff") ?? Number.NaN,
+  new URLSearchParams(
+    typeof location !== "undefined" ? location.search : "",
+  ).get("danceoff") ?? Number.NaN,
 );
 const clock: EventClock | null = Number.isFinite(PREVIEW)
   ? heldClock(DANCE_OFF_EVERY, PREVIEW)
