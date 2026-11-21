@@ -5,11 +5,13 @@ import assert from "node:assert/strict";
 import { PRIZE_GAMES, PRIZE_TABLES } from "../prizes.ts";
 import { challengesFor, dayOf } from "../challenges.ts";
 import { createDefaultSave, loadSave, serializeSave } from "../save.ts";
+import { CLEAN_BONUS, WAGE_PER_ORDER } from "../shifts.ts";
 import { freshProgression, totalXp } from "./progression.ts";
 import {
   GAME_LADDERS,
   applyPrize,
   finishPrize,
+  finishShift,
   scorePrize,
   rewardSteal,
   rewardVisit,
@@ -161,4 +163,26 @@ test("prizeXp is the grade's XP plus 25 for a personal best", () => {
   assert.equal(prizeXp("C", false), 25);
   assert.equal(prizeXp("S", false), 100);
   assert.equal(prizeXp("A", true), 95);
+});
+
+test("a finished shift pays the wage and Hustle XP into the save at once", () => {
+  const start = createDefaultSave("Mango");
+  const r = finishShift(
+    start,
+    "barista",
+    { right: 8, tips: 6 },
+    Date.UTC(2026, 10, 20),
+  );
+  assert.equal(r.coins, 8 * WAGE_PER_ORDER + 6 + CLEAN_BONUS);
+  assert.equal(r.save.coins, start.coins + r.coins);
+  assert.equal(r.save.progression.xp.hustle, r.xp);
+  assert.equal(r.save.shifts.worked.barista, 1);
+  assert.equal(start.shifts.today, 0);
+});
+
+test("a result no station can produce changes nothing", () => {
+  const start = createDefaultSave("Mango");
+  const r = finishShift(start, "boba", { right: 99, tips: 0 }, 0);
+  assert.equal(r.save, start);
+  assert.equal(r.coins, 0);
 });
