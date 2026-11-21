@@ -288,6 +288,7 @@ elim
 eliphalet
 elote
 elspeed
+emelyarules
 emissivemap
 enkarra
 enredo
@@ -820,6 +821,7 @@ ruido
 rukh
 runabc
 runningman
+ryoce
 rÉserve
 safayan
 safd
