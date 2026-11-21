@@ -85,7 +85,7 @@ export const MODEL_COST: Readonly<
   "doll/body-lo": { tris: 3168, parts: 1 },
   "doll/hair-bob-lo": { tris: 992, parts: 1 },
   "doll/top-tee-lo": { tris: 504, parts: 1 },
-  "doll/bottom-skinny-jeans-lo": { tris: 341, parts: 1 },
+  "doll/bottom-skinny-jeans-lo": { tris: 342, parts: 1 },
   "doll/shoes-platforms-lo": { tris: 1286, parts: 1 },
   "vendors/truck": { tris: 3360, parts: 1 },
   "vendors/cart": { tris: 1054, parts: 1 },

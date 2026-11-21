@@ -2856,6 +2856,13 @@ const SHOTS: {
   lineupShot("doll-wear-men", `men=1&wears=${WEAR_MIX}`, "pose"),
   // the far twin: a three-layer look merged into one draw (mergeGarments)
   lineupShot("doll-wear-far", `wears=${WEAR_MIX}`, "far"),
+  // the same three past the LOD distance: the merged, atlas-textured twins
+  lineupShot("doll-wear-lo", `wears=${WEAR_MIX}&cam=0,1.1,10.5`, "body"),
+  lineupShot(
+    "doll-wear-lo-men",
+    `men=1&wears=${WEAR_MIX}&cam=0,1.1,10.5`,
+    "pose",
+  ),
 ];
 
 const registry = new Set(SHOTS.map((s) => s.name));

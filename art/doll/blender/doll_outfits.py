@@ -24,9 +24,10 @@ GRID = 0.002  # metres: the precision a tuck key is stored at
 CLEAR = 0.008  # gap kept between sunk skin and the cloth
 LEG_PULL = 1.0  # share of the way covered leg skin is drawn in to its leg's axis: 1 collapses it onto the axis, so there is nothing to show through
 LEG_RAMP = 0.06  # metres up from a garment's lowest edge over which that pull fades in
+LEGWEAR = -0.002  # metres legwear sits off the skin: inside it, under every other layer
 SHARE = 0.03  # metres: hidden skin this near both pieces of a split suit goes with both
-INTO = 0.02  # metres: cloth this far outside a shoe (or less) tucks into it fully...
-INTO_FADE = 0.01  # ...fading out over this much further, so a wide hem stays over it
+INTO = 0.02  # metres: a garment whose cloth sits (in the median) this far outside a shoe or less tucks into it...
+INTO_FADE = 0.02  # ...each vertex fading out over this much further, so a stray flap isn't dragged in
 INSIDE = 0.015  # metres behind the shoe's surface tucked cloth goes: deep enough to stay in under any figure and pose (the leg skin there is drawn in further)
 
 
@@ -177,9 +178,11 @@ def leg_pull(ctx, body, co, covered, floor, share=LEG_PULL, ceil=np.inf):
     on the leg (knee socks) passes its top edge as `ceil`: the pull fades
     out the same way below it, so the bare leg above keeps its shape.
     The weights come from the body object's own groups, so the low-poly body
-    gets the same."""
+    gets the same. Also returns how much of the way each vertex is pulled
+    (0..`share`), for tuck to drop the normal-wise sink it replaces."""
     names = {g.index: g.name for g in body.vertex_groups}
     pull = np.zeros_like(co)
+    pulled = np.zeros(len(co))
     bones = ctx.rig.data.bones
     for side in ("Left", "Right"):
         legs = {f"mixamorig:{side}UpLeg", f"mixamorig:{side}Leg"}
@@ -202,7 +205,8 @@ def leg_pull(ctx, body, co, covered, floor, share=LEG_PULL, ceil=np.inf):
             * np.clip((w - 0.5) * 4, 0, 1)
         )
         pull[use] = ((best[0] - co) * (share * ramp)[:, None])[use]
-    return pull
+        pulled[use] = (share * ramp)[use]
+    return pull, pulled
 
 
 def tuck(ctx, body, body_src, garment, name):
@@ -251,10 +255,18 @@ def tuck(ctx, body, body_src, garment, name):
             sink[i] = max(sink[i], min(outside + CLEAR, 0.03))
     # shoes ride on the same body next to the trousers and their keys add up:
     # a pull from the sole up would collapse the ankle the hem leaves bare
-    move = -normals * sink[:, None]
-    if not is_shoe:
+    # leg skin under cloth is drawn in to its leg's axis; shoes (whose tucks
+    # add to the trousers') draw it in halfway, up to their top
+    if is_shoe:
+        share = LEG_PULL / 2
+        ceil = max(v.co.z for v in garment.data.vertices)
+    else:
         share = LEG_PULL / 2 if garment.name.startswith(HALF_PULL) else LEG_PULL
-        move = move + leg_pull(ctx, body, co, behind, floor, share, ceil)
+    pull, pulled = leg_pull(ctx, body, co, behind, floor, share, ceil)
+    # skin drawn in to the axis needs no sink along its normal as well: on
+    # top of another garment's pull (jeans in sneakers or boots) a sink
+    # carried collapsed skin out through the far side of the shin
+    move = -normals * (sink * (1 - pulled / share))[:, None] + pull
     sk = body.shape_key_add(name=f"tuck_{name}", from_mix=False)
     # on a GRID-metre grid: the key compresses far smaller, unseen
     sk.data.foreach_set("co", (co + np.round(move / GRID) * GRID).ravel())
@@ -501,9 +513,12 @@ def build(ctx, body, body_src):
 
     # legwear, under everything: opaque tights from the waist over the feet,
     # and knee socks
-    # and knee socks; both stop at the ankle, inside every pair of shoes
-    out.append(shell(ctx, "Legwear_tights", ["helper-tights"], [(h["ankle"], waist - 0.02)], 0.001, cloth, arms=0.2))
-    out.append(shell(ctx, "Legwear_knee-socks", ["helper-tights"], [(h["ankle"], knee - 0.04)], 0.0015, cloth, arms=0.2))
+    # and knee socks; both stop at the ankle, inside every pair of shoes.
+    # They sit a hair inside the bare leg's surface (the skin under them is
+    # drawn in by their tuck), so every skirt and short over them clears
+    # them by a few millimeters and none shows through in specks
+    out.append(shell(ctx, "Legwear_tights", ["helper-tights"], [(h["ankle"], waist - 0.02)], LEGWEAR, cloth, arms=0.2))
+    out.append(shell(ctx, "Legwear_knee-socks", ["helper-tights"], [(h["ankle"], knee - 0.04)], LEGWEAR, cloth, arms=0.2))
 
     # swimsuits. The bikini's leg line dips to the crotch and rises over the
     # hips to a thin side, lower at the back for fuller cover (front is -y)
@@ -574,7 +589,7 @@ def build(ctx, body, body_src):
     shoes = [ob for ob in out if ob.name.startswith("Shoes")]
     for ob in out:
         if ob.name.startswith(("Bottom", "Dress", "Legwear")):
-            into_shoes(ob, shoes)
+            into_shoes(ctx, ob, shoes)
     for ob in out:
         tuck(ctx, body, body_src, ob, ob.name.split("_", 1)[1])
     return out
@@ -588,31 +603,59 @@ WORN = ("Top", "Bottom", "Dress", "Outer", "Legwear", "Swim", "Shoes")
 HALF_PULL = ("Top", "Outer", "Legwear")
 
 
-def into_shoes(garment, shoes):
+def into_shoes(ctx, garment, shoes):
     """An "in_<shoe>" shape key per pair of shoes that tucks a garment's legs
-    into them: cloth below the shoe's top that pokes through it, or sits
-    within INTO outside it, moves INSIDE behind its surface (the skin there
-    is drawn in further by the garment's own tuck, and the shoe's and the
-    garment's weights and figure keys differ a little, so a shallow tuck
-    shows through in a pose). Cloth further out fades back to
-    its own place, so flares and gowns stay over the shoe. The client sets
-    the key of the shoes worn."""
+    into them. A ray from the leg's axis out through each cloth vertex below
+    the shoe's top finds the shoe's innermost surface that way (a sneaker's
+    sock or lining, not its outer shell); cloth outside it moves in along
+    the ray until it is INSIDE within that surface (the skin there is drawn
+    in further by the garment's own tuck; the shoe's and the garment's
+    weights and figure keys differ a little, so a shallow tuck shows through
+    in a pose). Face normals can't tell in from
+    out here: the sneakers' lining faces inward. Cloth further out than INTO
+    fades back to its own place, so flares and gowns stay over the shoe.
+    The client sets the key of the shoes worn."""
     co = np.array([v.co[:] for v in garment.data.vertices])
+    bones = ctx.rig.data.bones
+    # each side's calf axis, knee to ankle, run on past the ankle to the sole
+    legs = {
+        side: tuple(np.array(bones[f"mixamorig:{side}{b}"].head_local) for b in ("Leg", "Foot"))
+        for side in ("Left", "Right")
+    }
+
+    def axis(p):
+        knee, ankle = legs["Left" if p[0] > 0 else "Right"]
+        d = ankle - knee
+        t = np.clip((p - knee) @ d / (d @ d), 0, 1.5)
+        return knee + t * d
+
     for shoe in shoes:
         bvh = BVHTree.FromObject(shoe, bpy.context.evaluated_depsgraph_get())
         top = max(v.co.z for v in shoe.data.vertices)
         move = np.zeros_like(co)
+        seen = []  # (vertex, ray, radius, how far outside the shoe's wall)
         for i, p in enumerate(co):
             if p[2] > top:
                 continue
-            loc, normal, _f, _d = bvh.find_nearest(Vector(p), INTO + INTO_FADE)
-            if loc is None:
+            a = axis(p)
+            r = float(np.linalg.norm(p - a))
+            if r < 1e-6:
                 continue
-            outside = float(np.dot(p - np.array(loc), normal))
+            ray = (p - a) / r
+            hit, _n, _f, wall = bvh.ray_cast(Vector(a), Vector(ray), r + 0.1)
+            if hit is not None:
+                seen.append((i, ray, r, r - wall))
+        # one call per garment and shoe, so a hem never half-tucks into a
+        # ragged edge: wide legs (cargos, flares, gowns) stay over the shoe
+        # whole, and fitted ones (jeans, tights) go into it whole
+        if not seen or np.median([o for *_x, o in seen]) > INTO:
+            seen = []
+        for i, ray, r, outside in seen:
             if outside < -INSIDE:
                 continue
             fade = np.clip((INTO + INTO_FADE - outside) / INTO_FADE, 0, 1)
-            move[i] = -np.array(normal) * (outside + INSIDE) * fade
+            # never past the axis: at most most of the way in
+            move[i] = -ray * min(outside + INSIDE, 0.8 * r) * fade
         sk = garment.shape_key_add(name=f"in_{shoe.name.split('_', 1)[1]}", from_mix=False)
         sk.data.foreach_set("co", (co + move).ravel())
 

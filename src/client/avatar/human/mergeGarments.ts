@@ -1,17 +1,43 @@
 // Merges a far doll's garment twins (top, bottom, outerwear...) into one
-// skinned mesh tinted per vertex, so mix-and-match clothes cost one draw call
-// at a distance, like the single outfit model they replaced.
+// skinned mesh tinted per vertex and textured from one atlas, so
+// mix-and-match clothes cost one draw call at a distance, like the single
+// outfit model they replaced.
 import * as THREE from "three";
 
-/** A built garment mesh (bound to the body's bones), its tint, and its
- * detail map's linear brightness at a UV (denim, stripes), when it has one. */
+/** Where a piece's detail map sits in the atlas, in atlas UVs: x, y, width,
+ * height. A zero-size rect points every vertex at one spot (a white cell,
+ * for a piece with no map). */
+export type Rect = readonly [number, number, number, number];
+
+/** A built garment mesh (bound to the body's bones), its tint, and where its
+ * map is in the atlas (pieces given no rect make an untextured merge). */
 export type Piece = {
   mesh: THREE.SkinnedMesh;
   color: THREE.ColorRepresentation;
-  shade?: ((u: number, v: number) => number) | undefined;
+  rect?: Rect | undefined;
 };
 
 const TOLERANCE = 1e-4;
+
+/** The far twins' atlas: at most this many pixels a side, one cell per
+ * detail map and a white cell (for untextured garments) last. */
+export const ATLAS = 1024;
+
+/** Each image's cell in the atlas grid, the white cell last. */
+export const atlasCols = (images: number) => Math.ceil(Math.sqrt(images + 1));
+
+/** Where image `i` of `count` sits in the atlas, inset a texel or two so
+ * mipmaps blend less of the next cell in; `i === count` is the white cell. */
+export function atlasRect(i: number, count: number): Rect {
+  const cols = atlasCols(count);
+  const size = 1 / cols;
+  const x = (i % cols) * size;
+  const y = Math.floor(i / cols) * size;
+  if (i === count) return [x + size / 2, y + size / 2, 0, 0];
+  const inset = 2 / ATLAS;
+  return [x + inset, y + inset, size - 2 * inset, size - 2 * inset];
+}
+
 /** The morph attributes a merge carries. */
 const MORPHS = ["position", "normal"] as const;
 
@@ -37,8 +63,9 @@ const near = (a: THREE.Matrix4, b: THREE.Matrix4) =>
  * inverse bind matrices); a piece's vertices move into the first piece's
  * frame, found from a joint they share, and the frame must agree on every
  * joint the piece uses. Positions, normals, weights and every morph target
- * (zeros where a piece lacks one) come along. Textures don't: each vertex
- * takes its piece's tint times the detail map's brightness under it.
+ * (zeros where a piece lacks one) come along. Each vertex takes its piece's
+ * tint; when the pieces carry atlas rects their UVs move into them, so one
+ * atlas texture (made by the caller) keeps denim and stripes.
  */
 export function mergeGarments(
   pieces: readonly Piece[],
@@ -62,7 +89,8 @@ export function mergeGarments(
   );
   const geoms: THREE.BufferGeometry[] = [];
   const linear = new THREE.Color();
-  for (const { mesh, color, shade } of pieces) {
+  const atlas = pieces.some((p) => p.rect);
+  for (const { mesh, color, rect } of pieces) {
     const src = mesh.geometry;
     const pos = src.getAttribute("position");
     const nrm = src.getAttribute("normal");
@@ -134,15 +162,21 @@ export function mergeGarments(
     g.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(joints, 4));
     g.setAttribute("skinWeight", new THREE.BufferAttribute(floats(weight), 4));
     linear.set(color);
-    const uv = src.getAttribute("uv");
     const tint = new Float32Array(pos.count * 3);
-    for (let i = 0; i < pos.count; i++) {
-      const k = shade && uv ? shade(uv.getX(i), uv.getY(i)) : 1;
-      tint[i * 3] = linear.r * k;
-      tint[i * 3 + 1] = linear.g * k;
-      tint[i * 3 + 2] = linear.b * k;
-    }
+    for (let i = 0; i < pos.count; i++) linear.toArray(tint, i * 3);
     g.setAttribute("color", new THREE.BufferAttribute(tint, 3));
+    if (atlas) {
+      // the piece's UVs, clamped into its cell (no map: the cell's corner)
+      const [x, y, w, h] = rect ?? [0, 0, 0, 0];
+      const uv = src.getAttribute("uv");
+      const out = new Float32Array(pos.count * 2);
+      const clamp = (t: number) => Math.min(1, Math.max(0, t));
+      for (let i = 0; i < pos.count; i++) {
+        out[i * 2] = x + (uv ? clamp(uv.getX(i)) : 0) * w;
+        out[i * 2 + 1] = y + (uv ? clamp(uv.getY(i)) : 0) * h;
+      }
+      g.setAttribute("uv", new THREE.BufferAttribute(out, 2));
+    }
     const order = src.index
       ? floats(src.index)
       : Float32Array.from({ length: pos.count }, (_, i) => i);
@@ -218,7 +252,10 @@ function mergeAll(geoms: THREE.BufferGeometry[]): THREE.BufferGeometry | null {
     ["skinIndex", 4],
     ["skinWeight", 4],
     ["color", 3],
+    ["uv", 2],
   ] as const) {
+    // only an atlas merge has UVs
+    if (name === "uv" && !geoms[0]?.getAttribute("uv")) continue;
     const parts = geoms.map((g) => attrs(g, name));
     if (parts.some((a) => !a)) return null;
     out.setAttribute(

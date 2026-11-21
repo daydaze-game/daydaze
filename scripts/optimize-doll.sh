@@ -60,7 +60,12 @@ for src in "${files[@]}"; do
       # hair cards only reach a fifth of their triangles at a looser error
       err=0.02
       [ -n "$flag" ] && err=0.1
-      npx -y @gltf-transform/cli@4.5.1 simplify "$f" "$LO/$name.glb" --ratio 0.2 --error "$err"
+      # clothes keep their hems and openings where they are: a simplified
+      # hem that creeps up shows skin the body's tuck left bare (a blouse
+      # over jeans) and notches a skirt's edge
+      lock=(--lock-border true)
+      [ -n "$flag" ] && lock=()
+      npx -y @gltf-transform/cli@4.5.1 simplify "$f" "$LO/$name.glb" --ratio 0.2 --error "$err" "${lock[@]}"
       lo_opts=("${OPTS[@]}")
       # far hair: no head-shape keys, a 128 px atlas
       if [ -n "$flag" ]; then

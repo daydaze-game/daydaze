@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as THREE from "three";
-import { mergeGarments } from "./mergeGarments.ts";
+import { ATLAS, atlasCols, atlasRect, mergeGarments } from "./mergeGarments.ts";
 
 /** Two bones: a root and a child one meter up, posed (bent) a little. */
 function rig() {
@@ -153,17 +153,24 @@ test("merged garments skin, morph and tint like the pieces they came from", () =
   const color = merged.geometry.getAttribute("color");
   assert.equal(color.getX(0), 1);
   assert.equal(color.getZ(3), 1);
-  // a detail map darkens its piece's tint where it's dark
+  // with atlas rects, each piece's UVs land inside its own cell, and a
+  // piece with no UVs points at its cell's corner
   top.geometry.setAttribute(
     "uv",
-    new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1], 2),
+    new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1.5], 2),
   );
-  const shaded = mergeGarments([
-    { mesh: top, color: "#ff0000", shade: (u) => 1 - u / 2 },
+  const inAtlas = mergeGarments([
+    { mesh: top, color: "#ff0000", rect: [0.5, 0, 0.5, 0.5] },
+    { mesh: bottom, color: "#0000ff", rect: [0, 0.5, 0, 0] },
   ]);
-  const tint = shaded?.geometry.getAttribute("color");
-  assert.equal(tint?.getX(0), 1);
-  assert.equal(tint?.getX(1), 0.5);
+  const uv = inAtlas?.geometry.getAttribute("uv");
+  assert.ok(uv);
+  assert.deepEqual([uv.getX(1), uv.getY(1)], [1, 0]);
+  // a UV past the map's edge is clamped into the cell
+  assert.deepEqual([uv.getX(2), uv.getY(2)], [1, 0.5]);
+  assert.deepEqual([uv.getX(4), uv.getY(4)], [0, 0.5]);
+  // without rects there are no UVs at all
+  assert.equal(merged.geometry.getAttribute("uv"), undefined);
 });
 
 test("pieces that disagree on a shared joint's frame are not merged", () => {
@@ -182,4 +189,27 @@ test("pieces that disagree on a shared joint's frame are not merged", () => {
     null,
   );
   assert.equal(mergeGarments([]), null);
+});
+
+test("atlas cells tile the texture without overlap, the white cell last", () => {
+  assert.equal(atlasCols(1), 2);
+  assert.equal(atlasCols(3), 2);
+  assert.equal(atlasCols(4), 3);
+  const cells = [0, 1, 2].map((i) => atlasRect(i, 3));
+  for (const [x, y, w, h] of cells) {
+    assert.ok(x >= 0 && y >= 0 && x + w <= 1 && y + h <= 1);
+    assert.ok(w >= 0.5 - 4 / ATLAS && w < 0.5);
+    assert.equal(w, h);
+  }
+  // distinct cells, each inside its own quarter
+  assert.deepEqual(
+    cells.map(([x, y]) => [Math.floor(x * 2), Math.floor(y * 2)]),
+    [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+    ],
+  );
+  // the white cell is a single spot in the middle of the last quarter
+  assert.deepEqual(atlasRect(3, 3), [0.75, 0.75, 0, 0]);
 });
