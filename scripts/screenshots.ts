@@ -31,7 +31,7 @@ declare global {
   interface Window {
     daydazeReact: (id: string) => void;
     /** In the city (src/client/city/Traffic.tsx). */
-    daydazeStepOut: (ahead: number) => boolean;
+    daydazeStepOut: (ahead: number, dry?: boolean) => boolean;
   }
 }
 
@@ -1067,16 +1067,12 @@ const SHOTS: {
       // warm the moves pack up, so the fall is not missed while it loads
       await page.evaluate(() => window.daydazeReact("stumble"));
       await page.waitForTimeout(110_000);
-      // before recording starts, a car near her is moving (data-traffic-probe:
-      // "x,z,yaw,speed,kind;" per car), so the strip is not spent waiting
-      await page.waitForFunction(
-        () =>
-          (document.querySelector("canvas")?.dataset.trafficProbe ?? "")
-            .split(";")
-            .some((car) => Number(car.split(",")[3]) > 5),
-        null,
-        { timeout: 120_000, polling: 1_000 },
-      );
+      // before recording starts, a car near her to step out in front of,
+      // so the strip is not spent waiting
+      await page.waitForFunction(() => window.daydazeStepOut(5, true), null, {
+        timeout: 120_000,
+        polling: 2_000,
+      });
     },
     async (page) => {
       // retried in case that car stopped or turned meanwhile
