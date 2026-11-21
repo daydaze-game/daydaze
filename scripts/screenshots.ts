@@ -30,6 +30,8 @@ import { waitForFrames } from "./wait-for-frames.ts";
 declare global {
   interface Window {
     daydazeReact: (id: string) => void;
+    /** In the city (src/client/city/Traffic.tsx). */
+    daydazeStepOut: (ahead: number) => boolean;
   }
 }
 
@@ -1054,6 +1056,28 @@ const SHOTS: {
       60,
     );
   }),
+  // stepping out too close in front of a moving car: the hit, the fall and the
+  // get-up (game/city/carHits.ts); the dolls at a twentieth of speed, the
+  // car at its own
+  actionStrip(
+    "car-hit",
+    "room=city&view=full&quality=low&debug=1&time=12:00&timescale=0.05",
+    async (page) => {
+      await page.waitForTimeout(40_000);
+      // warm the moves pack up, so the fall is not missed while it loads
+      await page.evaluate(() => window.daydazeReact("stumble"));
+      await page.waitForTimeout(110_000);
+    },
+    async (page) => {
+      // retried while every car near her waits at a light
+      await page.waitForFunction(() => window.daydazeStepOut(8), null, {
+        timeout: 120_000,
+        polling: 2_000,
+      });
+    },
+    150,
+    60,
+  ),
   // the player's own emotes, full body: a whisper and a laugh
   ...(["Whisper", "Laughing"] as const).map((emote) =>
     actionStrip(
