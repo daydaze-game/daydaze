@@ -402,7 +402,7 @@ export const CREDITS: readonly {
           "Hair-card styles fishtail braid, crew cut and slick back, refitted to our heads (art/doll/blender/pack_hair.py).",
       },
       {
-        title: "Bob hair (blunt with bangs, curled under, inverted)",
+        title: "Bob hair (three cuts)",
         author: "MargaretToigo",
         license: "CC0 1.0",
         url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
@@ -426,13 +426,12 @@ export const CREDITS: readonly {
           "The Sleek bun hairstyle, fitted to our heads as a MakeHuman proxy (art/doll/blender/doll_hair.py).",
       },
       {
-        title:
-          "Hair (Daisy, Katherine, Ashley May, Hazel, Micky Afro, Braided Rows, Maxwell)",
+        title: "Seven hairstyles (hair02 pack)",
         author: "Elvaerwyn",
         license: "CC-BY 4.0",
         url: "https://static.makehumancommunity.org/assets/assetpacks/hair02.html",
         usedFor:
-          "The Glossy waves, Long and sleek, Shoulder waves, Shoulder-length, Puffs, Cornrows and Quiff hairstyles, fitted to our heads as MakeHuman proxies (art/doll/blender/doll_hair.py).",
+          "Daisy, Katherine, Ashley May, Hazel, Micky Afro, Braided Rows and Maxwell as the Glossy waves, Long and sleek, Shoulder waves, Shoulder-length, Puffs, Cornrows and Quiff hairstyles, fitted to our heads as MakeHuman proxies (art/doll/blender/doll_hair.py).",
       },
       {
         title: "Realistic Car Pack",
