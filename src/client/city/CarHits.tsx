@@ -65,7 +65,8 @@ type Bubble = { id: number; x: number; z: number; text: string };
 export function CarHits({ player }: { player: Player }) {
   const canvas = useThree((s) => s.gl.domElement);
   const [bubbles, setBubbles] = useState<readonly Bubble[]>([]);
-  const timers = useRef<number[]>([]);
+  // pending bubble timers, each dropped once it fires
+  const timers = useRef(new Set<number>());
   const recent = useRef<RecentLines>([]);
   const nextId = useRef(0);
   // the player thrown by a car: from, to and seconds into the throw
@@ -109,15 +110,17 @@ export function CarHits({ player }: { player: Player }) {
     });
     recent.current = picked.recent;
     const bubble: Bubble = { id: nextId.current++, x, z, text: picked.text };
-    timers.current.push(
-      window.setTimeout(
-        () => setBubbles((b) => [...b.slice(-2), bubble]),
-        delay * 1000,
-      ),
-      window.setTimeout(
-        () => setBubbles((b) => b.filter((o) => o !== bubble)),
-        (delay + BUBBLE_SECONDS) * 1000,
-      ),
+    const later = (fn: () => void, seconds: number) => {
+      const id = window.setTimeout(() => {
+        timers.current.delete(id);
+        fn();
+      }, seconds * 1000);
+      timers.current.add(id);
+    };
+    later(() => setBubbles((b) => [...b.slice(-2), bubble]), delay);
+    later(
+      () => setBubbles((b) => b.filter((o) => o !== bubble)),
+      delay + BUBBLE_SECONDS,
     );
   };
 
