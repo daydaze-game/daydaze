@@ -34,6 +34,8 @@ import {
   seededFace,
   DEFAULT_LOOK,
   EYESHADOWS,
+  GLOSSES,
+  isColor,
   HAIR_COLORS,
   HAIR_STYLES,
   LIPS,
@@ -282,7 +284,7 @@ test("freckles and glasses ride in the makeup code; 6-digit codes still decode",
     glasses: "cat-eye" as const,
   };
   const code = encodeMakeup(m);
-  assert.equal(code.length, 12);
+  assert.equal(code.length, 14);
   assert.deepEqual(decodeMakeup(code), m);
   // a code from before freckles and glasses: the same makeup, none of either
   const old = code.slice(0, 6);
@@ -336,6 +338,60 @@ test("a bindi and hearing aids ride at the end of the makeup code; 10-digit code
   });
   assert.equal(validateLook({ ...DEFAULT_LOOK, makeup: code }), true);
   assert.equal(decodeMakeup(code.slice(0, 10) + "9"), null);
+});
+
+test("the lipstick case holds 40+ shades from nude to bold", () => {
+  assert.ok(LIPS.length >= 40, `${LIPS.length} lipsticks`);
+  for (const lip of LIPS) assert.ok(isColor(lip.swatch), lip.id);
+  assert.equal(new Set(LIPS.map((l) => l.swatch)).size, LIPS.length);
+  // the first four are the closet's originals; saved looks still name them
+  assert.deepEqual(
+    LIPS.slice(0, 4).map((l) => l.id),
+    [
+      "lips-hot-pink-glam",
+      "lips-burgundy-cherry",
+      "lips-nude-pink-gloss",
+      "lips-90s-caramel-ombre",
+    ],
+  );
+});
+
+test("metallic and glitter finishes join the old ones without moving them", () => {
+  assert.deepEqual(
+    GLOSSES.map((g) => g.id),
+    ["matte", "satin", "glossy", "glass", "metallic", "glitter"],
+  );
+});
+
+test("lip liner and lip style ride at the end of the makeup code; 12-digit codes still decode", () => {
+  const m = {
+    ...DEFAULT_MAKEUP,
+    gloss: "glitter" as const,
+    lipLiner: "overlined" as const,
+    lipStyle: "ombre" as const,
+  };
+  const code = encodeMakeup(m);
+  assert.equal(code.length, 14);
+  assert.deepEqual(decodeMakeup(code), m);
+  assert.deepEqual(decodeMakeup(code.slice(0, 12)), {
+    ...m,
+    lipLiner: "soft",
+    lipStyle: "full",
+  });
+  assert.equal(DEFAULT_MAKEUP.lipLiner, "soft");
+  assert.equal(DEFAULT_MAKEUP.lipStyle, "full");
+  assert.equal(decodeMakeup(`${code.slice(0, 13)}9`), null);
+  assert.equal(validateLook({ ...DEFAULT_LOOK, makeup: code }), true);
+});
+
+test("the longest makeup code fits the 32-character wire value", () => {
+  const code = encodeMakeup({
+    ...DEFAULT_MAKEUP,
+    blush: "#123456",
+    highlight: "#abcdef",
+    lipLiner: "contrast",
+  });
+  assert.ok(code.length <= 32, `${code.length} chars`);
 });
 
 test("face presets ride in the code; 8-character codes still decode", () => {

@@ -22,12 +22,22 @@ export const DREAM_KINDS = [
 export type DreamKind = (typeof DREAM_KINDS)[number];
 
 /** One-off textured landmarks; each is used at one authored address only. */
-export const DREAM_LANDMARKS = ["palace", "manor", "clocktower"] as const;
+export const DREAM_LANDMARKS = [
+  "palace",
+  "manor",
+  "clocktower",
+  "greenhouse",
+  "rotunda",
+  "shopfront",
+] as const;
 export type DreamLandmark = (typeof DREAM_LANDMARKS)[number];
 const DETAILED: Readonly<Record<string, DreamLandmark>> = {
   "vesper-hotel": "palace",
   "bus-shelter-block": "manor",
   "mural-wall": "clocktower",
+  florist: "greenhouse",
+  "arcade-square": "rotunda",
+  "pawn-gadgets": "shopfront",
 };
 
 /** A single instanced model: a 20 by 16 m body, 16 m tall before its roof. */

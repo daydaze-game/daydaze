@@ -124,8 +124,9 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   - You are not done until the PR is merged. Then delete your worktree and
     branch.
 - Parallel agents each work in a git worktree, `.worktrees/<name>` on
-  `feat/<name>`, with `node_modules` symlinked from the main checkout (never
-  `npm install` in a worktree). Build agents get `docs/agents/agent-rules.md` as
+  `feat/<name>`, with `node_modules` and, when present, `.cache` symlinked from
+  the main checkout (never `npm install` in a worktree). Build agents get
+  `docs/agents/agent-rules.md` as
   their brief.
 - CI does the heavy lifting so the owner's machine stays free:
   - Pushing `feat/**`, `fix/**`, `perf/**` or `ci/**` runs `npm run verify`

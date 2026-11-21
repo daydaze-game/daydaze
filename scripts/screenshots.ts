@@ -2690,6 +2690,8 @@ const SHOTS: {
   // the paired kisses mid-kiss, in profile, at three height pairings
   lineupShot("together-kiss", "emote=kiss", "together"),
   lineupShot("together-cheek-kiss", "emote=cheek-kiss", "together"),
+  lineupShot("together-hug", "emote=hug", "together"),
+  lineupShot("together-forehead-kiss", "emote=forehead-kiss", "together"),
   // hair style rows (women, then men), from the front and from behind
   lineupShot(
     "hair-women-1",
@@ -2740,6 +2742,7 @@ const SHOTS: {
   lineupShot("doll-suit-track-back", "cam=-2.2,0.6,2.2", "trackwalk"),
   // the face shot's doll up close
   lineupShot("doll-face", "", "face"),
+  lineupShot("doll-lips", "", "lips"),
   lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
 ];
 
