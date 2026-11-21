@@ -1068,7 +1068,7 @@ def main():
         # same tuck keys, in the same order as the full body's
         no_src = np.full(len(lo.data.vertices), -1)
         for part in parts:
-            if part.name.startswith(("Outfit", "Swim", "Shoes")):
+            if part.name.startswith(doll_outfits.WORN):
                 doll_outfits.tuck(ctx, lo, no_src, part, part.name.split("_", 1)[1])
         bind(lo, rig)
         for key in ("deleted", "src"):

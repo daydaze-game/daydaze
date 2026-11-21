@@ -30,6 +30,8 @@ import { waitForFrames } from "./wait-for-frames.ts";
 declare global {
   interface Window {
     daydazeReact: (id: string) => void;
+    /** In the city (src/client/city/Traffic.tsx). */
+    daydazeStepOut: (ahead: number, dry?: boolean) => boolean;
   }
 }
 
@@ -809,6 +811,14 @@ const CHAT = CHAT_GROUPS[0] ?? { at: [22, 10.4] as const };
 /** The lineup page's hair colors, a spread from near-black to dyed. */
 const HAIR_COLORS = "1b1014,4a2a1c,b77a3e,f1d78f,ff4fb3,7b4dff";
 const MEN_COLORS = "1b1014,4a2a1c,b77a3e,1b1014,4a2a1c,c0c0c8";
+/** Three mixed looks for the wardrobe shots (lineup.tsx's `wears`): a
+ * corset over cargos with a puffer, a tee and pleated mini over tights, a
+ * blouse under the fur jacket with skinny jeans. */
+const WEAR_MIX = [
+  "corset~141018.cargos~6b7a2a.puffer~e8e2ff",
+  "baby-tee~ff2f9a.pleated-mini~9b5cff.tights~141018",
+  "blouse~f2e6c8.skinny-jeans~3a5a8a.fur-jacket~ffb02e",
+].join(",");
 /** A camera from behind the dolls, for the back of the hair. */
 const BEHIND = "cam=0,1.52,-2.4";
 /**
@@ -1054,6 +1064,34 @@ const SHOTS: {
       60,
     );
   }),
+  // stepping out too close in front of a moving car: the hit, the fall and the
+  // get-up (game/city/carHits.ts); the dolls at a twentieth of speed, the
+  // car at its own
+  actionStrip(
+    "car-hit",
+    "room=city&view=full&quality=low&debug=1&time=12:00&timescale=0.05",
+    async (page) => {
+      await page.waitForTimeout(40_000);
+      // warm the moves pack up, so the fall is not missed while it loads
+      await page.evaluate(() => window.daydazeReact("stumble"));
+      await page.waitForTimeout(110_000);
+      // before recording starts, a car near her to step out in front of,
+      // so the strip is not spent waiting
+      await page.waitForFunction(() => window.daydazeStepOut(5, true), null, {
+        timeout: 120_000,
+        polling: 2_000,
+      });
+    },
+    async (page) => {
+      // retried in case that car stopped or turned meanwhile
+      await page.waitForFunction(() => window.daydazeStepOut(5), null, {
+        timeout: 120_000,
+        polling: 2_000,
+      });
+    },
+    150,
+    60,
+  ),
   // the player's own emotes, full body: a whisper and a laugh
   ...(["Whisper", "Laughing"] as const).map((emote) =>
     actionStrip(
@@ -2580,6 +2618,42 @@ const SHOTS: {
       );
     },
   },
+  // the closet's mix-and-match pickers (WardrobePicker.tsx): a striped
+  // shirt, pencil skirt, puffer and tights put on one slot at a time
+  {
+    name: "closet-wardrobe",
+    query: "room=city&view=full",
+    live: true,
+    act: async (page: Page) => {
+      await page.waitForFunction(
+        () => document.querySelector("canvas")?.dataset.frames === "10",
+        null,
+        { timeout: 300_000 },
+      );
+      await page
+        .getByRole("button", { name: "Dressing room", exact: true })
+        .click();
+      await page.getByRole("tab", { name: "Outfit", exact: true }).click();
+      for (const [slot, item] of [
+        ["Top", "Striped shirt"],
+        ["Bottom", "Pencil skirt"],
+        ["Outerwear", "Puffer jacket"],
+        ["Legwear", "Tights"],
+      ] as const)
+        await page
+          .getByRole("radiogroup", { name: slot, exact: true })
+          .getByRole("radio", { name: item, exact: true })
+          .click();
+      await page
+        .getByRole("radiogroup", { name: "Outerwear", exact: true })
+        .scrollIntoViewIfNeeded();
+      await page.waitForFunction(
+        () => document.querySelector("canvas")?.dataset.avatar === "ready",
+        null,
+        { timeout: 120_000 },
+      );
+    },
+  },
   {
     name: "zoom-room",
     query: "room=salon",
@@ -2773,6 +2847,15 @@ const SHOTS: {
   lineupShot("doll-face", "", "face"),
   lineupShot("doll-lips", "", "lips"),
   lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
+  // mix and match (wardrobe.ts): separates across old outfits, outerwear
+  // over a top, legwear under a skirt; body, then in motion
+  lineupShot("doll-wear-mix", `wears=${WEAR_MIX}`, "body"),
+  lineupShot("doll-wear-pose", `wears=${WEAR_MIX}`, "pose"),
+  lineupShot("doll-wear-sit", `wears=${WEAR_MIX}`, "sit"),
+  lineupShot("doll-wear-dance", `wears=${WEAR_MIX}`, "dance"),
+  lineupShot("doll-wear-men", `men=1&wears=${WEAR_MIX}`, "pose"),
+  // the far twin: a three-layer look merged into one draw (mergeGarments)
+  lineupShot("doll-wear-far", `wears=${WEAR_MIX}`, "far"),
 ];
 
 const registry = new Set(SHOTS.map((s) => s.name));

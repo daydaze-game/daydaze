@@ -107,7 +107,9 @@ def dress(look):
             drop_faces(ob, lambda n: n in ("skin", "eye"))
             meshes.append((ob, "skin" if "skin" in names else "eye"))
     for kind in ("hair", "outfit", "shoes"):
-        for ob in load(PUBLIC / "models/doll" / look[kind]):
+        # the outfit is a list: one file per garment worn
+        files = look[kind] if isinstance(look[kind], list) else [look[kind]]
+        for ob in (o for f in files for o in load(PUBLIC / "models/doll" / f)):
             if ob.type != "MESH" or ob.name.startswith("Icosphere"):
                 continue
             world = ob.matrix_world.copy()

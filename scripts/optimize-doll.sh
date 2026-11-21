@@ -56,7 +56,7 @@ for src in "${files[@]}"; do
   # worn parts get a low-poly twin for far-off dolls: the same vertices'
   # attributes (skin weights, shape keys) on about a fifth of the triangles
   case "$name" in
-    hair-* | outfit-* | shoes-* | swim-*)
+    hair-* | top-* | bottom-* | dress-* | outer-* | legwear-* | shoes-* | swim-*)
       # hair cards only reach a fifth of their triangles at a looser error
       err=0.02
       [ -n "$flag" ] && err=0.1
