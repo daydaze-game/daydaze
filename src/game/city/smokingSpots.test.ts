@@ -13,12 +13,12 @@ test("isAfterDark returns false during day and true after dark / dusk / night", 
   assert.equal(isAfterDark(2), true, "late night is after dark");
 });
 
-test("SMOKING_SPOTS covers boardwalk, beach and rooftops", () => {
-  const ids = SMOKING_SPOTS.map((s) => s.id);
+test("SMOKING_SPOTS covers boardwalk, beach and rooftop", () => {
+  const ids: readonly string[] = SMOKING_SPOTS.map((s) => s.id);
   assert.ok(ids.includes("boardwalk-bench"));
   assert.ok(ids.includes("beach-fire"));
   assert.ok(ids.includes("skylark-rooftop"));
-  assert.ok(ids.includes("hotel-rooftop"));
+  assert.equal(ids.includes("hotel-rooftop"), false);
 });
 
 test("smokingSpotAt identifies spots correctly by room and coordinates", () => {
@@ -37,9 +37,4 @@ test("smokingSpotAt identifies spots correctly by room and coordinates", () => {
 
   // Wrong room for skylark coords
   assert.equal(smokingSpotAt("city", [0, 0]), null);
-
-  // Hotel rooftop
-  const hotel = smokingSpotAt("hotel-rooftop", [0, 0]);
-  assert.ok(hotel !== null);
-  assert.equal(hotel.id, "hotel-rooftop");
 });

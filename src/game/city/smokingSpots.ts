@@ -7,11 +7,10 @@ import type { Vec2 } from "../walk.ts";
 import { BONFIRES } from "./layout.ts";
 import { DECK as BOARDWALK_DECK } from "./boardwalk.ts";
 import { DECK as SKYLARK_DECK } from "../rooftop.ts";
-import { BOUNDS as HOTEL_BOUNDS } from "../hotelRooftop.ts";
 import { daylightAt } from "./daylight.ts";
 
 export type SmokingSpotId =
-  "boardwalk-bench" | "beach-fire" | "skylark-rooftop" | "hotel-rooftop";
+  "boardwalk-bench" | "beach-fire" | "skylark-rooftop";
 
 export type SmokingSpot = {
   id: SmokingSpotId;
@@ -26,7 +25,6 @@ export type SmokingSpot = {
  * - Boardwalk benches along Beachside deck
  * - Beach bonfire circles on the sand
  * - Skylark rooftop bar deck (open outdoor area)
- * - Vesper Hotel rooftop terrace
  */
 export const SMOKING_SPOTS: readonly SmokingSpot[] = [
   {
@@ -52,16 +50,6 @@ export const SMOKING_SPOTS: readonly SmokingSpot[] = [
       (SKYLARK_DECK.z0 + SKYLARK_DECK.z1) / 2,
     ],
     radius: 7.5,
-  },
-  {
-    id: "hotel-rooftop",
-    name: "Hotel Rooftop",
-    room: "hotel-rooftop",
-    center: [
-      (HOTEL_BOUNDS.x0 + HOTEL_BOUNDS.x1) / 2,
-      (HOTEL_BOUNDS.z0 + HOTEL_BOUNDS.z1) / 2,
-    ],
-    radius: 9.0,
   },
 ];
 

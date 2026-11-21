@@ -3391,8 +3391,7 @@ button:focus-visible {
 .smoking-spot-panel {
   right: auto;
   left: 16px;
-  top: auto;
-  bottom: 5.5rem;
+  top: 140px;
   background: rgba(20, 24, 33, 0.9);
   border: 1px solid #4a5568;
   color: #f7fafc;
