@@ -334,6 +334,22 @@ function walkStrip(
 }
 
 /**
+ * Clicks the debug panel's "Debug: a minute later" button from the DOM, so it
+ * still works while the panel is hidden for a recording (a display:none button
+ * fails Playwright's visibility check).
+ */
+async function debugLater(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find(
+      (el) => el.textContent?.trim() === "Debug: a minute later",
+    );
+    if (!(button instanceof HTMLButtonElement))
+      throw new Error("no 'Debug: a minute later' button on the page");
+    button.click();
+  });
+}
+
+/**
  * A frame strip of a room action (the ladder climb, the overhand throw): runs
  * `setup` (open the game), then records a CDP screencast while `go` fires the
  * move, saving docs/screenshots/<name>-<nn>.png.
@@ -358,6 +374,9 @@ function actionStrip(
         { timeout: 300_000 },
       );
       await setup(page);
+      // the strip shows the scene a player sees: the debug buttons go while
+      // recording, and `go` clicks "a minute later" through the DOM (debugLater)
+      await page.addStyleTag({ content: "nav.debug { display: none }" });
       const cdp = await page.context().newCDPSession(page);
       const frames: Buffer[] = [];
       cdp.on("Page.screencastFrame", (f) => {
@@ -875,7 +894,7 @@ const SHOTS: {
     },
     // a minute on in the peak
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -892,7 +911,7 @@ const SHOTS: {
       for (let i = 0; i < 4; i++) await later.click();
     },
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -910,7 +929,7 @@ const SHOTS: {
       for (let i = 0; i < 1; i++) await later.click();
     },
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -2004,7 +2023,7 @@ const SHOTS: {
     query: "room=city&quality=high&time=21:00&at=100,8&cam=100,2.2,8,150,7,-2",
     act: furnitureReady,
   },
-  // the queue outside Pulse, Kenney people on the forecourt (QueueCrowd.tsx)
+  // the queue outside Pulse, baked doll people on the forecourt (QueueCrowd.tsx)
   {
     name: "crowd-queue",
     query: "room=city&quality=high&time=21:00&at=112,6&cam=96,2.4,4,113,1.6,17",
@@ -2668,6 +2687,9 @@ const SHOTS: {
       ).toBeVisible();
     },
   },
+  // the paired kisses mid-kiss, in profile, at three height pairings
+  lineupShot("together-kiss", "emote=kiss", "together"),
+  lineupShot("together-cheek-kiss", "emote=cheek-kiss", "together"),
   // hair style rows (women, then men), from the front and from behind
   lineupShot(
     "hair-women-1",
@@ -2718,6 +2740,7 @@ const SHOTS: {
   lineupShot("doll-suit-track-back", "cam=-2.2,0.6,2.2", "trackwalk"),
   // the face shot's doll up close
   lineupShot("doll-face", "", "face"),
+  lineupShot("doll-lips", "", "lips"),
   lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
 ];
 

@@ -32,7 +32,7 @@ import { NEAR_BODY, useTrafficBodies } from "./trafficBodies.ts";
 import { blankHeist, COPS, heistFrame } from "../../game/city/heist.ts";
 import { blankChase, CHASE_COPS, chaseFrame } from "../../game/city/chase.ts";
 import { chaseClock, heistClock } from "./eventClocks.ts";
-import { useQuality } from "../world/quality.ts";
+import { useDetail } from "../world/quality.ts";
 import {
   JEEPNEY_CHROME,
   JEEPNEY_WHEEL,
@@ -157,7 +157,7 @@ function placePart(
 }
 
 export function Traffic({ player }: { player: Player }) {
-  const tier = useQuality();
+  const tier = useDetail();
   const count = TRAFFIC_COUNT[tier];
   const bodies = useTrafficBodies(count);
   const traffic = useMemo(() => createTraffic(count, TRAFFIC_SEED), [count]);

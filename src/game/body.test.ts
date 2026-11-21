@@ -9,8 +9,10 @@ import {
   bodyScales,
   cleanBody,
   clampTrait,
+  dollShapeKeys,
   figureMorphs,
 } from "./body.ts";
+import { DEFAULT_FACE, FACE_SLIDERS } from "./look.ts";
 
 test("the default body sits in the middle of every slider", () => {
   for (const trait of BODY_TRAITS)
@@ -86,4 +88,28 @@ test("muscle definition works independently of weight and does not double a pres
   assert.equal(cleanBody({ weight: 85, muscle: 60 }).weight, 85);
   assert.equal(cleanBody({ weight: 85, muscle: 60 }).muscle, 60);
   assert.deepEqual(cleanBody({ weight: -1, muscle: "strong" }), DEFAULT_BODY);
+});
+
+test("shape keys carry every face slider, the figure and the presets", () => {
+  const face = {
+    ...DEFAULT_FACE,
+    figure: "slim" as const,
+    eyeShape: "round" as const,
+  };
+  const keys = new Map(dollShapeKeys(face, DEFAULT_BODY));
+  for (const s of FACE_SLIDERS) assert.equal(keys.get(s.id), face[s.id]);
+  assert.equal(keys.get("slim"), 1);
+  assert.equal(keys.get("curvy"), 0);
+  assert.equal(keys.get("eye_round"), 1);
+  assert.equal(keys.get("eye_upturned"), 0);
+  assert.equal(keys.get("bust"), 0);
+  assert.equal(keys.has("classic"), false);
+});
+
+test("a monolid is a deep hooded fold with lifted corners", () => {
+  const keys = new Map(
+    dollShapeKeys({ ...DEFAULT_FACE, eyeShape: "monolid" }, DEFAULT_BODY),
+  );
+  assert.equal(keys.get("eye_hooded"), 0.9);
+  assert.equal(keys.get("eye_upturned"), 0.3);
 });

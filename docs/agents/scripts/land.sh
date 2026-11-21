@@ -9,7 +9,11 @@
 b=$1; w=$2; msg=$3; M=${DAYDAZE_MAIN:-$HOME/git/daydaze}; d=$M/.worktrees/$w
 # gh finds the repo from the cwd, which another landing of the same PR can delete
 export GH_REPO=${GH_REPO:-$(git -C "$M" remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##')}
-[ -d "$d" ] || { git -C "$M" worktree add -q "$d" "$b" && ln -s "$M/node_modules" "$d/node_modules"; }
+[ -d "$d" ] || git -C "$M" worktree add -q "$d" "$b"
+# Dependencies and ESLint's cache are shared with the main checkout. Keep cache
+# creation lazy so a fresh checkout still works when lint has not run there yet.
+[ -e "$d/node_modules" ] || ln -s "$M/node_modules" "$d/node_modules"
+[ -e "$M/.cache" ] && { [ -e "$d/.cache" ] || ln -s "$M/.cache" "$d/.cache"; }
 cd "$d" || exit 1
 [ -z "$(git status --porcelain)" ] || { echo "$w DIRTY: $(git status --porcelain | head -3 | tr '\n' ' ')"; exit 1; }
 # bots and the auto-update workflow add commits to PR branches: take them first

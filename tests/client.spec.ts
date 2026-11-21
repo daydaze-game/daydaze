@@ -1,3 +1,4 @@
+// Playwright end-to-end browser tests for the 3D client, rooms, HUD and navigation.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { DEALER_AT } from "../src/game/city/dealer.ts";
@@ -51,6 +52,7 @@ interface SavedGame {
   farm?: { groceries: Record<string, number> };
   pottery?: { score: number; target: string; glaze: string };
   bests?: Record<string, number>;
+  settings?: { graphics?: { preset: string; shadows: boolean } };
 }
 
 /** Narrows parsed JSON to a save: only "is an object", since each test
@@ -478,6 +480,43 @@ test("the plus and minus keys and the wheel zoom from the wide view in to her fa
   });
   for (let i = 0; i < 4; i++) await page.keyboard.press("-");
   await expect.poll(distance, { timeout: 60_000 }).toBeGreaterThan(wide + 0.5);
+});
+
+// The Graphics sheet: pick a preset, flip a switch (the preset becomes Custom),
+// and the choice is saved. It starts on Performance so the run stays light.
+test("Graphics opens from Menu, flips to Custom and saves the choice", async ({
+  page,
+}) => {
+  const errors = collectErrors(page);
+  await page.addInitScript(
+    ([key, graphics]) =>
+      localStorage.setItem(
+        key,
+        JSON.stringify({ version: 1, onboarded: true, settings: { graphics } }),
+      ),
+    [SAVE, { preset: "performance" }] as const,
+  );
+  await page.goto("/?still=1&prizehold=1&room=velvet-room");
+  const menuButton = page.getByRole("button", { name: "Menu", exact: true });
+  await (await fromMenu(page, "Graphics")).click();
+  const panel = page.getByRole("dialog", { name: "Graphics", exact: true });
+  await expect(
+    panel.getByRole("button", { name: "Close graphics" }),
+  ).toBeFocused();
+  const presets = panel.getByRole("radiogroup", { name: "Graphics preset" });
+  await expect(
+    presets.getByRole("radio", { name: "Performance" }),
+  ).toBeChecked();
+  await expect(presets.getByRole("radio", { name: "Custom" })).toHaveCount(0);
+  await panel.getByRole("checkbox", { name: "Shadows" }).check();
+  await expect(presets.getByRole("radio", { name: "Custom" })).toBeChecked();
+  await expect
+    .poll(async () => (await readSave(page)).settings?.graphics)
+    .toMatchObject({ preset: "custom", shadows: true });
+  await page.keyboard.press("Escape");
+  await expect(panel).toHaveCount(0);
+  await expect(menuButton).toBeFocused();
+  expect(errors).toEqual([]);
 });
 
 // Credits must remain readable and keyboard-accessible from the menu.
@@ -4051,7 +4090,9 @@ test("the walkthrough names you, dresses you and shows you around", async ({
   await expect(welcome).toContainText("Play something");
   await welcome.getByRole("button", { name: "Let's go" }).click();
   await expect(welcome).toHaveCount(0);
-  await expect(page.locator(".nametag").first()).toHaveText("Velvet Kat");
+  await expect(page.locator(".nametag").first()).toHaveText(
+    /^Velvet Kat · Lv \d+/,
+  );
   const saved = await readSave(page);
   expect(saved).toMatchObject({
     name: "Velvet Kat",

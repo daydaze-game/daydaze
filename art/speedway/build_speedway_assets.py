@@ -17,7 +17,6 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 TMP_DIR = "/tmp/daydaze-speedway-build"
 OUT_DIR = os.path.join(ROOT, "public/models/speedway")
 KENNEY_RACING = "/tmp/daydaze-city/kenney/racing-kit/Models/GLTF format"
-KENNEY_CHAR = "/tmp/daydaze-city/kenney/mini-characters/Models/GLB format"
 QUATERNIUS_CARS = "/tmp/daydaze-city/q/Realistic_Car_Pack__Nov_2018/Realistic Car Pack - Nov 2018/FBX"
 
 os.makedirs(TMP_DIR, exist_ok=True)

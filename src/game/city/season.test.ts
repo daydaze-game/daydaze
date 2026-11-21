@@ -1,10 +1,10 @@
-// Seasonal dates follow the player's local calendar, including overlapping events.
+// Seasonal dates follow the New York calendar, including overlapping events.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { dressings, parseDateFlag, season } from "./season.ts";
 
 const date = (month: number, day: number, year = 2026) =>
-  new Date(year, month - 1, day, 12);
+  new Date(Date.UTC(year, month - 1, day, 17));
 
 test("seasons and overlapping dressings respect their boundaries", () => {
   assert.equal(season(date(9, 21)), "summer");
@@ -26,8 +26,11 @@ test("Lunar New Year covers the first fifteen days of the lunar year", () => {
   assert.ok(dressings(date(1, 29, 2025)).includes("lunar-new-year"));
 });
 
-test("date preview rejects invalid dates and uses local calendar fields", () => {
+test("date preview rejects invalid dates and uses New York calendar fields", () => {
   assert.equal(parseDateFlag("?date=2026-02-30"), null);
   assert.equal(parseDateFlag("?date=2026-2-01"), null);
-  assert.equal(parseDateFlag("?date=2026-12-20")?.getDate(), 20);
+  assert.equal(
+    parseDateFlag("?date=2026-12-20")?.toISOString(),
+    "2026-12-20T17:00:00.000Z",
+  );
 });

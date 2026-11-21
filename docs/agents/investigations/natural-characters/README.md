@@ -2,7 +2,7 @@
 
 ## Work queue
 
-- [Crowd replacement #13](https://github.com/dpologdvinity/daydaze/issues/13): the Kenney crowd figures still differ from the human avatars.
+- [Crowd replacement #13](https://github.com/dpologdvinity/daydaze/issues/13): done. The crowds are baked doll people (`art/crowd/`).
 - [Clothing clipping #14](https://github.com/dpologdvinity/daydaze/issues/14): skin pokes through the default flared pants. Root cause remains unconfirmed.
 - [Dependency alerts #15](https://github.com/dpologdvinity/daydaze/issues/15): unrelated security maintenance; no dependency changes belong in the avatar task.
 - The owner's requested eyebrow/eye/lip additions are the next separate task. Partial eyebrow work is preserved at `64f3cd90` on `feat/face-shapes`; it is not part of the initial editor merge.
@@ -14,6 +14,8 @@ The owner wants one active worktree per agent: finish, test, commit, merge, and
 remove it before starting the next task. Open GitHub issues for unrelated findings.
 
 ## Rejected crowd experiments
+
+Superseded by `art/crowd/` (see its README); kept as a record.
 
 The `.txt` source attachments are diagnostic recipes, not runtime assets or an
 approved production pipeline. Copy them into an ignored `tmp/crowd-study/`
@@ -52,7 +54,7 @@ tests and inspect game renders before admitting any new crowd models.
    baked poses. Its outputs stay under `tmp/crowd-study/out/`.
 5. Inspect atlas alpha/UV handling, hair coverage, facial detail, real height,
    and garment occlusion. The prototype's hardcoded 0.4 scale preserves the
-   existing client `PERSON_SCALE=2.5`; changing one requires changing the other.
+   client `PERSON_SCALE=2.5` of the time (gone since; the crowd is baked at real size).
 
 Do not promote a model just because the bake/export succeeds or its triangle
 count passes. Resolve the visible defects first, then record provenance,

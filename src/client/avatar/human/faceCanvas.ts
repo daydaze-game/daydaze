@@ -107,6 +107,8 @@ const GLOSS: Record<Makeup["gloss"], number> = {
   satin: 0.35,
   glossy: 0.8,
   glass: 1.25,
+  metallic: 0.6,
+  glitter: 0.5,
 };
 
 /** A lipstick's base color and its deeper liner, from the closet swatch. */
@@ -515,6 +517,144 @@ function paintBrow(
   ctx.restore();
 }
 
+/** Draws `paint` on a fresh canvas and keeps only what falls on the lips. */
+function onLips(
+  img: HTMLImageElement,
+  paint: (ctx: CanvasRenderingContext2D) => void,
+) {
+  const { canvas, ctx } = makeCanvas(SIZE, SIZE);
+  paint(ctx);
+  ctx.globalCompositeOperation = "destination-in";
+  ctx.drawImage(alphaMask(img, 0), 0, 0);
+  return canvas;
+}
+
+/** Scales drawing about the mouth's center: <1 tucks inside the lip line,
+ * >1 paints past it (overlining). */
+function aboutMouth(
+  ctx: CanvasRenderingContext2D,
+  [mx, my]: readonly [number, number],
+  sx: number,
+  sy: number,
+) {
+  ctx.translate(mx * SIZE, my * SIZE);
+  ctx.scale(sx, sy);
+  ctx.translate(-mx * SIZE, -my * SIZE);
+}
+
+// [opacity, blur px, scale about the mouth] per lip liner; soft is the
+// gentle edge every look wore before the liner choice
+const LIP_LINER: Record<
+  Exclude<Makeup["lipLiner"], "none">,
+  [number, number, number]
+> = {
+  soft: [0.35, 2, 1],
+  defined: [0.75, 1, 1],
+  overlined: [0.7, 1.5, 1.05],
+  contrast: [0.8, 1.5, 1.01],
+};
+
+/** Lips: color through the sculpted lip mask in the chosen style, the liner
+ * edge, then the finish (shine, a metal sheen or glitter). */
+function paintLips(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  look: FaceFields,
+  makeup: Makeup,
+  { mouthL, mouthR }: Marks,
+) {
+  const [base, deeper] = lipInk(look.lips, look.skin);
+  const bare = look.lips === "lips-bare-balm";
+  const mouth: [number, number] = [
+    (mouthL[0] + mouthR[0]) / 2,
+    (mouthL[1] + mouthR[1]) / 2,
+  ];
+  const [mx, my] = mouth;
+  const width = Math.abs(mouthR[0] - mouthL[0]);
+  const overlined = makeup.lipLiner === "overlined";
+  // the liner is a deepening at the lip's edge, not a drawn outline
+  if (makeup.lipLiner !== "none") {
+    const [alpha, blur, scale] = LIP_LINER[makeup.lipLiner];
+    const ink = makeup.lipLiner === "contrast" ? "#5a3024" : deeper;
+    ctx.save();
+    ctx.globalAlpha = bare && makeup.lipLiner === "soft" ? 0.08 : alpha;
+    ctx.filter = `blur(${blur}px)`;
+    aboutMouth(ctx, mouth, scale, scale);
+    ctx.drawImage(channel(img, 0, ink), 0, 0);
+    ctx.restore();
+  }
+  ctx.save();
+  ctx.filter = "blur(2px)";
+  const fill = channel(img, 0, base);
+  if (makeup.lipStyle === "blurred") {
+    // a stain: thin all over, full color pressed into the middle
+    ctx.globalAlpha = bare ? 0.3 : 0.35;
+    aboutMouth(ctx, mouth, 0.9, 0.85);
+    ctx.drawImage(fill, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(
+      onLips(img, (c) => blob(c, mx, my, width * 0.3, 0.02, hexRgb(base), 0.9)),
+      0,
+      0,
+    );
+  } else {
+    // overlined lipstick follows the liner past the natural edge
+    ctx.globalAlpha = bare ? 0.6 : 0.85;
+    if (overlined) aboutMouth(ctx, mouth, 1.04, 1.04);
+    else aboutMouth(ctx, mouth, 0.97, 0.94);
+    ctx.drawImage(fill, 0, 0);
+    if (makeup.lipStyle === "ombre") {
+      // the center lifts toward a lighter shade of the same color
+      const light = mixRgb(hexRgb(base), [255, 226, 220], 0.45);
+      ctx.globalAlpha = 1;
+      ctx.drawImage(
+        onLips(img, (c) => blob(c, mx, my, width * 0.32, 0.018, light, 0.85)),
+        0,
+        0,
+      );
+    }
+  }
+  ctx.restore();
+  const shine = GLOSS[makeup.gloss];
+  blob(ctx, mx - 0.004, my + 0.022, 0.03, 0.007, [255, 255, 255], 0.45 * shine);
+  blob(ctx, mx - 0.012, my + 0.018, 0.007, 0.003, [255, 255, 255], 0.9 * shine);
+  if (makeup.gloss === "metallic") {
+    // foil: a bright band across the fullest part of each lip, in the
+    // lipstick's own color, and a darker valley where they meet
+    const sheen = mixRgb(hexRgb(base), [255, 255, 255], 0.55);
+    const valley = hexRgb(base).map((v) => v * 0.5);
+    ctx.drawImage(
+      onLips(img, (c) => {
+        blob(c, mx, my - 0.016, width * 0.35, 0.006, sheen, 0.7);
+        blob(c, mx, my + 0.02, width * 0.38, 0.008, sheen, 0.75);
+        blob(c, mx, my, width * 0.45, 0.004, valley, 0.5);
+      }),
+      0,
+      0,
+    );
+  } else if (makeup.gloss === "glitter") {
+    // fine flecks, the same scatter every time for the same mouth
+    let g = 31337;
+    const rand = () => {
+      g = (g * 16807) % 2147483647;
+      return g / 2147483647;
+    };
+    const fleck = mixRgb(hexRgb(base), [255, 255, 255], 0.7);
+    ctx.drawImage(
+      onLips(img, (c) => {
+        for (let i = 0; i < 260; i++) {
+          const x = mx + (rand() - 0.5) * width * 1.1;
+          const y = my + (rand() - 0.5) * 0.07;
+          c.fillStyle = rgba(rand() < 0.3 ? [255, 255, 255] : fleck, 0.95);
+          c.fillRect(x * SIZE, y * SIZE, 3, 3);
+        }
+      }),
+      0,
+      0,
+    );
+  }
+}
+
 /** The look fields a face is painted from; an optional one may be passed as
  * `undefined` (a look that never set it). */
 type FaceFields = Pick<
@@ -737,29 +877,7 @@ export async function paintFace(look: FaceFields, marks: Marks) {
 
   paintSkinMarks(ctx, marks, skin, makeup);
 
-  // lips: color through the sculpted lip mask, a deeper liner edge, gloss
-  const [base, liner] = lipInk(look.lips, look.skin);
-  const gloss = GLOSS[makeup.gloss];
-  const bare = look.lips === "lips-bare-balm";
-  // the liner is a soft deepening at the lip's edge, not a drawn outline
-  ctx.save();
-  ctx.globalAlpha = bare ? 0.08 : 0.35;
-  ctx.filter = "blur(2px)";
-  ctx.drawImage(channel(img, 0, liner), 0, 0);
-  ctx.restore();
-  ctx.save();
-  ctx.filter = "blur(2px)";
-  ctx.globalAlpha = bare ? 0.6 : 0.85;
-  const inset = channel(img, 0, base);
-  const mx = (mouthL[0] + mouthR[0]) / 2;
-  const my = (mouthL[1] + mouthR[1]) / 2;
-  ctx.translate(mx * SIZE, my * SIZE);
-  ctx.scale(0.97, 0.94);
-  ctx.translate(-mx * SIZE, -my * SIZE);
-  ctx.drawImage(inset, 0, 0);
-  ctx.restore();
-  blob(ctx, mx - 0.004, my + 0.022, 0.03, 0.007, [255, 255, 255], 0.45 * gloss);
-  blob(ctx, mx - 0.012, my + 0.018, 0.007, 0.003, [255, 255, 255], 0.9 * gloss);
+  paintLips(ctx, img, look, makeup, marks);
   // facial hair: short strokes in the hair color, a shade deeper
   const hairs = beardStrokes(look.beard ?? "none", marks);
   if (hairs.length) {
@@ -813,6 +931,11 @@ export function sharedLashes(): THREE.Texture {
   return lashTexture;
 }
 
+/** The painted iris's and pupil's radii, in UVs from the texture's center
+ * (the doll's eye shader widens the pupil by remapping inside the iris). */
+export const IRIS_R = 0.27;
+export const PUPIL_R = 0.085;
+
 /** Sclera, iris and pupil for the eyeballs' front planar UV. */
 function paintIris(color: string) {
   const S = 512;
@@ -821,14 +944,14 @@ function paintIris(color: string) {
   ctx.fillRect(0, 0, S, S);
   const c = S / 2;
   const iris = hexRgb(color);
-  const g = ctx.createRadialGradient(c, c, 0, c, c, S * 0.27);
+  const g = ctx.createRadialGradient(c, c, 0, c, c, S * IRIS_R);
   g.addColorStop(0, rgba(mixRgb(iris, [255, 210, 120], 0.35)));
   g.addColorStop(0.55, rgba(iris));
   g.addColorStop(0.9, rgba(iris.map((v) => v * 0.55)));
   g.addColorStop(1, "rgba(20,10,8,1)");
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(c, c, S * 0.27, 0, Math.PI * 2);
+  ctx.arc(c, c, S * IRIS_R, 0, Math.PI * 2);
   ctx.fill();
   // Irregular radial fibers and crypts rather than a flat colored disk.
   let seed = 37;
@@ -860,7 +983,7 @@ function paintIris(color: string) {
   }
   ctx.fillStyle = "#070304";
   ctx.beginPath();
-  ctx.arc(c, c, S * 0.085, 0, Math.PI * 2);
+  ctx.arc(c, c, S * PUPIL_R, 0, Math.PI * 2);
   ctx.fill();
   // A soft upper shadow seats the iris under the lid. The cornea adds the
   // actual environment reflection; keep painted catchlights small.
