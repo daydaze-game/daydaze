@@ -1084,7 +1084,7 @@ const SHOTS: {
   // her word for the driver and the street stopping to look
   actionStrip(
     "walker-hit",
-    "room=city&quality=low&debug=1&time=12:00",
+    "room=city&view=full&quality=low&debug=1&time=12:00",
     async (page) => {
       await page.waitForTimeout(40_000);
     },
