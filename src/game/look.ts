@@ -1,20 +1,15 @@
-// The doll's look: every closet catalog (skin, hair, makeup, outfits, shoes,
-// face, piercings, swimsuits; garments by slot are in wardrobe.ts), the Look type, its validator, and the short
-// codes that pack a face, makeup, piercings and swimsuit into strings. Looks go
+// The doll's look: every closet catalog (skin, hair, makeup, shoes, face,
+// piercings, swimsuits; the outfits and their garments are in wardrobe.ts),
+// the Look type, its validator, and the short codes that pack a face, makeup, piercings and swimsuit into strings. Looks go
 // over the network as flat maps of short strings, so new parts are optional
 // fields with codes that older looks can omit. Catalog ids double as shop item
 // ids (shop.ts).
 
 import { isGait } from "./gaits.ts";
-import { decodeWear } from "./wardrobe.ts";
-/** A full RGB color, validated at the storage and network boundary. */
-export function isColor(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    /^#[0-9a-fA-F]{6}$/.test(value) &&
-    value.length === 7
-  );
-}
+import { isColor } from "./color.ts";
+import { OUTFITS, decodeWear, type Outfit } from "./wardrobe.ts";
+
+export { isColor, OUTFITS, type Outfit };
 
 /** Skin tones; each id is the hex color the doll is tinted. */
 export const SKINS = [
@@ -213,32 +208,6 @@ export const BROWS = [
   { id: "brows-angled", label: "Angled" },
 ] as const;
 
-/** Each outfit is its own doll model, `outfit-<id>.glb`. */
-export const OUTFITS = [
-  { id: "flares", label: "Crop and flares" },
-  { id: "mini", label: "Slip mini" },
-  { id: "fur", label: "Faux fur" },
-  { id: "jeans", label: "Tee and skinny jeans" },
-  { id: "shorts", label: "Tee and denim shorts" },
-  { id: "blouse", label: "Blouse and pencil skirt" },
-  // Boutique outfits, see shop.ts.
-  { id: "tracksuit-y2k", label: "Y2K velour tracksuit" },
-  { id: "baby-tee-mini", label: "Baby tee and mini" },
-  { id: "sequin-slip", label: "Sequin slip gown" },
-  { id: "glam-faux-fur", label: "Glam faux-fur wrap" },
-  { id: "corset-maxi", label: "Corset and maxi skirt" },
-  { id: "cargo-crop", label: "Tube top and cargos" },
-  { id: "sundress", label: "Sundress" },
-  { id: "hoodie-bikers", label: "Cropped hoodie and bikers" },
-  // menswear, worn by anyone
-  { id: "denim-shirt", label: "Denim shirt and jeans" },
-  { id: "striped-shirt", label: "Striped shirt and jeans" },
-  { id: "puffer", label: "Puffer jacket and jeans" },
-  { id: "white-tee", label: "White tee and jeans" },
-  { id: "suit", label: "Suit and tie" },
-  { id: "overalls", label: "Overalls" },
-] as const;
-
 /** Outfit tints as hex ids; the Thrift Temple dyes are locked until bought. */
 export const OUTFIT_COLORS = [
   { id: "#ff2f9a", label: "Fuchsia" },
@@ -287,8 +256,6 @@ type IdOf<T extends readonly Option[]> = T[number]["id"];
 
 /** One of HAIR_STYLES' ids. */
 export type HairStyle = IdOf<typeof HAIR_STYLES>;
-/** One of OUTFITS' ids. */
-export type Outfit = IdOf<typeof OUTFITS>;
 
 /** Shoes: sneakers for everyone, the rest from Platform Palace. */
 export const SHOES = [

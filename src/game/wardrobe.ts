@@ -2,7 +2,37 @@
 // the short wear code a look carries. Each garment is its own doll model
 // (`<slot>-<id>.glb`, art/doll/blender/doll_outfits.py); looks from before
 // the wardrobe wear their outfit's garments (OUTFIT_WEAR).
-import { isColor, type Look, type Outfit } from "./look.ts";
+import { isColor } from "./color.ts";
+
+/** The whole outfits: closet presets and shop items, each a set of
+ * garments (OUTFIT_WEAR) in one color. */
+export const OUTFITS = [
+  { id: "flares", label: "Crop and flares" },
+  { id: "mini", label: "Slip mini" },
+  { id: "fur", label: "Faux fur" },
+  { id: "jeans", label: "Tee and skinny jeans" },
+  { id: "shorts", label: "Tee and denim shorts" },
+  { id: "blouse", label: "Blouse and pencil skirt" },
+  // Boutique outfits, see shop.ts.
+  { id: "tracksuit-y2k", label: "Y2K velour tracksuit" },
+  { id: "baby-tee-mini", label: "Baby tee and mini" },
+  { id: "sequin-slip", label: "Sequin slip gown" },
+  { id: "glam-faux-fur", label: "Glam faux-fur wrap" },
+  { id: "corset-maxi", label: "Corset and maxi skirt" },
+  { id: "cargo-crop", label: "Tube top and cargos" },
+  { id: "sundress", label: "Sundress" },
+  { id: "hoodie-bikers", label: "Cropped hoodie and bikers" },
+  // menswear, worn by anyone
+  { id: "denim-shirt", label: "Denim shirt and jeans" },
+  { id: "striped-shirt", label: "Striped shirt and jeans" },
+  { id: "puffer", label: "Puffer jacket and jeans" },
+  { id: "white-tee", label: "White tee and jeans" },
+  { id: "suit", label: "Suit and tie" },
+  { id: "overalls", label: "Overalls" },
+] as const;
+
+/** One of OUTFITS' ids. */
+export type Outfit = (typeof OUTFITS)[number]["id"];
 
 /** Wardrobe slots, from the skin out. A one-piece (`dress`, a dress or a
  * jumpsuit) replaces the top and the bottom; outerwear goes over the top. */
@@ -193,7 +223,11 @@ export function decodeWear(code: unknown): Wear | null {
 }
 
 /** What a look wears: its wear code, else its outfit's garments. */
-export function wearOf(look: Pick<Look, "outfit" | "outfitColor" | "wear">) {
+export function wearOf(look: {
+  outfit: Outfit;
+  outfitColor: string;
+  wear?: string | undefined;
+}): Wear {
   return decodeWear(look.wear) ?? outfitWear(look.outfit, look.outfitColor);
 }
 

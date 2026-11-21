@@ -1206,7 +1206,8 @@ export function HumanDoll({
     () => piercingsOf({ piercings: piercingCode }),
     [piercingCode],
   );
-  const parts = partsFor(look, swim);
+  // stable while the look is, so the garments effect runs only on a change
+  const parts = useMemo(() => partsFor(look, swim), [look, swim]);
   const tuckKey = parts.tucks.join(",");
   // the garments remount when what she wears changes, not when it's dyed
   const garmentUrls = parts.garments.map((g) => g.url).join(",");
