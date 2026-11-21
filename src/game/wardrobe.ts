@@ -209,10 +209,10 @@ export function putOn(wear: Wear, id: string, color: string): Wear {
     delete next.top;
     delete next.bottom;
   } else if ((g.slot === "top" || g.slot === "bottom") && wear.dress) {
-    const fill = outfitWear("jeans", wear.dress.color);
+    const { top, bottom } = outfitWear("jeans", wear.dress.color);
     delete next.dress;
-    next.top ??= fill.top;
-    next.bottom ??= fill.bottom;
+    if (!next.top && top) next.top = top;
+    if (!next.bottom && bottom) next.bottom = bottom;
   }
   return next;
 }
@@ -223,5 +223,16 @@ export function takeOff(wear: Wear, slot: Slot): Wear {
   if (slot !== "outer" && slot !== "legwear") return wear;
   const next = { ...wear };
   delete next[slot];
+  return next;
+}
+
+/** Wear with every garment dyed `color` (the closet's outfit color). */
+export function recolor(wear: Wear, color: string): Wear {
+  if (!isColor(color)) return wear;
+  const next: Wear = {};
+  for (const slot of SLOTS) {
+    const worn = wear[slot];
+    if (worn) next[slot] = { id: worn.id, color };
+  }
   return next;
 }

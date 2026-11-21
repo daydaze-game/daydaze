@@ -13,6 +13,7 @@ import {
   garmentsIn,
   isWearValid,
   putOn,
+  recolor,
   takeOff,
   wearOf,
   type Wear,
@@ -136,4 +137,12 @@ test("outerwear and legwear layer on and come off; top and bottom stay", () => {
   // unknown garments change nothing
   assert.deepEqual(putOn(tee, "cape", "#000000"), tee);
   assert.deepEqual(putOn(tee, "tee", "nope"), tee);
+});
+
+test("recolor dyes every worn garment and keeps bad colors out", () => {
+  const coat = putOn(tee, "puffer", "#141018");
+  const dyed = recolor(coat, "#c9a227");
+  for (const worn of Object.values(dyed)) assert.equal(worn.color, "#c9a227");
+  assert.deepEqual(Object.keys(dyed).sort(), Object.keys(coat).sort());
+  assert.deepEqual(recolor(coat, "red"), coat);
 });

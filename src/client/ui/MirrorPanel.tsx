@@ -2,6 +2,8 @@
 // dressing room drawer. Split out of Overlay.tsx and loaded with the first
 // time the drawer opens, so the first load stays small.
 
+import { encodeWear, recolor, wearOf } from "../../game/wardrobe.ts";
+import { WardrobePicker } from "./WardrobePicker.tsx";
 import { activeTier, allows } from "../../game/age.ts";
 import { Fragment, type ReactNode } from "react";
 import {
@@ -466,15 +468,29 @@ export function Mirror({
             tiles="outfit"
             options={wearable(OUTFITS, wardrobe)}
             value={look.outfit}
-            onPick={(outfit) => setLook({ ...look, outfit })}
+            onPick={(outfit) => {
+              // a whole outfit goes on over any mix
+              const { wear: _mixed, ...rest } = look;
+              setLook({ ...rest, outfit });
+            }}
           />
           <ColorPicker
             label="Outfit color"
             options={OUTFIT_COLORS}
             value={look.outfitColor}
-            onPick={(outfitColor) => setLook({ ...look, outfitColor })}
+            onPick={(outfitColor) =>
+              setLook({
+                ...look,
+                outfitColor,
+                // and dyes every garment of a mix
+                ...(look.wear
+                  ? { wear: encodeWear(recolor(wearOf(look), outfitColor)) }
+                  : {}),
+              })
+            }
           />
         </section>
+        <WardrobePicker look={look} setLook={setLook} wardrobe={wardrobe} />
         <section>
           <h3>Shoes</h3>
           <Chips
