@@ -110,7 +110,11 @@ export function mergeGarments(
     const g = new THREE.BufferGeometry();
     const p = floats(pos);
     const n = floats(nrm);
+    // normals turn with the frame but keep their length (quantization
+    // scales uniformly), so a normal and its morph deltas stay in step
     const normalFrame = new THREE.Matrix3().getNormalMatrix(frame);
+    const size = Math.cbrt(Math.abs(normalFrame.determinant()));
+    if (size > 0) normalFrame.multiplyScalar(1 / size);
     const v3 = new THREE.Vector3();
     for (let i = 0; i < pos.count; i++) {
       v3.fromArray(p, i * 3)

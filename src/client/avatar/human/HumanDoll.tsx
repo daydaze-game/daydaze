@@ -1010,7 +1010,12 @@ function Garments({
     const group = new THREE.Group();
     if (!merged) {
       for (const b of built) group.add(b.group);
-      return { group, materials: built.flatMap((b) => b.materials), own: null };
+      return {
+        group,
+        materials: built.flatMap((b) => b.materials),
+        own: null,
+        skeleton: null,
+      };
     }
     for (const b of built) b.materials.forEach((m) => m.dispose());
     group.add(merged);
@@ -1019,12 +1024,15 @@ function Garments({
       group,
       materials: Array.isArray(mat) ? mat : [mat],
       own: merged.geometry,
+      // its own skeleton (the bones are the body's): the bone texture goes
+      skeleton: merged.skeleton,
     };
   }, [gltfs, bones, tints]);
   useEffect(
     () => () => {
       lo.materials.forEach((m) => m.dispose());
       lo.own?.dispose();
+      lo.skeleton?.dispose();
     },
     [lo],
   );
@@ -1826,8 +1834,9 @@ export function HumanDoll({
       )}
       {own ? (
         // her own doll is always near: the full garments, no twins
+        // keyed by model, so a swapped garment's old part unregisters
         parts.garments.map((g) => (
-          <Suspense key={g.key} fallback={null}>
+          <Suspense key={g.url} fallback={null}>
             <Part
               key={g.url}
               url={g.url}

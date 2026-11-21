@@ -60,6 +60,13 @@ function piece(
   );
   delta.name = morph;
   g.morphAttributes.position = [delta];
+  // and a normal delta, tipping the normal from +z to +y at full influence
+  const bend = new THREE.BufferAttribute(
+    new Float32Array([0, 1, -1, 0, 1, -1, 0, 1, -1]),
+    3,
+  );
+  bend.name = morph;
+  g.morphAttributes.normal = [bend];
   g.morphTargetsRelative = true;
   const mesh = new THREE.SkinnedMesh(g, new THREE.MeshStandardMaterial());
   mesh.updateMorphTargets();
@@ -113,6 +120,20 @@ test("merged garments skin, morph and tint like the pieces they came from", () =
     { mesh: bottom, color: "#0000ff" },
   ]);
   assert.ok(merged);
+  // a scaled frame keeps the normal and its delta at the same scale, so the
+  // blended normal still turns all the way to +y
+  const n = merged.geometry.getAttribute("normal");
+  const k = merged.morphTargetDictionary?.tuck ?? -1;
+  const d = merged.geometry.morphAttributes.normal?.[k];
+  assert.ok(d);
+  const blended = new THREE.Vector3()
+    .fromBufferAttribute(n, 3)
+    .add(new THREE.Vector3().fromBufferAttribute(d, 3))
+    .normalize();
+  assert.ok(
+    blended.distanceTo(new THREE.Vector3(0, 1, 0)) < 1e-4,
+    `${blended.toArray()}`,
+  );
   assert.deepEqual(Object.keys(merged.morphTargetDictionary ?? {}).sort(), [
     "plus",
     "tuck",

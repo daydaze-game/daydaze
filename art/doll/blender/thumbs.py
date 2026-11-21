@@ -205,7 +205,7 @@ def main():
             CLOTH = colour
             reset()
             load("body", "hair-waves", *garments, f"shoes-{shoes}")
-            keys({f"tuck_{g.split('-', 1)[1]}": 1.0 for g in garments} | {f"tuck_{shoes}": 1.0})
+            keys({f"tuck_{g.split('-', 1)[1]}": 1.0 for g in garments} | {f"tuck_{shoes}": 1.0, f"in_{shoes}": 1.0})
             camera((0, -3.3, 0.95), (0, 0, 0.88), 30)
             render(f"outfit-{oid}")
         for style, colour in (
