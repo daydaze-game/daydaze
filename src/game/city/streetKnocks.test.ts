@@ -47,7 +47,7 @@ test("a knockdown throws her along the car's way, then she gets up and walks on 
   const s = newStreet();
   const t0 = 50;
   const hitAt = pedestrianAt(p, t0);
-  knock(s, p, t0, 9, 1, 0);
+  knock(s, t0, 9, 1, 0);
   // thrown along +x, lying there through the fall
   const down = streetPose(p, s, t0 + 1, fresh());
   assert.ok(down.held);
@@ -73,7 +73,7 @@ test("a knockdown throws her along the car's way, then she gets up and walks on 
 
 test("nothing jumps: a knock, its get-up and her walk back are smooth", () => {
   const s = newStreet();
-  knock(s, p, 20, 14, 0, 1);
+  knock(s, 20, 14, 0, 1);
   let prev = streetPose(p, s, 20, fresh());
   for (let t = 20; t < 32; t += 0.02) {
     settle(s, t);
@@ -86,14 +86,14 @@ test("nothing jumps: a knock, its get-up and her walk back are smooth", () => {
 
 test("a fast car throws her into a hard fall, a slow one only makes her stumble", () => {
   const hard = newStreet();
-  knock(hard, p, 0, 14, 1, 0);
+  knock(hard, 0, 14, 1, 0);
   assert.equal(streetPose(p, hard, 0.5, fresh()).reaction, "hard-fall");
   const bump = newStreet();
-  knock(bump, p, 0, 2, 1, 0);
+  knock(bump, 0, 2, 1, 0);
   assert.equal(streetPose(p, bump, 0.5, fresh()).reaction, "stumble");
   // too slow to matter
   const none = newStreet();
-  knock(none, p, 0, 0.2, 1, 0);
+  knock(none, 0, 0.2, 1, 0);
   assert.equal(none.ev, null);
 });
 
@@ -161,7 +161,7 @@ test("bystanders stop and turn to look at the spot", () => {
   assert.ok(pose.held);
   assert.ok(Math.abs(pose.yaw - yawTowards([at.x, at.z], spot)) < 1e-6);
   // and a knock still overrides a look
-  knock(s, p, 6, 9, 1, 0);
+  knock(s, 6, 9, 1, 0);
   assert.equal(streetPose(p, s, 6.5, fresh()).reaction, "trip-fall");
   // but not the other way around
   watch(s, p, 6.6, spot);

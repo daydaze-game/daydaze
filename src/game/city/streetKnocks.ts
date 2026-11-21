@@ -157,7 +157,6 @@ const busy = (s: StreetState, time: number) =>
  */
 export function knock(
   s: StreetState,
-  p: Pedestrian,
   time: number,
   speed: number,
   fx: number,

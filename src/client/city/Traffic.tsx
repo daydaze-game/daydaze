@@ -41,6 +41,7 @@ import {
   JEEPNEY_TRIM,
 } from "./carGeometry.ts";
 import { wheelMatrix } from "./wheelPlacement.ts";
+import { streetHits } from "./streetHits.ts";
 
 /**
  * Moving traffic and the junction lights. The cars come from the pure
@@ -315,6 +316,10 @@ export function Traffic({ player }: { player: Player }) {
     here.current[0] = player.pos.x;
     here.current[1] = player.pos.z;
     const onFoot = player.seat === null;
+    // in a car (hers or a friend's) traffic yields to the car; on foot it
+    // brakes for her like for anyone, and may not stop in time
+    const inCar =
+      driving.session?.kind === "city" || driving.passenger !== null;
     busPosition.current[0] = busMotion.pose.x;
     busPosition.current[1] = busMotion.pose.z;
     truckPosition.current[0] = foodMotion.pose.x;
@@ -324,14 +329,18 @@ export function Traffic({ player }: { player: Player }) {
     const wall = wallSeconds();
     advance(clock.current, dt, () => {
       syncClock(traffic, wall);
-      stepTraffic(
+      const hit = stepTraffic(
         traffic,
         1 / 50,
         onFoot ? here.current : null,
         busMotion.active ? busPosition.current : null,
         foodMotion.origin !== null ? truckPosition.current : null,
+        inCar,
       );
+      // CarHits.tsx knocks her down and lets the driver shout
+      if (hit) streetHits.hit = hit;
     });
+    streetHits.alarms = traffic.alarms;
     syncClock(traffic, wall);
     const { shell, trim, chrome, dark, wheels, lamps, signals } = meshes;
     const city = driving.session?.kind === "city" ? driving.session : null;

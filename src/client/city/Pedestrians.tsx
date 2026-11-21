@@ -1,5 +1,6 @@
-// The city's pedestrians and pets: every walker follows its scripted path, and
-// only the ones nearest the player are full dolls or creatures.
+// The city's pedestrians and pets: every walker follows its scripted path (or
+// where a car has put her: knocked down, dodging, staring; streetHits.ts),
+// and only the ones nearest the player are full dolls or creatures.
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { useMemo, useRef, useState } from "react";
@@ -17,28 +18,63 @@ import {
   PEDESTRIAN_DOLL_RADIUS,
 } from "../../game/city/tuning.ts";
 import { wallSeconds } from "../../game/clock.ts";
+import { streetPose, type StreetPose } from "../../game/city/streetKnocks.ts";
+import { reactionClip, type ReactionId } from "../../game/reactions.ts";
 import { useDetail } from "../world/quality.ts";
-import { Doll } from "../avatar/Doll.tsx";
+import { Doll, type WalkState } from "../avatar/Doll.tsx";
 import { Creature, type CreaturePose } from "../creatures/Creature.tsx";
 import type { Player } from "../world/PlayerController.tsx";
 import { cityHour } from "./daylight.ts";
 import { usePersonAt } from "../rooms/speedway/peopleModel.ts";
 import { FAN_LOOKS, RIDER_LOOKS, crowdUrl } from "../../game/crowd.ts";
+import { streetHits } from "./streetHits.ts";
+
+/** Walker `i` at `time`: on her path, or where a car has put her. */
+function walkerAt(i: number, time: number, out: StreetPose): StreetPose {
+  const s = streetHits.walkers.get(i);
+  if (s) return streetPose(PEDESTRIANS[i], s, time, out);
+  pedestrianAt(PEDESTRIANS[i], time, out);
+  out.held = false;
+  out.reaction = null;
+  return out;
+}
+
+const standing = (): StreetPose => ({
+  x: 0,
+  z: 0,
+  yaw: 0,
+  held: false,
+  reaction: null,
+});
 
 /** Seconds between re-picking who is nearest. */
 const REPICK = 0.75;
 
 function Walker({ index }: { index: number }) {
   const g = useRef<THREE.Group>(null);
-  const pose = useRef<PedestrianPose>({ x: 0, z: 0, yaw: 0 });
+  const pose = useRef<StreetPose>(standing());
+  const shown = useRef<ReactionId | null>(null);
   const p = PEDESTRIANS[index];
   // her own pace over the ground, so her legs keep up with it
-  const walking = useMemo(() => ({ current: { speed: p.speed } }), [p]);
+  const walking = useMemo<{ current: WalkState }>(
+    () => ({ current: { speed: p.speed } }),
+    [p],
+  );
   useFrame(() => {
     if (!g.current) return;
-    pedestrianAt(p, wallSeconds(), pose.current);
-    g.current.position.set(pose.current.x, 0, pose.current.z);
-    g.current.rotation.y = pose.current.yaw;
+    const now = walkerAt(index, wallSeconds(), pose.current);
+    g.current.position.set(now.x, 0, now.z);
+    g.current.rotation.y = now.yaw;
+    // knocked down, frozen or staring, she stands; a reaction plays once
+    walking.current.speed = now.held ? 0 : p.speed;
+    if (now.reaction !== shown.current) {
+      shown.current = now.reaction;
+      if (now.reaction)
+        walking.current.react = {
+          id: reactionClip(now.reaction),
+          n: (walking.current.react?.n ?? 0) + 1,
+        };
+    }
   });
   // a dog walker's dog trots at her left hand (+x at yaw 0, facing +z), a
   // little ahead
@@ -173,7 +209,7 @@ function CrowdFigures({
   const picked = useRef<readonly number[]>([]);
   const last = useRef(-Infinity);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const pose = useRef<PedestrianPose>({ x: 0, z: 0, yaw: 0 });
+  const pose = useRef<StreetPose>(standing());
   const counts = useRef<number[]>(
     new Array<number>(LOOKS.length * STRIDES.length).fill(0),
   );
@@ -201,7 +237,7 @@ function CrowdFigures({
       const slot = look * STRIDES.length + stride;
       const m = meshes.current[slot];
       if (!m || counts.current[slot] >= CROWD_CAP) continue;
-      pedestrianAt(PEDESTRIANS[i], t, pose.current);
+      walkerAt(i, t, pose.current);
       dummy.position.set(pose.current.x, 0.14, pose.current.z);
       dummy.rotation.y = pose.current.yaw;
       dummy.updateMatrix();
