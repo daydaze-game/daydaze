@@ -539,7 +539,9 @@ export const DANCE_MOVES: readonly DanceMove[] = [
     ],
   },
   {
-    // arms wrapped round the partner, cheek turned, a slow rock side to side
+    // arms wrapped round the partner, cheek turned, a slow rock side to side.
+    // Upright, chests touching (together.ts gap): a lean would push them
+    // through each other, and the hands stop at the partner's shoulder blades.
     id: "hug",
     label: "Hug",
     period: 3,
@@ -547,23 +549,23 @@ export const DANCE_MOVES: readonly DanceMove[] = [
       {
         at: 0,
         joints: {
-          body: [0.08, 0.04, 0.03],
+          body: [0, 0.04, 0.03],
           head: [0.1, 0.35, 0.08],
           lArm: [-0.95, 0, 0.2],
           rArm: [-0.9, 0, -0.18],
-          lFore: [-1.25, 0, 0.5],
-          rFore: [-1.2, 0, -0.5],
+          lFore: [-1.55, 0, 0.5],
+          rFore: [-1.5, 0, -0.5],
         },
       },
       {
         at: 1.5,
         joints: {
-          body: [0.08, -0.04, -0.03],
+          body: [0, -0.04, -0.03],
           head: [0.1, 0.3, 0.04],
           lArm: [-0.9, 0, 0.18],
           rArm: [-0.95, 0, -0.2],
-          lFore: [-1.2, 0, 0.5],
-          rFore: [-1.25, 0, -0.5],
+          lFore: [-1.5, 0, 0.5],
+          rFore: [-1.55, 0, -0.5],
         },
       },
     ],
@@ -600,31 +602,74 @@ export const DANCE_MOVES: readonly DanceMove[] = [
     ],
   },
   {
-    // hands on the partner's shoulders, leaning in until foreheads touch
+    // both hands on the partner's shoulders, a lean in from the hips until the
+    // foreheads touch, eyes closed, then an ease out. Unmirrored on the pair
+    // clock like the kisses (together.ts), so both lean in together.
     id: "forehead-kiss",
     label: "Forehead kiss",
-    period: 4,
+    period: 5,
+    groove: false,
+    synced: true,
+    shut: [1.3, 3.1],
     keys: [
       {
         at: 0,
+        ...planted(0.03),
         joints: {
-          body: [0.12, 0, 0],
-          head: [0.3, 0, 0],
-          lArm: [-1.3, 0, 0.15],
-          rArm: [-1.3, 0, -0.15],
-          lFore: [-0.7, 0, 0.35],
-          rFore: [-0.7, 0, -0.35],
+          ...leanJoints(0.03),
+          head: [0.05, 0, 0],
+          lArm: [-0.6, 0, 0],
+          rArm: [-0.6, 0, 0],
+          lFore: [-1.9, 0, 0],
+          rFore: [-1.9, 0, 0],
         },
       },
       {
-        at: 2,
+        at: 0.9,
+        ...planted(0.11),
         joints: {
-          body: [0.16, 0, 0],
-          head: [0.38, 0.05, 0.03],
-          lArm: [-1.35, 0, 0.15],
-          rArm: [-1.35, 0, -0.15],
-          lFore: [-0.75, 0, 0.35],
-          rFore: [-0.75, 0, -0.35],
+          ...leanJoints(0.11),
+          head: [0.3, 0, 0],
+          lArm: [-0.51, 0, 0],
+          rArm: [-0.51, 0, 0],
+          lFore: [-2.12, 0, 0],
+          rFore: [-2.12, 0, 0],
+        },
+      },
+      {
+        at: 1.3,
+        ...planted(0.12),
+        joints: {
+          ...leanJoints(0.12),
+          head: [0.35, 0, 0],
+          lArm: [-0.5, 0, 0],
+          rArm: [-0.5, 0, 0],
+          lFore: [-2.15, 0, 0],
+          rFore: [-2.15, 0, 0],
+        },
+      },
+      {
+        at: 3.1,
+        ...planted(0.12),
+        joints: {
+          ...leanJoints(0.12),
+          head: [0.35, 0, 0],
+          lArm: [-0.5, 0, 0],
+          rArm: [-0.5, 0, 0],
+          lFore: [-2.15, 0, 0],
+          rFore: [-2.15, 0, 0],
+        },
+      },
+      {
+        at: 3.8,
+        ...planted(0.04),
+        joints: {
+          ...leanJoints(0.04),
+          head: [0.1, 0, 0],
+          lArm: [-0.59, 0, 0],
+          rArm: [-0.59, 0, 0],
+          lFore: [-1.93, 0, 0],
+          rFore: [-1.93, 0, 0],
         },
       },
     ],
