@@ -61,6 +61,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
       effects: "low",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   };
   const raw = JSON.stringify(save);
@@ -73,6 +74,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
       effects: "low",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     bests: save.bests,
     challenges: save.challenges,

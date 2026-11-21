@@ -314,6 +314,8 @@ export function Overlay({
   setHolds,
   effects,
   setEffects,
+  highAudio = true,
+  setHighAudio,
   view,
   setView,
   panelOpen,
@@ -359,6 +361,8 @@ export function Overlay({
   setHolds: (holds: Holds) => void;
   effects: Intensity;
   setEffects: (effects: Intensity) => void;
+  highAudio?: boolean;
+  setHighAudio?: ((highAudio: boolean) => void) | undefined;
   view: View;
   setView: (view: View) => void;
   panelOpen: boolean;
@@ -458,6 +462,8 @@ export function Overlay({
               setBody={setBody}
               effects={effects}
               setEffects={setEffects}
+              highAudio={highAudio}
+              setHighAudio={setHighAudio}
             />
           </Suspense>
         )}

@@ -45,6 +45,7 @@ test("createDefaultSave uses the default look and auto quality", () => {
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
@@ -97,6 +98,7 @@ test("a save round-trips through serializeSave and loadSave", () => {
       effects: "off",
       panelOpen: true,
       strictChat: true,
+      highAudio: true,
     },
     home: {
       locked: false,
@@ -190,6 +192,7 @@ test("a save from before the swimsuit slot still loads", () => {
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
@@ -252,6 +255,7 @@ test("loadSave keeps a valid name when the look is bad", () => {
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   });
   assert.deepEqual(loadSave(raw, "Fallback"), {
@@ -268,6 +272,7 @@ test("loadSave keeps a valid name when the look is bad", () => {
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
@@ -320,6 +325,7 @@ test("loadSave keeps a valid look when the name is bad", () => {
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
@@ -365,6 +371,7 @@ test("loadSave repairs settings field by field", () => {
     effects: "full",
     panelOpen: false,
     strictChat: false,
+    highAudio: true,
   });
   const badMuted = JSON.stringify({
     version: 1,
@@ -378,6 +385,7 @@ test("loadSave repairs settings field by field", () => {
     effects: "full",
     panelOpen: false,
     strictChat: false,
+    highAudio: true,
   });
 });
 
@@ -402,6 +410,7 @@ test("loadSave repairs the effects setting without touching the rest", () => {
       effects: "loud",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   });
   assert.deepEqual(loadSave(raw, "Fallback").settings, {
@@ -410,6 +419,7 @@ test("loadSave repairs the effects setting without touching the rest", () => {
     effects: "full",
     panelOpen: false,
     strictChat: false,
+    highAudio: true,
   });
   const low = JSON.stringify({
     version: 1,
@@ -787,6 +797,31 @@ test("a teen save keeps its pouch: loading never strips it", () => {
     loadSave(serializeSave(save), "Fallback").inventory,
     save.inventory,
   );
+});
+
+test("a save from before highAudio loads with highAudio enabled", () => {
+  const old = JSON.stringify({
+    version: 1,
+    name: "Old Player",
+    settings: { quality: "low", muted: true, effects: "low" },
+  });
+  assert.equal(loadSave(old, "Fallback").settings.highAudio, true);
+});
+
+test("loadSave preserves highAudio setting when boolean and defaults when invalid", () => {
+  const off = JSON.stringify({
+    version: 1,
+    name: "Player",
+    settings: { highAudio: false },
+  });
+  assert.equal(loadSave(off, "Fallback").settings.highAudio, false);
+
+  const invalid = JSON.stringify({
+    version: 1,
+    name: "Player",
+    settings: { highAudio: "yes" },
+  });
+  assert.equal(loadSave(invalid, "Fallback").settings.highAudio, true);
 });
 
 test("a save from before the Graphics menu migrates its quality setting", () => {
