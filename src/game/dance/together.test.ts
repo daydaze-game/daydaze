@@ -58,6 +58,13 @@ test("the follower faces the leader, gap meters in front", () => {
   assert.ok(close(spot.yaw, Math.PI));
 });
 
+test("dolls face to face never stand inside each other", () => {
+  // the doll's chest sits 0.21 m ahead of its origin (measured in the doll
+  // lab's together shot), so two chests touch at 0.42 m
+  for (const e of TOGETHER)
+    if (!e.side && !e.behind) assert.ok(e.gap >= 0.42, e.id);
+});
+
 test("holding hands puts the follower at the leader's side, facing the same way", () => {
   const e = must(TOGETHER.find((x) => x.id === "hold-hands"));
   const spot = followSpot("hold-hands", [0, 0], Math.PI / 2);
@@ -108,7 +115,7 @@ test("an emote together rides the action code, buzz and all", () => {
 });
 
 test("the kisses face each other unmirrored, so heads tilt opposite ways", () => {
-  for (const id of ["cheek-kiss", "kiss"] as const) {
+  for (const id of ["cheek-kiss", "kiss", "forehead-kiss"] as const) {
     const e = must(TOGETHER.find((x) => x.id === id));
     // a mirrored follow tilts its head the same way the lead does, nose into nose
     assert.equal(mirrored(id), false, id);
@@ -122,7 +129,7 @@ test("the kisses face each other unmirrored, so heads tilt opposite ways", () =>
 });
 
 test("a kiss runs on the pair clock, eyes closed while the lips meet", () => {
-  for (const id of ["cheek-kiss", "kiss"] as const) {
+  for (const id of ["cheek-kiss", "kiss", "forehead-kiss"] as const) {
     const move = danceMove(roleMove(id, "lead"));
     // both partners at the same moment of it, on any screen
     assert.equal(move.synced, true, id);
