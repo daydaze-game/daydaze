@@ -23,6 +23,7 @@ import {
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
 import type { Graphics } from "../game/graphics.ts";
 import { getBuzz } from "./effects/drunk.ts";
+import { LazyPanel } from "./ui/ReloadBoundary.tsx";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
 import { leaveParty } from "./net/party.ts";
 import { endVisit, homeVisit, listenForHomes } from "./net/home.ts";
@@ -561,9 +562,9 @@ export function App() {
           progression={save.progression}
           muted={save.settings.muted}
         />
-        <Suspense fallback={null}>
+        <LazyPanel>
           <StreakPanel streak={save.streak} />
-        </Suspense>
+        </LazyPanel>
         <UpdatePrompt />
         <Collections
           visited={save.visited}
@@ -635,23 +636,43 @@ export function App() {
             )}
           </p>
         </div>
-        <Suspense fallback={null}>
+        <LazyPanel>
           <PeerCard />
-          <FriendsPanel
-            onGo={(room) => travel(room, ROOMS[room].spawn)}
-            strictChat={save.settings.strictChat}
-            onStrictChat={setStrictChat}
-            save={save}
-            onSave={setSave}
-          />
-          {ONLINE && <DuelPanel />}
-          {ONLINE && <TogetherPanel />}
-          {ONLINE && <CookOffInvite />}
-          {ONLINE && <PartyPanel onGo={goWithParty} />}
-          {ONLINE && <RidePanel />}
-          {ONLINE && <RacePanel />}
-          {ONLINE && <ConnectionNote />}
-        </Suspense>
+        </LazyPanel>
+        {ONLINE && (
+          <>
+            <LazyPanel>
+              <FriendsPanel
+                onGo={(room) => travel(room, ROOMS[room].spawn)}
+                strictChat={save.settings.strictChat}
+                onStrictChat={setStrictChat}
+                save={save}
+                onSave={setSave}
+              />
+            </LazyPanel>
+            <LazyPanel>
+              <DuelPanel />
+            </LazyPanel>
+            <LazyPanel>
+              <TogetherPanel />
+            </LazyPanel>
+            <LazyPanel>
+              <CookOffInvite />
+            </LazyPanel>
+            <LazyPanel>
+              <PartyPanel onGo={goWithParty} />
+            </LazyPanel>
+            <LazyPanel>
+              <RidePanel />
+            </LazyPanel>
+            <LazyPanel>
+              <RacePanel />
+            </LazyPanel>
+            <LazyPanel>
+              <ConnectionNote />
+            </LazyPanel>
+          </>
+        )}
         <div className="fade" data-on={fading} aria-hidden="true" />
         {notice && (
           <p className="notice" role="status">
@@ -756,24 +777,19 @@ export function App() {
             You&apos;re at {visiting.owner.name}&apos;s place.
           </p>
         )}
-        <Suspense fallback={null}>
-          {here.room === "apartment" && !visiting.owner && (
+        {/* a panel that fails to load shows the Reload card for itself only,
+            and an arrest still ends with its penalty saved */}
+        {here.room === "apartment" && !visiting.owner && (
+          <LazyPanel>
             <ApartmentPanel
               home={save.home}
               onChange={setHome}
               onShelf={() => setShopping(true)}
             />
-          )}
-          {here.room === "apartment" && shopping && (
-            <ShopliftPanel
-              crime={save.crime}
-              now={now}
-              onCaught={caught}
-              onClose={() => setShopping(false)}
-            />
-          )}
-          {arrest && <ArrestSequence onDone={finishArrest} />}
-          {here.room === "jail" && (
+          </LazyPanel>
+        )}
+        {here.room === "jail" && (
+          <LazyPanel>
             <JailHud
               jail={save.jail}
               coins={save.coins}
@@ -781,9 +797,28 @@ export function App() {
               onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
               onRelease={release}
             />
-          )}
-          {game && <GameOverlay game={game} onClose={endGame} />}
-        </Suspense>
+          </LazyPanel>
+        )}
+        {game && (
+          <LazyPanel onContinue={() => endGame(null)}>
+            <GameOverlay game={game} onClose={endGame} />
+          </LazyPanel>
+        )}
+        {here.room === "apartment" && shopping && (
+          <LazyPanel onContinue={() => setShopping(false)}>
+            <ShopliftPanel
+              crime={save.crime}
+              now={now}
+              onCaught={caught}
+              onClose={() => setShopping(false)}
+            />
+          </LazyPanel>
+        )}
+        {arrest && (
+          <LazyPanel onContinue={finishArrest}>
+            <ArrestSequence onDone={finishArrest} />
+          </LazyPanel>
+        )}
         {here.room === "city" && touch && <CityJoystick />}
         <ChatBar
           onSay={(text) => {

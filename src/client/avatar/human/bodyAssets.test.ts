@@ -1,10 +1,11 @@
 // Verify that rebuilt dolls expose the editor's actual controls and load in a
 // neutral state, before runtime effects select clothing and facial morphs.
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import { readGlb } from "../../../../scripts/pruneMorphs.ts";
 import { FACE_SLIDERS } from "../../../game/look.ts";
+import { GARMENTS } from "../../../game/wardrobe.ts";
 
 test("both human bodies and their distance models carry every facial slider", () => {
   for (const file of ["body", "body-lo", "body-m", "body-m-lo"]) {
@@ -62,6 +63,36 @@ test("new eye and lip presets deform both bodies at both detail levels", () => {
         }),
         `${file}: ${key} must move vertices`,
       );
+    }
+  }
+});
+
+// Every wardrobe garment ships for both builds at both detail levels, and
+// each body carries the tuck key that sinks the skin under it.
+test("every garment ships fitted to both bodies, with its tuck key", () => {
+  for (const m of ["", "-m"]) {
+    for (const lo of ["", "-lo"]) {
+      const { json } = readGlb(
+        readFileSync(
+          new URL(
+            `../../../../public/models/doll/body${m}${lo}.glb`,
+            import.meta.url,
+          ),
+        ),
+      );
+      const keys = new Set(
+        json.meshes.flatMap((mesh) => mesh.extras?.targetNames ?? []),
+      );
+      for (const g of GARMENTS) {
+        const file = `${g.slot}-${g.id}${m}${lo}.glb`;
+        assert.ok(
+          existsSync(
+            new URL(`../../../../public/models/doll/${file}`, import.meta.url),
+          ),
+          file,
+        );
+        assert.ok(keys.has(`tuck_${g.id}`), `body${m}${lo}: tuck_${g.id}`);
+      }
     }
   }
 });

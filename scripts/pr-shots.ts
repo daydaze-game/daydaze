@@ -41,6 +41,11 @@ const ROOM_SHOT_ALIASES: Readonly<Record<string, string>> = {
 /** Folders outside rooms/ that each show one representative shot. */
 const AREA_SHOTS: readonly (readonly [RegExp, string])[] = [
   [/^src\/(client|game)\/(city|world)\//, "city-day"],
+  // the closet's wardrobe pickers and the rules behind them
+  [
+    /^src\/(client\/ui\/(WardrobePicker|MirrorPanel)|game\/wardrobe)/,
+    "closet-wardrobe",
+  ],
   [/^src\/client\/avatar\//, "plaza"],
   [/^src\/client\/ui\//, "hud-city"],
   [

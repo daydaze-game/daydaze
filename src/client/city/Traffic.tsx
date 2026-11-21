@@ -15,8 +15,9 @@ import {
   signalledJunctions,
   stepTraffic,
   type Signal,
+  type TrafficCar,
 } from "../../game/city/traffic.ts";
-import type { Player } from "../world/PlayerController.tsx";
+import { placePlayer, type Player } from "../world/PlayerController.tsx";
 import { foodMotion } from "./foodVendors.ts";
 import { busMotion } from "./busRide.ts";
 import { taxiCab } from "./taxiStore.ts";
@@ -41,6 +42,7 @@ import {
   JEEPNEY_TRIM,
 } from "./carGeometry.ts";
 import { wheelMatrix } from "./wheelPlacement.ts";
+import { streetHits } from "./streetHits.ts";
 
 /**
  * Moving traffic and the junction lights. The cars come from the pure
@@ -195,6 +197,7 @@ export function Traffic({ player }: { player: Player }) {
   // ("x,z,yaw,speed,kind" each (c a body, j a jeepney), ";" between), for the screenshot script to find a
   // car to photograph; off by default, so the frame loop allocates nothing
   const canvas = useThree((s) => s.gl.domElement);
+  const camera = useThree((s) => s.camera);
   const probing = useMemo(
     () => new URLSearchParams(location.search).has("debug"),
     [],
@@ -295,6 +298,50 @@ export function Traffic({ player }: { player: Player }) {
     return { ...all, signals };
   }, [bulbs, slots]);
 
+  // `?debug=1` puts `daydazeStepOut(meters)` on the page, for tests: the
+  // player steps into the lane that many meters ahead of the fastest car
+  // near her, one heading toward the camera if any is (true), or there is
+  // none moving (false); `daydazeStepOut(5, true)` only asks. The camera
+  // keeps its offset from her, so a car driving away from it stops right on it.
+  useEffect(() => {
+    if (!probing) return;
+    const stepOut = (ahead: unknown, dry?: unknown) => {
+      if (typeof ahead !== "number" || !Number.isFinite(ahead)) return false;
+      let fastest: TrafficCar | null = null;
+      let toward: TrafficCar | null = null;
+      const ox = camera.position.x - player.pos.x;
+      const oz = camera.position.z - player.pos.z;
+      for (const car of traffic.cars) {
+        carPose(car, pose);
+        const d = Math.hypot(pose.x - player.pos.x, pose.z - player.pos.z);
+        // not one about to turn at a junction: it would curve past her
+        if (car.next || d > 120 || car.speed <= 5) continue;
+        if (car.speed > (fastest?.speed ?? 0)) fastest = car;
+        const facing = Math.cos(pose.yaw) * ox - Math.sin(pose.yaw) * oz > 0;
+        if (facing && car.speed > (toward?.speed ?? 0)) toward = car;
+      }
+      const pick = toward ?? fastest;
+      // `dry`: only say whether there is a car to step out in front of
+      if (!pick || dry === true) return pick !== null;
+      carPose(pick, pose);
+      placePlayer(
+        player,
+        pose.x + Math.cos(pose.yaw) * ahead,
+        pose.z - Math.sin(pose.yaw) * ahead,
+      );
+      // facing the car (walk.ts yaw: 0 faces +z; traffic's: 0 faces +x)
+      player.yaw =
+        player.walk.yaw =
+        player.before.yaw =
+          Math.atan2(-Math.cos(pose.yaw), Math.sin(pose.yaw));
+      return true;
+    };
+    Object.assign(window, { daydazeStepOut: stepOut });
+    return () => {
+      Object.assign(window, { daydazeStepOut: undefined });
+    };
+  }, [probing, traffic, player, camera]);
+
   useEffect(
     () => () => {
       for (const mesh of Object.values(meshes)) {
@@ -315,6 +362,10 @@ export function Traffic({ player }: { player: Player }) {
     here.current[0] = player.pos.x;
     here.current[1] = player.pos.z;
     const onFoot = player.seat === null;
+    // in a car (hers or a friend's) traffic yields to the car; on foot it
+    // brakes for her like for anyone, and may not stop in time
+    const inCar =
+      driving.session?.kind === "city" || driving.passenger !== null;
     busPosition.current[0] = busMotion.pose.x;
     busPosition.current[1] = busMotion.pose.z;
     truckPosition.current[0] = foodMotion.pose.x;
@@ -324,14 +375,18 @@ export function Traffic({ player }: { player: Player }) {
     const wall = wallSeconds();
     advance(clock.current, dt, () => {
       syncClock(traffic, wall);
-      stepTraffic(
+      const hit = stepTraffic(
         traffic,
         1 / 50,
         onFoot ? here.current : null,
         busMotion.active ? busPosition.current : null,
         foodMotion.origin !== null ? truckPosition.current : null,
+        inCar,
       );
+      // CarHits.tsx knocks her down and lets the driver shout
+      if (hit) streetHits.hit ??= hit;
     });
+    streetHits.alarms = traffic.alarms;
     syncClock(traffic, wall);
     const { shell, trim, chrome, dark, wheels, lamps, signals } = meshes;
     const city = driving.session?.kind === "city" ? driving.session : null;

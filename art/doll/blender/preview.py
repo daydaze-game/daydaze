@@ -21,7 +21,7 @@ keys = dict(a.split("=") for a in args[2:])
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sfx = "-m" if keys.get("sex") == "m" else ""  # sex=m: the man's files
 bpy.ops.import_scene.gltf(filepath=os.path.join(OUT, f"body{sfx}.glb"))
-# show=Hair_waves,Outfit_flares imports those parts (hair-waves.glb, ...)
+# show=Hair_waves,Bottom_flares imports those parts (hair-waves.glb, ...)
 for part in filter(None, keys.get("show", "").split(",")):
     kind, name = part.split("_", 1)
     bpy.ops.import_scene.gltf(filepath=os.path.join(OUT, f"{kind.lower()}-{name}{sfx}.glb"))

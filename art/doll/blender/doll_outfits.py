@@ -1,7 +1,8 @@
-"""Outfits, swimsuits and shoes, each one object the client shows or hides.
+"""Garments, swimsuits and shoes, each one object the client shows or hides.
 
-Names: Outfit_<id> (OUTFITS in src/game/look.ts), Swim_<id> (SWIMSUITS) and
-Shoes_<id>. Garments come from MakeHuman CC0 proxies or are cut from the base
+Names: <Slot>_<id> for garments (Top_, Bottom_, Dress_, Outer_, Legwear_;
+GARMENTS in src/game/wardrobe.ts), Swim_<id> (SWIMSUITS in
+src/game/look.ts) and Shoes_<id>. Garments come from MakeHuman CC0 proxies or are cut from the base
 mesh's tights and skirt helpers, so all of them follow the body sliders. Each
 garment also adds a "tuck_<name>" shape key to the body that pulls the skin
 under it inwards, so skin never pokes through cloth, in a pose or not.
@@ -23,6 +24,10 @@ GRID = 0.002  # metres: the precision a tuck key is stored at
 CLEAR = 0.008  # gap kept between sunk skin and the cloth
 LEG_PULL = 1.0  # share of the way covered leg skin is drawn in to its leg's axis: 1 collapses it onto the axis, so there is nothing to show through
 LEG_RAMP = 0.06  # metres up from a garment's lowest edge over which that pull fades in
+SHARE = 0.03  # metres: hidden skin this near both pieces of a split suit goes with both
+INTO = 0.02  # metres: cloth this far outside a shoe (or less) tucks into it fully...
+INTO_FADE = 0.01  # ...fading out over this much further, so a wide hem stays over it
+INSIDE = 0.015  # metres behind the shoe's surface tucked cloth goes: deep enough to stay in under any figure and pose (the leg skin there is drawn in further)
 
 
 def heights(ctx):
@@ -158,7 +163,7 @@ def arm_weight(ctx, f):
     return sum(ctx.weight(g)[f] for g in i).max()
 
 
-def leg_pull(ctx, body, co, covered, floor):
+def leg_pull(ctx, body, co, covered, floor, share=LEG_PULL, ceil=np.inf):
     """Vectors drawing covered leg skin in to the axis of its leg.
 
     Sinking skin along its own normal does not clear the back of a bent knee:
@@ -168,6 +173,9 @@ def leg_pull(ctx, body, co, covered, floor):
     poke out, the cloth hides it as if its faces were deleted. It fades in over
     LEG_RAMP above the garment's lowest edge (`floor`), so a hem leaves no
     step, and with the vertex's share of leg weight, so the hip is left alone.
+    `share` scales the pull (HALF_PULL layers take half). Legwear that ends
+    on the leg (knee socks) passes its top edge as `ceil`: the pull fades
+    out the same way below it, so the bare leg above keeps its shape.
     The weights come from the body object's own groups, so the low-poly body
     gets the same."""
     names = {g.index: g.name for g in body.vertex_groups}
@@ -188,8 +196,12 @@ def leg_pull(ctx, body, co, covered, floor):
             pt = a + t[:, None] * axis
             d = np.linalg.norm(co - pt, axis=1)
             best = (pt, d) if best is None else (np.where((d < best[1])[:, None], pt, best[0]), np.minimum(d, best[1]))
-        ramp = np.clip((co[:, 2] - floor) / LEG_RAMP, 0, 1) * np.clip((w - 0.5) * 4, 0, 1)
-        pull[use] = ((best[0] - co) * (LEG_PULL * ramp)[:, None])[use]
+        ramp = (
+            np.clip((co[:, 2] - floor) / LEG_RAMP, 0, 1)
+            * np.clip((ceil - co[:, 2]) / LEG_RAMP, 0, 1)
+            * np.clip((w - 0.5) * 4, 0, 1)
+        )
+        pull[use] = ((best[0] - co) * (share * ramp)[:, None])[use]
     return pull
 
 
@@ -218,12 +230,14 @@ def tuck(ctx, body, body_src, garment, name):
     bvh = BVHTree.FromObject(garment, bpy.context.evaluated_depsgraph_get())
     is_shoe = garment.name.startswith("Shoes")
     floor = min(v.co.z for v in garment.data.vertices) if not is_shoe else -1.0
+    # legwear may end on the leg: the skin above its top edge stays bare
+    ceil = max(v.co.z for v in garment.data.vertices) if garment.name.startswith("Legwear") else np.inf
     # skin sinks only within SNUG of the cloth; trousers and wide legs can sit
     # up to ~10 cm off the leg, so the wider reach only marks leg skin as
     # covered. Sinking everything within 10 cm tore the jaw and neck near a collar.
     reach = 0.03 if is_shoe else 0.10
     for i, p in enumerate(co):
-        if not is_shoe and p[2] < floor:
+        if not is_shoe and (p[2] < floor or p[2] > ceil):
             continue
         loc, _n, _f, dist = bvh.find_nearest(Vector(p), reach)
         if loc is None:
@@ -239,77 +253,190 @@ def tuck(ctx, body, body_src, garment, name):
     # a pull from the sole up would collapse the ankle the hem leaves bare
     move = -normals * sink[:, None]
     if not is_shoe:
-        move = move + leg_pull(ctx, body, co, behind, floor)
+        share = LEG_PULL / 2 if garment.name.startswith(HALF_PULL) else LEG_PULL
+        move = move + leg_pull(ctx, body, co, behind, floor, share, ceil)
     sk = body.shape_key_add(name=f"tuck_{name}", from_mix=False)
     # on a GRID-metre grid: the key compresses far smaller, unseen
     sk.data.foreach_set("co", (co + np.round(move / GRID) * GRID).ravel())
 
 
+def split(ctx, ob, bottom, cut=None):
+    """Splits a MakeHuman suit into its top (`ob`, kept) and its bottom, a
+    new object named `bottom` (None drops it). A loose part reaching above
+    mid-torso is the top's; a suit welded into one piece is cut at height
+    `cut` instead, so a tucked-in shirt ends at the belt. The skin the suit
+    hides (its "deleted" list) goes to whichever piece is nearer it, so each
+    piece's tuck sinks only the skin under that piece."""
+    h = heights(ctx)
+    me = ob.data
+    z = np.array([v.co.z for v in me.vertices])
+    if cut is None:
+        parent = np.arange(len(z))
+
+        def find(a):
+            while parent[a] != a:
+                parent[a] = parent[parent[a]]
+                a = parent[a]
+            return a
+
+        for e in me.edges:
+            ra, rb = find(e.vertices[0]), find(e.vertices[1])
+            if ra != rb:
+                parent[ra] = rb
+        roots = np.array([find(i) for i in range(len(z))])
+        mid = (h["hip"] + h["shoulder"]) / 2
+        upper = {r for r in set(roots.tolist()) if z[roots == r].max() > mid}
+        lower = [p.index for p in me.polygons if roots[p.vertices[0]] not in upper]
+    else:
+        lower = [p.index for p in me.polygons if p.center.z < cut]
+    piece = separate(ob, lower)
+    deleted = np.array(ob["deleted"], int)
+    if len(deleted):
+        # each hidden skin vertex goes with every piece within SHARE of it
+        # (a blouse tucked into its skirt covers the waist on its own too),
+        # else with the nearer one
+        near = []
+        for part in (ob, piece):
+            co = np.array([v.co[:] for v in part.data.vertices])
+            tree = KDTree(len(co))
+            for i, p in enumerate(co):
+                tree.insert(p, i)
+            tree.balance()
+            near.append(np.array([tree.find(p)[2] for p in ctx.PB[deleted]]))
+        mine = (near[0] <= near[1]) | (near[0] < SHARE)
+        theirs = (near[1] < near[0]) | (near[1] < SHARE)
+        ob["deleted"] = sorted(deleted[mine].tolist())
+        piece["deleted"] = sorted(deleted[theirs].tolist())
+    if bottom is None:
+        bpy.data.objects.remove(piece)
+        return None
+    piece.name = piece.data.name = bottom
+    return piece
+
+
+def separate(ob, faces):
+    """Moves `faces` of `ob` into a new object (shape keys, weights, UVs and
+    materials come along) and returns it."""
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+    # edit mode rebuilds face selection from the vertices': select those
+    me = ob.data
+    keep = np.zeros(len(me.polygons), bool)
+    keep[list(faces)] = True
+    me.polygons.foreach_set("select", keep)
+    picked = np.zeros(len(me.vertices), bool)
+    for i in faces:
+        picked[list(me.polygons[i].vertices)] = True
+    me.vertices.foreach_set("select", picked)
+    me.edges.foreach_set("select", np.array([picked[a] and picked[b] for a, b in (e.vertices for e in me.edges)], bool))
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.separate(type="SELECTED")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    (piece,) = [o for o in bpy.context.selected_objects if o is not ob]
+    return piece
+
+
+def islands_kept(ob, keep):
+    """Drops all but the `keep` largest loose parts of `ob` (by vertex
+    count): a jacket's own shell without the shirt glimpsed inside it."""
+    me = ob.data
+    parent = np.arange(len(me.vertices))
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    for e in me.edges:
+        ra, rb = find(e.vertices[0]), find(e.vertices[1])
+        if ra != rb:
+            parent[ra] = rb
+    roots = np.array([find(i) for i in range(len(me.vertices))])
+    sizes = {r: int((roots == r).sum()) for r in set(roots.tolist())}
+    big = set(sorted(sizes, key=sizes.get, reverse=True)[:keep])
+    drop = [p.index for p in me.polygons if roots[p.vertices[0]] not in big]
+    if drop:
+        bpy.data.objects.remove(separate(ob, drop))
+
+
 def build(ctx, body, body_src):
+    """Every garment as its own object, named <Slot>_<id> (GARMENTS in
+    src/game/wardrobe.ts), then swimsuits and shoes. Each old outfit is split
+    into its pieces (OUTFIT_WEAR there), so any top goes with any bottom."""
     h = heights(ctx)
     out = []
     cloth = bpy.data.materials.new("cloth")
     satin = bpy.data.materials.new("satin")
     fur = bpy.data.materials.new("fur")
 
-    # crop top and flares, from the CC0 sports suit
+    # sport crop top and flares, from the CC0 sports suit
     img = proxies.detail_texture(
         "clothes/female_sportsuit01/female_sportsuit01_diffuse.png", 1024
     )
-    flares = proxies.build(
+    crop_top = proxies.build(
         ctx,
-        "Outfit_flares",
+        "Top_sport-crop",
         "clothes/female_sportsuit01/female_sportsuit01.mhclo",
         proxies.textured("outfit_flares", img),
         snug=SNUG,
     )
+    flares = split(ctx, crop_top, "Bottom_flares")
     flare(ctx, flares)
-    out.append(flares)
+    out += [crop_top, flares]
 
-    # everyday wear from the CC0 MakeHuman suits: tee and skinny jeans, tee
-    # and denim shorts, a striped blouse and pencil skirt. The tees' printed
-    # logo is painted out.
+    # everyday wear from the CC0 MakeHuman suits, each split into its top and
+    # bottom: tee and skinny jeans, tee and denim shorts, a blouse and pencil
+    # skirt. The tees' printed logo is painted out.
     logo = ((0.79, 0.27, 0.105),)
-    for cut, suit, blank in (
-        ("jeans", "female_casualsuit01", logo),
-        ("shorts", "female_casualsuit02", logo),
-        ("blouse", "female_elegantsuit01", ()),
+    waist = h["hip"] + 0.1
+    for kind, top, bottom, suit, blank in (
+        ("Top", "tee", "skinny-jeans", "female_casualsuit01", logo),
+        ("Top", "scoop-tee", "denim-shorts", "female_casualsuit02", logo),
+        ("Top", "blouse", "pencil-skirt", "female_elegantsuit01", ()),
         # menswear (worn by anyone): a denim shirt, a striped shirt, a puffer
-        # jacket and a white tee, each over jeans; a suit and tie; overalls
-        ("denim-shirt", "male_casualsuit01", ()),
-        ("striped-shirt", "male_casualsuit03", ()),
-        ("puffer", "male_casualsuit05", ()),
-        ("white-tee", "male_casualsuit06", ((0.245, 0.14, 0.05), (0.535, 0.16, 0.11), (0.74, 0.17, 0.02))),
-        ("suit", "male_elegantsuit01", ()),
-        ("overalls", "male_worksuit01", ()),
+        # jacket and a crew tee, all of whose suits wear the same jeans (kept
+        # once, from the crew tee's); a suit; overalls, whole
+        ("Top", "denim-shirt", None, "male_casualsuit01", ()),
+        ("Top", "striped-shirt", None, "male_casualsuit03", ()),
+        ("Outer", "puffer", None, "male_casualsuit05", ()),
+        ("Top", "white-tee", "straight-jeans", "male_casualsuit06", ((0.245, 0.14, 0.05), (0.535, 0.16, 0.11), (0.74, 0.17, 0.02))),
+        ("Top", "suit-jacket", "suit-trousers", "male_elegantsuit01", ()),
+        ("Dress", "overalls", "", "male_worksuit01", ()),
     ):
         img = proxies.detail_texture(f"clothes/{suit}/{suit}_diffuse.png", 1024, blank=blank)
-        out.append(
-            proxies.build(
-                ctx, f"Outfit_{cut}", f"clothes/{suit}/{suit}.mhclo", proxies.textured(f"outfit_{cut}", img), snug=SNUG
-            )
+        ob = proxies.build(
+            ctx, f"{kind}_{top}", f"clothes/{suit}/{suit}.mhclo", proxies.textured(f"outfit_{top}", img), snug=SNUG
         )
+        out.append(ob)
+        if bottom == "":
+            continue
+        # the denim shirt is welded to its jeans: cut at the belt
+        rest = split(ctx, ob, bottom and f"Bottom_{bottom}", cut=waist - 0.02 if top == "denim-shirt" else None)
+        if rest:
+            out.append(rest)
+        if top == "puffer":
+            # the open jacket alone: the shirt glimpsed inside it would fight
+            # whatever top is worn under
+            islands_kept(ob, 1)
 
-    # slip mini: a strapless satin bodice on the tights helper, a fitted skirt
-    # from the skirt helper ending mid-thigh
+    # satin bandeau and mini: a strapless satin bodice on the tights helper, a
+    # fitted skirt from the skirt helper ending mid-thigh
     bust = h["shoulder"] - 0.1
-    waist = h["hip"] + 0.1
     hem = h["hip"] - 0.2
-    top = shell(ctx, "Outfit_mini", ["helper-tights"], [(waist - 0.04, bust)], 0.002, satin)
-    sk = shell(ctx, "mini_skirt", ["helper-skirt"], [(hem, waist)], 0.003, satin)
+    out.append(shell(ctx, "Top_bandeau", ["helper-tights"], [(waist - 0.04, bust)], 0.002, satin))
+    sk = shell(ctx, "Bottom_satin-mini", ["helper-skirt"], [(hem, waist)], 0.003, satin)
     taper(sk, waist, hem, 0.05)
-    out.append(join(top, sk))
+    out.append(sk)
 
-    # faux fur: a cropped jacket with sleeves to the wrist, over a skirt
-    coat = shell(
-        ctx, "Outfit_fur", ["helper-tights"], [(waist + 0.02, h["neck"] - 0.04)], 0.022, fur, arms=1.1
+    # faux fur: a cropped jacket with sleeves to the wrist
+    out.append(
+        shell(ctx, "Outer_fur-jacket", ["helper-tights"], [(waist + 0.02, h["neck"] - 0.04)], 0.022, fur, arms=1.1)
     )
-    sk2 = shell(ctx, "fur_skirt", ["helper-skirt"], [(hem, waist)], 0.003, satin)
-    taper(sk2, waist, hem, 0.05)
-    out.append(join(coat, sk2))
 
-    # boutique and closet garments, each its own cut (see OUTFITS in
-    # src/game/look.ts); all from the tights and skirt helpers
+    # boutique and closet garments, each its own cut; all from the tights and
+    # skirt helpers
     velour = bpy.data.materials.new("velour")
     sequin = bpy.data.materials.new("sequin")
     ankle = h["ankle"] + 0.02
@@ -317,56 +444,66 @@ def build(ctx, body, body_src):
     midthigh = (h["hip"] + knee) / 2
 
     # Y2K velour tracksuit: a zip hoodie to the wrists, flared track pants
-    hood = shell(ctx, "Outfit_tracksuit-y2k", ["helper-tights"], [(waist - 0.03, h["neck"] - 0.035)], 0.012, velour, arms=1.1)
-    pants = shell(ctx, "tracksuit_pants", ["helper-tights"], [(ankle, waist - 0.01)], 0.006, velour)
+    out.append(
+        shell(ctx, "Top_velour-hoodie", ["helper-tights"], [(waist - 0.03, h["neck"] - 0.035)], 0.012, velour, arms=1.1)
+    )
+    pants = shell(ctx, "Bottom_track-pants", ["helper-tights"], [(ankle, waist - 0.01)], 0.006, velour)
     flare(ctx, pants)
-    out.append(join(hood, pants))
+    out.append(pants)
 
-    # baby tee and pleated mini: a fitted cropped tee with cap sleeves over a
+    # baby tee and pleated mini: a fitted cropped tee with cap sleeves; a
     # short skirt that kicks out at the hem
-    tee = shell(ctx, "Outfit_baby-tee-mini", ["helper-tights"], [(waist + 0.07, h["neck"] - 0.05)], 0.004, cloth, arms=0.55)
-    sk3 = shell(ctx, "babytee_skirt", ["helper-skirt"], [(hem + 0.05, waist)], 0.004, cloth)
+    out.append(
+        shell(ctx, "Top_baby-tee", ["helper-tights"], [(waist + 0.07, h["neck"] - 0.05)], 0.004, cloth, arms=0.55)
+    )
+    sk3 = shell(ctx, "Bottom_pleated-mini", ["helper-skirt"], [(hem + 0.05, waist)], 0.004, cloth)
     taper(sk3, waist, hem + 0.05, -0.18)
-    out.append(join(tee, sk3))
+    out.append(sk3)
 
     # sequin slip gown: a strapless bodice and a skirt stretched to the ankle
-    bod = shell(ctx, "Outfit_sequin-slip", ["helper-tights"], [(waist - 0.04, bust)], 0.002, sequin)
+    bod = shell(ctx, "Dress_sequin-gown", ["helper-tights"], [(waist - 0.04, bust)], 0.002, sequin)
     gown = shell(ctx, "slip_gown", ["helper-skirt"], [(hem, waist)], 0.004, sequin)
     stretch(gown, waist, hem, ankle + 0.03)
     taper(gown, waist, ankle + 0.03, -0.25)
     out.append(join(bod, gown))
 
-    # glam faux-fur wrap: a long, plush coat to mid-thigh over a satin mini
-    wrap = shell(ctx, "Outfit_glam-faux-fur", ["helper-tights"], [(waist - 0.02, h["neck"] - 0.03)], 0.03, fur, arms=1.1)
+    # glam faux-fur wrap: a long, plush coat to mid-thigh
+    wrap = shell(ctx, "Outer_fur-wrap", ["helper-tights"], [(waist - 0.02, h["neck"] - 0.03)], 0.03, fur, arms=1.1)
     tail = shell(ctx, "wrap_tail", ["helper-skirt"], [(hem - 0.04, waist + 0.02)], 0.032, fur)
     taper(tail, waist, hem - 0.04, -0.12)
     out.append(join(wrap, tail))
 
-    # corset and maxi skirt: a laced bodice cinched at the waist, a full
-    # skirt to the floor
-    cor = shell(ctx, "Outfit_corset-maxi", ["helper-tights"], [(waist - 0.06, bust + 0.01)], 0.003, satin)
-    maxi = shell(ctx, "corset_skirt", ["helper-skirt"], [(hem, waist - 0.04)], 0.006, cloth)
+    # corset and maxi skirt: a laced bodice cinched at the waist; a full skirt
+    # to the floor
+    out.append(shell(ctx, "Top_corset", ["helper-tights"], [(waist - 0.06, bust + 0.01)], 0.003, satin))
+    maxi = shell(ctx, "Bottom_maxi-skirt", ["helper-skirt"], [(hem, waist - 0.04)], 0.006, cloth)
     stretch(maxi, waist - 0.04, hem, ankle)
     taper(maxi, waist - 0.04, ankle, -0.55)
-    out.append(join(cor, maxi))
+    out.append(maxi)
 
-    # cargo pants and a tank: wide, roomy legs to the ankle and a cropped
+    # cargo pants and a tube top: wide, roomy legs to the ankle and a cropped
     # vest top
-    tank = shell(ctx, "Outfit_cargo-crop", ["helper-tights"], [(waist + 0.09, bust + 0.03)], 0.003, cloth, arms=0.15)
-    cargo = shell(ctx, "cargo_pants", ["helper-tights"], [(ankle, waist - 0.01)], 0.022, cloth)
-    out.append(join(tank, cargo))
+    out.append(shell(ctx, "Top_tube-top", ["helper-tights"], [(waist + 0.09, bust + 0.03)], 0.003, cloth, arms=0.15))
+    out.append(shell(ctx, "Bottom_cargos", ["helper-tights"], [(ankle, waist - 0.01)], 0.022, cloth))
 
     # sundress: a fitted bodice and a skirt flaring to the knee
-    sun = shell(ctx, "Outfit_sundress", ["helper-tights"], [(waist - 0.03, bust + 0.01)], 0.003, cloth)
+    sun = shell(ctx, "Dress_sundress", ["helper-tights"], [(waist - 0.03, bust + 0.01)], 0.003, cloth)
     swing = shell(ctx, "sundress_skirt", ["helper-skirt"], [(hem, waist - 0.02)], 0.005, cloth)
     stretch(swing, waist - 0.02, hem, knee - 0.02)
     taper(swing, waist - 0.02, knee - 0.02, -0.4)
     out.append(join(sun, swing))
 
-    # cropped hoodie and biker shorts
-    crop = shell(ctx, "Outfit_hoodie-bikers", ["helper-tights"], [(waist + 0.08, h["neck"] - 0.035)], 0.012, cloth, arms=1.1)
-    bikers = shell(ctx, "biker_shorts", ["helper-tights"], [(midthigh, waist - 0.01)], 0.003, satin)
-    out.append(join(crop, bikers))
+    # cropped hoodie and bike shorts
+    out.append(
+        shell(ctx, "Top_cropped-hoodie", ["helper-tights"], [(waist + 0.08, h["neck"] - 0.035)], 0.012, cloth, arms=1.1)
+    )
+    out.append(shell(ctx, "Bottom_bike-shorts", ["helper-tights"], [(midthigh, waist - 0.01)], 0.003, satin))
+
+    # legwear, under everything: opaque tights from the waist over the feet,
+    # and knee socks
+    # and knee socks; both stop at the ankle, inside every pair of shoes
+    out.append(shell(ctx, "Legwear_tights", ["helper-tights"], [(h["ankle"], waist - 0.02)], 0.001, cloth, arms=0.2))
+    out.append(shell(ctx, "Legwear_knee-socks", ["helper-tights"], [(h["ankle"], knee - 0.04)], 0.0015, cloth, arms=0.2))
 
     # swimsuits. The bikini's leg line dips to the crotch and rises over the
     # hips to a thin side, lower at the back for fuller cover (front is -y)
@@ -434,9 +571,50 @@ def build(ctx, body, body_src):
     gloss = bpy.data.materials.new("shoe_gloss")
     out.append(platforms(ctx, "Shoes_platforms", h["ankle"] + 0.02, gloss))
     out.append(platforms(ctx, "Shoes_boots", h["knee"] - 0.06, gloss))
+    shoes = [ob for ob in out if ob.name.startswith("Shoes")]
+    for ob in out:
+        if ob.name.startswith(("Bottom", "Dress", "Legwear")):
+            into_shoes(ob, shoes)
     for ob in out:
         tuck(ctx, body, body_src, ob, ob.name.split("_", 1)[1])
     return out
+
+
+# the prefixes of every worn part's object name: each gets a body tuck key
+WORN = ("Top", "Bottom", "Dress", "Outer", "Legwear", "Swim", "Shoes")
+# layers that go over or under another garment draw covered leg skin in only
+# halfway: their tucks add up with the bottom's, and two full pulls would
+# fling the skin through the axis and out the far side of the leg
+HALF_PULL = ("Top", "Outer", "Legwear")
+
+
+def into_shoes(garment, shoes):
+    """An "in_<shoe>" shape key per pair of shoes that tucks a garment's legs
+    into them: cloth below the shoe's top that pokes through it, or sits
+    within INTO outside it, moves INSIDE behind its surface (the skin there
+    is drawn in further by the garment's own tuck, and the shoe's and the
+    garment's weights and figure keys differ a little, so a shallow tuck
+    shows through in a pose). Cloth further out fades back to
+    its own place, so flares and gowns stay over the shoe. The client sets
+    the key of the shoes worn."""
+    co = np.array([v.co[:] for v in garment.data.vertices])
+    for shoe in shoes:
+        bvh = BVHTree.FromObject(shoe, bpy.context.evaluated_depsgraph_get())
+        top = max(v.co.z for v in shoe.data.vertices)
+        move = np.zeros_like(co)
+        for i, p in enumerate(co):
+            if p[2] > top:
+                continue
+            loc, normal, _f, _d = bvh.find_nearest(Vector(p), INTO + INTO_FADE)
+            if loc is None:
+                continue
+            outside = float(np.dot(p - np.array(loc), normal))
+            if outside < -INSIDE:
+                continue
+            fade = np.clip((INTO + INTO_FADE - outside) / INTO_FADE, 0, 1)
+            move[i] = -np.array(normal) * (outside + INSIDE) * fade
+        sk = garment.shape_key_add(name=f"in_{shoe.name.split('_', 1)[1]}", from_mix=False)
+        sk.data.foreach_set("co", (co + move).ravel())
 
 
 PLATFORM = 0.05  # sole height in metres; the client lifts the doll by this

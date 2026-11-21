@@ -38,6 +38,15 @@ test("crimes raise stars: shoplifting a little, a heist a lot", () => {
   assert.ok(CRIMES.heist.heat > CRIMES.streetFight.heat);
 });
 
+test("hitting someone with your car is a star; driving off makes it worse", () => {
+  const hit = commitCrime(NOT_WANTED, "pedestrianHit");
+  assert.equal(starsOf(hit.state), 1);
+  // no Street-ladder XP for running someone over
+  assert.equal(hit.xp, 0);
+  const ran = commitCrime(hit.state, "hitAndRun");
+  assert.ok(starsOf(ran.state) >= 2);
+});
+
 test("crimes stack and stars cap at five", () => {
   let state: WantedState = NOT_WANTED;
   for (let i = 0; i < 20; i++) state = commitCrime(state, "heist").state;

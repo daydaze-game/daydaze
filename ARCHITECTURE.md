@@ -87,7 +87,9 @@ floors, looks, saves, chat effects) so both sides agree on the rules. `npm run l
   on-demand packs; `game/dance/clips.ts` picks the clip, `idlePlan.ts` gives
   the player and each NPC their idle rhythm, `transitions.ts` joins sitting
   and standing). The hand-made 13-joint poses in `pose.ts` (built dances, poses for
-  two, the toon doll) reach the skeleton through `BuiltPose`.
+  two, the toon doll) reach the skeleton through `BuiltPose`. Clothes are one
+  model per worn garment; a far doll's low-poly garments merge into one draw
+  (`human/mergeGarments.ts`).
 - `net/` wires the online session into React (see Online below).
 
 Quality tiers (`world/quality.ts`, `?quality=low|high|ultra`) keep the low tier
@@ -148,6 +150,9 @@ online player agree. The main tables:
   spawns, portals). `city/layout.ts` is the city's buildings and streets.
 - `look.ts`, `save.ts`, `shop.ts`, `wallet.ts`: the doll's look, the save
   (`SaveV1`, salvaged field by field from untrusted JSON), shops and coins.
+  `wardrobe.ts` is the mix-and-match wardrobe: garments by slot (top, bottom,
+  one-piece, outerwear, legwear), the layering rules and the look's `wear`
+  code; looks without one wear their outfit's garments.
 - `prizes.ts`, `challenges.ts`: grading every scored game S to C, bests,
   daily challenges.
 - One module per game (`bowling.ts`, `tennis.ts`, `cookOff.ts`,
@@ -196,6 +201,14 @@ reached, the game is single-player and makes no network calls.
   relay. `Directory` tracks copies and who is where; `RateLimiter` keeps
   auth and report budgets in its SQLite storage.
 - `server/migrations/` is the D1 schema.
+- Progress is server-owned for accounts: `server/src/progressCore.ts` (pure)
+  grades a reported score with the game's own prize rules, pays XP to its
+  ladder under a daily cap, and pays a first visit once;
+  `server/src/progressStore.ts` stores it in D1 (`progress`, with
+  `weekly_scores` and `weekly_xp` for the Monday-to-Sunday boards) using
+  revision-checked writes. `GET/PUT /api/save` return the server's XP and
+  title, and `src/net/progress.ts` validates the replies on the client.
+  Guests keep progress on the device. Threat model: `docs/security.md`.
 - Apartments are one copy per owner: `/ws/home/<ownerId>` reaches the
   `apartment:home:<ownerId>` Durable Object, for the owner or a friend
   (checked in D1; never a blocked one). `RoomCore`'s home mode lets a visitor
@@ -213,7 +226,9 @@ the account's own save has loaded (`saveSync.ts`, `client/net/cloudSave.ts`).
 
 The 3D doll is built in Blender from MakeHuman's CC0 assets
 (`art/doll/blender/`), optimized with gltf-transform into
-`public/models/doll/`. Textures are CC0 PBR sets fetched by
+`public/models/doll/`: the body, then hair, garments (`<slot>-<id>.glb`,
+`doll_outfits.py`), swimsuits and shoes as separate parts, each with a
+man's fit (`-m`) and a far-LOD twin (`-lo`). Textures are CC0 PBR sets fetched by
 `scripts/fetch-textures.ts`. The doll's skeleton is Mixamo's 52 bones
 (MPFB2's CC0 rig); `art/doll/blender/mocap.py` retargets Mixamo clips onto
 it (and Quaternius' CC0 Universal Animation Library) into

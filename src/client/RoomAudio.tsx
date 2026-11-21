@@ -200,6 +200,8 @@ export function RoomAudio({ room, muted }: { room: RoomId; muted: boolean }) {
             jukebox.playTrack(track);
         } else jukebox.stopTrack();
       },
+      // a failed download leaves the room without music, not without a game
+      (error: unknown) => console.warn("Room music failed to load", error),
     );
     return () => {
       live = false;

@@ -28,8 +28,10 @@ import {
   thriftFind,
   unlockedLook,
   wearable,
+  wearableGarments,
   wearItem,
 } from "./shop.ts";
+import { encodeWear } from "./wardrobe.ts";
 
 const catalogs = {
   outfit: OUTFITS,
@@ -251,4 +253,28 @@ test("shoes: the outfit's own by default, Platform Palace's once bought", () => 
     "sneakers",
   );
   assert.equal(validateLook({ ...DEFAULT_LOOK, shoes: "heels" }), false);
+});
+
+test("garments split from a boutique outfit are locked until it is bought", () => {
+  const corset = shopItem("corset-maxi");
+  assert.ok(corset, "the corset outfit is a shop item");
+  const ids = (wardrobe: string[]) =>
+    wearableGarments(wardrobe).map((g) => g.id);
+  assert.equal(ids([]).includes("corset"), false);
+  assert.equal(ids([]).includes("tee"), true);
+  assert.equal(ids(["corset-maxi"]).includes("maxi-skirt"), true);
+  const laced = {
+    ...DEFAULT_LOOK,
+    wear: encodeWear({
+      top: { id: "corset", color: "#141018" },
+      bottom: { id: "skinny-jeans", color: "#3a5a8a" },
+    }),
+  };
+  // not owned: the wear code comes off and the look wears its outfit
+  const unowned = unlockedLook(laced, []);
+  assert.equal("wear" in unowned, false);
+  assert.ok(validateLook(unowned));
+  assert.equal(unlockedLook(laced, ["corset-maxi"]).wear, laced.wear);
+  // trying on a whole outfit takes the mixed garments off
+  assert.equal("wear" in wearItem(laced, corset), false);
 });

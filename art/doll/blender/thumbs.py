@@ -33,22 +33,23 @@ PRESETS = {
     "face": ["oval", "round", "heart", "square", "diamond"],
 }
 FIGURES = ["classic", "curvy", "slim", "athletic", "plus"]
-# outfit id -> (cut, shoes, linear colour); ids match OUTFITS in src/game/look.ts
+# outfit id -> (garment files, shoes, linear colour); ids match OUTFITS in
+# src/game/look.ts, and the garments its OUTFIT_WEAR in src/game/wardrobe.ts
 OUTFITS = {
-    "flares": ("flares", "sneakers", (0.02, 0.6, 0.55, 1)),
-    "mini": ("mini", "platforms", (0.3, 0.1, 0.9, 1)),
-    "fur": ("fur", "boots", (0.85, 0.82, 0.95, 1)),
-    "jeans": ("jeans", "sneakers", (0.9, 0.45, 0.05, 1)),
-    "shorts": ("shorts", "sneakers", (0.03, 0.03, 0.04, 1)),
-    "blouse": ("blouse", "platforms", (1.0, 0.05, 0.35, 1)),
-    "tracksuit-y2k": ("tracksuit-y2k", "sneakers", (1.0, 0.25, 0.6, 1)),
-    "baby-tee-mini": ("baby-tee-mini", "platforms", (1.0, 0.75, 0.9, 1)),
-    "sequin-slip": ("sequin-slip", "platforms", (0.95, 0.8, 0.3, 1)),
-    "glam-faux-fur": ("glam-faux-fur", "boots", (1.0, 0.1, 0.5, 1)),
-    "corset-maxi": ("corset-maxi", "platforms", (0.02, 0.02, 0.03, 1)),
-    "cargo-crop": ("cargo-crop", "sneakers", (0.25, 0.3, 0.12, 1)),
-    "sundress": ("sundress", "platforms", (1.0, 0.85, 0.2, 1)),
-    "hoodie-bikers": ("hoodie-bikers", "sneakers", (0.35, 0.15, 0.9, 1)),
+    "flares": (["top-sport-crop", "bottom-flares"], "sneakers", (0.02, 0.6, 0.55, 1)),
+    "mini": (["top-bandeau", "bottom-satin-mini"], "platforms", (0.3, 0.1, 0.9, 1)),
+    "fur": (["top-bandeau", "bottom-satin-mini", "outer-fur-jacket"], "boots", (0.85, 0.82, 0.95, 1)),
+    "jeans": (["top-tee", "bottom-skinny-jeans"], "sneakers", (0.9, 0.45, 0.05, 1)),
+    "shorts": (["top-scoop-tee", "bottom-denim-shorts"], "sneakers", (0.03, 0.03, 0.04, 1)),
+    "blouse": (["top-blouse", "bottom-pencil-skirt"], "platforms", (1.0, 0.05, 0.35, 1)),
+    "tracksuit-y2k": (["top-velour-hoodie", "bottom-track-pants"], "sneakers", (1.0, 0.25, 0.6, 1)),
+    "baby-tee-mini": (["top-baby-tee", "bottom-pleated-mini"], "platforms", (1.0, 0.75, 0.9, 1)),
+    "sequin-slip": (["dress-sequin-gown"], "platforms", (0.95, 0.8, 0.3, 1)),
+    "glam-faux-fur": (["top-bandeau", "bottom-satin-mini", "outer-fur-wrap"], "boots", (1.0, 0.1, 0.5, 1)),
+    "corset-maxi": (["top-corset", "bottom-maxi-skirt"], "platforms", (0.02, 0.02, 0.03, 1)),
+    "cargo-crop": (["top-tube-top", "bottom-cargos"], "sneakers", (0.25, 0.3, 0.12, 1)),
+    "sundress": (["dress-sundress"], "platforms", (1.0, 0.85, 0.2, 1)),
+    "hoodie-bikers": (["top-cropped-hoodie", "bottom-bike-shorts"], "sneakers", (0.35, 0.15, 0.9, 1)),
 }
 # `-- outfits` renders only that group
 SKIN = (0.55, 0.3, 0.19, 1)  # linear: a warm medium tone
@@ -131,7 +132,7 @@ def load(*parts):
                         nt.links.new(tex.outputs["Alpha"], bsdf.inputs["Alpha"])
                 slot.material = mat
             continue
-        elif name.startswith(("Outfit", "Swim", "Shoes")):
+        elif name.startswith(("Top", "Bottom", "Dress", "Outer", "Legwear", "Swim", "Shoes")):
             mat = paint(ob, CLOTH, 0.6)
             # keep the garment's own detail map (denim, stripes) under the tint
             old = ob.active_material
@@ -200,11 +201,11 @@ def main():
     only = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     if not only or "outfits" in only:
         global CLOTH
-        for oid, (cut, shoes, colour) in OUTFITS.items():
+        for oid, (garments, shoes, colour) in OUTFITS.items():
             CLOTH = colour
             reset()
-            load("body", "hair-waves", f"outfit-{cut}", f"shoes-{shoes}")
-            keys({f"tuck_{cut}": 1.0, f"tuck_{shoes}": 1.0})
+            load("body", "hair-waves", *garments, f"shoes-{shoes}")
+            keys({f"tuck_{g.split('-', 1)[1]}": 1.0 for g in garments} | {f"tuck_{shoes}": 1.0, f"in_{shoes}": 1.0})
             camera((0, -3.3, 0.95), (0, 0, 0.88), 30)
             render(f"outfit-{oid}")
         for style, colour in (
