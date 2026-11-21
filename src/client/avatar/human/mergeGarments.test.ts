@@ -159,11 +159,11 @@ test("merged garments skin, morph and tint like the pieces they came from", () =
     "uv",
     new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1.5], 2),
   );
-  const atlased = mergeGarments([
+  const inAtlas = mergeGarments([
     { mesh: top, color: "#ff0000", rect: [0.5, 0, 0.5, 0.5] },
     { mesh: bottom, color: "#0000ff", rect: [0, 0.5, 0, 0] },
   ]);
-  const uv = atlased?.geometry.getAttribute("uv");
+  const uv = inAtlas?.geometry.getAttribute("uv");
   assert.ok(uv);
   assert.deepEqual([uv.getX(1), uv.getY(1)], [1, 0]);
   // a UV past the map's edge is clamped into the cell
