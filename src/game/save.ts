@@ -32,6 +32,7 @@ import {
   NO_CHALLENGES,
   type ChallengeSave,
 } from "./challenges.ts";
+import { cleanShifts, NO_SHIFTS, type ShiftsSave } from "./shifts.ts";
 import { cleanStreak, NO_STREAK, type StreakSave } from "./streakSave.ts";
 import { cleanBests, type Bests } from "./prizes.ts";
 import { validatePet, type PetSave } from "./pet.ts";
@@ -103,6 +104,8 @@ export type SaveV1 = {
   giftDay: number;
   /** The daily streak (streak.ts); saves from before it start with none. */
   streak: StreakSave;
+  /** Paid shifts worked (shifts.ts); saves from before jobs start with none. */
+  shifts: ShiftsSave;
 };
 
 /** The localStorage key the save lives under. */
@@ -135,6 +138,7 @@ export function createDefaultSave(name: string): SaveV1 {
     challenges: { ...NO_CHALLENGES, done: [] },
     progression: freshProgression(),
     streak: { ...NO_STREAK, days: [], frozen: [] },
+    shifts: { ...NO_SHIFTS, worked: {} },
     car: null,
     garage: [STARTER],
     records: [],
@@ -240,6 +244,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
     inventory: cleanInventory(save.get("inventory")),
     giftDay: cleanGiftDay(save.get("giftDay")),
     streak: cleanStreak(save.get("streak")),
+    shifts: cleanShifts(save.get("shifts")),
   };
 }
 

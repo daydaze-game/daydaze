@@ -73,6 +73,7 @@ test("createDefaultSave uses the default look and auto quality", () => {
       frozen: [],
       freezeWeek: -1,
     },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -133,6 +134,7 @@ test("a save round-trips through serializeSave and loadSave", () => {
       frozen: [],
       freezeWeek: -1,
     },
+    shifts: { day: 0, today: 0, worked: {} },
   };
   assert.deepEqual(loadSave(serializeSave(save), "Fallback"), save);
 });
@@ -216,6 +218,7 @@ test("a save from before the swimsuit slot still loads", () => {
       frozen: [],
       freezeWeek: -1,
     },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -293,6 +296,7 @@ test("loadSave keeps a valid name when the look is bad", () => {
       frozen: [],
       freezeWeek: -1,
     },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -344,6 +348,7 @@ test("loadSave keeps a valid look when the name is bad", () => {
       frozen: [],
       freezeWeek: -1,
     },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -536,6 +541,7 @@ test("loadSave salvages valid fields from a wrong version", () => {
       frozen: [],
       freezeWeek: -1,
     },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -802,4 +808,19 @@ test("custom graphics settings survive a save and load", () => {
   });
   const loaded = loadSave(JSON.stringify(save), "Fallback");
   assert.deepEqual(loaded.settings.graphics, save.settings.graphics);
+});
+
+test("a saved shift record survives a reload and bad ones are cleaned", () => {
+  const save = createDefaultSave("Kai");
+  save.shifts = { day: 9, today: 2, worked: { barista: 4 } };
+  assert.deepEqual(
+    loadSave(serializeSave(save), "Fallback").shifts,
+    save.shifts,
+  );
+  const bad = JSON.stringify({ ...save, shifts: { day: -4, worked: 7 } });
+  assert.deepEqual(loadSave(bad, "Fallback").shifts, {
+    day: 0,
+    today: 0,
+    worked: {},
+  });
 });
