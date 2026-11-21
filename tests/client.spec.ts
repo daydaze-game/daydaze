@@ -2627,6 +2627,49 @@ test("walking the sidewalk, her foot catches: she trips, is held a moment, then 
   expect(errors).toEqual([]);
 });
 
+test("stepping out in front of a car too close to stop: she is knocked down and gets back up", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  // midday on the avenue by the spawn, where traffic is moving
+  await page.goto(`${LOW}&room=city&time=12:00&debug=1`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  // into the lane 8 m ahead of a moving car (retried while every car near
+  // her waits at a light)
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const stepOut: unknown = Reflect.get(window, "daydazeStepOut");
+          return (
+            typeof stepOut === "function" &&
+            Reflect.apply(stepOut, window, [8]) === true
+          );
+        }),
+      { timeout: 120_000, intervals: [2_000] },
+    )
+    .toBe(true);
+  await expect(canvas).toHaveAttribute(
+    "data-car-hit",
+    /^(bump|knockdown|hard-fall)$/,
+    { timeout: 60_000 },
+  );
+  await expect(canvas).toHaveAttribute(
+    "data-reaction",
+    /^(stumble|trip-fall|hard-fall|get-up)$/,
+    { timeout: 30_000 },
+  );
+  // and up again, free to walk
+  await expect(canvas).not.toHaveAttribute("data-reaction", /.+/, {
+    timeout: 120_000,
+  });
+  expect(errors).toEqual([]);
+});
+
 test("drinks in the Velvet Room raise the buzz, and three in the view sways", async ({
   page,
 }) => {

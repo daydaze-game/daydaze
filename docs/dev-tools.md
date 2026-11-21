@@ -121,6 +121,13 @@ message counts by type and the last few messages, without the constant
 For example, `__dd.scene.getObjectByName("floor")` or
 `__dd.gl.info.render`.
 
+With `?debug=1` (any build), two test handles sit on `window`:
+`daydazeReact("trip-fall")` plays a reaction on your doll (`reaction.ts`),
+and in the city `daydazeStepOut(8)` puts you in the lane 8 m ahead of the
+fastest traffic car near you, too close for it to stop (`Traffic.tsx`; false
+when none is moving). The canvas then shows `data-car-hit` (the outcome) and
+`data-heat` (police heat, `world/heat.ts`).
+
 ## URL flags
 
 These work in any build, without the panel:

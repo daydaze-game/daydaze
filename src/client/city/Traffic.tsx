@@ -15,8 +15,9 @@ import {
   signalledJunctions,
   stepTraffic,
   type Signal,
+  type TrafficCar,
 } from "../../game/city/traffic.ts";
-import type { Player } from "../world/PlayerController.tsx";
+import { placePlayer, type Player } from "../world/PlayerController.tsx";
 import { foodMotion } from "./foodVendors.ts";
 import { busMotion } from "./busRide.ts";
 import { taxiCab } from "./taxiStore.ts";
@@ -295,6 +296,35 @@ export function Traffic({ player }: { player: Player }) {
       mesh.frustumCulled = false;
     return { ...all, signals };
   }, [bulbs, slots]);
+
+  // `?debug=1` puts `daydazeStepOut(meters)` on the page, for tests: the
+  // player steps into the lane that many meters ahead of the fastest car
+  // near her (true), or there is none moving (false)
+  useEffect(() => {
+    if (!probing) return;
+    const stepOut = (ahead: unknown) => {
+      if (typeof ahead !== "number" || !Number.isFinite(ahead)) return false;
+      let fastest: TrafficCar | null = null;
+      for (const car of traffic.cars) {
+        carPose(car, pose);
+        const d = Math.hypot(pose.x - player.pos.x, pose.z - player.pos.z);
+        if (d < 120 && car.speed > 5 && car.speed > (fastest?.speed ?? 0))
+          fastest = car;
+      }
+      if (!fastest) return false;
+      carPose(fastest, pose);
+      placePlayer(
+        player,
+        pose.x + Math.cos(pose.yaw) * ahead,
+        pose.z - Math.sin(pose.yaw) * ahead,
+      );
+      return true;
+    };
+    Object.assign(window, { daydazeStepOut: stepOut });
+    return () => {
+      Object.assign(window, { daydazeStepOut: undefined });
+    };
+  }, [probing, traffic, player]);
 
   useEffect(
     () => () => {
