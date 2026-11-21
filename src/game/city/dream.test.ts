@@ -145,6 +145,9 @@ test("detailed landmarks replace one central module each without repeating on wi
     ["bus-shelter-block", "manor"],
     ["mural-wall", "clocktower"],
     ["vesper-hotel", "palace"],
+    ["florist", "greenhouse"],
+    ["arcade-square", "rotunda"],
+    ["pawn-gadgets", "shopfront"],
   ]);
   const all = BUILDINGS.flatMap((b) => {
     const modules = spots(b);
@@ -162,7 +165,14 @@ test("detailed landmarks replace one central module each without repeating on wi
 test("textured landmarks keep their proportions and the street-facing boundary", async () => {
   const dream = await import("./dream.ts");
   assert.equal(typeof dream.landmarkPlacement, "function");
-  for (const id of ["vesper-hotel", "bus-shelter-block", "mural-wall"]) {
+  for (const id of [
+    "vesper-hotel",
+    "bus-shelter-block",
+    "mural-wall",
+    "florist",
+    "arcade-square",
+    "pawn-gadgets",
+  ]) {
     const b = BUILDINGS.find((b) => b.id === id);
     assert.ok(b);
     const spot = spots(b).find((s) => s.landmark !== undefined);
