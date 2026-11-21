@@ -18,7 +18,7 @@ RAW = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/dream-landmarks")
 DEST = ROOT / "public/models/city-dream"
 metadata = json.loads((RAW / "metadata.json").read_text())
 costs = {}
-for key in ("palace", "manor", "clocktower"):
+for key in metadata:
     costs[key] = {}
     for low in (False, True):
         filename = key + ("-lo" if low else "") + ".glb"
