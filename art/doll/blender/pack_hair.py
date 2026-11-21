@@ -53,13 +53,9 @@ STYLES = {
     "sleek-side": ("p2", 104, {}),
     "high-pony": ("p2", 105, {"swing": (0.0, 0.07, 0.07)}),
     "twin-tails": ("p2", 107, {}),
-    "lob": ("p2", 103, {}),
     "blunt-bob": ("p2", 106, {}),
-    "sidebob": ("p2", 100, {}),
     "side-fringe": ("p2", 101, {}),
-    "messy-bun": ("p2", 112, {}),
     # short cuts, for either sex
-    "quiff": ("p1", 0, {}),
     "side-part": ("p1", 2, {}),
     "tousled": ("p1", 3, {}),
     "messy-curls": ("p2", 102, {}),

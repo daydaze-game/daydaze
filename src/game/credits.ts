@@ -383,7 +383,7 @@ export const CREDITS: readonly {
         license: "CC-BY 4.0",
         url: "https://sketchfab.com/3d-models/none-41f1709e39e24a3fafdbcd2c2aac72a1",
         usedFor:
-          "Hair-card styles quiff, side part, tousled, mop, pompadour, mohawk, spiky crop and layered waves, refitted to our heads, the atlas greyed so hair color tints it (art/doll/blender/pack_hair.py).",
+          "Hair-card styles side part, tousled, mop, pompadour, mohawk, spiky crop and layered waves, refitted to our heads, the atlas greyed so hair color tints it (art/doll/blender/pack_hair.py).",
       },
       {
         title: "Hair Pack (part 2)",
@@ -391,7 +391,7 @@ export const CREDITS: readonly {
         license: "CC-BY 4.0",
         url: "https://sketchfab.com/3d-models/none-06a783e91c194e12a296402453476824",
         usedFor:
-          "Hair-card styles rapunzel, long waves, sleek side-swept, high ponytail, twin tails, lob, blunt bob, side-swept bob, side fringe, messy bun and messy shag, refitted to our heads (art/doll/blender/pack_hair.py).",
+          "Hair-card styles rapunzel, long waves, sleek side-swept, high ponytail, twin tails, blunt bob, side fringe and messy shag, refitted to our heads (art/doll/blender/pack_hair.py).",
       },
       {
         title: "Hair Pack (part 3)",
@@ -400,6 +400,38 @@ export const CREDITS: readonly {
         url: "https://sketchfab.com/3d-models/none-9dc99938fab341e29b34354004e230b6",
         usedFor:
           "Hair-card styles fishtail braid, crew cut and slick back, refitted to our heads (art/doll/blender/pack_hair.py).",
+      },
+      {
+        title: "Bob hair (three cuts)",
+        author: "MargaretToigo",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+        usedFor:
+          "The Bob with bangs, Curled-under bob and Inverted bob hairstyles, fitted to our heads as MakeHuman proxies, greyed so hair color tints them (art/doll/blender/doll_hair.py).",
+      },
+      {
+        title: "Double MH Braid",
+        author: "Elvaerwyn",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+        usedFor:
+          "The Braided pigtails hairstyle, fitted to our heads as a MakeHuman proxy (art/doll/blender/doll_hair.py).",
+      },
+      {
+        title: "Hair Bun Brown",
+        author: "RehmanPolanski",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+        usedFor:
+          "The Sleek bun hairstyle, fitted to our heads as a MakeHuman proxy (art/doll/blender/doll_hair.py).",
+      },
+      {
+        title: "Seven hairstyles (hair02 pack)",
+        author: "Elvaerwyn",
+        license: "CC-BY 4.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair02.html",
+        usedFor:
+          "Daisy, Katherine, Ashley May, Hazel, Micky Afro, Braided Rows and Maxwell as the Glossy waves, Long and sleek, Shoulder waves, Shoulder-length, Puffs, Cornrows and Quiff hairstyles, fitted to our heads as MakeHuman proxies (art/doll/blender/doll_hair.py).",
       },
       {
         title: "Realistic Car Pack",
