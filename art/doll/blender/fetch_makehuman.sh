@@ -190,4 +190,17 @@ if [ ! -d "$PACK/proxymeshes/male1591" ]; then
   unzip -q -o "$tmp/cc0.zip" '*clothes/male_*' '*hair/short0*' '*proxymeshes/male1591/*' -d "$PACK"
   rm -r "$tmp"
 fi
+# community hair (doll_hair.py COMMUNITY): CC0 from hair01, CC-BY from hair02
+# (2026-11-20); only the styles we wear are kept
+if [ ! -d "$PACK/hair/elvs_maxwell_hair" ]; then
+  tmp="$(mktemp -d)"
+  curl -fsSL https://files.makehumancommunity.org/asset_packs/hair01/hair01_cc0.zip -o "$tmp/hair01.zip"
+  unzip -q -o "$tmp/hair01.zip" 'hair/toigo_blunt_bob_with_bangs/*' 'hair/toigo_curled_under_bob/*' \
+    'hair/toigo_inverted_bob/*' 'hair/elvs_double_mh_braid/*' 'hair/rehmanpolanski_hair_bun_brown/*' -d "$PACK"
+  curl -fsSL https://files.makehumancommunity.org/asset_packs/hair02/hair02_ccby.zip -o "$tmp/hair02.zip"
+  unzip -q -o "$tmp/hair02.zip" 'hair/elvs_daisy_hair/*' 'hair/elvs_katherine_hair/*' \
+    'hair/elvs_ashley_may_hair/*' 'hair/elvs_hazel_hair/*' 'hair/elvs_micky_afro/*' \
+    'hair/elvs_braided_rows/*' 'hair/elvs_maxwell_hair/*' -d "$PACK"
+  rm -r "$tmp"
+fi
 echo "MakeHuman proxies in $PACK"
