@@ -27,6 +27,7 @@ LEG_RAMP = 0.06  # metres up from a garment's lowest edge over which that pull f
 SHARE = 0.03  # metres: hidden skin this near both pieces of a split suit goes with both
 INTO = 0.02  # metres: cloth this far outside a shoe (or less) tucks into it fully...
 INTO_FADE = 0.01  # ...fading out over this much further, so a wide hem stays over it
+INSIDE = 0.015  # metres behind the shoe's surface tucked cloth goes: deep enough to stay in under any figure and pose (the leg skin there is drawn in further)
 
 
 def heights(ctx):
@@ -590,8 +591,10 @@ HALF_PULL = ("Top", "Outer", "Legwear")
 def into_shoes(garment, shoes):
     """An "in_<shoe>" shape key per pair of shoes that tucks a garment's legs
     into them: cloth below the shoe's top that pokes through it, or sits
-    within INTO outside it, moves to CLEAR / 2 behind its surface (skin there
-    is sunk CLEAR behind by the shoe's tuck). Cloth further out fades back to
+    within INTO outside it, moves INSIDE behind its surface (the skin there
+    is drawn in further by the garment's own tuck, and the shoe's and the
+    garment's weights and figure keys differ a little, so a shallow tuck
+    shows through in a pose). Cloth further out fades back to
     its own place, so flares and gowns stay over the shoe. The client sets
     the key of the shoes worn."""
     co = np.array([v.co[:] for v in garment.data.vertices])
@@ -606,10 +609,10 @@ def into_shoes(garment, shoes):
             if loc is None:
                 continue
             outside = float(np.dot(p - np.array(loc), normal))
-            if outside < -CLEAR / 2:
+            if outside < -INSIDE:
                 continue
             fade = np.clip((INTO + INTO_FADE - outside) / INTO_FADE, 0, 1)
-            move[i] = -np.array(normal) * (outside + CLEAR / 2) * fade
+            move[i] = -np.array(normal) * (outside + INSIDE) * fade
         sk = garment.shape_key_add(name=f"in_{shoe.name.split('_', 1)[1]}", from_mix=False)
         sk.data.foreach_set("co", (co + move).ravel())
 
