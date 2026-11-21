@@ -4,7 +4,9 @@
 // the room copy's Durable Object with an identity header only this gateway
 // sets. Every response gets the security headers; error bodies are fixed codes.
 
+import { dayOf } from "../../../src/game/challenges.ts";
 import type { RoomId } from "../../../src/game/rooms.ts";
+import type { Progression } from "../../../src/game/progression/progression.ts";
 import {
   createDefaultSave,
   generateGuestName,
@@ -19,6 +21,14 @@ import {
 } from "../cookies.ts";
 import type { AuthAction, LimitScope } from "../authLimits.ts";
 import { checkLogin, hashPassword } from "../passwords.ts";
+import {
+  applyScore,
+  applyTitle,
+  applyVisit,
+  DAILY_XP_CAP,
+  progressionOf,
+  type ProgressState,
+} from "../progressCore.ts";
 import { matchRoute, needsOriginCheck, type Route } from "../routes.ts";
 import {
   applySecurityHeaders,
@@ -39,7 +49,10 @@ import {
   parseIdentity,
   parseReport,
   parseSave,
+  parseScoreSubmission,
   parseTarget,
+  parseTitleChoice,
+  parseVisit,
   type Identity,
   type RoomCopy,
 } from "../validation.ts";
@@ -50,6 +63,13 @@ import {
   roomObjectName,
   homeObjectName,
 } from "./roomInstance.ts";
+
+import {
+  ladderBoard,
+  loadProgress,
+  scoreBoard,
+  updateProgress,
+} from "../progressStore.ts";
 
 export { Directory } from "./directory.ts";
 export { RateLimiter } from "./rateLimiter.ts";
@@ -258,6 +278,25 @@ async function friendsOf(env: Env, id: string) {
   return friendLists(sentTo, receivedFrom, names, rooms);
 }
 
+/** A save's Progression with the server's XP and title (events stay the
+ * client's: they only gate local XP, which the server overrides). */
+function ownProgression(
+  state: ProgressState,
+  save: { progression: Progression },
+): Progression {
+  return progressionOf(state, save.progression.events);
+}
+
+/** What the client needs of a state: totals, title and today's headroom. */
+function progressBody(state: ProgressState, now: number) {
+  const today = state.day === dayOf(now) ? state.dayXp : 0;
+  return {
+    xp: state.xp,
+    title: state.title,
+    dailyXpLeft: Math.max(0, DAILY_XP_CAP - today),
+  };
+}
+
 function publicIdentity({ id, name, isGuest, isAdmin }: Identity): Identity {
   return { id, name, isGuest, isAdmin };
 }
@@ -393,9 +432,12 @@ async function handle(
         .bind(session.id)
         .first();
       const data = typeof row?.data === "string" ? row.data : null;
-      const save = data
+      const stored = data
         ? loadSave(data, session.name)
         : createDefaultSave(session.name);
+      // XP and the title are the server's; the stored copy only carries them
+      const { state } = await loadProgress(env.DB, session.id, session.name);
+      const save = { ...stored, progression: ownProgression(state, stored) };
       return new Response(serializeSave(save), {
         headers: { "Content-Type": "application/json" },
       });
@@ -405,15 +447,92 @@ async function handle(
       const raw = await readText(request, MAX_SAVE_BYTES);
       const save = raw === null ? null : parseSave(raw, session.name);
       if (!save) return error(400, "invalid-save");
+      // First contact seeds progress from the save stored *before* this upload,
+      // so an upload can't pick its own starting XP; afterwards the client's
+      // XP and title are ignored for the server's.
+      const { state } = await loadProgress(env.DB, session.id, session.name);
+      const owned = { ...save, progression: ownProgression(state, save) };
       await env.DB.prepare(
         `INSERT INTO saves (user_id, data, updated_at) VALUES (?, ?, ?)
          ON CONFLICT (user_id) DO UPDATE
            SET data = excluded.data, updated_at = excluded.updated_at`,
       )
-        .bind(session.id, serializeSave(save), Date.now())
+        .bind(session.id, serializeSave(owned), Date.now())
         .run();
-      return json(save);
+      return json(owned);
     }
+    case "progress":
+    case "progress-score":
+    case "progress-visit":
+    case "progress-title": {
+      // guests keep progress on the device; only accounts have a server row
+      if (session.isGuest) return error(403, "guest-progress-is-local");
+      const now = Date.now();
+      if (route.kind === "progress") {
+        const { state } = await loadProgress(env.DB, session.id, session.name);
+        return json(progressBody(state, now));
+      }
+      const body = await readJson(request);
+      const score =
+        route.kind === "progress-score" && parseScoreSubmission(body);
+      const visit = route.kind === "progress-visit" && parseVisit(body);
+      const title = route.kind === "progress-title" && parseTitleChoice(body);
+      if (!score && !visit && !title) return error(400, "invalid-progress");
+      const limited = await rateLimited(
+        env,
+        request,
+        "progress",
+        "",
+        session.id,
+      );
+      if (limited) return limited;
+      const outcome = await updateProgress(
+        env.DB,
+        session.id,
+        session.name,
+        now,
+        (state) => {
+          if (score) {
+            const r = applyScore(state, score.game, score.score, now);
+            return (
+              r && {
+                state: r.state,
+                effects: {
+                  score: { game: score.game, value: score.score },
+                  xp: { ladder: r.ladder, amount: r.xp },
+                },
+                result: {
+                  grade: r.grade,
+                  ladder: r.ladder,
+                  gained: r.xp,
+                  best: r.best,
+                  capped: r.capped,
+                },
+              }
+            );
+          }
+          if (visit) {
+            const r = applyVisit(state, visit.roomId);
+            return {
+              state: r.state,
+              effects: { xp: { ladder: r.ladder, amount: r.xp } },
+              result: { ladder: r.ladder, gained: r.xp },
+            };
+          }
+          const next = title ? applyTitle(state, title.title) : null;
+          return next && { state: next, effects: {}, result: {} };
+        },
+      );
+      if (outcome === "busy") return error(409, "busy");
+      if (!outcome) return error(422, "refused");
+      return json({ ...outcome.result, ...progressBody(outcome.state, now) });
+    }
+    case "board-score":
+      return json(await scoreBoard(env.DB, route.game, session.id, Date.now()));
+    case "board-ladder":
+      return json(
+        await ladderBoard(env.DB, route.ladder, session.id, Date.now()),
+      );
     case "report": {
       const report = parseReport(await readJson(request));
       if (!report) return error(400, "invalid-report");

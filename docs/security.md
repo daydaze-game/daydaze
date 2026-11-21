@@ -11,6 +11,8 @@ Daydaze is a free social game for adults, run on Cloudflare free tiers. What we 
 3. **The shared rooms.** One client must not crash a room copy, flood it, teleport, spoof another player, or claim admin.
 4. **Free-tier capacity.** Scripts must not burn D1 writes or CPU through unauthenticated endpoints.
 
+5. **Fair progress and boards.** XP, ranks, titles and the weekly leaderboards belong to the server for accounts, so a player can't climb a public board by editing their save.
+
 Out of scope for now: anything that only hurts the cheater (client-owned coins), nation-state attackers, and DDoS (Cloudflare's edge handles volumetric floods).
 
 ## What is protected
@@ -67,6 +69,16 @@ Out of scope for now: anything that only hurts the cheater (client-owned coins),
 - Looks must come from the catalog, and display names are 2 to 16 ASCII characters checked against the slur list.
 - A save upload is rejected unless `loadSave` would keep every field as sent, so a bad upload never replaces the last good save.
 
+**Server-owned progress (accounts only)**
+
+- An account's XP per ladder, title, visited places and personal bests live in D1 (`progress`), and the client can't write them. `PUT /api/save` keeps whatever XP and title the save says only until the server has its own row; after that it replaces them with the server's, and `GET /api/save` does the same.
+- The client reports what happened (`POST /api/progress/score` with a game and a score, `/visit` with a room, `/title` with a title). The server grades the score with the game's own rules (`prizeFor`), decides the XP, and refuses a title that isn't earned.
+- Scores must be plausible: finite, and not more than ten times the game's S bar (or, in lower-is-better games, not under half of it).
+- Score XP is capped at 5,000 per UTC day; a first visit to a place pays once; progress writes are rate limited (6 per player, then 1 every 10 s; 60 per address, then 1 every 2 s).
+- Concurrent writes can't double-spend the cap: each write checks a revision number and its leaderboard rows are only written if the progress write won.
+- Guests have no server progress (403 `guest-progress-is-local`), so they are never on a board.
+- Weekly boards (`weekly_scores`, `weekly_xp`) count only what the server graded this week, use Monday 00:00 UTC weeks, keep eight weeks, leave banned players off, and show usernames only, never ids.
+
 **Harassment tools**
 
 - Blocks are enforced by the server in both directions, for entities, profiles, chat and emotes.
@@ -93,7 +105,7 @@ Out of scope for now: anything that only hurts the cheater (client-owned coins),
   - In headless Chromium, the app renders with no violations, a same-host `ws://` connection passes (CSP Level 3 `'self'` covers `ws:`/`wss:` to the same host), and `ws://evil.example` is blocked.
 - `'unsafe-inline'` styles are for React style props. `server/src/csp.test.ts` pins the policy, so a loosened header fails `npm test`.
 
-The smoke test (`npm run smoke:server`) runs against a local `wrangler dev`. It covers the cross-origin refusals, the 6th rapid login, the 21st rapid block and the 6th rapid report getting 429, the security headers and the CSP, blocks, reconnects, and forged identity headers.
+The smoke test (`npm run smoke:server`) runs against a local `wrangler dev`. It covers the server-owned progress flow (grading, implausible scores, boards, first visits, titles, the save override, the rate limit), the cross-origin refusals, the 6th rapid login, the 21st rapid block and the 6th rapid report getting 429, the security headers and the CSP, blocks, reconnects, and forged identity headers.
 
 ## Deployment requirements
 
@@ -104,7 +116,12 @@ The smoke test (`npm run smoke:server`) runs against a local `wrangler dev`. It 
 ## Known gaps
 
 - **Guest re-entry after a ban.** A banned guest can start a new guest session. IP bans help, but addresses are shared (carrier NAT, campus Wi-Fi) and rotate (IPv6). Accounts are the real accountability tool; if guests are abused, gate chat or rooms behind accounts.
-- **Client-owned coins and purchases.** Coins live in the client save, so players can give themselves anything. That only affects the cheater while there is no trading or online leaderboard. Both of those must wait for a server-authoritative economy.
+- **Client-owned coins and purchases.** Coins live in the client save, so players can give themselves anything. That only affects the cheater while there is no trading. Trading must wait for a server-authoritative economy. (XP and the boards are server-owned; rank coins are still granted by the client.)
+- **Scores are still reported by the client.** The server can't replay a minigame, so a forged score inside the plausibility bounds still lands on a weekly board and pays its normal XP (within the daily cap). Closing this means simulating or verifying games on the server, or submitting input logs; until then the boards are "fair enough", and admins can ban a cheater, which removes them from the boards.
+- **One-time import of old progress.** An account's first contact with the server seeds its XP, title, visited places and bests from the cloud save it had stored, which is client-owned. A player could have inflated that before the server shipped. The import is not counted on the weekly boards, so it can't win them; and an upload after the first contact can't change XP.
+- **The client doesn't send progress yet.** Until the client calls the progress routes (#366), an account's minigame and first-visit XP is paid locally and overwritten by the server's on the next save sync, so the server must not go live before that lands.
+- **Event-night XP is not on the server yet.** The client still pays XP for event nights, discoveries beyond first visits, lifts and the daily-challenge bonus locally; those numbers are overwritten by the server's the next time the save syncs. They need server endpoints before they count online.
+- **Boards ignore blocks.** A blocked player still appears on a leaderboard you view.
 - **Admin tools are API-only.** `POST /api/admin/ban` bans a player (and a guest's last IP) and signs them out everywhere, and admins get a Ban button on the peer card and a report viewer (`GET /api/admin/reports`) in the Friends panel. There's no kick, unban or report triage yet.
 - **In-room rate limits live in memory.** Login, signup, guest, report and block budgets live in a `RateLimiter` Durable Object's SQLite storage, so eviction doesn't refill them. The per-room movement, chat and emote buckets in `RoomCore` are in memory, so a room copy evicted after idling starts them full again. Many users behind one IP share the auth budget.
 - **Client-owned jail sentences and store bans.** They live in the save, so a player can clear them; they move to D1 with the server economy (A5).

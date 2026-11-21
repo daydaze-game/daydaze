@@ -173,3 +173,41 @@ test("admin reports are validated row by row; bad rows are dropped", () => {
   );
   assert.equal(parseReports("nope"), null);
 });
+
+test("progress routes use the right method, path and body, and validate replies", async () => {
+  const progress = {
+    xp: { street: 1, fame: 2, hustle: 3 },
+    title: null,
+    dailyXpLeft: 5000,
+  };
+  const board = {
+    week: 1,
+    startsAt: 0,
+    endsAt: 1,
+    entries: [],
+    you: null,
+  };
+  const { fetch, calls } = fakeFetch(({ url }) =>
+    json(url.includes("/leaderboard/") ? board : progress),
+  );
+  const api = createApi({ fetch });
+  assert.deepEqual(await api.progress(), { ok: true, value: progress });
+  const visit = await api.visit("plaza");
+  assert.equal(visit.ok, false, "a visit reply without its ladder is refused");
+  assert.equal((await api.setTitle(null)).ok, true);
+  assert.equal((await api.scoreBoard("bowling")).ok, true);
+  assert.equal((await api.ladderBoard("fame")).ok, true);
+  assert.deepEqual(
+    calls.map(({ url, init }) => [init.method, url, init.body]),
+    [
+      ["GET", "/api/progress", undefined],
+      ["POST", "/api/progress/visit", '{"roomId":"plaza"}'],
+      ["POST", "/api/progress/title", '{"title":null}'],
+      ["GET", "/api/leaderboard/score/bowling", undefined],
+      ["GET", "/api/leaderboard/ladder/fame", undefined],
+    ],
+  );
+  const score = await api.submitScore("bowling", 150);
+  assert.equal(score.ok, false, "a score reply without its grade is refused");
+  assert.equal(calls[5]?.init.body, '{"game":"bowling","score":150}');
+});
