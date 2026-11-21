@@ -1497,6 +1497,21 @@ const SHOTS: {
   { name: "tiki-bar", query: "room=tiki-bar" },
   { name: "thrift-temple", query: "room=thrift-temple" },
   { name: "espresso-lab", query: "room=espresso-lab" },
+  // a finished barista shift: empty cups count as wrong orders, so the shift
+  // ends after eight and the panel shows the pay slip (game/shifts.ts)
+  {
+    name: "barista-pay-slip",
+    query: "room=espresso-lab",
+    act: async (page) => {
+      const panel = page.getByRole("region", { name: "Barista station" });
+      await panel
+        .getByRole("button", { name: "Start a shift" })
+        .click({ timeout: 150_000 });
+      for (let i = 0; i < 8; i++)
+        await panel.getByRole("button", { name: "Hand it over" }).click();
+      await expect(panel).toContainText(/Paid \d+ coins/);
+    },
+  },
   { name: "hotel-rooftop", query: "room=hotel-rooftop" },
   { name: "bookshop", query: "room=bookshop" },
   { name: "patisserie", query: "room=patisserie" },
