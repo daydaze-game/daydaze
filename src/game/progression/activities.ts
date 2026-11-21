@@ -9,6 +9,7 @@ import type { MinigameId } from "../hotspots.ts";
 import { prizeFor, type PrizeGame } from "../prizes.ts";
 import type { RoomId } from "../rooms.ts";
 import type { SaveV1 } from "../save.ts";
+import { settleShift, type Job, type ShiftResult } from "../shifts.ts";
 import { earn, payoutFor, type PayGrade } from "../wallet.ts";
 import { addXp, type Ladder } from "./progression.ts";
 
@@ -69,6 +70,13 @@ export const GAME_LADDERS: Record<PrizeGame, Ladder> = {
   pottery: "hustle",
 };
 const GRADE_XP: Record<PayGrade, number> = { C: 25, B: 45, A: 70, S: 100 };
+const BEST_XP = 25;
+
+/** XP a finished game pays for its grade and a personal best (the daily
+ * challenge bonus is on top). Shared with the server, which grades scores itself. */
+export function prizeXp(grade: PayGrade, best: boolean): number {
+  return GRADE_XP[grade] + (best ? BEST_XP : 0);
+}
 
 /** The shared entry point for present and future activity completions. */
 export function rewardXp(s: SaveV1, ladder: Ladder, xp: number): SaveV1 {
@@ -105,8 +113,7 @@ export function scorePrize(
   if (!Number.isFinite(score) || Math.abs(score) >= 1e7) return null;
   const prize = prizeFor(game, score, s.bests[game]);
   const daily = completeChallenge(s.challenges, dayOf(now), game, score);
-  const xp =
-    GRADE_XP[prize.grade] + (prize.best ? 25 : 0) + (daily.coins > 0 ? 75 : 0);
+  const xp = prizeXp(prize.grade, prize.best) + (daily.coins > 0 ? 75 : 0);
   return { prize, daily: daily.coins, challenges: daily.save, xp };
 }
 export type ScoredPrize = NonNullable<ReturnType<typeof scorePrize>>;
@@ -134,6 +141,20 @@ export function finishPrize(
 ) {
   const r = scorePrize(s, game, score, now);
   return r && { ...r, save: applyPrize(s, game, r) };
+}
+
+/** A finished paid shift (shifts.ts): its wage and Hustle XP land in the save
+ * together with the shift count, so a reload cannot replay it. */
+export function finishShift(
+  s: SaveV1,
+  job: Job,
+  result: ShiftResult,
+  now: number,
+) {
+  const w = settleShift(s.shifts, job, result, dayOf(now));
+  if (w.shifts === s.shifts) return { ...w, save: s };
+  const paid = { ...s, coins: earn(s.coins, w.coins), shifts: w.shifts };
+  return { ...w, save: rewardXp(paid, "hustle", w.xp) };
 }
 
 export function rewardVisit(

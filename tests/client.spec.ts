@@ -1760,6 +1760,28 @@ test("Espresso Lab: a barista shift takes a ticket and scores a drink", async ({
   expect(errors).toEqual([]);
 });
 
+test("Espresso Lab: a finished shift posts a pay slip and counts in the save", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=espresso-lab`);
+  const panel = page.getByRole("region", { name: "Barista station" });
+  await panel
+    .getByRole("button", { name: "Start a shift" })
+    .click({ timeout: 150_000 });
+  // empty cups are wrong orders: the shift still ends and is logged
+  for (let i = 0; i < 8; i++)
+    await panel.getByRole("button", { name: "Hand it over" }).click();
+  await expect(panel).toContainText(/Paid \d+ coins and \d+ Hustle XP/);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("daydaze-save-v1") ?? ""),
+    )
+    .toContain('"worked":{"barista":1}');
+  expect(errors).toEqual([]);
+});
+
 test("Thrift Temple: buy a vintage dye and wear it", async ({ page }) => {
   test.setTimeout(330_000);
   const errors = collectErrors(page);
@@ -4701,6 +4723,28 @@ test("a part of the game that fails to load offers a reload, not a blank page", 
   await page.goto(`${LOW}&room=city`);
   await expect(page.getByRole("alert")).toContainText("didn't load");
   await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
+});
+
+test("a closet that fails to load shows the reload card and keeps the game", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  await page.route("**/src/client/ui/MirrorPanel.tsx*", (route) =>
+    route.abort(),
+  );
+  await page.goto(VELVET);
+  const toggle = page.getByRole("button", {
+    name: "Dressing room",
+    exact: true,
+  });
+  await toggle.click();
+  await expect(page.getByRole("alert")).toContainText("didn't load");
+  await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
+  // the game is still there: the drawer closes and the rest of the HUD answers
+  await page.getByRole("button", { name: "Close dressing room" }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Chat message" }),
+  ).toBeVisible();
 });
 
 test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({

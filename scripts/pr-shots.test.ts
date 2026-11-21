@@ -53,3 +53,13 @@ test("knownShots reads the shot names and ignores other name: strings", () => {
   const src = `{ name: "plaza", query: "" }, getByRole("img", { name: "3D room view" })`;
   assert.deepEqual(knownShots(src), ["plaza"]);
 });
+
+test("the shared order panel and the shift rules map to the pay-slip shot", () => {
+  const known = [...KNOWN, "barista-pay-slip"];
+  for (const file of [
+    "src/client/rooms/shared/OrderPanel.tsx",
+    "src/client/rooms/shared/orderSession.ts",
+    "src/game/shifts.ts",
+  ])
+    assert.deepEqual(pickShots([file], known), ["barista-pay-slip"], file);
+});

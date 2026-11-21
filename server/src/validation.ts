@@ -3,6 +3,7 @@
 // passes through here before use.
 
 import { validateLook, DEFAULT_LOOK, type Look } from "../../src/game/look.ts";
+import { isPrizeGame, type PrizeGame } from "../../src/game/prizes.ts";
 import { isRoomId, type RoomId } from "../../src/game/rooms.ts";
 import {
   isValidDisplayName,
@@ -157,6 +158,37 @@ export function parseBlock(
 export function parseTarget(body: unknown): string | null {
   const targetId = fields(body).get("targetId");
   return isNetworkId(targetId) ? targetId : null;
+}
+
+/** A finished minigame: which one and the score. The server grades it. */
+export function parseScoreSubmission(
+  body: unknown,
+): { game: PrizeGame; score: number } | null {
+  const f = fields(body);
+  const game = f.get("game");
+  const score = f.get("score");
+  return isPrizeGame(game) &&
+    typeof score === "number" &&
+    Number.isFinite(score)
+    ? { game, score }
+    : null;
+}
+
+/** Entering a place, for its first-visit XP. */
+export function parseVisit(body: unknown): { roomId: RoomId } | null {
+  const roomId = fields(body).get("roomId");
+  return isRoomId(roomId) ? { roomId } : null;
+}
+
+/** The title to show: "<ladder>:<rank 0-9>", or null to show none. */
+export function parseTitleChoice(
+  body: unknown,
+): { title: string | null } | null {
+  const title = fields(body).get("title");
+  if (title === null) return { title };
+  return typeof title === "string" && /^(street|fame|hustle):[0-9]$/.test(title)
+    ? { title }
+    : null;
 }
 
 /**

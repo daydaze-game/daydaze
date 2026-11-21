@@ -87,3 +87,43 @@ test("every WebSocket route and every non-GET request needs an Origin check", ()
   // Plain reads are same-origin-policy protected, so they skip it.
   assert.equal(needsOriginCheck("GET", me), false);
 });
+
+test("progress and leaderboard routes match by method and path", () => {
+  assert.deepEqual(matchRoute("GET", "/api/progress"), { kind: "progress" });
+  assert.deepEqual(matchRoute("POST", "/api/progress/score"), {
+    kind: "progress-score",
+  });
+  assert.deepEqual(matchRoute("POST", "/api/progress/visit"), {
+    kind: "progress-visit",
+  });
+  assert.deepEqual(matchRoute("POST", "/api/progress/title"), {
+    kind: "progress-title",
+  });
+  assert.deepEqual(matchRoute("GET", "/api/leaderboard/score/bowling"), {
+    kind: "board-score",
+    game: "bowling",
+  });
+  assert.deepEqual(matchRoute("GET", "/api/leaderboard/ladder/fame"), {
+    kind: "board-ladder",
+    ladder: "fame",
+  });
+});
+
+test("leaderboards name only real games and ladders, and only read", () => {
+  for (const [method, path] of [
+    ["GET", "/api/leaderboard/score/nope"],
+    ["GET", "/api/leaderboard/score/toString"],
+    ["GET", "/api/leaderboard/ladder/nope"],
+    ["GET", "/api/leaderboard/ladder/toString"],
+    ["POST", "/api/leaderboard/score/bowling"],
+    ["GET", "/api/progress/score"],
+    ["PUT", "/api/progress"],
+  ])
+    assert.equal(matchRoute(method, path), null, `${method} ${path}`);
+});
+
+test("progress writes need the Origin check", () => {
+  const score = matchRoute("POST", "/api/progress/score");
+  assert.ok(score);
+  assert.equal(needsOriginCheck("POST", score), true);
+});

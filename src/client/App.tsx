@@ -23,6 +23,7 @@ import {
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
 import type { Graphics } from "../game/graphics.ts";
 import { getBuzz } from "./effects/drunk.ts";
+import { LazyPanel } from "./ui/ReloadBoundary.tsx";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
 import { leaveParty } from "./net/party.ts";
 import { endVisit, homeVisit, listenForHomes } from "./net/home.ts";
@@ -71,6 +72,7 @@ import { playSoundFile } from "../audio/soundFiles.ts";
 import { playFanfare } from "../audio/worldSounds.ts";
 import {
   applyPrize,
+  finishShift,
   scorePrize,
   rewardSteal,
   rewardVisit,
@@ -89,6 +91,7 @@ import { Collections } from "./ui/Collections.tsx";
 import { claimSet } from "../game/collections.ts";
 import { Onboarding } from "./ui/Onboarding.tsx";
 import { postPrize, prizeDesk } from "./ui/prizeDesk.ts";
+import { shiftDesk } from "./ui/shiftDesk.ts";
 import { petDesk } from "./rooms/zoo/petDesk.ts";
 import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
@@ -517,6 +520,21 @@ export function App() {
         result.prize.grade === "S" ? 1 : result.prize.grade === "A" ? 0.6 : 0,
       );
   }, [pending]);
+  // a finished paid shift pays its wage and Hustle XP, and posts the slip
+  const shiftPending = shiftDesk.use().pending;
+  useEffect(() => {
+    if (!shiftPending) return;
+    const now = Date.now();
+    const { job, result } = shiftPending;
+    // the slip is read from the last render; the save itself is updated from
+    // its latest state, so a prize paid in the same tick is not overwritten
+    const r = finishShift(latest.current, job, result, now);
+    setSave((s) => finishShift(s, job, result, now).save);
+    shiftDesk.set({
+      pending: null,
+      slip: { job, coins: r.coins, xp: r.xp, clean: r.clean, slow: r.slow },
+    });
+  }, [shiftPending]);
   // opening the game on a new day counts toward the streak (and again if the
   // tab stays open past midnight); a milestone pays and celebrates
   useEffect(() => {
@@ -544,9 +562,9 @@ export function App() {
           progression={save.progression}
           muted={save.settings.muted}
         />
-        <Suspense fallback={null}>
+        <LazyPanel>
           <StreakPanel streak={save.streak} />
-        </Suspense>
+        </LazyPanel>
         <UpdatePrompt />
         <Collections
           visited={save.visited}
@@ -618,23 +636,43 @@ export function App() {
             )}
           </p>
         </div>
-        <Suspense fallback={null}>
+        <LazyPanel>
           <PeerCard />
-          <FriendsPanel
-            onGo={(room) => travel(room, ROOMS[room].spawn)}
-            strictChat={save.settings.strictChat}
-            onStrictChat={setStrictChat}
-            save={save}
-            onSave={setSave}
-          />
-          {ONLINE && <DuelPanel />}
-          {ONLINE && <TogetherPanel />}
-          {ONLINE && <CookOffInvite />}
-          {ONLINE && <PartyPanel onGo={goWithParty} />}
-          {ONLINE && <RidePanel />}
-          {ONLINE && <RacePanel />}
-          {ONLINE && <ConnectionNote />}
-        </Suspense>
+        </LazyPanel>
+        {ONLINE && (
+          <>
+            <LazyPanel>
+              <FriendsPanel
+                onGo={(room) => travel(room, ROOMS[room].spawn)}
+                strictChat={save.settings.strictChat}
+                onStrictChat={setStrictChat}
+                save={save}
+                onSave={setSave}
+              />
+            </LazyPanel>
+            <LazyPanel>
+              <DuelPanel />
+            </LazyPanel>
+            <LazyPanel>
+              <TogetherPanel />
+            </LazyPanel>
+            <LazyPanel>
+              <CookOffInvite />
+            </LazyPanel>
+            <LazyPanel>
+              <PartyPanel onGo={goWithParty} />
+            </LazyPanel>
+            <LazyPanel>
+              <RidePanel />
+            </LazyPanel>
+            <LazyPanel>
+              <RacePanel />
+            </LazyPanel>
+            <LazyPanel>
+              <ConnectionNote />
+            </LazyPanel>
+          </>
+        )}
         <div className="fade" data-on={fading} aria-hidden="true" />
         {notice && (
           <p className="notice" role="status">
@@ -739,24 +777,19 @@ export function App() {
             You&apos;re at {visiting.owner.name}&apos;s place.
           </p>
         )}
-        <Suspense fallback={null}>
-          {here.room === "apartment" && !visiting.owner && (
+        {/* a panel that fails to load shows the Reload card for itself only,
+            and an arrest still ends with its penalty saved */}
+        {here.room === "apartment" && !visiting.owner && (
+          <LazyPanel>
             <ApartmentPanel
               home={save.home}
               onChange={setHome}
               onShelf={() => setShopping(true)}
             />
-          )}
-          {here.room === "apartment" && shopping && (
-            <ShopliftPanel
-              crime={save.crime}
-              now={now}
-              onCaught={caught}
-              onClose={() => setShopping(false)}
-            />
-          )}
-          {arrest && <ArrestSequence onDone={finishArrest} />}
-          {here.room === "jail" && (
+          </LazyPanel>
+        )}
+        {here.room === "jail" && (
+          <LazyPanel>
             <JailHud
               jail={save.jail}
               coins={save.coins}
@@ -764,9 +797,28 @@ export function App() {
               onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
               onRelease={release}
             />
-          )}
-          {game && <GameOverlay game={game} onClose={endGame} />}
-        </Suspense>
+          </LazyPanel>
+        )}
+        {game && (
+          <LazyPanel onContinue={() => endGame(null)}>
+            <GameOverlay game={game} onClose={endGame} />
+          </LazyPanel>
+        )}
+        {here.room === "apartment" && shopping && (
+          <LazyPanel onContinue={() => setShopping(false)}>
+            <ShopliftPanel
+              crime={save.crime}
+              now={now}
+              onCaught={caught}
+              onClose={() => setShopping(false)}
+            />
+          </LazyPanel>
+        )}
+        {arrest && (
+          <LazyPanel onContinue={finishArrest}>
+            <ArrestSequence onDone={finishArrest} />
+          </LazyPanel>
+        )}
         {here.room === "city" && touch && <CityJoystick />}
         <ChatBar
           onSay={(text) => {

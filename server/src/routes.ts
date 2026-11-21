@@ -1,7 +1,12 @@
 // Maps an HTTP method and path to a typed Route for the Worker: the fixed /api
-// endpoints, a room's copy list, a room copy's WebSocket and an apartment's
+// endpoints (progress and weekly leaderboards included), a room's copy list, a room copy's WebSocket and an apartment's
 // (by owner). Unknown rooms, bad copy numbers and bad owner ids match nothing.
 
+import { isPrizeGame, type PrizeGame } from "../../src/game/prizes.ts";
+import {
+  LADDERS,
+  type Ladder,
+} from "../../src/game/progression/progression.ts";
 import { isRoomId, type RoomId } from "../../src/game/rooms.ts";
 
 /**
@@ -23,10 +28,18 @@ export type Route =
         | "friend"
         | "unfriend"
         | "friends"
+        | "progress"
+        | "progress-score"
+        | "progress-visit"
+        | "progress-title"
         | "admin-ban"
         | "admin-reports";
     }
   | { kind: "rooms"; roomId: RoomId }
+  /** This week's best scores in one minigame. */
+  | { kind: "board-score"; game: PrizeGame }
+  /** This week's XP earned on one ladder. */
+  | { kind: "board-ladder"; ladder: Ladder }
   | { kind: "ws"; roomId: RoomId; copy: number }
   /** An apartment copy's socket: the owner's home, by their player id. */
   | { kind: "home"; ownerId: string };
@@ -44,6 +57,10 @@ const FIXED = new Map<string, Route>([
   ["POST /api/friend", { kind: "friend" }],
   ["POST /api/unfriend", { kind: "unfriend" }],
   ["GET /api/friends", { kind: "friends" }],
+  ["GET /api/progress", { kind: "progress" }],
+  ["POST /api/progress/score", { kind: "progress-score" }],
+  ["POST /api/progress/visit", { kind: "progress-visit" }],
+  ["POST /api/progress/title", { kind: "progress-title" }],
   ["POST /api/admin/ban", { kind: "admin-ban" }],
   ["GET /api/admin/reports", { kind: "admin-reports" }],
 ]);
@@ -67,6 +84,12 @@ export function matchRoute(method: string, pathname: string): Route | null {
   if (method !== "GET") return null;
   const rooms = /^\/api\/rooms\/([^/]+)$/.exec(pathname);
   if (rooms && isRoomId(rooms[1])) return { kind: "rooms", roomId: rooms[1] };
+  const score = /^\/api\/leaderboard\/score\/([^/]+)$/.exec(pathname);
+  if (score?.[1] && isPrizeGame(score[1]))
+    return { kind: "board-score", game: score[1] };
+  const ladder = /^\/api\/leaderboard\/ladder\/([^/]+)$/.exec(pathname);
+  const found = LADDERS.find((name) => name === ladder?.[1]);
+  if (found) return { kind: "board-ladder", ladder: found };
   const ws = /^\/ws\/room\/([^/]+)\/([^/]+)$/.exec(pathname);
   const copy = ws && parseCopy(ws[2]);
   if (ws && copy && isRoomId(ws[1])) return { kind: "ws", roomId: ws[1], copy };

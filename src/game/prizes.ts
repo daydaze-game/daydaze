@@ -453,7 +453,8 @@ export function prizeFor(game: PrizeGame, score: number, best?: number): Prize {
 
 export type Bests = Partial<Record<PrizeGame, number>>;
 
-function isPrizeGame(value: string): value is PrizeGame {
+/** Type guard for a game id from storage or the network. */
+export function isPrizeGame(value: unknown): value is PrizeGame {
   return PRIZE_GAMES.some((g) => g === value);
 }
 
