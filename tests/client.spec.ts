@@ -2638,7 +2638,7 @@ test("stepping out in front of a car too close to stop: she is knocked down and 
   await expect(canvas).toHaveAttribute("data-frames", "10", {
     timeout: 240_000,
   });
-  // into the lane 8 m ahead of a moving car (retried while every car near
+  // into the lane 5 m ahead of a moving car (retried while every car near
   // her waits at a light)
   await expect
     .poll(
@@ -2647,7 +2647,7 @@ test("stepping out in front of a car too close to stop: she is knocked down and 
           const stepOut: unknown = Reflect.get(window, "daydazeStepOut");
           return (
             typeof stepOut === "function" &&
-            Reflect.apply(stepOut, window, [8]) === true
+            Reflect.apply(stepOut, window, [5]) === true
           );
         }),
       { timeout: 120_000, intervals: [2_000] },

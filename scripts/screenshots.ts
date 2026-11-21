@@ -1072,7 +1072,7 @@ const SHOTS: {
     },
     async (page) => {
       // retried while every car near her waits at a light
-      await page.waitForFunction(() => window.daydazeStepOut(8), null, {
+      await page.waitForFunction(() => window.daydazeStepOut(5), null, {
         timeout: 120_000,
         polling: 2_000,
       });

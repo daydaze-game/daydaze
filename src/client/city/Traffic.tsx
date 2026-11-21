@@ -308,8 +308,9 @@ export function Traffic({ player }: { player: Player }) {
       for (const car of traffic.cars) {
         carPose(car, pose);
         const d = Math.hypot(pose.x - player.pos.x, pose.z - player.pos.z);
-        if (d < 120 && car.speed > 5 && car.speed > (fastest?.speed ?? 0))
-          fastest = car;
+        // not one about to turn at a junction: it would curve past her
+        if (car.next || d > 120 || car.speed <= 5) continue;
+        if (car.speed > (fastest?.speed ?? 0)) fastest = car;
       }
       if (!fastest) return false;
       carPose(fastest, pose);

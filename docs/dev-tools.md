@@ -123,7 +123,7 @@ For example, `__dd.scene.getObjectByName("floor")` or
 
 With `?debug=1` (any build), test handles sit on `window`:
 `daydazeReact("trip-fall")` plays a reaction on your doll (`reaction.ts`). In
-the city, `daydazeStepOut(8)` puts you in the lane 8 m ahead of the fastest
+the city, `daydazeStepOut(5)` puts you in the lane 5 m ahead of the fastest
 traffic car near you, too close for it to stop (`Traffic.tsx`; false when
 none is moving), and `daydazeKnockWalker(9)` has the walker nearest you hit
 as by your car at 9 m/s (`CarHits.tsx`; her index, or -1). The canvas then
