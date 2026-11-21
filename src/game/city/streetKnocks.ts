@@ -238,7 +238,11 @@ export function startle(
   time: number,
   car: CarNow,
 ): void {
-  if (busy(s, time)) return;
+  // mid-reaction she is not watching the road: a later car is noticed afresh
+  if (busy(s, time)) {
+    s.noticed = Number.NaN;
+    return;
+  }
   const at = streetPose(p, s, time, scratch);
   if (!threatened(car, at)) {
     s.noticed = Number.NaN;

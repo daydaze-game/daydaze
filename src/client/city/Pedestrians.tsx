@@ -233,11 +233,15 @@ function CrowdFigures({
     counts.current.fill(0);
     for (const i of picked.current) {
       const look = i % LOOKS.length;
-      const stride = (t * STEP_RATE + i * 0.37) % 1 < 0.5 ? 0 : 1;
+      walkerAt(i, t, pose.current);
+      // standing still (stopped by a car, staring): one pose, not a stride
+      // shortcut: a far walker knocked down stays upright; she is a doll
+      // when the car that hit her is near, so this shows only past the dolls
+      const stride =
+        pose.current.held || (t * STEP_RATE + i * 0.37) % 1 < 0.5 ? 0 : 1;
       const slot = look * STRIDES.length + stride;
       const m = meshes.current[slot];
       if (!m || counts.current[slot] >= CROWD_CAP) continue;
-      walkerAt(i, t, pose.current);
       dummy.position.set(pose.current.x, 0.14, pose.current.z);
       dummy.rotation.y = pose.current.yaw;
       dummy.updateMatrix();

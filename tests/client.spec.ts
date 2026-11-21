@@ -2660,7 +2660,8 @@ test("stepping out in front of a car too close to stop: she is knocked down and 
   await expect(canvas).toHaveAttribute("data-frames", "10", {
     timeout: 240_000,
   });
-  // into the lane 5 m ahead of a moving car (retried while every car near
+  // into the lane 5 m ahead of a car going over 5 m/s: too close and too
+  // fast for a mere bump (retried while every car near
   // her waits at a light)
   await expect
     .poll(
@@ -2677,12 +2678,12 @@ test("stepping out in front of a car too close to stop: she is knocked down and 
     .toBe(true);
   await expect(canvas).toHaveAttribute(
     "data-car-hit",
-    /^(bump|knockdown|hard-fall)$/,
+    /^(knockdown|hard-fall)$/,
     { timeout: 60_000 },
   );
   await expect(canvas).toHaveAttribute(
     "data-reaction",
-    /^(stumble|trip-fall|hard-landing|get-up)$/,
+    /^(trip-fall|hard-landing|get-up)$/,
     { timeout: 30_000 },
   );
   // and up again, free to walk

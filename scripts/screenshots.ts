@@ -1067,9 +1067,19 @@ const SHOTS: {
       // warm the moves pack up, so the fall is not missed while it loads
       await page.evaluate(() => window.daydazeReact("stumble"));
       await page.waitForTimeout(110_000);
+      // before recording starts, a car near her is moving (data-traffic-probe:
+      // "x,z,yaw,speed,kind;" per car), so the strip is not spent waiting
+      await page.waitForFunction(
+        () =>
+          (document.querySelector("canvas")?.dataset.trafficProbe ?? "")
+            .split(";")
+            .some((car) => Number(car.split(",")[3]) > 5),
+        null,
+        { timeout: 120_000, polling: 1_000 },
+      );
     },
     async (page) => {
-      // retried while every car near her waits at a light
+      // retried in case that car stopped or turned meanwhile
       await page.waitForFunction(() => window.daydazeStepOut(5), null, {
         timeout: 120_000,
         polling: 2_000,

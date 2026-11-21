@@ -152,6 +152,25 @@ test("she reacts only after her notice delay, then gets out of the car's line or
   }
 });
 
+test("a notice cut short by a stare starts over: the next car still takes her delay", () => {
+  const i = PEDESTRIANS.findIndex((_, k) => !freezes(k));
+  const q = PEDESTRIANS[i];
+  const s = newStreet();
+  const at = pedestrianAt(q, 10);
+  const car: CarNow = { x: at.x - 20, z: at.z, fx: 1, fz: 0, speed: 10 };
+  // she sees the car, then turns to stare at a hit nearby before reacting
+  startle(s, q, i, 10, car);
+  watch(s, q, 10.2, [at.x + 5, at.z]);
+  startle(s, q, i, 10.5, car);
+  // long after the stare, a new car: no instant dodge
+  const later = 30;
+  settle(s, later);
+  const now = streetPose(q, s, later, fresh());
+  const next: CarNow = { x: now.x - 20, z: now.z, fx: 1, fz: 0, speed: 10 };
+  startle(s, q, i, later, next);
+  assert.equal(s.ev, null);
+});
+
 test("bystanders stop and turn to look at the spot", () => {
   const s = newStreet();
   const at = pedestrianAt(p, 5);

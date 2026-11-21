@@ -549,7 +549,8 @@ function contact(
   car: TrafficCar,
   walker: Vec2 | null,
 ): TrafficHit | null {
-  if (!walker || car.speed < MIN_HIT_SPEED) return null;
+  // a car stopping after a hit is still on her: that is the same hit
+  if (!walker || car.speed < MIN_HIT_SPEED || car.halt > 0) return null;
   relative(car, walker, rel);
   const half = VEHICLE_LENGTH[car.kind] / 2;
   if (rel.along < -half || rel.along > half + 0.3) return null;

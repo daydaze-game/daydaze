@@ -189,7 +189,9 @@ export function CarHits({ player }: { player: Player }) {
     if (!ev || ev.kind !== "knock" || ev.at !== now) return false;
     playThump(speed < 3 ? 0.5 : 1);
     crime("pedestrianHit");
-    scene.current = openHitScene([x, z]);
+    // the first hit's scene runs on until it is over: a second hit nearby
+    // must not reset where driving off is measured from
+    scene.current ??= openHitScene([x, z]);
     setData(canvas.dataset, "walkerHit", String(i));
     say(
       "pedestrian",

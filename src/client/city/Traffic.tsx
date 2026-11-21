@@ -383,7 +383,7 @@ export function Traffic({ player }: { player: Player }) {
         inCar,
       );
       // CarHits.tsx knocks her down and lets the driver shout
-      if (hit) streetHits.hit = hit;
+      if (hit) streetHits.hit ??= hit;
     });
     streetHits.alarms = traffic.alarms;
     syncClock(traffic, wall);

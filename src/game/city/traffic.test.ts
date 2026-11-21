@@ -215,6 +215,15 @@ test("someone stepping out inside the stopping distance gets hit", () => {
   assert.equal(t.alarms, 1);
 });
 
+test("one hit is reported once, though she is still in front of the car", () => {
+  const { t, person } = cruising(5);
+  let hits = 0;
+  // she stays where she was struck (no throw here): the car must not hit her
+  // again and again as it stops
+  for (let i = 0; i < 3 / DT; i++) if (stepTraffic(t, DT, person)) hits++;
+  assert.equal(hits, 1);
+});
+
 test("a hard stop for someone in the road counts as an alarm (screech and horn)", () => {
   const { t, person } = cruising(25);
   const before = t.alarms;
