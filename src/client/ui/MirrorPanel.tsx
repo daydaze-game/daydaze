@@ -87,6 +87,11 @@ const EFFECT_LEVELS = INTENSITIES.map((id) => ({
   label: id === "off" ? "Off" : id === "low" ? "Low" : "Full",
 }));
 
+const HIGH_AUDIO_CHIPS = [
+  { id: "on", label: "On" },
+  { id: "off", label: "Off" },
+] as const;
+
 /**
  * The closet's tabs, in order. Face and makeup frame the camera on the face;
  * the rest show the full doll.
@@ -113,6 +118,8 @@ export function Mirror({
   setBody,
   effects,
   setEffects,
+  highAudio = true,
+  setHighAudio,
 }: {
   tab: MirrorTab;
   setTab: (tab: MirrorTab) => void;
@@ -125,6 +132,8 @@ export function Mirror({
   setBody: (body: BodyShape) => void;
   effects: Intensity;
   setEffects: (effects: Intensity) => void;
+  highAudio?: boolean;
+  setHighAudio?: ((highAudio: boolean) => void) | undefined;
 }) {
   const face = faceOf(look);
   const makeup = makeupOf(look);
@@ -530,6 +539,17 @@ export function Mirror({
               options={EFFECT_LEVELS}
               value={effects}
               onPick={setEffects}
+            />
+          </section>
+        )}
+        {allows(activeTier(), "drugs") && setHighAudio && (
+          <section>
+            <h3>High audio</h3>
+            <Chips
+              label="High audio"
+              options={HIGH_AUDIO_CHIPS}
+              value={highAudio ? "on" : "off"}
+              onPick={(v) => setHighAudio(v === "on")}
             />
           </section>
         )}
