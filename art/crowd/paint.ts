@@ -30,6 +30,7 @@ import {
   type Face,
   shoesOf,
 } from "../../src/game/look.ts";
+import { garment, wearOf } from "../../src/game/wardrobe.ts";
 
 /** The face landmarks the doll's body carries in its glTF extras. */
 async function marksOf(suffix: string): Promise<Marks> {
@@ -88,13 +89,16 @@ async function paint() {
     images[`${id}-face.png`] = png((await painted.texture).image);
     images[`${id}-iris.png`] = png(acquireIris(face.eyeColor).image);
     const shoes = shoesOf(look);
+    const worn = Object.values(wearOf(look)).map((w) => w.id);
     looks[id] = {
       suffix: m,
       // HumanDoll's partsFor, for the hair styles crowds wear
       hair: `hair-${look.hairStyle}${m}.glb`,
-      outfit: `outfit-${look.outfit}${m}.glb`,
+      // one file per garment (wardrobe.ts); crowd looks wear their outfit,
+      // all in its one color
+      outfit: worn.map((id) => `${garment(id)?.slot}-${id}${m}.glb`),
       shoes: `shoes-${shoes}${m}.glb`,
-      tucks: [`tuck_${look.outfit}`, `tuck_${shoes}`],
+      tucks: [...worn.map((id) => `tuck_${id}`), `tuck_${shoes}`],
       keys: Object.fromEntries(dollShapeKeys(face, DEFAULT_BODY)),
       hairColor: look.hairColor,
       outfitColor: look.outfitColor,

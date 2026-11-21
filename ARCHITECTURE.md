@@ -87,7 +87,9 @@ floors, looks, saves, chat effects) so both sides agree on the rules. `npm run l
   on-demand packs; `game/dance/clips.ts` picks the clip, `idlePlan.ts` gives
   the player and each NPC their idle rhythm, `transitions.ts` joins sitting
   and standing). The hand-made 13-joint poses in `pose.ts` (built dances, poses for
-  two, the toon doll) reach the skeleton through `BuiltPose`.
+  two, the toon doll) reach the skeleton through `BuiltPose`. Clothes are one
+  model per worn garment; a far doll's low-poly garments merge into one draw
+  (`human/mergeGarments.ts`).
 - `net/` wires the online session into React (see Online below).
 
 Quality tiers (`world/quality.ts`, `?quality=low|high|ultra`) keep the low tier
@@ -148,6 +150,9 @@ online player agree. The main tables:
   spawns, portals). `city/layout.ts` is the city's buildings and streets.
 - `look.ts`, `save.ts`, `shop.ts`, `wallet.ts`: the doll's look, the save
   (`SaveV1`, salvaged field by field from untrusted JSON), shops and coins.
+  `wardrobe.ts` is the mix-and-match wardrobe: garments by slot (top, bottom,
+  one-piece, outerwear, legwear), the layering rules and the look's `wear`
+  code; looks without one wear their outfit's garments.
 - `prizes.ts`, `challenges.ts`: grading every scored game S to C, bests,
   daily challenges.
 - One module per game (`bowling.ts`, `tennis.ts`, `cookOff.ts`,
@@ -213,7 +218,9 @@ the account's own save has loaded (`saveSync.ts`, `client/net/cloudSave.ts`).
 
 The 3D doll is built in Blender from MakeHuman's CC0 assets
 (`art/doll/blender/`), optimized with gltf-transform into
-`public/models/doll/`. Textures are CC0 PBR sets fetched by
+`public/models/doll/`: the body, then hair, garments (`<slot>-<id>.glb`,
+`doll_outfits.py`), swimsuits and shoes as separate parts, each with a
+man's fit (`-m`) and a far-LOD twin (`-lo`). Textures are CC0 PBR sets fetched by
 `scripts/fetch-textures.ts`. The doll's skeleton is Mixamo's 52 bones
 (MPFB2's CC0 rig); `art/doll/blender/mocap.py` retargets Mixamo clips onto
 it (and Quaternius' CC0 Universal Animation Library) into
