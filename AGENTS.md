@@ -115,6 +115,9 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
   its branch, and never commit, stash or discard anything in it. Only read
   there (`git status`, `log`, `diff`, `fetch`). Start every change, even one
   line, with `git worktree add -b <type>/<name> .worktrees/<name> origin/main`.
+- **Run `docs/agents/scripts/setup-git.sh` once per clone.** Worktrees share
+  the remote refs, so parallel fetches otherwise fail with `cannot lock ref`
+  after git's 100 ms default lock timeout.
 - **You own your PR until it merges.** When your issue is done, open a PR.
   - If a check fails, fix it.
   - If CodeRabbit comments, consider each suggestion: fix it, or reply why not.
