@@ -14,6 +14,8 @@ import {
   type Roll,
 } from "../../../game/bowling.ts";
 import { award } from "../../ui/prizeDesk.ts";
+import { minigameAssist } from "../../effects/minigameAssist.ts";
+import { sweepDuration } from "../../../game/effects/minigameModifiers.ts";
 
 /**
  * One player's game on the lane, shared by the alley's 3D scene (which
@@ -34,6 +36,8 @@ export type Lane = {
   angle: number;
   /** When the current sweep (aim or power) started, performance.now() ms. */
   sweepAt: number;
+  /** Period of the current meter, held constant for the full sweep. */
+  sweepPeriod: number;
   roll: Roll | null;
   /** The last ball's pin count, for the panel's call ("Strike!"). */
   last: { pins: number; strike: boolean; spare: boolean } | null;
@@ -48,6 +52,7 @@ const OFF: Lane = {
   hook: 0,
   angle: 0,
   sweepAt: 0,
+  sweepPeriod: 1000 / 0.9,
   roll: null,
   last: null,
 };
@@ -77,12 +82,14 @@ export function useLane(): Lane {
 
 /** The aim's sweep, radians, at `now`: a slow swing either side. */
 export function aimAt(now: number, since: number): number {
-  return Math.sin(((now - since) / 1000) * Math.PI * 0.9) * THROW_LIMITS.angle;
+  return (
+    Math.sin(((now - since) / lane.sweepPeriod) * Math.PI) * THROW_LIMITS.angle
+  );
 }
 
 /** The power's swing, 0..1, at `now`. */
 export function powerAt(now: number, since: number): number {
-  return 0.5 - Math.cos(((now - since) / 1000) * Math.PI * 1.8) * 0.5;
+  return 0.5 - Math.cos(((now - since) / lane.sweepPeriod) * Math.PI) * 0.5;
 }
 
 /** How hard a hook pulls, for each of the three settings. */
@@ -113,9 +120,19 @@ export function setHook(hook: -1 | 0 | 1) {
 
 /** The one button: start the aim, lock it, then bowl at the power shown. */
 export function press(now: number) {
-  if (lane.phase === "place") set({ phase: "aim", sweepAt: now });
+  if (lane.phase === "place")
+    set({
+      phase: "aim",
+      sweepAt: now,
+      sweepPeriod: sweepDuration(1000 / 0.9, minigameAssist()),
+    });
   else if (lane.phase === "aim")
-    set({ phase: "power", angle: aimAt(now, lane.sweepAt), sweepAt: now });
+    set({
+      phase: "power",
+      angle: aimAt(now, lane.sweepAt),
+      sweepAt: now,
+      sweepPeriod: sweepDuration(1000 / 1.8, minigameAssist()),
+    });
   else if (lane.phase === "power") {
     const [lo, hi] = THROW_LIMITS.speed;
     const speed = lo + (hi - lo) * powerAt(now, lane.sweepAt);

@@ -7,19 +7,37 @@ import {
 } from "../../game/food/delivery.ts";
 import { menuItemById, type MenuItem } from "../../game/food/venues.ts";
 import { drink, relieve, setSoftDrinkListener } from "../effects/drunk.ts";
+import { activeTier, allows } from "../../game/age.ts";
+import { FELT } from "../../game/effects/substances.ts";
+import {
+  freshNeeds,
+  satisfyNeed,
+  stepNeeds,
+  type Needs,
+} from "../../game/food/needs.ts";
+import { getMeters } from "../effects/high.ts";
 
 export type FoodState = {
   held: MenuItem | null;
   orders: readonly Order[];
   /** The courier's last news, read by the live region, or null. */
   toast: string | null;
+  /** Each new announcement gets a full display period, even if text repeats. */
+  toastId: number;
+  needs: Needs;
 };
 
-let state: FoodState = { held: null, orders: [], toast: null };
+let state: FoodState = {
+  held: null,
+  orders: [],
+  toast: null,
+  toastId: 0,
+  needs: freshNeeds(),
+};
 const listeners = new Set<() => void>();
 
-function set(next: FoodState): void {
-  state = next;
+function set(next: FoodState, announce = false): void {
+  state = announce ? { ...next, toastId: state.toastId + 1 } : next;
   for (const listen of listeners) listen();
 }
 
@@ -44,13 +62,49 @@ export function eatHeld(): void {
   const held = state.held;
   if (!held) return;
   if (held.alcohol) drink(held.alcohol);
-  else relieve(held.kind);
+  else consumeFood(held.kind);
   set({ ...state, held: null });
+}
+
+/** Shared by held food, quick snacks/water, street food and vending drinks.
+ * Keeps the existing food/hangover relief; never changes the high meter. */
+export function consumeFood(kind: "food" | "drink"): void {
+  relieve(kind);
+  if (!allows(activeTier(), "drugs")) return;
+  const need = kind === "food" ? state.needs.hunger : state.needs.thirst;
+  const feelsBetter = getMeters().high.level >= FELT && need > 0;
+  set(
+    {
+      ...state,
+      needs: satisfyNeed(state.needs, kind),
+      toast: feelsBetter
+        ? kind === "food"
+          ? "That snack really hit the spot."
+          : "A cool drink feels extra refreshing."
+        : state.toast,
+    },
+    feelsBetter,
+  );
+}
+
+/** Called on the food HUD's timer, not inside the rendering loop. */
+export function tickNeeds(seconds: number): void {
+  const needs = stepNeeds(
+    state.needs,
+    getMeters().high.level,
+    seconds,
+    allows(activeTier(), "drugs"),
+  );
+  if (
+    needs.hunger !== state.needs.hunger ||
+    needs.thirst !== state.needs.thirst
+  )
+    set({ ...state, needs });
 }
 
 /** Shows `text` in the toast line (a hint, not courier news). */
 export function showToast(text: string): void {
-  set({ ...state, toast: text });
+  set({ ...state, toast: text }, true);
 }
 
 /** Places an order for a menu item; unknown items are ignored. */
@@ -66,17 +120,23 @@ export function tickDeliveries(now: number): void {
   if (due.length === 0) return;
   let held = state.held;
   let toast = state.toast;
+  let received = false;
   for (const order of due) {
     const found = menuItemById(order.itemId);
     if (!found) continue;
+    received = true;
     held = found.item;
     toast = `The courier dropped off ${found.item.name}.`;
   }
-  set({
-    held,
-    toast,
-    orders: state.orders.filter((order) => !due.includes(order)),
-  });
+  set(
+    {
+      ...state,
+      held,
+      toast,
+      orders: state.orders.filter((order) => !due.includes(order)),
+    },
+    received,
+  );
 }
 
 export function clearToast(): void {
@@ -84,7 +144,13 @@ export function clearToast(): void {
 }
 
 export function resetFood(): void {
-  set({ held: null, orders: [], toast: null });
+  set({
+    held: null,
+    orders: [],
+    toast: null,
+    toastId: state.toastId,
+    needs: freshNeeds(),
+  });
 }
 
 // Mocktail names a 13+ player is served, in turn.
@@ -99,9 +165,12 @@ let served = 0;
 
 /** A 13+ bar's drink: a mocktail toast (no buzz). */
 export function sipMocktail(): void {
-  set({
-    ...state,
-    toast: `You sip ${MOCKTAILS[served++ % MOCKTAILS.length]}.`,
-  });
+  set(
+    {
+      ...state,
+      toast: `You sip ${MOCKTAILS[served++ % MOCKTAILS.length]}.`,
+    },
+    true,
+  );
 }
 setSoftDrinkListener(sipMocktail);

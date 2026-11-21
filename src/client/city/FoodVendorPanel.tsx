@@ -6,7 +6,7 @@ import {
   buyStreetFood,
 } from "../../game/city/vendors.ts";
 import { foodCounterOpen, foodVendors } from "./foodVendors.ts";
-import { relieve } from "../effects/drunk.ts";
+import { consumeFood } from "../food/store.ts";
 import {
   loadDialogue,
   pickLine,
@@ -76,7 +76,7 @@ export function FoodVendorPanel({
               if (buyStreetFood(coins, near, item.id) === null) return;
               pending.current = true;
               if (onSpend(item.price)) {
-                relieve("food");
+                consumeFood("food");
                 setReceipt(`${item.name} purchased`);
               } else {
                 pending.current = false;
