@@ -22,6 +22,7 @@ import {
   SHOES,
 } from "./look.ts";
 import { spend } from "./wallet.ts";
+import { GARMENTS, wearOf, type Garment } from "./wardrobe.ts";
 
 /** A store that sells look items. */
 export type ShopId =
@@ -132,7 +133,10 @@ export function wearItem(look: Look, item: ShopItem): Look {
   switch (item.slot) {
     case "outfit": {
       const o = OUTFITS.find((x) => x.id === item.id);
-      return o ? { ...look, outfit: o.id } : look;
+      if (!o) return look;
+      // the whole outfit goes on: mixed garments come off
+      const { wear: _mixed, ...rest } = look;
+      return { ...rest, outfit: o.id };
     }
     case "outfitColor": {
       const o = OUTFIT_COLORS.find((x) => x.id === item.id);
@@ -214,12 +218,18 @@ function locked(id: string, wardrobe: readonly string[]): boolean {
 
 /** Unowned items fall back to defaults; character colors remain available. */
 export function unlockedLook(look: Look, wardrobe: readonly string[]): Look {
-  // unowned shoes come off, back to the outfit's own
-  const { shoes, ...rest } = look;
+  // unowned shoes come off, back to the outfit's own; so does wear with an
+  // unowned garment in it, back to the outfit's garments
+  const { shoes, wear, ...rest } = look;
   const keep = shoes !== undefined && !locked(shoes, wardrobe);
+  const owned = new Set(wearableGarments(wardrobe).map((g) => g.id));
+  const keepWear =
+    wear !== undefined &&
+    Object.values(wearOf(look)).every((worn) => owned.has(worn.id));
   return {
     ...rest,
     ...(keep ? { shoes } : {}),
+    ...(keepWear ? { wear } : {}),
     outfit: locked(look.outfit, wardrobe) ? DEFAULT_LOOK.outfit : look.outfit,
     outfitColor: locked(look.outfitColor, wardrobe)
       ? DEFAULT_LOOK.outfitColor
@@ -253,6 +263,12 @@ export function wearable<T extends { id: string }>(
   wardrobe: readonly string[],
 ): T[] {
   return options.filter((option) => !locked(option.id, wardrobe));
+}
+
+/** The garments a wardrobe may wear: free ones, and those split from an
+ * outfit that is free or owned. */
+export function wearableGarments(wardrobe: readonly string[]): Garment[] {
+  return GARMENTS.filter((g) => g.from === null || !locked(g.from, wardrobe));
 }
 
 /** Known, unique shop ids only; anything else is dropped. */

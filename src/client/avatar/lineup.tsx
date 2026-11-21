@@ -18,6 +18,7 @@ import {
   BEARDS,
   type Look,
 } from "../../game/look.ts";
+import { decodeWear } from "../../game/wardrobe.ts";
 import { ToonDoll as Doll } from "./Doll.tsx";
 import { HumanDoll } from "./human/HumanDoll.tsx";
 import {
@@ -217,10 +218,32 @@ const LINEUP: Look[] = [
 const OUTFIT_PICK = new URLSearchParams(location.search)
   .get("outfits")
   ?.split(",");
-const BODY = (["flares", "mini", "fur"] as const).map((fallback, i) => ({
-  ...LINEUP[i],
-  outfit: OUTFITS.find((o) => o.id === OUTFIT_PICK?.[i])?.id ?? fallback,
-}));
+// `?wears=tee~ff2f9a.cargos~141018,...` dresses them (and the pose, sit and
+// dance dolls) in mixed garments instead: one wear code per doll, garments
+// split by "." and each `id~hex` (URL-safe for wardrobe.ts's "id#hex+...")
+const WEAR_PICK = new URLSearchParams(location.search)
+  .get("wears")
+  ?.split(",")
+  .map((code) =>
+    code
+      .split(".")
+      .map((g) => g.replace("~", "#"))
+      .join("+"),
+  )
+  .filter((code) => decodeWear(code) !== null);
+const worn = (look: Look, i: number): Look => {
+  const wear = WEAR_PICK?.[i % WEAR_PICK.length];
+  return wear ? { ...look, wear } : look;
+};
+const BODY = (["flares", "mini", "fur"] as const).map((fallback, i) =>
+  worn(
+    {
+      ...LINEUP[i],
+      outfit: OUTFITS.find((o) => o.id === OUTFIT_PICK?.[i])?.id ?? fallback,
+    },
+    i,
+  ),
+);
 
 // `?shot=men`: three masculine dolls, in menswear with short cuts and beards
 const MEN: Look[] = [
@@ -423,7 +446,7 @@ const SHOTS = {
   },
   // distant crowd: what a doll costs when it is far from the camera
   far: {
-    looks: LINEUP.slice(0, 1),
+    looks: LINEUP.slice(0, 1).map(worn),
     x: () => 0,
     cam: [0, 1.0, 26] as const,
     target: [0, 0.9, 0] as const,
@@ -431,7 +454,7 @@ const SHOTS = {
   },
   // five dance moves side by side
   dance: {
-    looks: LINEUP.slice(0, 5).map(suited),
+    looks: LINEUP.slice(0, 5).map((look, i) => worn(suited(look), i)),
     x: (i: number) => (i - 2) * 1.0,
     cam: [0, 1.1, 7.2] as const,
     target: [0, 0.95, 0] as const,
@@ -474,14 +497,14 @@ const SHOTS = {
   },
   // every held motion-capture pose, front on
   pose: {
-    looks: HOLDS.pose.map((_, i) => suited(LINEUP[i % LINEUP.length])),
+    looks: HOLDS.pose.map((_, i) => worn(suited(LINEUP[i % LINEUP.length]), i)),
     x: (i: number) => (i - (HOLDS.pose.length - 1) / 2) * 1.0,
     cam: [0, 1.0, 7.5] as const,
     target: [0, 0.9, 0] as const,
     fov: 36,
   },
   sit: {
-    looks: HOLDS.sit.map((_, i) => suited(LINEUP[i % LINEUP.length])),
+    looks: HOLDS.sit.map((_, i) => worn(suited(LINEUP[i % LINEUP.length]), i)),
     x: (i: number) => (i - (HOLDS.sit.length - 1) / 2) * 1.1,
     cam: [2.5, 1.2, 5] as const,
     target: [0, 0.6, 0] as const,

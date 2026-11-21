@@ -185,6 +185,7 @@ server (`lineup.tsx`), with its own flags:
 | `?men=1`                             | Face, portrait and pose shots on the masculine body.                                                                            |
 | `?outfit=suit`                       | With `?men=1`, dresses the pose, sit and dance dolls in that outfit.                                                            |
 | `?outfits=a,b,c`                     | Dresses the body shot's three dolls.                                                                                            |
+| `?wears=tee~ff2f9a.cargos~141018,…`  | Mixed garments (`GARMENTS` ids, `id~hex` joined by `.`), one look per doll, for the body, far, pose, sit and dance shots.       |
 | `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot.                                                                                    |
 | `?hair=waves`                        | Swaps the face shot's hair.                                                                                                     |
 | `?beard=<id>`                        | Puts a beard (a `BEARDS` id) on the face shot.                                                                                  |

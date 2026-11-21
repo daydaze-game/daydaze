@@ -5,7 +5,7 @@ import { isDollReady } from "./dollReady.ts";
 
 test("isDollReady requires outfit, hair, and footwear when all are present", () => {
   const parts = {
-    outfit: "/models/doll/outfit-flares.glb",
+    garments: [{ key: "outfit" }],
     hair: "/models/doll/hair-bob.glb",
     shoes: "/models/doll/shoes-platforms.glb",
   };
@@ -37,7 +37,7 @@ test("isDollReady requires outfit, hair, and footwear when all are present", () 
 
 test("isDollReady handles bald hairstyles without hair asset requirement", () => {
   const parts = {
-    outfit: "/models/doll/outfit-flares.glb",
+    garments: [{ key: "outfit" }],
     hair: null,
     shoes: "/models/doll/shoes-sneakers.glb",
   };
@@ -57,7 +57,7 @@ test("isDollReady handles bald hairstyles without hair asset requirement", () =>
 
 test("isDollReady handles swimwear without footwear requirement", () => {
   const parts = {
-    outfit: "/models/doll/swim-bikini.glb",
+    garments: [{ key: "outfit" }],
     hair: "/models/doll/hair-long.glb",
     shoes: null,
   };
@@ -73,4 +73,14 @@ test("isDollReady handles swimwear without footwear requirement", () => {
     true,
     "swimwear is ready once outfit and hair load",
   );
+});
+
+test("isDollReady waits for every garment of a mixed look", () => {
+  const parts = {
+    garments: [{ key: "top" }, { key: "bottom" }, { key: "outer" }],
+    hair: null,
+    shoes: null,
+  };
+  assert.equal(isDollReady(new Set(["top", "bottom"]), parts), false);
+  assert.equal(isDollReady(new Set(["top", "bottom", "outer"]), parts), true);
 });
