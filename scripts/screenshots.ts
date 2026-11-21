@@ -2715,6 +2715,20 @@ const SHOTS: {
     "hair-men-2",
     "men=1&styles=mop,pompadour,mohawk,spiky-crop,crew,quiff&colors=1b1014,3a6bff,ff4fb3,4a2a1c,b77a3e,7b4dff",
   ),
+  // the MakeHuman community styles (doll_hair.py COMMUNITY), front and back
+  ...[
+    "bob,lob,sidebob,pigtails,messy-bun,waves",
+    "long-straight,mid-wavy,mid-straight,puffs,cornrows,quiff",
+  ].flatMap((styles, i) => [
+    lineupShot(
+      `hair-community-${i + 1}`,
+      `styles=${styles}&colors=${HAIR_COLORS}`,
+    ),
+    lineupShot(
+      `hair-community-${i + 1}-back`,
+      `styles=${styles}&colors=${HAIR_COLORS}&${BEHIND}`,
+    ),
+  ]),
   // close-ups of the speckle cases: men's and women's dark hair from behind,
   // and the Quiff's forehead in several colors
   lineupShot(
