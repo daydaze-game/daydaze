@@ -102,6 +102,11 @@ const VendingWatch = lazy(() =>
     default: m.VendingWatch,
   })),
 );
+const SmokeWisps = lazy(() =>
+  import("../city/SmokeWisps.tsx").then((m) => ({
+    default: m.SmokeWisps,
+  })),
+);
 const MartWatch = lazy(() =>
   import("../inventory/MartWatch.tsx").then((m) => ({ default: m.MartWatch })),
 );
@@ -932,6 +937,7 @@ export function World({
             <Suspense fallback={null}>
               <VendingWatch room={room} player={player} />
               {room === "city" && <MartWatch player={player} />}
+              <SmokeWisps player={player} />
             </Suspense>
             <PlayerController
               editing={dressing}

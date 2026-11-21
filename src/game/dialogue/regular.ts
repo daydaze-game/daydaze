@@ -204,6 +204,55 @@ export const regularBank: RoleBank = {
       text: "Hey! Sit with us, we've got a whole theory about the bartender's sunset cocktail.",
       when: { tier: "adult", venue: "violet-hour" },
     },
+    // The Skylark rooftop bar
+    {
+      text: "The breeze up here after dark clears your head like nothing else.",
+      when: { venue: "rooftop-bar" },
+    },
+    {
+      text: "Look at the skyline from the rail. You can see the whole strip glowing.",
+      when: { venue: "rooftop-bar" },
+    },
+    {
+      text: "The fire pit is the best spot once the wind picks up off the avenue.",
+      when: { venue: "rooftop-bar" },
+    },
+    {
+      text: "Up thirty meters above the noise. It feels like a different city up here.",
+      when: { venue: "rooftop-bar" },
+    },
+    {
+      text: "The lights down on Nightlife Row look like a stream of neon ribbons from here.",
+      when: { venue: "rooftop-bar" },
+    },
+    {
+      text: "Got a light? The wind up here makes it an art form, but the view is worth it.",
+      when: { tier: "adult", venue: "rooftop-bar" },
+    },
+    {
+      text: "Sitting by the fire with something rolled is the only way to end the night.",
+      when: { tier: "adult", venue: "rooftop-bar" },
+    },
+    {
+      text: "The outdoor smoking spot by the rail is mellow tonight. Pull up a stool.",
+      when: { tier: "adult", venue: "rooftop-bar" },
+    },
+    {
+      text: "Nothing beats a vape and cold air over the glass railing when the stars come out.",
+      when: { tier: "adult", venue: "rooftop-bar" },
+    },
+    {
+      text: "Pass the lighter if you've got one, the embers look amazing in this breeze.",
+      when: { tier: "adult", venue: "rooftop-bar" },
+    },
+    {
+      text: "Taking a breather by the fire pit. Stay warm, the night air has teeth.",
+      when: { venue: "rooftop-bar" },
+    },
+    {
+      text: "I always come up here when the clubs down below get too crowded.",
+      when: { venue: "rooftop-bar" },
+    },
     {
       text: "I came for the coaster and stayed for the lights. The lights were the plan.",
       when: { neighborhood: "fairground" },
