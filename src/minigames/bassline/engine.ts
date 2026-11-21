@@ -51,10 +51,17 @@ export function comboMultiplier(combo: number): number {
  * target time. Negative and positive offsets are equally forgiving.
  */
 export function judge(offsetMs: number): Judgment {
+  return judgeWithin(offsetMs, 0);
+}
+
+/** Judges a hit with wider timing windows, preserving the maximum score. */
+export function judgeWithin(offsetMs: number, assist: number): Judgment {
   const abs = Math.abs(offsetMs);
-  if (abs <= JUDGMENT_WINDOW_MS.perfect) return "perfect";
-  if (abs <= JUDGMENT_WINDOW_MS.great) return "great";
-  if (abs <= JUDGMENT_WINDOW_MS.good) return "good";
+  const scale =
+    1 + Math.max(0, Math.min(1, Number.isFinite(assist) ? assist : 0)) * 0.25;
+  if (abs <= JUDGMENT_WINDOW_MS.perfect * scale) return "perfect";
+  if (abs <= JUDGMENT_WINDOW_MS.great * scale) return "great";
+  if (abs <= JUDGMENT_WINDOW_MS.good * scale) return "good";
   return "miss";
 }
 
@@ -101,13 +108,17 @@ export function findHittableNote(
   lane: Lane,
   hitNoteIds: ReadonlySet<number>,
   nowMs: number,
+  assist = 0,
 ): BeatNote | null {
+  const window =
+    JUDGMENT_WINDOW_MS.good *
+    (1 + Math.max(0, Math.min(1, Number.isFinite(assist) ? assist : 0)) * 0.25);
   let best: BeatNote | null = null;
   let bestAbsOffset = Infinity;
   for (const note of notes) {
     if (note.lane !== lane || hitNoteIds.has(note.id)) continue;
     const absOffset = Math.abs(nowMs - note.timeMs);
-    if (absOffset <= JUDGMENT_WINDOW_MS.good && absOffset < bestAbsOffset) {
+    if (absOffset <= window && absOffset < bestAbsOffset) {
       best = note;
       bestAbsOffset = absOffset;
     }

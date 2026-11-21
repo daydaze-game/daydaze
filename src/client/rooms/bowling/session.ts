@@ -14,6 +14,8 @@ import {
   type Roll,
 } from "../../../game/bowling.ts";
 import { award } from "../../ui/prizeDesk.ts";
+import { minigameAssist } from "../../effects/minigameAssist.ts";
+import { sweepDuration } from "../../../game/effects/minigameModifiers.ts";
 
 /**
  * One player's game on the lane, shared by the alley's 3D scene (which
@@ -77,12 +79,14 @@ export function useLane(): Lane {
 
 /** The aim's sweep, radians, at `now`: a slow swing either side. */
 export function aimAt(now: number, since: number): number {
-  return Math.sin(((now - since) / 1000) * Math.PI * 0.9) * THROW_LIMITS.angle;
+  const duration = sweepDuration(1000 / 0.9, minigameAssist());
+  return Math.sin(((now - since) / duration) * Math.PI) * THROW_LIMITS.angle;
 }
 
 /** The power's swing, 0..1, at `now`. */
 export function powerAt(now: number, since: number): number {
-  return 0.5 - Math.cos(((now - since) / 1000) * Math.PI * 1.8) * 0.5;
+  const duration = sweepDuration(1000 / 1.8, minigameAssist());
+  return 0.5 - Math.cos(((now - since) / duration) * Math.PI) * 0.5;
 }
 
 /** How hard a hook pulls, for each of the three settings. */

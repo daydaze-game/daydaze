@@ -14,6 +14,8 @@ import {
   type Round,
 } from "../../../game/minigolf.ts";
 import { award } from "../../ui/prizeDesk.ts";
+import { minigameAssist } from "../../effects/minigameAssist.ts";
+import { sweepDuration } from "../../../game/effects/minigameModifiers.ts";
 
 /**
  * A round on the course, shared by the scene (which draws the ball and
@@ -67,7 +69,8 @@ export function useCourse(): Course {
 
 /** The power swing, 0..1, at `now`. */
 export function powerAt(now: number, since: number): number {
-  return 0.5 - Math.cos(((now - since) / 1000) * Math.PI * 1.1) * 0.5;
+  const duration = sweepDuration(1000 / 1.1, minigameAssist());
+  return 0.5 - Math.cos(((now - since) / duration) * Math.PI) * 0.5;
 }
 
 /** Aim straight at the cup from where the ball lies: a fair first guess. */

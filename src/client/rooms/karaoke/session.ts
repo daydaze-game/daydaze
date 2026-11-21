@@ -30,6 +30,8 @@ import {
 import { gradeSwing, type Swing } from "../../../game/tennis.ts";
 import { award } from "../../ui/prizeDesk.ts";
 import { createStore } from "../shared/store.ts";
+import { minigameAssist } from "../../effects/minigameAssist.ts";
+import { timingWindow } from "../../../game/effects/minigameModifiers.ts";
 
 /** Off, counting in (waiting for the band's tempo), singing, or done. */
 export type Phase = "off" | "cueing" | "singing" | "over";
@@ -188,7 +190,10 @@ export function singOn(lane: number) {
   if (!note) return;
   // in a duet, your partner's lines aren't yours to sing
   if (!mine(karaoke.get().song.length)) return;
-  const swing = gradeSwing(songNow() - note.at);
+  const swing = gradeSwing(
+    songNow() - note.at,
+    timingWindow(0.32, minigameAssist()),
+  );
   const onTime = swing === "perfect" || swing === "good";
   const right = lane === note.lane;
   getSharedJukeboxController().playPitch(note.pitch ?? 60, right && onTime);

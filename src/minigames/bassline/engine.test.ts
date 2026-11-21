@@ -4,6 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   judge,
+  judgeWithin,
   comboMultiplier,
   pointsFor,
   nextCombo,
@@ -36,6 +37,14 @@ test("judgment windows match the design spec", () => {
   assert.equal(JUDGMENT_WINDOW_MS.perfect, 45);
   assert.equal(JUDGMENT_WINDOW_MS.great, 90);
   assert.equal(JUDGMENT_WINDOW_MS.good, 140);
+});
+
+test("Bassline assist widens judgments by at most 25 percent", () => {
+  assert.equal(judgeWithin(140, 0), "good");
+  assert.equal(judgeWithin(150, 0.5), "good");
+  assert.equal(judgeWithin(175, 1), "good");
+  assert.equal(judgeWithin(176, 1), "miss");
+  assert.equal(judgeWithin(0, 1), "perfect");
 });
 
 test("combo multiplier climbs one tier per 10 hits and caps at 4x", () => {
@@ -110,6 +119,12 @@ test("findHittableNote ignores notes outside the Good window or already hit", ()
   const chart = generateChart(4, 120);
   assert.equal(findHittableNote(chart, 0, new Set(), 10000), null);
   assert.equal(findHittableNote(chart, 0, new Set([0]), 500), null);
+});
+
+test("an eligible high extends Bassline's outer hit window", () => {
+  const chart = generateChart(4, 120);
+  assert.equal(findHittableNote(chart, 0, new Set(), 650), null);
+  assert.equal(findHittableNote(chart, 0, new Set(), 650, 1)?.id, 0);
 });
 
 test("laneForKey maps D F J K in any case and the arrow keys", () => {
