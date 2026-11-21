@@ -111,6 +111,19 @@ test("score XP stops at the daily cap, then resumes the next day", () => {
   assert.equal(next.capped, false);
 });
 
+test("a request that straddles midnight never moves the day backward", () => {
+  const tomorrow = {
+    ...freshState(),
+    day: Math.floor(NOW / DAY) + 1,
+    dayXp: 4950,
+  };
+  const r = applyScore(tomorrow, "bowling", 185, NOW);
+  assert.ok(r);
+  assert.equal(r.state.day, tomorrow.day);
+  assert.equal(r.xp, 50);
+  assert.equal(r.state.dayXp, DAILY_XP_CAP);
+});
+
 test("a place pays Street XP once, and never an album-less room", () => {
   const first = applyVisit(freshState(), "plaza");
   assert.equal(first.xp, VISIT_XP);

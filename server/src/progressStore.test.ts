@@ -318,3 +318,43 @@ test("the ladder board counts only XP the server paid this week", async () => {
   assert.deepEqual(board.you, { rank: 2, value: 70 });
   assert.deepEqual((await ladderBoard(db, "street", "u_a", NOW)).entries, []);
 });
+
+test("a caller's rank leaves out banned players, like the list does", async () => {
+  const { sqlite, db } = database();
+  for (const [id, name] of [
+    ["u_a", "Ana"],
+    ["u_b", "Bea"],
+  ] as const)
+    addUser(sqlite, id, name);
+  await play(db, "u_a", "bowling", 150);
+  await play(db, "u_b", "bowling", 190);
+  sqlite
+    .prepare("INSERT INTO bans (player_id, created_at) VALUES ('u_b', 0)")
+    .run();
+  assert.equal((await scoreBoard(db, "bowling", "u_a", NOW)).you?.rank, 1);
+  assert.equal((await ladderBoard(db, "fame", "u_a", NOW)).you?.rank, 1);
+});
+
+test("players tied on value and time still get distinct ranks, matching the list", async () => {
+  const { sqlite, db } = database();
+  addUser(sqlite, "u_a", "Ana");
+  addUser(sqlite, "u_b", "Bea");
+  await play(db, "u_a", "bowling", 150);
+  await play(db, "u_b", "bowling", 150);
+  for (const viewer of ["u_a", "u_b"]) {
+    for (const board of [
+      await scoreBoard(db, "bowling", viewer, NOW),
+      await ladderBoard(db, "fame", viewer, NOW),
+    ]) {
+      const listed = board.entries.find(
+        (e) => e.name === (viewer === "u_a" ? "Ana" : "Bea"),
+      );
+      assert.equal(board.you?.rank, listed?.rank, viewer);
+    }
+  }
+  const ranks = [
+    (await scoreBoard(db, "bowling", "u_a", NOW)).you?.rank,
+    (await scoreBoard(db, "bowling", "u_b", NOW)).you?.rank,
+  ];
+  assert.deepEqual(ranks.sort(), [1, 2]);
+});

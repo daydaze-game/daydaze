@@ -244,7 +244,7 @@ export async function scoreBoard(
        FROM weekly_scores w JOIN users u ON u.id = w.user_id
       WHERE w.week = ?1 AND w.game = ?2
         AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = w.user_id)
-      ORDER BY w.score ${order}, w.at ASC LIMIT ${BOARD_SIZE}`,
+      ORDER BY w.score ${order}, w.at ASC, w.user_id ASC LIMIT ${BOARD_SIZE}`,
     )
     .bind(week, game)
     .all();
@@ -253,8 +253,10 @@ export async function scoreBoard(
       `SELECT m.score AS value,
             1 + (SELECT COUNT(*) FROM weekly_scores o
                   WHERE o.week = m.week AND o.game = m.game
+                    AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = o.user_id)
                     AND (o.score ${better} m.score
-                         OR (o.score = m.score AND o.at < m.at))) AS rank
+                         OR (o.score = m.score AND (o.at < m.at
+                              OR (o.at = m.at AND o.user_id < m.user_id))))) AS rank
        FROM weekly_scores m
       WHERE m.week = ?1 AND m.game = ?2 AND m.user_id = ?3`,
     )
@@ -283,7 +285,7 @@ export async function ladderBoard(
        FROM weekly_xp w JOIN users u ON u.id = w.user_id
       WHERE w.week = ?1 AND w.ladder = ?2
         AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = w.user_id)
-      ORDER BY w.xp DESC, w.at ASC LIMIT ${BOARD_SIZE}`,
+      ORDER BY w.xp DESC, w.at ASC, w.user_id ASC LIMIT ${BOARD_SIZE}`,
     )
     .bind(week, ladder)
     .all();
@@ -292,7 +294,10 @@ export async function ladderBoard(
       `SELECT m.xp AS value,
             1 + (SELECT COUNT(*) FROM weekly_xp o
                   WHERE o.week = m.week AND o.ladder = m.ladder
-                    AND (o.xp > m.xp OR (o.xp = m.xp AND o.at < m.at))) AS rank
+                    AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = o.user_id)
+                    AND (o.xp > m.xp
+                         OR (o.xp = m.xp AND (o.at < m.at
+                              OR (o.at = m.at AND o.user_id < m.user_id))))) AS rank
        FROM weekly_xp m
       WHERE m.week = ?1 AND m.ladder = ?2 AND m.user_id = ?3`,
     )

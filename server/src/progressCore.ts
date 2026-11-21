@@ -124,7 +124,8 @@ export function applyScore(
 ): ScoreResult | null {
   if (!isPlausibleScore(game, score)) return null;
   const prize = prizeFor(game, score, state.bests[game]);
-  const day = dayOf(now);
+  // `now` was read before the state was loaded; never step the day backward
+  const day = Math.max(dayOf(now), state.day);
   const paidToday = state.day === day ? state.dayXp : 0;
   const owed = prizeXp(prize.grade, prize.best);
   const ladder = GAME_LADDERS[game];
