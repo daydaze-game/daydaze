@@ -1,12 +1,21 @@
 // Typed client for the Worker's /api routes (guest, accounts, saves, room
-// copies, friends, blocks, reports and admin). Every response body is parsed
-// and validated before use; a call never throws and resolves to an ApiResult
-// instead. Requests send cookies (credentials: include) for the session.
+// copies, friends, blocks, reports, admin, progress and weekly boards). Every
+// response body is parsed and validated before use; a call never throws and
+// resolves to an ApiResult instead. Requests send cookies (credentials:
+// include) for the session.
 
 import { isRoomId, type RoomId } from "../../game/rooms.ts";
 import { loadSave, serializeSave, type SaveV1 } from "../../game/save.ts";
 import { parseFriends } from "../friends.ts";
 import { parseIdentity, type Identity } from "../identity.ts";
+import type { PrizeGame } from "../../game/prizes.ts";
+import type { Ladder } from "../../game/progression/progression.ts";
+import {
+  parseBoard,
+  parseProgress,
+  parseScoreOutcome,
+  parseVisitOutcome,
+} from "../progress.ts";
 
 /**
  * The fetch function the API calls through; injected so tests and the browser
@@ -238,6 +247,39 @@ export function createApi({
     friends: () =>
       call("GET", "/api/friends", undefined, (text) =>
         parseFriends(parseJson(text)),
+      ),
+    /** Accounts only (guests' progress stays local): the server's XP and title. */
+    progress: () =>
+      call("GET", "/api/progress", undefined, (text) =>
+        parseProgress(parseJson(text)),
+      ),
+    /** A finished minigame: the server grades the score and pays XP itself. */
+    submitScore: (game: PrizeGame, score: number) =>
+      call(
+        "POST",
+        "/api/progress/score",
+        JSON.stringify({ game, score }),
+        (text) => parseScoreOutcome(parseJson(text)),
+      ),
+    /** Entering a place: its first-visit XP, once. */
+    visit: (roomId: RoomId) =>
+      call("POST", "/api/progress/visit", JSON.stringify({ roomId }), (text) =>
+        parseVisitOutcome(parseJson(text)),
+      ),
+    /** Shows an earned title ("<ladder>:<rank>") on the name tag; null clears. */
+    setTitle: (title: string | null) =>
+      call("POST", "/api/progress/title", JSON.stringify({ title }), (text) =>
+        parseProgress(parseJson(text)),
+      ),
+    /** This week's best scores in one minigame. */
+    scoreBoard: (game: PrizeGame) =>
+      call("GET", `/api/leaderboard/score/${game}`, undefined, (text) =>
+        parseBoard(parseJson(text)),
+      ),
+    /** This week's XP earned on one ladder. */
+    ladderBoard: (ladder: Ladder) =>
+      call("GET", `/api/leaderboard/ladder/${ladder}`, undefined, (text) =>
+        parseBoard(parseJson(text)),
       ),
   };
 }
