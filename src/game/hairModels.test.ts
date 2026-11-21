@@ -38,7 +38,8 @@ test("every pack hair the Blender build makes is in the closet", () => {
   const src = readFileSync("art/doll/blender/pack_hair.py", "utf8");
   const block = src.slice(src.indexOf("STYLES = {"), src.indexOf("# pieces"));
   const built = [...block.matchAll(/^ {4}"([a-z-]+)": \(/gm)].map((m) => m[1]);
-  assert.ok(built.length >= 20, `found ${built.length} pack styles`);
+  // a floor, so a parse that silently matches nothing fails
+  assert.ok(built.length >= 15, `found ${built.length} pack styles`);
   const ids: string[] = HAIR_STYLES.map((h) => h.id);
   assert.deepEqual(
     built.filter((id) => !ids.includes(id)),

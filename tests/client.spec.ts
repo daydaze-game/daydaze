@@ -1760,6 +1760,28 @@ test("Espresso Lab: a barista shift takes a ticket and scores a drink", async ({
   expect(errors).toEqual([]);
 });
 
+test("Espresso Lab: a finished shift posts a pay slip and counts in the save", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=espresso-lab`);
+  const panel = page.getByRole("region", { name: "Barista station" });
+  await panel
+    .getByRole("button", { name: "Start a shift" })
+    .click({ timeout: 150_000 });
+  // empty cups are wrong orders: the shift still ends and is logged
+  for (let i = 0; i < 8; i++)
+    await panel.getByRole("button", { name: "Hand it over" }).click();
+  await expect(panel).toContainText(/Paid \d+ coins and \d+ Hustle XP/);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("daydaze-save-v1") ?? ""),
+    )
+    .toContain('"worked":{"barista":1}');
+  expect(errors).toEqual([]);
+});
+
 test("Thrift Temple: buy a vintage dye and wear it", async ({ page }) => {
   test.setTimeout(330_000);
   const errors = collectErrors(page);
@@ -2869,6 +2891,71 @@ test("the marina: cast, strike, and the catch is called", async ({ page }) => {
   await panel.getByRole("button", { name: "Reel in and leave" }).click();
   await expect(panel.getByRole("button", { name: "Go fishing" })).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("the boardwalk pier: cast and leave fishing", async ({ page }) => {
+  test.setTimeout(300_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city`);
+  await expect(canvasOf(page)).toHaveAttribute("data-frames", "10");
+  await page.getByRole("button", { name: "Fishing", exact: true }).click();
+  const panel = page.getByRole("region", { name: "Fishing" });
+  await panel.getByRole("button", { name: "Go fishing" }).click();
+  await panel.getByRole("button", { name: "Cast", exact: true }).click();
+  await panel.getByRole("button", { name: "Strike!" }).click();
+  await expect(panel.getByRole("status")).toHaveText(/spooked|got away|kg/, {
+    timeout: 120_000,
+  });
+  await panel.getByRole("button", { name: "Reel in and leave" }).click();
+  await expect(panel.getByRole("button", { name: "Go fishing" })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("city fishing and driving do not take the player at the same time", async ({
+  page,
+}) => {
+  test.setTimeout(600_000);
+  await page.goto(`${LOW}&room=city`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-city-car", "parked", {
+    timeout: 180_000,
+  });
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 180_000,
+  });
+  await expect(canvas).toHaveAttribute("data-avatar", "ready", {
+    timeout: 180_000,
+  });
+  await expect(canvas).toHaveAttribute("data-street", "ready", {
+    timeout: 180_000,
+  });
+  await (await dockAction(page, "Drive your car")).click();
+  await expect(canvas).toHaveAttribute("data-city-car", "driving", {
+    timeout: 120_000,
+  });
+  await page.getByRole("button", { name: "Fishing", exact: true }).click();
+  const panel = page.getByRole("region", { name: "Fishing" });
+  await panel.getByRole("button", { name: "Go fishing" }).click();
+  await expect(panel).toContainText("Leave the car before fishing");
+  await panel.getByRole("button", { name: "Leave the car" }).click();
+  await expect(canvas).toHaveAttribute("data-city-car", "parked");
+  await panel.getByRole("button", { name: "Go fishing" }).click();
+  await expect(
+    panel.getByRole("button", { name: "Reel in and leave" }),
+  ).toBeVisible();
+  await (await dockAction(page, "Drive your car")).click();
+  await expect(panel.getByRole("button", { name: "Go fishing" })).toBeVisible();
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-player-z")), {
+      timeout: 120_000,
+    })
+    .toBeGreaterThan(300);
+  // The player starts toward the car; the full route is tracked separately (#356).
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-player-z")), {
+      timeout: 120_000,
+    })
+    .toBeLessThan(375);
 });
 
 test("Starlight yacht: board at the marina, cruise, dance and return", async ({
@@ -4636,6 +4723,28 @@ test("a part of the game that fails to load offers a reload, not a blank page", 
   await page.goto(`${LOW}&room=city`);
   await expect(page.getByRole("alert")).toContainText("didn't load");
   await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
+});
+
+test("a closet that fails to load shows the reload card and keeps the game", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  await page.route("**/src/client/ui/MirrorPanel.tsx*", (route) =>
+    route.abort(),
+  );
+  await page.goto(VELVET);
+  const toggle = page.getByRole("button", {
+    name: "Dressing room",
+    exact: true,
+  });
+  await toggle.click();
+  await expect(page.getByRole("alert")).toContainText("didn't load");
+  await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
+  // the game is still there: the drawer closes and the rest of the HUD answers
+  await page.getByRole("button", { name: "Close dressing room" }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Chat message" }),
+  ).toBeVisible();
 });
 
 test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({

@@ -17,6 +17,7 @@ import {
   type Shop,
 } from "../../game/inventory.ts";
 import { take } from "../effects/high.ts";
+import { triggerSmoke } from "../effects/smokeEffect.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
 export type PouchSave = {
@@ -66,6 +67,9 @@ export function takeFromPouch(id: ItemId): boolean {
   const item = itemOf(id);
   const left = open() ? removeItem(d.inventory, id) : null;
   if (!item || !left || !take(item.dose, item.strain)) return false;
+  if (item.dose === "joint" || item.dose === "vape") {
+    triggerSmoke(item.dose);
+  }
   commit({ inventory: left, giftDay: d.giftDay, coins: d.coins }, "");
   return true;
 }

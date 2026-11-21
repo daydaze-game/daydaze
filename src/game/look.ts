@@ -52,7 +52,7 @@ export const HAIR_STYLES = [
   // Salon styles: sold by the stylist, see shop.ts.
   { id: "sleek-bob", label: "Sleek bob" },
   { id: "curl-cloud", label: "Curl cloud" },
-  { id: "bob", label: "Bob" },
+  { id: "bob", label: "Bob with bangs" },
   { id: "braids", label: "Knotless braids" },
   { id: "afro", label: "Afro puff" },
   { id: "long-straight", label: "Long and sleek" },
@@ -65,7 +65,7 @@ export const HAIR_STYLES = [
   { id: "shag", label: "Shag" },
   { id: "coils", label: "Coils" },
   { id: "low-pony", label: "Low pony" },
-  { id: "pigtails", label: "Pigtails" },
+  { id: "pigtails", label: "Braided pigtails" },
   { id: "top-knot", label: "Top knot" },
   // textured styles
   { id: "locs", label: "Locs" },
@@ -98,11 +98,11 @@ export const HAIR_STYLES = [
   { id: "sleek-side", label: "Side-swept long" },
   { id: "high-pony", label: "High ponytail" },
   { id: "twin-tails", label: "Twin tails" },
-  { id: "lob", label: "Layered lob" },
+  { id: "lob", label: "Curled-under bob" },
   { id: "blunt-bob", label: "Blunt bob" },
-  { id: "sidebob", label: "Side-swept bob" },
+  { id: "sidebob", label: "Inverted bob" },
   { id: "side-fringe", label: "Side fringe" },
-  { id: "messy-bun", label: "Messy bun" },
+  { id: "messy-bun", label: "Sleek bun" },
   // and the short cuts and a mohawk
   { id: "quiff", label: "Quiff" },
   { id: "side-part", label: "Messy side part" },
@@ -152,6 +152,50 @@ export const LIPS = [
   { id: "lips-peach-fizz", label: "Peach fizz", swatch: "#f2a07b" },
   { id: "lips-brick-matte", label: "Brick matte", swatch: "#9c3b2a" },
   { id: "lips-bare-balm", label: "Bare balm", swatch: "#c98f86" },
+  // nudes for every skin tone, fair to deep
+  { id: "lips-petal-nude", label: "Petal nude", swatch: "#dba5a2" },
+  { id: "lips-pink-champagne", label: "Pink champagne", swatch: "#e3aaa6" },
+  { id: "lips-rosy-beige", label: "Rosy beige", swatch: "#c98a7e" },
+  { id: "lips-warm-sand", label: "Warm sand", swatch: "#c49276" },
+  { id: "lips-toffee", label: "Toffee", swatch: "#a8705a" },
+  { id: "lips-cinnamon", label: "Cinnamon", swatch: "#8e5442" },
+  { id: "lips-cocoa", label: "Cocoa", swatch: "#6e3d32" },
+  { id: "lips-espresso-nude", label: "Espresso nude", swatch: "#4e2a24" },
+  // pinks
+  { id: "lips-ballet-pink", label: "Ballet pink", swatch: "#f0a6b8" },
+  { id: "lips-dusty-rose", label: "Dusty rose", swatch: "#b8707a" },
+  { id: "lips-rosewood", label: "Rosewood", swatch: "#9e4f5c" },
+  { id: "lips-watermelon", label: "Watermelon", swatch: "#ff5c7a" },
+  { id: "lips-doll-pink", label: "Doll pink", swatch: "#ff4fa3" },
+  // reds
+  { id: "lips-classic-red", label: "Classic red", swatch: "#b5121b" },
+  { id: "lips-blue-red", label: "Blue red", swatch: "#a3001e" },
+  { id: "lips-orange-red", label: "Orange red", swatch: "#e33b1f" },
+  { id: "lips-raspberry", label: "Raspberry", swatch: "#b0154f" },
+  { id: "lips-wine", label: "Wine", swatch: "#5c0a1e" },
+  // corals and oranges
+  { id: "lips-papaya", label: "Papaya", swatch: "#ff8a63" },
+  { id: "lips-tangerine", label: "Tangerine", swatch: "#ff7a2f" },
+  { id: "lips-terracotta", label: "Terracotta", swatch: "#b5543a" },
+  // berries and browns
+  { id: "lips-berry-crush", label: "Berry crush", swatch: "#8a1d4a" },
+  { id: "lips-black-cherry", label: "Black cherry", swatch: "#3a0a18" },
+  { id: "lips-90s-brown", label: "90s brown", swatch: "#7a4a3a" },
+  { id: "lips-mocha", label: "Mocha", swatch: "#8a5a48" },
+  { id: "lips-chocolate", label: "Chocolate", swatch: "#4a261c" },
+  // bold and fantasy
+  { id: "lips-grape-soda", label: "Grape soda", swatch: "#5e2a7a" },
+  { id: "lips-electric-violet", label: "Electric violet", swatch: "#7b2fff" },
+  { id: "lips-lilac", label: "Lilac", swatch: "#b89ae0" },
+  { id: "lips-cobalt", label: "Cobalt", swatch: "#2a3fbf" },
+  { id: "lips-navy", label: "Navy", swatch: "#1a2050" },
+  { id: "lips-teal", label: "Teal", swatch: "#1f8a8a" },
+  { id: "lips-emerald", label: "Emerald", swatch: "#1a7a4a" },
+  { id: "lips-mint", label: "Mint", swatch: "#8fe3c0" },
+  { id: "lips-neon-orange", label: "Neon orange", swatch: "#ff6a00" },
+  { id: "lips-gold-leaf", label: "Gold leaf", swatch: "#c9a24a" },
+  { id: "lips-silver", label: "Silver", swatch: "#b8b8c4" },
+  { id: "lips-jet-black", label: "Jet black", swatch: "#15101a" },
 ] as const;
 
 /** Eyebrow styles. */
@@ -579,6 +623,10 @@ export function seededMakeup(seed: number): Makeup {
     hearing: (
       ["none", "none", "none", "none", "none", "none", "beige", "pink"] as const
     )[(n >> 25) % 8],
+    // mostly a plain lip, sometimes ombre or a blurred stain
+    lipLiner: "soft",
+    // low bits: NPC seeds are small, so high bits would always be zero
+    lipStyle: (["full", "full", "full", "ombre", "blurred"] as const)[n % 5],
   };
 }
 
@@ -602,6 +650,26 @@ export const GLOSSES = [
   { id: "satin", label: "Satin" },
   { id: "glossy", label: "Glossy" },
   { id: "glass", label: "Glass" },
+  { id: "metallic", label: "Metallic" },
+  { id: "glitter", label: "Glitter" },
+] as const;
+
+/** Lip liner: soft is a gentle deepening at the edge (every look before the
+ * liner choice wore it); contrast is a 90s brown edge whatever the lipstick. */
+export const LIP_LINERS = [
+  { id: "soft", label: "Soft" },
+  { id: "none", label: "No liner" },
+  { id: "defined", label: "Defined" },
+  { id: "overlined", label: "Overlined" },
+  { id: "contrast", label: "90s brown" },
+] as const;
+
+/** How lipstick is laid on: all over, deeper at the edges fading to a light
+ * center (ombre), or a just-bitten stain in the middle (blurred). */
+export const LIP_STYLES = [
+  { id: "full", label: "Full" },
+  { id: "ombre", label: "Ombre" },
+  { id: "blurred", label: "Blurred" },
 ] as const;
 
 /** Blush colors; `swatch` is the closet chip, transparent for none. */
@@ -700,6 +768,8 @@ export type Makeup = {
   birthmark: IdOf<typeof BIRTHMARKS>;
   bindi: IdOf<typeof BINDIS>;
   hearing: IdOf<typeof HEARING_AIDS>;
+  lipLiner: IdOf<typeof LIP_LINERS>;
+  lipStyle: IdOf<typeof LIP_STYLES>;
 };
 
 /** Makeup for looks without a makeup code. */
@@ -716,6 +786,8 @@ export const DEFAULT_MAKEUP: Makeup = {
   birthmark: "none",
   bindi: "none",
   hearing: "none",
+  lipLiner: "soft",
+  lipStyle: "full",
 };
 
 // Makeup travels as one short code, like the face: one digit per choice,
@@ -734,6 +806,8 @@ const MAKEUP_PARTS = [
   ["birthmark", BIRTHMARKS],
   ["bindi", BINDIS],
   ["hearing", HEARING_AIDS],
+  ["lipLiner", LIP_LINERS],
+  ["lipStyle", LIP_STYLES],
 ] as const;
 /** The code's length before freckles, glasses, bindis and hearing aids. */
 const MAKEUP_V1 = 6;

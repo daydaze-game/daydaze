@@ -1497,6 +1497,21 @@ const SHOTS: {
   { name: "tiki-bar", query: "room=tiki-bar" },
   { name: "thrift-temple", query: "room=thrift-temple" },
   { name: "espresso-lab", query: "room=espresso-lab" },
+  // a finished barista shift: empty cups count as wrong orders, so the shift
+  // ends after eight and the panel shows the pay slip (game/shifts.ts)
+  {
+    name: "barista-pay-slip",
+    query: "room=espresso-lab",
+    act: async (page) => {
+      const panel = page.getByRole("region", { name: "Barista station" });
+      await panel
+        .getByRole("button", { name: "Start a shift" })
+        .click({ timeout: 150_000 });
+      for (let i = 0; i < 8; i++)
+        await panel.getByRole("button", { name: "Hand it over" }).click();
+      await expect(panel).toContainText(/Paid \d+ coins/);
+    },
+  },
   { name: "hotel-rooftop", query: "room=hotel-rooftop" },
   { name: "bookshop", query: "room=bookshop" },
   { name: "patisserie", query: "room=patisserie" },
@@ -2690,6 +2705,8 @@ const SHOTS: {
   // the paired kisses mid-kiss, in profile, at three height pairings
   lineupShot("together-kiss", "emote=kiss", "together"),
   lineupShot("together-cheek-kiss", "emote=cheek-kiss", "together"),
+  lineupShot("together-hug", "emote=hug", "together"),
+  lineupShot("together-forehead-kiss", "emote=forehead-kiss", "together"),
   // hair style rows (women, then men), from the front and from behind
   lineupShot(
     "hair-women-1",
@@ -2715,6 +2732,20 @@ const SHOTS: {
     "hair-men-2",
     "men=1&styles=mop,pompadour,mohawk,spiky-crop,crew,quiff&colors=1b1014,3a6bff,ff4fb3,4a2a1c,b77a3e,7b4dff",
   ),
+  // the MakeHuman community styles (doll_hair.py COMMUNITY), front and back
+  ...[
+    "bob,lob,sidebob,pigtails,messy-bun,waves",
+    "long-straight,mid-wavy,mid-straight,puffs,cornrows,quiff",
+  ].flatMap((styles, i) => [
+    lineupShot(
+      `hair-community-${i + 1}`,
+      `styles=${styles}&colors=${HAIR_COLORS}`,
+    ),
+    lineupShot(
+      `hair-community-${i + 1}-back`,
+      `styles=${styles}&colors=${HAIR_COLORS}&${BEHIND}`,
+    ),
+  ]),
   // close-ups of the speckle cases: men's and women's dark hair from behind,
   // and the Quiff's forehead in several colors
   lineupShot(
@@ -2740,6 +2771,7 @@ const SHOTS: {
   lineupShot("doll-suit-track-back", "cam=-2.2,0.6,2.2", "trackwalk"),
   // the face shot's doll up close
   lineupShot("doll-face", "", "face"),
+  lineupShot("doll-lips", "", "lips"),
   lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
 ];
 

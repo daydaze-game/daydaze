@@ -11,6 +11,9 @@ import {
   parseBlock,
   parseCredentials,
   parseLookParam,
+  parseScoreSubmission,
+  parseTitleChoice,
+  parseVisit,
   parseReport,
   parseSave,
   parseTarget,
@@ -61,6 +64,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
       effects: "low",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   };
   const raw = JSON.stringify(save);
@@ -73,6 +77,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
       effects: "low",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     bests: save.bests,
     challenges: save.challenges,
@@ -91,6 +96,7 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
     inventory: save.inventory,
     giftDay: save.giftDay,
     streak: save.streak,
+    shifts: save.shifts,
     crime: save.crime,
     jail: save.jail,
     home: save.home,
@@ -225,4 +231,50 @@ test("a report or block from inside an apartment names its owner", () => {
       ?.owner,
     undefined,
   );
+});
+
+test("a score submission names a real game and a finite score", () => {
+  assert.deepEqual(parseScoreSubmission({ game: "bowling", score: 150 }), {
+    game: "bowling",
+    score: 150,
+  });
+  assert.deepEqual(parseScoreSubmission({ game: "mini-golf", score: -2 }), {
+    game: "mini-golf",
+    score: -2,
+  });
+  for (const bad of [
+    null,
+    {},
+    { game: "bowling" },
+    { game: "nope", score: 1 },
+    { game: "toString", score: 1 },
+    { game: "bowling", score: "150" },
+    { game: "bowling", score: NaN },
+    { game: "bowling", score: null },
+    { game: 7, score: 1 },
+  ])
+    assert.equal(parseScoreSubmission(bad), null, JSON.stringify(bad));
+});
+
+test("a visit names a known room", () => {
+  assert.deepEqual(parseVisit({ roomId: "plaza" }), { roomId: "plaza" });
+  for (const bad of [null, {}, { roomId: "nowhere" }, { roomId: 3 }])
+    assert.equal(parseVisit(bad), null);
+});
+
+test("a title choice is a ladder rank or null to clear", () => {
+  assert.deepEqual(parseTitleChoice({ title: "street:2" }), {
+    title: "street:2",
+  });
+  assert.deepEqual(parseTitleChoice({ title: null }), { title: null });
+  for (const bad of [
+    null,
+    {},
+    { title: "street:10" },
+    { title: "nope:1" },
+    { title: "street:-1" },
+    { title: 5 },
+    { title: "street:1 " },
+  ])
+    assert.equal(parseTitleChoice(bad), null, JSON.stringify(bad));
 });

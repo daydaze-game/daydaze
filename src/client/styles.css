@@ -2958,7 +2958,7 @@ button:focus-visible {
   position: fixed;
   right: 28px;
   top: 112px;
-  z-index: 5;
+  z-index: 6;
   display: flex;
   gap: 6px;
 }
@@ -3047,8 +3047,8 @@ button:focus-visible {
 .car-extras {
   position: fixed;
   right: 16px;
-  /* under the corner buttons */
-  top: 120px;
+  /* below the city activity tabs */
+  top: 155px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -3386,6 +3386,29 @@ button:focus-visible {
 .pouch-panel {
   right: auto;
   left: 16px;
+}
+
+.smoking-spot-panel {
+  right: auto;
+  left: 16px;
+  top: 140px;
+  background: rgba(20, 24, 33, 0.9);
+  border: 1px solid #4a5568;
+  color: #f7fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  z-index: 20;
+}
+.smoking-spot-panel button.drink {
+  background: #2d3748;
+  color: #edf2f7;
+  border: 1px solid #718096;
+  border-radius: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+.smoking-spot-panel button.drink:hover {
+  background: #4a5568;
 }
 
 /* Street counters stay legible over the city, with accessible menu controls. */

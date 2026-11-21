@@ -8,6 +8,7 @@ import { byTier } from "../../game/age.ts";
 import type { Progression } from "../../game/progression/progression.ts";
 import { ProgressionHud, LadderPanel } from "./Progression.tsx";
 import { ActionDock, DockAction } from "./ActionDock.tsx";
+import { LazyPanel } from "./ReloadBoundary.tsx";
 import { ClubNightTicker } from "./EventCalendar.tsx";
 import { InviteButton } from "../net/InviteButton.tsx";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
@@ -30,6 +31,7 @@ import { TaxiPanel } from "../city/TaxiPanel.tsx";
 import { driverSays, taxiRide } from "../city/taxiStore.ts";
 import { fareFor, planRoute, routeLength } from "../../game/city/taxi.ts";
 import { FuelStop } from "../city/FuelStop.tsx";
+import { SmokingPrompt } from "../city/SmokingPrompt.tsx";
 import type { ParkedCar } from "../../game/city/drive.ts";
 import type { RoomId, Spawn } from "../../game/rooms.ts";
 import { type BodyShape } from "../../game/body.ts";
@@ -314,6 +316,8 @@ export function Overlay({
   setHolds,
   effects,
   setEffects,
+  highAudio = true,
+  setHighAudio,
   view,
   setView,
   panelOpen,
@@ -359,6 +363,8 @@ export function Overlay({
   setHolds: (holds: Holds) => void;
   effects: Intensity;
   setEffects: (effects: Intensity) => void;
+  highAudio?: boolean;
+  setHighAudio?: ((highAudio: boolean) => void) | undefined;
   view: View;
   setView: (view: View) => void;
   panelOpen: boolean;
@@ -437,15 +443,16 @@ export function Overlay({
       </header>
 
       {phone && (
-        <Suspense fallback={null}>
+        <LazyPanel onContinue={() => setPhone(false)}>
           <DeliveryApp onClose={() => setPhone(false)} />
-        </Suspense>
+        </LazyPanel>
       )}
       <FoodHud />
 
       <Dressing open={panelOpen} onOpenChange={setPanelOpen}>
         {closetOpened && (
-          <Suspense fallback={null}>
+          // a failed download shows the Reload card; the drawer stays closable
+          <LazyPanel>
             <Mirror
               tab={tab}
               setTab={setTab}
@@ -458,8 +465,10 @@ export function Overlay({
               setBody={setBody}
               effects={effects}
               setEffects={setEffects}
+              highAudio={highAudio}
+              setHighAudio={setHighAudio}
             />
-          </Suspense>
+          </LazyPanel>
         )}
       </Dressing>
 
@@ -476,16 +485,27 @@ export function Overlay({
       <RoomPanel room={room} />
       {room === "city" && <FuelStop coins={coins} onSpend={onSpend} />}
       {room === "city" && (
-        <Suspense fallback={null}>
-          <VolleyStop />
-          <ParkPanel />
-          <BandPanel />
-          <BusPanel />
-          <FoodVendorPanel coins={coins} onSpend={onSpend} />
-        </Suspense>
+        <>
+          <LazyPanel>
+            <VolleyStop />
+          </LazyPanel>
+          <LazyPanel>
+            <ParkPanel />
+          </LazyPanel>
+          <LazyPanel>
+            <BandPanel />
+          </LazyPanel>
+          <LazyPanel>
+            <BusPanel />
+          </LazyPanel>
+          <LazyPanel>
+            <FoodVendorPanel coins={coins} onSpend={onSpend} />
+          </LazyPanel>
+        </>
       )}
       <VendingPanel coins={coins} onSpend={onSpend} />
       <PouchPanel />
+      <SmokingPrompt room={room} />
       {room === "city" && <GasMartPanel />}
       {room === "green-haze" && (
         <WeedShopPanel shop="dispensary" title="Dispensary" />

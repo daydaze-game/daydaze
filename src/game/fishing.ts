@@ -31,6 +31,12 @@ export const SPECIES: readonly Species[] = [
   { name: "Sunset marlin", kg: [15, 40], reach: 22, weight: 0.4 },
 ];
 
+export const BOARDWALK_SPECIES: readonly Species[] = [
+  { name: "Sardine", kg: [0.1, 0.3], reach: 0, weight: 5 },
+  { name: "Mackerel", kg: [0.5, 1.5], reach: 0, weight: 4 },
+  { name: "Sea bass", kg: [1, 4], reach: 10, weight: 3 },
+];
+
 function rand(n: number): number {
   const v = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return v - Math.floor(v);
@@ -51,8 +57,12 @@ export function biteDelay(seed: number): number {
 }
 
 /** What's on the line for a cast `distance` out. */
-export function speciesFor(seed: number, distance: number): Species {
-  const pool = SPECIES.filter((s) => distance >= s.reach);
+export function speciesFor(
+  seed: number,
+  distance: number,
+  species: readonly Species[] = SPECIES,
+): Species {
+  const pool = species.filter((s) => distance >= s.reach);
   const total = pool.reduce((t, s) => t + s.weight, 0);
   let pick = rand(seed + 0.5) * total;
   for (const s of pool) {
@@ -78,8 +88,9 @@ export function strike(
   seed: number,
   distance: number,
   reaction: number,
+  species: readonly Species[] = SPECIES,
 ): Catch {
-  const fish = speciesFor(seed, distance);
+  const fish = speciesFor(seed, distance, species);
   if (!Number.isFinite(reaction) || reaction < 0)
     return { species: fish.name, kg: 0, outcome: "early" };
   if (reaction > HOOK_WINDOW)
