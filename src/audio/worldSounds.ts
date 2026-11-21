@@ -223,6 +223,42 @@ export function playHorn(): boolean {
   return true;
 }
 
+/** Tires locking up: a narrow band of road noise sliding down in pitch over
+ * a thin squeal, `seconds` long (a hard stop for someone in the road). */
+export function playScreech(seconds = 0.9): boolean {
+  const out = sfx();
+  if (!out) return false;
+  const { ctx, dest } = out;
+  const now = ctx.currentTime;
+  const end = now + Math.min(2, Math.max(0.2, seconds));
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.09, now + 0.05);
+  gain.gain.setValueAtTime(0.09, end - 0.25);
+  gain.gain.exponentialRampToValueAtTime(0.0001, end);
+  gain.connect(dest);
+  const road = ctx.createBufferSource();
+  road.buffer = noiseBuffer(ctx);
+  const band = ctx.createBiquadFilter();
+  band.type = "bandpass";
+  band.Q.value = 14;
+  band.frequency.setValueAtTime(2700, now);
+  band.frequency.exponentialRampToValueAtTime(1800, end);
+  road.connect(band).connect(gain);
+  road.start(now, Math.random() * 0.5);
+  road.stop(end + 0.02);
+  const squeal = ctx.createOscillator();
+  squeal.type = "sawtooth";
+  squeal.frequency.setValueAtTime(1250, now);
+  squeal.frequency.exponentialRampToValueAtTime(980, end);
+  const thin = ctx.createGain();
+  thin.gain.value = 0.25;
+  squeal.connect(thin).connect(gain);
+  squeal.start(now);
+  squeal.stop(end + 0.02);
+  return true;
+}
+
 /** A soft glassy tick for buttons. */
 export function playClick(): boolean {
   const out = sfx();

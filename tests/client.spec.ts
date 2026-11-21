@@ -2649,6 +2649,80 @@ test("walking the sidewalk, her foot catches: she trips, is held a moment, then 
   expect(errors).toEqual([]);
 });
 
+test("stepping out in front of a car too close to stop: she is knocked down and gets back up", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  // midday on the avenue by the spawn, where traffic is moving
+  await page.goto(`${LOW}&room=city&time=12:00&debug=1`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  // into the lane 5 m ahead of a car going over 5 m/s: too close and too
+  // fast for a mere bump (retried while every car near
+  // her waits at a light)
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const stepOut: unknown = Reflect.get(window, "daydazeStepOut");
+          return (
+            typeof stepOut === "function" &&
+            Reflect.apply(stepOut, window, [5]) === true
+          );
+        }),
+      { timeout: 120_000, intervals: [2_000] },
+    )
+    .toBe(true);
+  await expect(canvas).toHaveAttribute(
+    "data-car-hit",
+    /^(knockdown|hard-fall)$/,
+    { timeout: 60_000 },
+  );
+  await expect(canvas).toHaveAttribute(
+    "data-reaction",
+    /^(trip-fall|hard-landing|get-up)$/,
+    { timeout: 30_000 },
+  );
+  // and up again, free to walk
+  await expect(canvas).not.toHaveAttribute("data-reaction", /.+/, {
+    timeout: 120_000,
+  });
+  expect(errors).toEqual([]);
+});
+
+test("knocking a walker down with your car raises police heat", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city&time=12:00&debug=1`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  await expect(canvas).toHaveAttribute("data-heat", "0");
+  // the walker nearest her, hit as by her car at city speed (retried until
+  // someone walks within reach)
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const knock: unknown = Reflect.get(window, "daydazeKnockWalker");
+          return typeof knock === "function"
+            ? Number(Reflect.apply(knock, window, [9]))
+            : -1;
+        }),
+      { timeout: 120_000, intervals: [2_000] },
+    )
+    .toBeGreaterThanOrEqual(0);
+  await expect(canvas).toHaveAttribute("data-walker-hit", /^\d+$/);
+  await expect(canvas).not.toHaveAttribute("data-heat", "0");
+  expect(errors).toEqual([]);
+});
+
 test("drinks in the Velvet Room raise the buzz, and three in the view sways", async ({
   page,
 }) => {
