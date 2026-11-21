@@ -4,6 +4,7 @@
 // the room copy's Durable Object with an identity header only this gateway
 // sets. Every response gets the security headers; error bodies are fixed codes.
 
+import { dayOf } from "../../../src/game/challenges.ts";
 import type { RoomId } from "../../../src/game/rooms.ts";
 import type { Progression } from "../../../src/game/progression/progression.ts";
 import {
@@ -68,7 +69,7 @@ import {
   loadProgress,
   scoreBoard,
   updateProgress,
-} from "./progress.ts";
+} from "../progressStore.ts";
 
 export { Directory } from "./directory.ts";
 export { RateLimiter } from "./rateLimiter.ts";
@@ -288,7 +289,7 @@ function ownProgression(
 
 /** What the client needs of a state: totals, title and today's headroom. */
 function progressBody(state: ProgressState, now: number) {
-  const today = state.day === Math.floor(now / 86_400_000) ? state.dayXp : 0;
+  const today = state.day === dayOf(now) ? state.dayXp : 0;
   return {
     xp: state.xp,
     title: state.title,
@@ -435,7 +436,7 @@ async function handle(
         ? loadSave(data, session.name)
         : createDefaultSave(session.name);
       // XP and the title are the server's; the stored copy only carries them
-      const { state } = await loadProgress(env, session.id, session.name);
+      const { state } = await loadProgress(env.DB, session.id, session.name);
       const save = { ...stored, progression: ownProgression(state, stored) };
       return new Response(serializeSave(save), {
         headers: { "Content-Type": "application/json" },
@@ -449,7 +450,7 @@ async function handle(
       // First contact seeds progress from the save stored *before* this upload,
       // so an upload can't pick its own starting XP; afterwards the client's
       // XP and title are ignored for the server's.
-      const { state } = await loadProgress(env, session.id, session.name);
+      const { state } = await loadProgress(env.DB, session.id, session.name);
       const owned = { ...save, progression: ownProgression(state, save) };
       await env.DB.prepare(
         `INSERT INTO saves (user_id, data, updated_at) VALUES (?, ?, ?)
@@ -468,7 +469,7 @@ async function handle(
       if (session.isGuest) return error(403, "guest-progress-is-local");
       const now = Date.now();
       if (route.kind === "progress") {
-        const { state } = await loadProgress(env, session.id, session.name);
+        const { state } = await loadProgress(env.DB, session.id, session.name);
         return json(progressBody(state, now));
       }
       const body = await readJson(request);
@@ -486,7 +487,7 @@ async function handle(
       );
       if (limited) return limited;
       const outcome = await updateProgress(
-        env,
+        env.DB,
         session.id,
         session.name,
         now,
@@ -527,9 +528,11 @@ async function handle(
       return json({ ...outcome.result, ...progressBody(outcome.state, now) });
     }
     case "board-score":
-      return json(await scoreBoard(env, route.game, session.id, Date.now()));
+      return json(await scoreBoard(env.DB, route.game, session.id, Date.now()));
     case "board-ladder":
-      return json(await ladderBoard(env, route.ladder, session.id, Date.now()));
+      return json(
+        await ladderBoard(env.DB, route.ladder, session.id, Date.now()),
+      );
     case "report": {
       const report = parseReport(await readJson(request));
       if (!report) return error(400, "invalid-report");

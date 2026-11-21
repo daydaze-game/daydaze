@@ -2,7 +2,7 @@
 // client reports what happened (a score, a place); the server grades it with
 // the same pure rules the game uses, caps what a day can pay, and keeps the
 // numbers that feed the weekly boards. Pure: the D1 adapter lives in
-// worker/progress.ts.
+// progressStore.ts.
 
 import { mayEnter } from "../../src/game/age.ts";
 import { dayOf } from "../../src/game/challenges.ts";
