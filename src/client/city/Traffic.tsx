@@ -319,13 +319,13 @@ export function Traffic({ player }: { player: Player }) {
         pose.x + Math.cos(pose.yaw) * ahead,
         pose.z - Math.sin(pose.yaw) * ahead,
       );
-      // her back to the car, so the close camera, which faces her, looks
-      // up the lane at it rather than sitting where it stops (walk.ts yaw: 0
-      // faces +z; traffic's: 0 faces +x)
+      // facing the car, so the close camera behind her looks up the lane at
+      // it rather than sitting where it stops (walk.ts yaw: 0 faces +z;
+      // traffic's: 0 faces +x)
       player.yaw =
         player.walk.yaw =
         player.before.yaw =
-          Math.atan2(Math.cos(pose.yaw), -Math.sin(pose.yaw));
+          Math.atan2(-Math.cos(pose.yaw), Math.sin(pose.yaw));
       return true;
     };
     Object.assign(window, { daydazeStepOut: stepOut });
