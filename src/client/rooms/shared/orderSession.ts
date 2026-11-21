@@ -37,6 +37,8 @@ export function createOrderSession(station: Station, prize: PrizeGame) {
   const update = (shift: Shift) => store.set({ ...store.get(), shift });
   return {
     station,
+    /** The job a finished shift here is paid as; null for a contest. */
+    job: isJob(prize) ? prize : null,
     store,
     /** A shared `seed` gives two cooks the same tickets (the cook-off). */
     start(now: number, seed = Math.floor(Math.random() * 1e6)) {

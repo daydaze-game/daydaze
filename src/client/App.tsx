@@ -531,7 +531,7 @@ export function App() {
     setSave((s) => finishShift(s, job, result, now).save);
     shiftDesk.set({
       pending: null,
-      slip: { coins: r.coins, xp: r.xp, clean: r.clean, slow: r.slow },
+      slip: { job, coins: r.coins, xp: r.xp, clean: r.clean, slow: r.slow },
     });
   }, [shiftPending]);
   // opening the game on a new day counts toward the streak (and again if the

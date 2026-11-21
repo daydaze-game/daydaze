@@ -4,6 +4,8 @@ import type { Job, ShiftResult } from "../../game/shifts.ts";
 import { createStore } from "../rooms/shared/store.ts";
 
 export type PaySlip = {
+  /** The job that earned it: a panel shows only its own station's slip. */
+  job: Job;
   coins: number;
   xp: number;
   clean: boolean;

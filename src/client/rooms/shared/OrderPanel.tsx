@@ -67,7 +67,7 @@ export function OrderPanel({
             ? `${s.last.right ? `${s.last.name}, perfect${s.last.tip ? `: +${s.last.tip} ${tipWord}` : ""}` : wrong(s.last.name)}. Next: ${order?.name}`
             : `Ticket: ${order?.name}`}
       </p>
-      {over && slip && (
+      {over && slip && slip.job === session.job && (
         <p className="game-call" role="status">
           Paid {slip.coins} coins and {slip.xp} Hustle XP
           {slip.clean ? " (clean shift bonus)" : ""}
