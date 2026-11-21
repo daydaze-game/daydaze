@@ -134,10 +134,18 @@ jobs:
           path: shots
           merge-multiple: true
       - run: cat shots/stats-*.jsonl > shots/stats.jsonl 2>/dev/null || true
+      # README.md next to the PNGs: the same grid the `screenshots` branch gets,
+      # so a downloaded artifact or release opens as a gallery in any Markdown viewer
+      - env:
+          REF: ${{ github.head_ref || github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node --experimental-strip-types scripts/shot-plan.ts --gallery shots "$REF" "$SHA"
       - uses: actions/upload-artifact@v7
         with:
           name: screenshots
-          path: shots/*.png
+          path: |
+            shots/*.png
+            shots/README.md
           retention-days: 7
       # the artifact above expires; this copy, a release on the artifacts
       # repo, does not (scripts/archive-run.sh)
@@ -147,7 +155,7 @@ jobs:
           ARCHIVE_REF: ${{ github.head_ref || github.ref_name }}
           ARCHIVE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           ARCHIVE_NOTES: "Shots: ${{ inputs.shots || 'tour' }}"
-        run: shopt -s nullglob && bash scripts/archive-run.sh screenshots shots/*.png
+        run: shopt -s nullglob && bash scripts/archive-run.sh screenshots shots/*.png shots/README.md
       - if: ${{ github.event_name != 'pull_request' }}
         env:
           REF: ${{ github.ref_name }}
