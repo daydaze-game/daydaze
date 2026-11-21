@@ -914,6 +914,10 @@ function NearPart({
   return <primitive object={part.group} />;
 }
 
+/** An sRGB channel value (0..1) in linear light. */
+const srgbToLinear = (c: number) =>
+  c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+
 // a detail map's brightness, read once per image at this many pixels a side
 const SHADE_RES = 64;
 const shades = new WeakMap<object, (u: number, v: number) => number>();
@@ -941,7 +945,7 @@ function shadeOf(map: THREE.Texture | null) {
   const px = ctx.getImageData(0, 0, SHADE_RES, SHADE_RES).data;
   const lum = new Float32Array(SHADE_RES * SHADE_RES);
   for (let i = 0; i < lum.length; i++)
-    lum[i] = THREE.SRGBToLinear(
+    lum[i] = srgbToLinear(
       (0.3 * (px[i * 4] ?? 0) +
         0.59 * (px[i * 4 + 1] ?? 0) +
         0.11 * (px[i * 4 + 2] ?? 0)) /
