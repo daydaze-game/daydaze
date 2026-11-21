@@ -300,14 +300,15 @@ export function Traffic({ player }: { player: Player }) {
 
   // `?debug=1` puts `daydazeStepOut(meters)` on the page, for tests: the
   // player steps into the lane that many meters ahead of the fastest car
-  // near her heading toward the camera (true), or there is none moving
-  // (false). The camera keeps its offset from her, so a car driving away from
-  // it would stop right on it.
+  // near her, one heading toward the camera if any is (true), or there is
+  // none moving (false). The camera keeps its offset from her, so a car
+  // driving away from it stops right on it.
   useEffect(() => {
     if (!probing) return;
     const stepOut = (ahead: unknown) => {
       if (typeof ahead !== "number" || !Number.isFinite(ahead)) return false;
       let fastest: TrafficCar | null = null;
+      let toward: TrafficCar | null = null;
       const ox = camera.position.x - player.pos.x;
       const oz = camera.position.z - player.pos.z;
       for (const car of traffic.cars) {
@@ -315,11 +316,13 @@ export function Traffic({ player }: { player: Player }) {
         const d = Math.hypot(pose.x - player.pos.x, pose.z - player.pos.z);
         // not one about to turn at a junction: it would curve past her
         if (car.next || d > 120 || car.speed <= 5) continue;
-        if (Math.cos(pose.yaw) * ox - Math.sin(pose.yaw) * oz < 0) continue;
         if (car.speed > (fastest?.speed ?? 0)) fastest = car;
+        const facing = Math.cos(pose.yaw) * ox - Math.sin(pose.yaw) * oz > 0;
+        if (facing && car.speed > (toward?.speed ?? 0)) toward = car;
       }
-      if (!fastest) return false;
-      carPose(fastest, pose);
+      const pick = toward ?? fastest;
+      if (!pick) return false;
+      carPose(pick, pose);
       placePlayer(
         player,
         pose.x + Math.cos(pose.yaw) * ahead,
