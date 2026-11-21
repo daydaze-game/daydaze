@@ -121,9 +121,15 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 - **You own your PR until it merges.** When your issue is done, open a PR.
   - If a check fails, fix it.
   - If CodeRabbit comments, consider each suggestion: fix it, or reply why not.
-  - When every check is green, update the branch with `main` and bypass-merge
-    it (`gh pr merge <n> --admin --merge`), unless there is a reason to wait for
-    the checks again (for example, the update brought in conflicts you fixed).
+  - Bypass-merge (`gh pr merge <n> --admin --merge`) only when all of these
+    hold; otherwise leave it to auto-merge:
+    - every check is green;
+    - the work is finished: every item in the issue and the PR's checklist is
+      done, and the PR is not a draft;
+    - every review comment is answered and its thread resolved;
+    - the branch is up to date with `main`;
+    - updating from `main` merged cleanly, with no conflicts to fix (if you
+      fixed any, wait for the checks to pass again).
   - You are not done until the PR is merged. Then delete your worktree and
     branch.
 - Parallel agents each work in a git worktree, `.worktrees/<name>` on
@@ -166,8 +172,8 @@ A Vite port other than 5173 must be in `ALLOWED_ORIGINS`
 - Merge gate: nobody pushes to `main`. GitHub merges a PR only when it is up
   to date with `main` and every required check passes (the browser suites
   included), so two PRs that are green alone cannot merge into a red `main`.
-  The one exception is the bypass-merge above: a PR that was all green and
-  only took `main` in may merge without waiting for the checks again. The
+  The one exception is the bypass-merge above: a PR that meets all of its
+  conditions may merge without waiting for the checks again. The
   `automerge` workflow turns auto-merge on for every PR that is not a
   draft (when it opens or is marked ready). To do it by hand:
   `gh pr merge <n> --auto --merge`, or
@@ -225,7 +231,7 @@ request. Use the `gh` CLI.
   Claude GitHub Action can't open PRs, so it leaves a branch and the main
   session opens the PR.
 - **Reviews and CI**: do not merge a PR with a red check, or with checks that
-  never ran (the bypass-merge after updating from `main` is fine), and do not
+  never ran (a bypass-merge that meets every condition above is fine), and do not
   push to `main` around CI. Answer review comments with a commit or a reply,
   and resolve the thread. Close issues you have fixed with a comment pointing
   at the commit or PR.
