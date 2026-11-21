@@ -14,6 +14,7 @@ import {
   playFireworkBoom,
   playCrashBoom,
   playHorn,
+  playScreech,
   playPurr,
   playShellNote,
   playSplash,
@@ -43,6 +44,7 @@ test("world sounds stay silent and never throw without Web Audio", () => {
   assert.equal(playShellNote(2), false);
   assert.equal(playPurr(2), false);
   assert.equal(playHorn(), false);
+  assert.equal(playScreech(), false);
   assert.equal(playCheer(1), false);
   assert.equal(playThump(1), false);
   assert.equal(playSplash(1), false);
