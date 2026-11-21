@@ -1,4 +1,4 @@
-// Three unique, textured addresses complement the instanced city vocabulary.
+// Unique, textured addresses complement the instanced city vocabulary.
 // These static glTF scenes keep their authored materials, UVs and normal maps.
 import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
