@@ -196,6 +196,14 @@ reached, the game is single-player and makes no network calls.
   relay. `Directory` tracks copies and who is where; `RateLimiter` keeps
   auth and report budgets in its SQLite storage.
 - `server/migrations/` is the D1 schema.
+- Progress is server-owned for accounts: `server/src/progressCore.ts` (pure)
+  grades a reported score with the game's own prize rules, pays XP to its
+  ladder under a daily cap, and pays a first visit once;
+  `server/src/worker/progress.ts` stores it in D1 (`progress`, with
+  `weekly_scores` and `weekly_xp` for the Monday-to-Sunday boards) using
+  revision-checked writes. `GET/PUT /api/save` return the server's XP and
+  title, and `src/net/progress.ts` validates the replies on the client.
+  Guests keep progress on the device. Threat model: `docs/security.md`.
 - Apartments are one copy per owner: `/ws/home/<ownerId>` reaches the
   `apartment:home:<ownerId>` Durable Object, for the owner or a friend
   (checked in D1; never a blocked one). `RoomCore`'s home mode lets a visitor
