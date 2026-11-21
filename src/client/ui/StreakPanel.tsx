@@ -158,13 +158,14 @@ export function StreakPanel({ streak }: { streak: StreakSave }): JSX.Element {
   // button: move focus into the calendar, and on close hand it back to the
   // Menu toggle if it fell to the page.
   useEffect(() => {
-    if (!open) return;
+    // a milestone card showing keeps the focus; the calendar takes it after
+    if (!open || celebrate) return;
     heading.current?.focus();
     return () => {
       if (document.activeElement === document.body)
         document.querySelector<HTMLElement>(".menu-open")?.focus();
     };
-  }, [open]);
+  }, [open, celebrate]);
   useEffect(() => {
     if (!open) return;
     const key = (e: KeyboardEvent) => {

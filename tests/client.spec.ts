@@ -4892,6 +4892,34 @@ test("the daily streak calendar takes focus when it opens and hands it back to t
   ).toBeFocused();
 });
 
+test("the streak milestone card keeps focus on its button until it is dismissed", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  // two days running up to yesterday: opening today makes day 3
+  const today = Math.floor(Date.now() / 86_400_000);
+  await seedSave(page, {
+    streak: {
+      count: 2,
+      best: 2,
+      last: today - 1,
+      days: [today - 2, today - 1],
+      frozen: [],
+      freezeWeek: -1,
+    },
+  });
+  await page.goto(VELVET);
+  const card = page.getByRole("dialog", { name: "Streak milestone" });
+  const done = card.getByRole("button", { name: "Keep it burning" });
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(card).toHaveCount(0);
+});
+
 test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({
   page,
 }) => {
