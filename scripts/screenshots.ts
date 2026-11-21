@@ -1058,11 +1058,10 @@ const SHOTS: {
   }),
   // stepping out too close in front of a moving car: the hit, the fall and the
   // get-up (game/city/carHits.ts); the dolls at a twentieth of speed, the
-  // car at its own. The room's high camera: a close one ends up inside the
-  // car once it stops by her
+  // car at its own
   actionStrip(
     "car-hit",
-    "room=city&quality=low&debug=1&time=12:00&timescale=0.05",
+    "room=city&view=full&quality=low&debug=1&time=12:00&timescale=0.05",
     async (page) => {
       await page.waitForTimeout(40_000);
       // warm the moves pack up, so the fall is not missed while it loads
