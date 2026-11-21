@@ -201,7 +201,8 @@ export function CarHits({ player }: { player: Player }) {
 
   // `?debug=1` puts `daydazeKnockWalker(speed)` on the page, for tests and
   // screenshots: the walker nearest you is hit as by your car at `speed` m/s,
-  // coming from your side (her index, or -1 with nobody near)
+  // coming from your side, and you stand a few meters off facing her, so the
+  // camera behind you sees it (her index, or -1 with nobody near)
   const hitRef = useRef(hitWalker);
   hitRef.current = hitWalker;
   useEffect(() => {
@@ -226,7 +227,10 @@ export function CarHits({ player }: { player: Player }) {
       const d = Math.max(best, 1e-6);
       const fx = (pose.x - player.pos.x) / d;
       const fz = (pose.z - player.pos.z) / d;
-      return hitRef.current(nearest, now, speed, fx, fz) ? nearest : -1;
+      if (!hitRef.current(nearest, now, speed, fx, fz)) return -1;
+      placePlayer(player, pose.x - fx * 4, pose.z - fz * 4);
+      player.yaw = player.walk.yaw = player.before.yaw = Math.atan2(fx, fz);
+      return nearest;
     };
     Object.assign(window, { daydazeKnockWalker: knockNearest });
     return () => {
@@ -313,7 +317,10 @@ export function CarHits({ player }: { player: Player }) {
     <>
       {bubbles.map((b) => (
         <Html key={b.id} position={[b.x, 2.4, b.z]} center>
-          <p className="bubble">{b.text}</p>
+          {/* its own width, not squeezed at the edge of the view */}
+          <p className="bubble" style={{ width: "max-content" }}>
+            {b.text}
+          </p>
         </Html>
       ))}
     </>
