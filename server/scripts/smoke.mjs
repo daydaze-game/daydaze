@@ -386,7 +386,7 @@ try {
   const fresh = createDefaultSave("Smoke Tester");
   const save = {
     ...fresh,
-    settings: { ...fresh.settings, quality: "low", muted: true },
+    settings: { ...fresh.settings, muted: true },
   };
   const put = await fetch(`${BASE}/api/save`, {
     method: "PUT",
@@ -403,10 +403,7 @@ try {
   const got = await (
     await fetch(`${BASE}/api/save`, { headers: { Cookie: account } })
   ).json();
-  check(
-    got.settings.quality === "low",
-    "GET /api/save keeps the last good save",
-  );
+  check(got.settings.muted === true, "GET /api/save keeps the last good save");
   const logout = await fetch(`${BASE}/api/logout`, {
     method: "POST",
     headers: { Cookie: account },
@@ -427,6 +424,97 @@ try {
     body: JSON.stringify({ ...credentials, password: "wrong horse" }),
   });
   check(wrong.status === 401, "POST /api/login rejects a wrong password");
+
+  // Server-owned progress: grading, caps, boards and the save override.
+  const player = login.headers.getSetCookie()[0].split(";")[0];
+  const api = (path, body, cookie = player) =>
+    fetch(`${BASE}/api/${path}`, {
+      method: body === undefined ? "GET" : "POST",
+      headers: { Cookie: cookie },
+      ...(body !== undefined && { body: JSON.stringify(body) }),
+    });
+  const progressGuest = await guest();
+  check(
+    (await api("progress", undefined, progressGuest.cookie)).status === 403,
+    "a guest has no server progress",
+  );
+  const start = await (await api("progress")).json();
+  check(
+    start.xp.fame === 0 && start.dailyXpLeft === 5000,
+    "a new account starts with no XP",
+  );
+  const inflated = createDefaultSave("Smoke Tester");
+  inflated.progression.xp.street = 30000;
+  const overridden = await fetch(`${BASE}/api/save`, {
+    method: "PUT",
+    headers: { Cookie: player },
+    body: JSON.stringify(inflated),
+  });
+  check(
+    overridden.status === 200 &&
+      (await overridden.json()).progression.xp.street === 0,
+    "an uploaded save cannot raise XP",
+  );
+  const scored = await (
+    await api("progress/score", { game: "bowling", score: 185 })
+  ).json();
+  check(
+    scored.grade === "S" &&
+      scored.gained === 125 &&
+      scored.best === true &&
+      scored.xp.fame === 125,
+    `the server grades a score and pays its ladder (${JSON.stringify(scored)})`,
+  );
+  check(
+    (await api("progress/score", { game: "bowling", score: 99999 })).status ===
+      422,
+    "an implausible score is refused",
+  );
+  const board = await (await api("leaderboard/score/bowling")).json();
+  check(
+    board.entries[0]?.name === "Smoke Tester" &&
+      board.entries[0].value === 185 &&
+      board.you?.rank === 1,
+    "the weekly board lists the score and the caller's rank",
+  );
+  const xpBoard = await (await api("leaderboard/ladder/fame")).json();
+  check(
+    xpBoard.entries[0]?.value === 125,
+    "the weekly ladder board counts the XP the server paid",
+  );
+  const firstVisit = await (
+    await api("progress/visit", { roomId: "plaza" })
+  ).json();
+  const secondVisit = await (
+    await api("progress/visit", { roomId: "plaza" })
+  ).json();
+  check(
+    firstVisit.gained === 30 && secondVisit.gained === 0,
+    "a first visit pays once",
+  );
+  check(
+    (await api("progress/title", { title: "street:5" })).status === 422,
+    "an unearned title is refused",
+  );
+  check(
+    (await api("progress/title", { title: "fame:0" })).status === 200,
+    "an earned title is accepted",
+  );
+  check(
+    (await api("progress/score", { game: "bowling", score: 100 })).status ===
+      429,
+    "progress writes are rate limited per player",
+  );
+  check(
+    (
+      await fetch(`${BASE}/api/progress/score`, {
+        method: "POST",
+        headers: { Cookie: player, Origin: "https://evil.example" },
+        body: JSON.stringify({ game: "bowling", score: 100 }),
+      })
+    ).status === 403,
+    "a cross-origin progress write is refused",
+  );
 
   // Password guessing: the 6th rapid attempt on one account is refused.
   const statuses = [];
