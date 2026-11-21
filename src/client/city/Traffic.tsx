@@ -319,6 +319,9 @@ export function Traffic({ player }: { player: Player }) {
         pose.x + Math.cos(pose.yaw) * ahead,
         pose.z - Math.sin(pose.yaw) * ahead,
       );
+      // side-on to the lane, so a camera on her sees the car cross the view
+      // rather than sit on it (walk.ts yaw: 0 faces +z)
+      player.yaw = player.walk.yaw = player.before.yaw = pose.yaw;
       return true;
     };
     Object.assign(window, { daydazeStepOut: stepOut });
