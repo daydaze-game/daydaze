@@ -41,7 +41,29 @@ MODELS = {
     "palace": {"folder": "majestic-victorian-mansion-rapid-assets-cdd1a0", "title": "Majestic Victorian Mansion [Rapid Assets]", "author": "RapidAssets", "uid": "cdd1a04e6c8b4a14b2681baf3c8fb66a", "yaw": 270, "height": 20},
     "manor": {"folder": "free-fairytale-gothic-manor-house-524cb9", "title": "FREE Fairytale Gothic Manor House", "author": "Hamanzz", "uid": "524cb97cc77541b99e225970efd8abe8", "yaw": 0, "height": 26},
     "clocktower": {"folder": "whimsical-crimson-clocktower-65e765", "title": "Whimsical Crimson Clocktower", "author": "Mutasim", "uid": "65e765a675eb4b3fab20e29a9c0fd02e", "yaw": 0, "height": 26},
+    "greenhouse": {"folder": "greenhouse-victorian-e00471", "title": "Greenhouse Victorian", "author": "Ryoce", "uid": "e00471c89eec45ae8ddb9b06e3f1966e", "yaw": 0, "height": 16},
+    "rotunda": {"folder": "rotunda-ac2227", "title": "Rotunda", "author": "emelyarules", "uid": "ac22270d58af43b8af4af61e39c9b6c0", "yaw": 0, "height": 18},
+    "shopfront": {"folder": "steampunk-shops-864459", "title": "steampunk Shops", "author": "jacques_3D", "uid": "86445970625a4ce8a66905322576e7c8", "yaw": 270, "height": 16},
 }
+
+
+def join_by_material(objects):
+    groups = {}
+    for obj in objects:
+        mat_name = obj.data.materials[0].name if obj.data.materials else "None"
+        groups.setdefault(mat_name, []).append(obj)
+    joined = []
+    for mat_name, objs in groups.items():
+        if len(objs) == 1:
+            joined.append(objs[0])
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in objs:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = objs[0]
+        bpy.ops.object.join()
+        joined.append(objs[0])
+    return joined
 
 
 def imported_meshes(folder):
@@ -192,7 +214,7 @@ def render_board(groups, path, columns=3):
     camera.location = target + Vector((32,-95,60))
     camera.rotation_euler = (target-camera.location).to_track_quat("-Z","Y").to_euler()
     camera.data.type = "ORTHO"
-    camera.data.ortho_scale = 115 if columns == 4 else 100
+    camera.data.ortho_scale = 140 if len(groups) > 6 else (115 if columns == 4 else 100)
     scene.camera = camera
     sun = bpy.data.objects.new("Daylight",bpy.data.lights.new("Daylight","SUN"))
     scene.collection.objects.link(sun)
@@ -224,9 +246,12 @@ def main():
             assert "CC-BY-4.0" in license_text and spec["author"] in license_text
             files = {str(p.relative_to(folder)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(folder.rglob("*")) if p.is_file()}
             archive.write(folder/"license.txt",key+"/license.txt")
-            archive.write(folder/"meta.json",key+"/source-meta.json")
+            if (folder/"meta.json").exists():
+                archive.write(folder/"meta.json",key+"/source-meta.json")
             archive.writestr(key+"/sha256.json",json.dumps(files,indent=2))
             originals = imported_meshes(folder)
+            if len(originals) > 1:
+                originals = join_by_material(originals)
             transform = normalize(originals,spec["yaw"],spec["height"])
             if probe:
                 for yaw in [0,90,180,270]:

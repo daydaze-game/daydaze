@@ -17,13 +17,16 @@ npx prettier --write src/game/city/dreamLandmarkCosts.generated.ts \
   public/models/city-dream/landmarks.generated.json
 ```
 
-Inputs are three Sketchfab downloads, all CC-BY-4.0:
+Inputs are six Sketchfab downloads, all CC-BY-4.0:
 
 | Key | Title | Author | Source UID |
 | --- | --- | --- | --- |
 | palace | Majestic Victorian Mansion [Rapid Assets] | RapidAssets | cdd1a04e6c8b4a14b2681baf3c8fb66a |
 | manor | FREE Fairytale Gothic Manor House | Hamanzz | 524cb97cc77541b99e225970efd8abe8 |
 | clocktower | Whimsical Crimson Clocktower | Mutasim | 65e765a675eb4b3fab20e29a9c0fd02e |
+| greenhouse | Greenhouse Victorian | Ryoce | e00471c89eec45ae8ddb9b06e3f1966e |
+| rotunda | Rotunda | emelyarules | ac22270d58af43b8af4af61e39c9b6c0 |
+| shopfront | steampunk Shops | jacques_3D | 86445970625a4ce8a66905322576e7c8 |
 
 The original PBR materials and UV layout are retained. Derivatives normalize
 orientation and footprint, bake the clocktower's static pose, simplify near/far

@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   addCatch,
   biteDelay,
+  BOARDWALK_SPECIES,
   castDistance,
   CAST_RANGE,
   CASTS,
@@ -76,4 +77,21 @@ test("a trip is five casts, totalled to a tenth of a kilo", () => {
   assert.equal(trip.catches.length, CASTS);
   assert.ok(tripOver(trip));
   assert.equal(tripKg(trip), 6.3);
+});
+
+test("boardwalk catches come from its own common-fish table", () => {
+  for (let seed = 0; seed < 100; seed++) {
+    const fish = speciesFor(seed, 26, BOARDWALK_SPECIES);
+    assert.ok(BOARDWALK_SPECIES.includes(fish));
+    assert.ok(fish.kg[1] <= 4);
+  }
+});
+
+test("strikes use the selected spot's fish table", () => {
+  for (let seed = 0; seed < 100; seed++) {
+    const catchResult = strike(seed, 26, 0.1, BOARDWALK_SPECIES);
+    assert.ok(
+      BOARDWALK_SPECIES.some((fish) => fish.name === catchResult.species),
+    );
+  }
 });
