@@ -3392,6 +3392,11 @@ for (const room of [
         timeout: 120_000,
       })
       .toBeGreaterThan(15);
+    // the first frames draw mid-load (streamed dolls can show both LOD
+    // meshes for a frame), so read the count once the tenth frame settled it
+    await expect(canvas).toHaveAttribute("data-frames", "10", {
+      timeout: 120_000,
+    });
     expect(Number(await canvas.getAttribute("data-calls"))).toBeLessThan(250);
   });
 }

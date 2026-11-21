@@ -66,6 +66,8 @@ export type SaveV1 = {
     panelOpen: boolean;
     /** Mask swearing in others' chat too, not just slurs. */
     strictChat: boolean;
+    /** Subtle reverb bloom and low-pass filter on music while high in music venues. */
+    highAudio: boolean;
   };
   // Added after v1 shipped: older saves load with these defaults.
   home: HomeSave;
@@ -127,6 +129,7 @@ export function createDefaultSave(name: string): SaveV1 {
       effects: "full",
       strictChat: false,
       panelOpen: false,
+      highAudio: true,
     },
     home: { ...DEFAULT_HOME, furniture: [] },
     jail: { ...DEFAULT_JAIL },
@@ -188,6 +191,7 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
   const effects = settings.get("effects");
   const panelOpen = settings.get("panelOpen");
   const strictChat = settings.get("strictChat");
+  const highAudio = settings.get("highAudio");
   const defaults = createDefaultSave(
     isValidDisplayName(name) ? name : fallbackName,
   );
@@ -214,6 +218,10 @@ export function loadSave(raw: string | null, fallbackName: string): SaveV1 {
         typeof strictChat === "boolean"
           ? strictChat
           : defaults.settings.strictChat,
+      highAudio:
+        typeof highAudio === "boolean"
+          ? highAudio
+          : defaults.settings.highAudio,
     },
     home: validateHome(save.get("home")),
     jail: validateJail(save.get("jail")),
