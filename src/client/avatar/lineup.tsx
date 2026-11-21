@@ -799,6 +799,8 @@ function Probe({
       const doll = scene.getObjectByName(`doll-${i}`);
       let visible = false;
       doll?.traverse((o) => {
+        // a near doll still in its far twin (HumanDoll's Part, Garments)
+        if (o.userData.nearPending === true) ready = false;
         if (!isMesh(o)) return;
         let shown = true;
         for (let p: THREE.Object3D | null = o; p; p = p.parent)

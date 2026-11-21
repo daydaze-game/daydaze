@@ -115,7 +115,8 @@ import { HearingAids } from "./HearingAids.tsx";
 import { isBone, isMesh, isSkinnedMesh } from "../../world/guards.ts";
 import { setData } from "../../world/dataset.ts";
 import { isDollReady } from "./dollReady.ts";
-import { mergeGarments } from "./mergeGarments.ts";
+import { ATLAS, atlasCols, atlasRect, mergeGarments } from "./mergeGarments.ts";
+import { RefCache } from "./refCache.ts";
 
 /**
  * The 3D doll: a skinned, shape-keyed body built in Blender from MakeHuman's
@@ -845,6 +846,8 @@ function Part({
     if (full) return;
     if (!wantNear && !far.current) setWantNear(true);
     const showLo = far.current || !near;
+    // the lineup's screenshots wait while a near doll still wears its twin
+    lo.group.userData.nearPending = !far.current && !near;
     if (lo.group.visible !== showLo) lo.group.visible = showLo;
     if (near && near.group.visible === showLo) near.group.visible = !showLo;
   });
@@ -914,50 +917,56 @@ function NearPart({
   return <primitive object={part.group} />;
 }
 
-/** An sRGB channel value (0..1) in linear light. */
-const srgbToLinear = (c: number) =>
-  c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+const imageIds = new WeakMap<object, number>();
+let nextImageId = 0;
+/** A stable id per decoded image, for the atlas cache key. */
+const imageId = (image: object) => {
+  let id = imageIds.get(image);
+  if (id === undefined) imageIds.set(image, (id = nextImageId++));
+  return id;
+};
 
-// a detail map's brightness, read once per image at this many pixels a side
-const SHADE_RES = 64;
-const shades = new WeakMap<object, (u: number, v: number) => number>();
+type AtlasImage = ImageBitmap | HTMLImageElement | HTMLCanvasElement;
+const isAtlasImage = (image: unknown): image is AtlasImage =>
+  (typeof ImageBitmap !== "undefined" && image instanceof ImageBitmap) ||
+  (typeof HTMLImageElement !== "undefined" &&
+    image instanceof HTMLImageElement) ||
+  (typeof HTMLCanvasElement !== "undefined" &&
+    image instanceof HTMLCanvasElement);
 
 /**
- * A garment detail map's linear brightness at a UV, for the merged far
- * twin's vertex tint (mergeGarments): coarse, but denim reads as denim and
- * a dark collar stays dark. Undefined without a map or a canvas to read it.
+ * The far twins' detail maps drawn into one texture, shared by every doll
+ * wearing the same garments (colors are per vertex, so they don't matter).
+ * glTF maps aren't flipped, so neither is the atlas: v runs down.
  */
-function shadeOf(map: THREE.Texture | null) {
-  const image: unknown = map?.image;
-  if (
-    !map ||
-    typeof document === "undefined" ||
-    !(image instanceof ImageBitmap || image instanceof HTMLImageElement)
-  )
-    return undefined;
-  const known = shades.get(image);
-  if (known) return known;
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = SHADE_RES;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return undefined;
-  ctx.drawImage(image, 0, 0, SHADE_RES, SHADE_RES);
-  const px = ctx.getImageData(0, 0, SHADE_RES, SHADE_RES).data;
-  const lum = new Float32Array(SHADE_RES * SHADE_RES);
-  for (let i = 0; i < lum.length; i++)
-    lum[i] = srgbToLinear(
-      (0.3 * (px[i * 4] ?? 0) +
-        0.59 * (px[i * 4 + 1] ?? 0) +
-        0.11 * (px[i * 4 + 2] ?? 0)) /
-        255,
-    );
-  // glTF maps aren't flipped: v runs down the image
-  const at = (t: number) =>
-    Math.min(SHADE_RES - 1, Math.floor((t - Math.floor(t)) * SHADE_RES));
-  const shade = (u: number, v: number) => lum[at(v) * SHADE_RES + at(u)] ?? 1;
-  shades.set(image, shade);
-  return shade;
-}
+const atlases = new RefCache<THREE.CanvasTexture, readonly AtlasImage[]>(
+  (_key, images) => {
+    const cols = atlasCols(images.length);
+    const cell = Math.floor(ATLAS / cols);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = cell * cols;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      images.forEach((image, i) =>
+        ctx.drawImage(
+          image,
+          (i % cols) * cell,
+          Math.floor(i / cols) * cell,
+          cell,
+          cell,
+        ),
+      );
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.flipY = false;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  },
+  (texture) => texture.dispose(),
+  8,
+);
 
 /** A worn garment: its model, tint and worn-part key (partsFor). */
 type Garment = { key: string; url: string; color: string };
@@ -994,18 +1003,35 @@ function Garments({
         false,
       ),
     );
-    const merged = mergeGarments(
-      built.flatMap((b, i) =>
-        b.group.children.filter(isSkinnedMesh).map((mesh) => ({
+    // every piece with its detail map's image, if it has one
+    const pieces = built.flatMap((b, i) =>
+      b.group.children.filter(isSkinnedMesh).map((mesh) => {
+        const image: unknown =
+          mesh.material instanceof THREE.MeshStandardMaterial
+            ? mesh.material.map?.image
+            : null;
+        return {
           mesh,
           color: colors[i] ?? "#ffffff",
-          shade: shadeOf(
-            mesh.material instanceof THREE.MeshStandardMaterial
-              ? mesh.material.map
-              : null,
-          ),
-        })),
-      ),
+          image: isAtlasImage(image) ? image : null,
+        };
+      }),
+    );
+    const images = [
+      ...new Set(pieces.flatMap((p) => (p.image ? [p.image] : []))),
+    ];
+    const atlasKey = images.map(imageId).join(",");
+    const merged = mergeGarments(
+      pieces.map(({ mesh, color, image }) => ({
+        mesh,
+        color,
+        rect: images.length
+          ? atlasRect(
+              image ? images.indexOf(image) : images.length,
+              images.length,
+            )
+          : undefined,
+      })),
     );
     const group = new THREE.Group();
     if (!merged) {
@@ -1015,17 +1041,21 @@ function Garments({
         materials: built.flatMap((b) => b.materials),
         own: null,
         skeleton: null,
+        atlas: null,
       };
     }
     for (const b of built) b.materials.forEach((m) => m.dispose());
     group.add(merged);
     const mat = merged.material;
+    if (images.length && mat instanceof THREE.MeshStandardMaterial)
+      mat.map = atlases.acquire(atlasKey, images);
     return {
       group,
       materials: Array.isArray(mat) ? mat : [mat],
       own: merged.geometry,
       // its own skeleton (the bones are the body's): the bone texture goes
       skeleton: merged.skeleton,
+      atlas: images.length ? atlasKey : null,
     };
   }, [gltfs, bones, tints]);
   useEffect(
@@ -1033,6 +1063,7 @@ function Garments({
       lo.materials.forEach((m) => m.dispose());
       lo.own?.dispose();
       lo.skeleton?.dispose();
+      if (lo.atlas !== null) atlases.release(lo.atlas);
     },
     [lo],
   );
@@ -1068,6 +1099,7 @@ function Garments({
   useFrame(() => {
     if (!wantNear && !far.current) setWantNear(true);
     const showLo = far.current || !ready;
+    lo.group.userData.nearPending = !far.current && !ready;
     if (lo.group.visible !== showLo) lo.group.visible = showLo;
     for (let i = 0; i < nearGroups.length; i++) {
       const group = nearGroups[i];
