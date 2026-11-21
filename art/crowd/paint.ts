@@ -99,7 +99,11 @@ async function paint() {
       outfit: worn.map((id) => `${garment(id)?.slot}-${id}${m}.glb`),
       shoes: `shoes-${shoes}${m}.glb`,
       tucks: [...worn.map((id) => `tuck_${id}`), `tuck_${shoes}`],
-      keys: Object.fromEntries(dollShapeKeys(face, DEFAULT_BODY)),
+      // with the trouser legs tucked into the shoes, as HumanDoll sets them
+      keys: {
+        ...Object.fromEntries(dollShapeKeys(face, DEFAULT_BODY)),
+        [`in_${shoes}`]: 1,
+      },
       hairColor: look.hairColor,
       outfitColor: look.outfitColor,
       // HumanDoll's shoe tint: sneakers keep their colors, the rest take

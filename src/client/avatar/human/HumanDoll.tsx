@@ -45,6 +45,7 @@ import {
   makeupOf,
   type Look,
   shoesOf,
+  SHOES,
   type Mood,
   type SwimLook,
 } from "../../../game/look.ts";
@@ -1253,7 +1254,16 @@ export function HumanDoll({
   const worn = useRef(new Map<string, THREE.Mesh[]>());
   const wornList = useRef<THREE.Mesh[]>([]);
   // every face and body key with its value (dollShapeKeys)
-  const shapeKeys = useMemo(() => dollShapeKeys(face, shape), [face, shape]);
+  // and the trouser legs and legwear tucked into the shoes worn (the
+  // garments' in_<shoe> keys, doll_outfits.py into_shoes)
+  const shod = swim ? null : shoesOf(look);
+  const shapeKeys = useMemo(
+    () => [
+      ...dollShapeKeys(face, shape),
+      ...SHOES.map(({ id }) => [`in_${id}`, id === shod ? 1 : 0] as const),
+    ],
+    [face, shape, shod],
+  );
   const shapedFor = useRef<THREE.Mesh[] | null>(null);
   const shapedWith = useRef<typeof shapeKeys | null>(null);
   const lift = useRef(0);

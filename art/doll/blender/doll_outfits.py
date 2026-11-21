@@ -24,6 +24,9 @@ GRID = 0.002  # metres: the precision a tuck key is stored at
 CLEAR = 0.008  # gap kept between sunk skin and the cloth
 LEG_PULL = 1.0  # share of the way covered leg skin is drawn in to its leg's axis: 1 collapses it onto the axis, so there is nothing to show through
 LEG_RAMP = 0.06  # metres up from a garment's lowest edge over which that pull fades in
+SHARE = 0.03  # metres: hidden skin this near both pieces of a split suit goes with both
+INTO = 0.02  # metres: cloth this far outside a shoe (or less) tucks into it fully...
+INTO_FADE = 0.01  # ...fading out over this much further, so a wide hem stays over it
 
 
 def heights(ctx):
@@ -288,7 +291,9 @@ def split(ctx, ob, bottom, cut=None):
     piece = separate(ob, lower)
     deleted = np.array(ob["deleted"], int)
     if len(deleted):
-        # each hidden skin vertex goes with the nearer piece
+        # each hidden skin vertex goes with every piece within SHARE of it
+        # (a blouse tucked into its skirt covers the waist on its own too),
+        # else with the nearer one
         near = []
         for part in (ob, piece):
             co = np.array([v.co[:] for v in part.data.vertices])
@@ -297,13 +302,14 @@ def split(ctx, ob, bottom, cut=None):
                 tree.insert(p, i)
             tree.balance()
             near.append(np.array([tree.find(p)[2] for p in ctx.PB[deleted]]))
-        mine = near[0] <= near[1]
+        mine = (near[0] <= near[1]) | (near[0] < SHARE)
+        theirs = (near[1] < near[0]) | (near[1] < SHARE)
         ob["deleted"] = sorted(deleted[mine].tolist())
-        piece["deleted"] = sorted(deleted[~mine].tolist())
+        piece["deleted"] = sorted(deleted[theirs].tolist())
     if bottom is None:
         bpy.data.objects.remove(piece)
         return None
-    piece.name = bottom
+    piece.name = piece.data.name = bottom
     return piece
 
 
@@ -494,8 +500,9 @@ def build(ctx, body, body_src):
 
     # legwear, under everything: opaque tights from the waist over the feet,
     # and knee socks
-    out.append(shell(ctx, "Legwear_tights", ["helper-tights"], [(-1.0, waist - 0.02)], 0.001, cloth, arms=0.2))
-    out.append(shell(ctx, "Legwear_knee-socks", ["helper-tights"], [(-1.0, knee - 0.04)], 0.0015, cloth, arms=0.2))
+    # and knee socks; both stop at the ankle, inside every pair of shoes
+    out.append(shell(ctx, "Legwear_tights", ["helper-tights"], [(h["ankle"], waist - 0.02)], 0.001, cloth, arms=0.2))
+    out.append(shell(ctx, "Legwear_knee-socks", ["helper-tights"], [(h["ankle"], knee - 0.04)], 0.0015, cloth, arms=0.2))
 
     # swimsuits. The bikini's leg line dips to the crotch and rises over the
     # hips to a thin side, lower at the back for fuller cover (front is -y)
@@ -563,6 +570,10 @@ def build(ctx, body, body_src):
     gloss = bpy.data.materials.new("shoe_gloss")
     out.append(platforms(ctx, "Shoes_platforms", h["ankle"] + 0.02, gloss))
     out.append(platforms(ctx, "Shoes_boots", h["knee"] - 0.06, gloss))
+    shoes = [ob for ob in out if ob.name.startswith("Shoes")]
+    for ob in out:
+        if ob.name.startswith(("Bottom", "Dress", "Legwear")):
+            into_shoes(ob, shoes)
     for ob in out:
         tuck(ctx, body, body_src, ob, ob.name.split("_", 1)[1])
     return out
@@ -574,6 +585,33 @@ WORN = ("Top", "Bottom", "Dress", "Outer", "Legwear", "Swim", "Shoes")
 # halfway: their tucks add up with the bottom's, and two full pulls would
 # fling the skin through the axis and out the far side of the leg
 HALF_PULL = ("Top", "Outer", "Legwear")
+
+
+def into_shoes(garment, shoes):
+    """An "in_<shoe>" shape key per pair of shoes that tucks a garment's legs
+    into them: cloth below the shoe's top that pokes through it, or sits
+    within INTO outside it, moves to CLEAR / 2 behind its surface (skin there
+    is sunk CLEAR behind by the shoe's tuck). Cloth further out fades back to
+    its own place, so flares and gowns stay over the shoe. The client sets
+    the key of the shoes worn."""
+    co = np.array([v.co[:] for v in garment.data.vertices])
+    for shoe in shoes:
+        bvh = BVHTree.FromObject(shoe, bpy.context.evaluated_depsgraph_get())
+        top = max(v.co.z for v in shoe.data.vertices)
+        move = np.zeros_like(co)
+        for i, p in enumerate(co):
+            if p[2] > top:
+                continue
+            loc, normal, _f, _d = bvh.find_nearest(Vector(p), INTO + INTO_FADE)
+            if loc is None:
+                continue
+            outside = float(np.dot(p - np.array(loc), normal))
+            if outside < -CLEAR / 2:
+                continue
+            fade = np.clip((INTO + INTO_FADE - outside) / INTO_FADE, 0, 1)
+            move[i] = -np.array(normal) * (outside + CLEAR / 2) * fade
+        sk = garment.shape_key_add(name=f"in_{shoe.name.split('_', 1)[1]}", from_mix=False)
+        sk.data.foreach_set("co", (co + move).ravel())
 
 
 PLATFORM = 0.05  # sole height in metres; the client lifts the doll by this
