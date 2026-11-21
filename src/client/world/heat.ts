@@ -6,7 +6,6 @@
 import {
   NOT_WANTED,
   commitCrime,
-  starsOf,
   stepWanted,
   type CrimeKind,
   type WantedState,
@@ -27,6 +26,3 @@ export function coolHeat(dtMs: number): void {
       hiding: false,
     }).state;
 }
-
-/** Stars the heat holds now. */
-export const heatStars = (): number => starsOf(heat.state);
