@@ -4,7 +4,7 @@
 // FULL_PAY_SHIFTS shifts in a UTC day the rest pay half ("slow hours"), so
 // grinding is capped and nothing is locked. All jobs here are non-alcohol,
 // so every one is 13+. Pure; progression/activities.ts applies it to a save.
-import { TICKETS } from "./orders.ts";
+import { MAX_TIP, TICKETS } from "./orders.ts";
 import type { PrizeGame } from "./prizes.ts";
 import { isRecord } from "./typed.ts";
 
@@ -74,7 +74,7 @@ export function settleShift(
   slow: boolean;
   shifts: ShiftsSave;
 } {
-  if (!whole(result.right, TICKETS) || !whole(result.tips, TICKETS * 5))
+  if (!whole(result.right, TICKETS) || !whole(result.tips, TICKETS * MAX_TIP))
     return { coins: 0, xp: 0, clean: false, slow: false, shifts };
   const clean = result.right === TICKETS;
   const today = day > shifts.day ? 0 : shifts.today;

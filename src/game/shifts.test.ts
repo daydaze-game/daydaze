@@ -12,7 +12,7 @@ import {
   isJob,
   settleShift,
 } from "./shifts.ts";
-import { TICKETS } from "./orders.ts";
+import { MAX_TIP, TICKETS } from "./orders.ts";
 
 const day = 20_000;
 
@@ -70,6 +70,7 @@ test("nonsense results pay nothing", () => {
     { right: 1.5, tips: 0 },
     { right: TICKETS + 1, tips: 0 },
     { right: 1, tips: -3 },
+    { right: 1, tips: TICKETS * MAX_TIP + 1 },
     { right: NaN, tips: 0 },
   ]) {
     const r = settleShift(NO_SHIFTS, "barista", bad, day);
