@@ -197,6 +197,7 @@ export function Traffic({ player }: { player: Player }) {
   // ("x,z,yaw,speed,kind" each (c a body, j a jeepney), ";" between), for the screenshot script to find a
   // car to photograph; off by default, so the frame loop allocates nothing
   const canvas = useThree((s) => s.gl.domElement);
+  const camera = useThree((s) => s.camera);
   const probing = useMemo(
     () => new URLSearchParams(location.search).has("debug"),
     [],
@@ -299,17 +300,22 @@ export function Traffic({ player }: { player: Player }) {
 
   // `?debug=1` puts `daydazeStepOut(meters)` on the page, for tests: the
   // player steps into the lane that many meters ahead of the fastest car
-  // near her (true), or there is none moving (false)
+  // near her heading toward the camera (true), or there is none moving
+  // (false). The camera keeps its offset from her, so a car driving away from
+  // it would stop right on it.
   useEffect(() => {
     if (!probing) return;
     const stepOut = (ahead: unknown) => {
       if (typeof ahead !== "number" || !Number.isFinite(ahead)) return false;
       let fastest: TrafficCar | null = null;
+      const ox = camera.position.x - player.pos.x;
+      const oz = camera.position.z - player.pos.z;
       for (const car of traffic.cars) {
         carPose(car, pose);
         const d = Math.hypot(pose.x - player.pos.x, pose.z - player.pos.z);
         // not one about to turn at a junction: it would curve past her
         if (car.next || d > 120 || car.speed <= 5) continue;
+        if (Math.cos(pose.yaw) * ox - Math.sin(pose.yaw) * oz < 0) continue;
         if (car.speed > (fastest?.speed ?? 0)) fastest = car;
       }
       if (!fastest) return false;
@@ -319,9 +325,7 @@ export function Traffic({ player }: { player: Player }) {
         pose.x + Math.cos(pose.yaw) * ahead,
         pose.z - Math.sin(pose.yaw) * ahead,
       );
-      // facing the car, so the close camera behind her looks up the lane at
-      // it rather than sitting where it stops (walk.ts yaw: 0 faces +z;
-      // traffic's: 0 faces +x)
+      // facing the car (walk.ts yaw: 0 faces +z; traffic's: 0 faces +x)
       player.yaw =
         player.walk.yaw =
         player.before.yaw =
@@ -332,7 +336,7 @@ export function Traffic({ player }: { player: Player }) {
     return () => {
       Object.assign(window, { daydazeStepOut: undefined });
     };
-  }, [probing, traffic, player]);
+  }, [probing, traffic, player, camera]);
 
   useEffect(
     () => () => {
