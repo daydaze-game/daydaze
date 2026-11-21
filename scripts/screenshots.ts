@@ -2784,6 +2784,7 @@ const SHOTS: {
   lineupShot("doll-suit-track-back", "cam=-2.2,0.6,2.2", "trackwalk"),
   // the face shot's doll up close
   lineupShot("doll-face", "", "face"),
+  lineupShot("doll-lips", "", "lips"),
   lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
   // mix and match (wardrobe.ts): separates across old outfits, outerwear
   // over a top, legwear under a skirt; body, then in motion

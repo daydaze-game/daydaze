@@ -122,3 +122,10 @@ test("acid level reaches the filter, and a context that can't build it still wor
   assert.ok(bus.getContext());
   bus.dispose();
 });
+
+test("high level reaches the filter, and a context that can't build it still works", () => {
+  const bus = createAudioBus(makeFakeAudioContext()); // no filter nodes: skipped
+  bus.setHighLevel(1);
+  assert.ok(bus.getContext());
+  bus.dispose();
+});
