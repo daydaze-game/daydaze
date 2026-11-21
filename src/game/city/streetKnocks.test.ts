@@ -87,7 +87,7 @@ test("nothing jumps: a knock, its get-up and her walk back are smooth", () => {
 test("a fast car throws her into a hard fall, a slow one only makes her stumble", () => {
   const hard = newStreet();
   knock(hard, 0, 14, 1, 0);
-  assert.equal(streetPose(p, hard, 0.5, fresh()).reaction, "hard-fall");
+  assert.equal(streetPose(p, hard, 0.5, fresh()).reaction, "hard-landing");
   const bump = newStreet();
   knock(bump, 0, 2, 1, 0);
   assert.equal(streetPose(p, bump, 0.5, fresh()).reaction, "stumble");

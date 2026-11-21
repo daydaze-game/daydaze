@@ -44,11 +44,13 @@ export function hitOutcome(speed: number): HitOutcome | null {
 const REACTION_OF: Readonly<Record<HitOutcome, ReactionId>> = {
   bump: "stumble",
   knockdown: "trip-fall",
-  "hard-fall": "hard-fall",
+  // thrown, she lands hard on hands and knees and rises: the clip is its
+  // own get-up
+  "hard-fall": "hard-landing",
 };
 
-/** The reaction (game/reactions.ts) an outcome plays; both falls chain a
- * get-up. */
+/** The reaction (game/reactions.ts) an outcome plays; each ends with her back
+ * on her feet. */
 export const hitReaction = (o: HitOutcome): ReactionId => REACTION_OF[o];
 
 /** Meters she is thrown along the car's way: a step for a bump, a few meters

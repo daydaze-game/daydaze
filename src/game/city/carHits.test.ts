@@ -45,10 +45,14 @@ test("speed at contact decides the outcome", () => {
   assert.equal(hitOutcome(-kmh(5)), "bump");
 });
 
-test("every knockdown ends in a get-up; a bump is a stumble", () => {
+test("every fall ends back on her feet; a bump is a stumble", () => {
   assert.equal(hitReaction("bump"), "stumble");
-  for (const o of ["knockdown", "hard-fall"] as const)
-    assert.equal(REACTIONS[hitReaction(o)].then, "get-up");
+  // a knockdown lies her down, then the get-up clip
+  assert.equal(REACTIONS[hitReaction("knockdown")].then, "get-up");
+  // a hard fall is the hard landing, which rises from the ground in its own
+  // clip: a get-up after it would start lying down again
+  assert.equal(REACTIONS[hitReaction("hard-fall")].clip, "react-hard-landing");
+  assert.equal(REACTIONS[hitReaction("hard-fall")].then, undefined);
   assert.notEqual(hitReaction("knockdown"), hitReaction("hard-fall"));
 });
 

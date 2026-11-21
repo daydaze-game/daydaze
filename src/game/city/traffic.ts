@@ -8,7 +8,12 @@ import { neighborhoodAt } from "./cells.ts";
 import { hash } from "./hash.ts";
 import { ROAD_EDGES, ROAD_NODES, type RoadEdge } from "./layout.ts";
 import { shortest, snapToRoad } from "./taxi.ts";
-import { DRIVER_REACTION, HARD_BRAKE, MIN_HIT_SPEED } from "./carHits.ts";
+import {
+  DRIVER_REACTION,
+  HARD_BRAKE,
+  MIN_HIT_SPEED,
+  carSpeedAfterHit,
+} from "./carHits.ts";
 import {
   HEAVY_MIX,
   TRAFFIC_MIX,
@@ -554,7 +559,10 @@ function contact(
   if (car.seen < DRIVER_REACTION) t.alarms++;
   car.seen = Math.max(car.seen, DRIVER_REACTION);
   car.halt = HALT_AFTER_HIT;
-  return { car, speed: car.speed, x: pose.x, z: pose.z, yaw: pose.yaw };
+  const speed = car.speed;
+  // the hit takes most of its speed at once: it stops short of where she lands
+  car.speed = carSpeedAfterHit(speed);
+  return { car, speed, x: pose.x, z: pose.z, yaw: pose.yaw };
 }
 
 /**

@@ -205,6 +205,9 @@ test("someone stepping out inside the stopping distance gets hit", () => {
   assert.ok(hit, "no hit");
   assert.equal(hit.car, car);
   assert.ok(hit.speed > 8, `hit at ${hit.speed.toFixed(1)} m/s`);
+  // the hit and the stamp on the brakes take most of its speed at once, so
+  // it stops short of where she lands
+  assert.ok(car.speed < hit.speed * 0.4, `still ${car.speed.toFixed(1)} m/s`);
   // the car keeps braking after the hit
   for (let i = 0; i < 4 / DT; i++) stepTraffic(t, DT, null);
   assert.ok(car.speed < 3);

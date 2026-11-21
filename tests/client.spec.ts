@@ -2660,7 +2660,7 @@ test("stepping out in front of a car too close to stop: she is knocked down and 
   );
   await expect(canvas).toHaveAttribute(
     "data-reaction",
-    /^(stumble|trip-fall|hard-fall|get-up)$/,
+    /^(stumble|trip-fall|hard-landing|get-up)$/,
     { timeout: 30_000 },
   );
   // and up again, free to walk
