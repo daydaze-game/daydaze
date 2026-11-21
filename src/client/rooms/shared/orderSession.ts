@@ -12,11 +12,14 @@ import {
   type Station,
 } from "../../../game/orders.ts";
 import type { PrizeGame } from "../../../game/prizes.ts";
+import { isJob } from "../../../game/shifts.ts";
 import { award } from "../../ui/prizeDesk.ts";
+import { clockOut, shiftDesk } from "../../ui/shiftDesk.ts";
 import { createStore } from "./store.ts";
 
 /** A shift at an order station (the espresso bar, the boba bar): tickets one
- * at a time, the clock on each for the tip, a prize at the end. */
+ * at a time, the clock on each for the tip, a prize at the end (and, at a
+ * workplace, a wage). */
 export function createOrderSession(station: Station, prize: PrizeGame) {
   const OFF: {
     on: boolean;
@@ -34,9 +37,12 @@ export function createOrderSession(station: Station, prize: PrizeGame) {
   const update = (shift: Shift) => store.set({ ...store.get(), shift });
   return {
     station,
+    /** The job a finished shift here is paid as; null for a contest. */
+    job: isJob(prize) ? prize : null,
     store,
     /** A shared `seed` gives two cooks the same tickets (the cook-off). */
     start(now: number, seed = Math.floor(Math.random() * 1e6)) {
+      shiftDesk.set({ slip: null });
       store.set({
         on: true,
         shift: newShift(seed),
@@ -53,7 +59,10 @@ export function createOrderSession(station: Station, prize: PrizeGame) {
       const name = ticket(station, s.shift.seed, s.shift.served).name;
       const r = serve(station, s.shift, (now - s.since) / 1000);
       store.set({ ...s, shift: r.shift, since: now, last: { name, ...r } });
-      if (shiftOver(r.shift)) award(prize, score(r.shift));
+      if (!shiftOver(r.shift)) return;
+      award(prize, score(r.shift));
+      if (isJob(prize))
+        clockOut(prize, { right: r.shift.right, tips: r.shift.tips });
     },
   };
 }

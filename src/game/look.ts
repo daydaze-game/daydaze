@@ -48,7 +48,7 @@ export const HAIR_STYLES = [
   // Salon styles: sold by the stylist, see shop.ts.
   { id: "sleek-bob", label: "Sleek bob" },
   { id: "curl-cloud", label: "Curl cloud" },
-  { id: "bob", label: "Bob" },
+  { id: "bob", label: "Bob with bangs" },
   { id: "braids", label: "Knotless braids" },
   { id: "afro", label: "Afro puff" },
   { id: "long-straight", label: "Long and sleek" },
@@ -61,7 +61,7 @@ export const HAIR_STYLES = [
   { id: "shag", label: "Shag" },
   { id: "coils", label: "Coils" },
   { id: "low-pony", label: "Low pony" },
-  { id: "pigtails", label: "Pigtails" },
+  { id: "pigtails", label: "Braided pigtails" },
   { id: "top-knot", label: "Top knot" },
   // textured styles
   { id: "locs", label: "Locs" },
@@ -94,11 +94,11 @@ export const HAIR_STYLES = [
   { id: "sleek-side", label: "Side-swept long" },
   { id: "high-pony", label: "High ponytail" },
   { id: "twin-tails", label: "Twin tails" },
-  { id: "lob", label: "Layered lob" },
+  { id: "lob", label: "Curled-under bob" },
   { id: "blunt-bob", label: "Blunt bob" },
-  { id: "sidebob", label: "Side-swept bob" },
+  { id: "sidebob", label: "Inverted bob" },
   { id: "side-fringe", label: "Side fringe" },
-  { id: "messy-bun", label: "Messy bun" },
+  { id: "messy-bun", label: "Sleek bun" },
   // and the short cuts and a mohawk
   { id: "quiff", label: "Quiff" },
   { id: "side-part", label: "Messy side part" },
