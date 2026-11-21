@@ -165,6 +165,30 @@ export const CREDITS: readonly {
           "The arrival avenue's unique clocktower landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
       },
       {
+        title: "Greenhouse Victorian",
+        author: "Ryoce",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/greenhouse-victorian-e00471c89eec45ae8ddb9b06e3f1966e",
+        usedFor:
+          "Petal & Stem florist shop landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
+        title: "Rotunda",
+        author: "emelyarules",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/rotunda-ac22270d58af43b8af4af61e39c9b6c0",
+        usedFor:
+          "Arcade Square domed rotunda landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
+        title: "steampunk Shops",
+        author: "jacques_3D",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/steampunk-shops-86445970625a4ce8a66905322576e7c8",
+        usedFor:
+          "Pawn & Gadgets oddities shopfront landmark, normalized, joined by material and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
         title: "Classic Art Nouveau Window",
         author: "Davide Tirindelli",
         license: "CC0 1.0",

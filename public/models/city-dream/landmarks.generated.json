@@ -163,5 +163,175 @@
       "textures/tripo_material_627cfa3b-f177-4e33-897f-c6a2a566012f_metallicRoughness.png": "49dc1f5dea2cbaf7d8e007be14ef97a3d2d952000de8bda08618ef1ff52e01ab",
       "textures/tripo_material_627cfa3b-f177-4e33-897f-c6a2a566012f_normal.png": "2429f0e629f5094d0937178e89964535118c688664ca324fa8fccd37c566c9b4"
     }
+  },
+  "greenhouse": {
+    "folder": "greenhouse-victorian-e00471",
+    "title": "Greenhouse Victorian",
+    "author": "Ryoce",
+    "uid": "e00471c89eec45ae8ddb9b06e3f1966e",
+    "yaw": 0,
+    "height": 16,
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/e00471c89eec45ae8ddb9b06e3f1966e",
+    "normalization": {
+      "sourceBoundsBlender": [
+        [-9.999999046325684, -5.202001571655273, -4.154230117797852],
+        [11.066055297851562, 5.202001571655273, 9.354851722717285]
+      ],
+      "scale": [0.9493946836574116, 1.5378695853516255, 1.184388412839009],
+      "yawDegreesBlender": 0
+    },
+    "near": {
+      "tris": 17558,
+      "parts": 1,
+      "bounds": {
+        "min": [-10.0, 0.0, -8.0],
+        "max": [10.0, 16.0, 8.0]
+      },
+      "file": "/models/city-dream/greenhouse.glb",
+      "bytes": 401332,
+      "sha256": "0bc5fa02083e1ffdb3bfb9612748fdff03faa880775147bfc10c945637594e55",
+      "textureSize": 1024,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "far": {
+      "tris": 9007,
+      "parts": 2,
+      "bounds": {
+        "min": [-10.0, 0.0, -8.0],
+        "max": [10.0, 16.0, 8.0]
+      },
+      "file": "/models/city-dream/greenhouse-lo.glb",
+      "bytes": 246252,
+      "sha256": "e4b3a8407b9c6601456b13cb368469fd5871b156862185202e3648e91c77cf62",
+      "textureSize": 512,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "sourceHashes": {
+      "license.txt": "b40cc316fe950b58c8e08ffbf409becdfcf9d78d0b97af086546114d2adbeb71",
+      "meta.json": "d4140757087695556384ab2f717c1a4a4f0a2e00c67a3d5ac2425c0f2e459bfe",
+      "scene.bin": "7c3cc6c1aec70fc058c9de15d7f255f80bb023f8970965d40e06bfd3b631bca2",
+      "scene.gltf": "c23af3a0fee6101f98d857fc4d62731418cb814f506073cbaa38a4034789855a",
+      "textures/Material.001_baseColor.png": "f92a591827d8c7c81ae16c39e877631658b37990aaeb89ad3c12c893f12e50e1",
+      "textures/Material.001_emissive.png": "86d8e3dbd33e2021f0482029b84ec086a6ca571f071b103ab4deb8177a9e515b",
+      "textures/Material.001_metallicRoughness.png": "b8518d5183adc76de454861ddd831a9bdb9579461371fa617c20b0d28e98ded3"
+    }
+  },
+  "rotunda": {
+    "folder": "rotunda-ac2227",
+    "title": "Rotunda",
+    "author": "emelyarules",
+    "uid": "ac22270d58af43b8af4af61e39c9b6c0",
+    "yaw": 0,
+    "height": 18,
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/ac22270d58af43b8af4af61e39c9b6c0",
+    "normalization": {
+      "sourceBoundsBlender": [
+        [-1.0, -1.0000001192092896, -1.3435885648505064e-7],
+        [1.0, 1.0000001192092896, 2.452543258666992]
+      ],
+      "scale": [10.0, 7.999999046325797, 7.339319683878184],
+      "yawDegreesBlender": 0
+    },
+    "near": {
+      "tris": 18000,
+      "parts": 1,
+      "bounds": {
+        "min": [-10.0, 0.0, -8.0],
+        "max": [10.0, 17.999984741210938, 8.0]
+      },
+      "file": "/models/city-dream/rotunda.glb",
+      "bytes": 525616,
+      "sha256": "b8a0493b10084ac48c421b3cd8b8b3e09b19e10456a601f3aec65531fb2d831b",
+      "textureSize": 1024,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "far": {
+      "tris": 12824,
+      "parts": 2,
+      "bounds": {
+        "min": [-10.0, 1.8493480080650215e-9, -7.989816665649414],
+        "max": [10.0, 18.0, 7.989816665649414]
+      },
+      "file": "/models/city-dream/rotunda-lo.glb",
+      "bytes": 221200,
+      "sha256": "8dd886e4c44c846f0de05c6807787dc1786b3e606604799e5bc7f9fdd0e28fdc",
+      "textureSize": 512,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "sourceHashes": {
+      "license.txt": "6ffa22db0bf95fc0c7ddc02857438365a8c9e3e188826c641d2707f9c5d1a435",
+      "scene-decimated.glb": "b74946517a348f5a39fe44adb0780cca9faea90446fcaa78c66f068dec29e0ed",
+      "scene.bin": "ebb3daf8db957ef90d4cc90730691305fc8ac29e18cd4a1732a7d884a24d7e7d",
+      "scene.gltf": "c1b104202b5f6d69ff04b5a7d99d938f9f9f6335e633dfa05559ca83fdddbebc",
+      "textures/map_Rotunda_001_baseColor.png": "bb5dbe7b9e2a873298d127bc0610f945a6d791e7c41f45f3e384124d5e3b3744",
+      "textures/map_Rotunda_001_metallicRoughness.png": "b2284be84c48616fd70e625c3bb4d7dd3d5e803731c0da0d9070721babd31176",
+      "textures/map_Rotunda_001_normal.png": "b87d44aea4e97b95fb31e9410cbbeeb06a87c364f2c64f6dacd9077848ea33e9"
+    }
+  },
+  "shopfront": {
+    "folder": "steampunk-shops-864459",
+    "title": "steampunk Shops",
+    "author": "jacques_3D",
+    "uid": "86445970625a4ce8a66905322576e7c8",
+    "yaw": 270,
+    "height": 16,
+    "license": "CC-BY-4.0",
+    "source": "https://sketchfab.com/3d-models/86445970625a4ce8a66905322576e7c8",
+    "normalization": {
+      "sourceBoundsBlender": [
+        [-0.2163018137216568, -0.33679479360580444, -0.16765978932380676],
+        [0.6620797514915466, 0.1581234335899353, 0.49962490797042847]
+      ],
+      "scale": [22.769148160737572, 32.32857292538554, 23.977771504244306],
+      "yawDegreesBlender": 270
+    },
+    "near": {
+      "tris": 4664,
+      "parts": 3,
+      "bounds": {
+        "min": [-10.0, 0.0, -8.0],
+        "max": [10.0, 16.0, 8.0]
+      },
+      "file": "/models/city-dream/shopfront.glb",
+      "bytes": 612656,
+      "sha256": "9d91986e5a54e6e17384ff942096b66825796204f2e4b340c325517725132f0d",
+      "textureSize": 1024,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "far": {
+      "tris": 4664,
+      "parts": 6,
+      "bounds": {
+        "min": [-10.0, 0.0, -8.0],
+        "max": [10.0, 16.0, 8.0]
+      },
+      "file": "/models/city-dream/shopfront-lo.glb",
+      "bytes": 254180,
+      "sha256": "e2fe562f5a0ce27692ffa8c6e3c40995c726dd9b7d3005b283d8f71ec68e0e5c",
+      "textureSize": 512,
+      "textureCodec": "WebP",
+      "geometryCodec": "meshopt"
+    },
+    "sourceHashes": {
+      "license.txt": "ace92a161e72ed7e03ee020615b8ad5680797c988555f4a5a8957761ec02ba0f",
+      "scene.bin": "c0ee16de38a98a3d6a6aabf2124dec42a63c92c4717afda87fd0f2f06595724a",
+      "scene.gltf": "e53e2925a3d19766ba8d61320ad462c7de65d689e83d19dbf728a463d873770d",
+      "textures/M_gears_baseColor.png": "daf0bb8423bca8eb178ab112ff2a46f1619eaae0f72f9a0e784f5c6511ca25fa",
+      "textures/M_gears_metallicRoughness.png": "02923cb9a30ae447d5077ae23e9c0145985c93d06705920bbc870d637e7039cd",
+      "textures/M_gears_normal.png": "fc4e50d4490b3aeca00fb2069d043dc332f9169285d37badd9782a64191600a2",
+      "textures/M_shop_1_baseColor.png": "13325be18b9314136bcbcfbe3fd4c337ce698b225560fc029b226f5d41c53b01",
+      "textures/M_shop_1_metallicRoughness.png": "7649ee963eee315dabb2c58a13292106707fe4e1863af5de56834786c1b30c59",
+      "textures/M_shop_1_normal.png": "6d417174f9df6f4c47e4b9df914271372921c6dd5dcc05d370c539f28ff4be26",
+      "textures/M_shop_2_baseColor.png": "fc567e2e18dfee21c355856269448c09aa141a59eb11db5031cc2f13cbefb85a",
+      "textures/M_shop_2_metallicRoughness.png": "cb83f88e727fbc135919fe63df4530d198c4d7c16af533e592b1df576e534535",
+      "textures/M_shop_2_normal.png": "61cdcd7c3ff1536db95432bfcdea92828332966b91d38017f281323c6a01c634"
+    }
   }
 }

@@ -1,5 +1,8 @@
 // The per-frame driver for buzz and high: decays them, publishes the look the
 // doll and `DrunkPost` read, and mirrors it onto canvas data attributes.
+import { ADULT_OK } from "../adult.ts";
+import { isMusicRoom } from "../../game/musicRooms.ts";
+import type { RoomId } from "../../game/rooms.ts";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import {
@@ -38,16 +41,30 @@ import {
  * doll and the post pass. Always mounted, so `data-buzz` and `data-sway` read
  * on every quality tier. Writes the canvas attributes only when they change.
  */
-export function DrunkState({ intensity }: { intensity: Intensity }) {
+export function DrunkState({
+  intensity,
+  room,
+  highAudio = true,
+}: {
+  intensity: Intensity;
+  room?: RoomId;
+  highAudio?: boolean;
+}) {
   const gl = useThree((s) => s.gl);
   const invalidate = useThree((s) => s.invalidate);
   const calm = useReducedMotion();
   const shown = useRef({ buzz: -1, calm, intensity });
   const acidHeard = useRef(0);
+  const highHeard = useRef(0);
   const weedPhase = useRef<Phase | null>(null);
 
   useEffect(() => onBuzzChange(() => invalidate()), [invalidate]);
   useEffect(() => onHighChange(() => invalidate()), [invalidate]);
+  useEffect(() => {
+    return () => {
+      getSharedAudioBus().setHighLevel(0);
+    };
+  }, []);
   // what the canvas attributes last showed: each meter at two decimals
   const shownHigh = useRef({
     levels: {
@@ -77,6 +94,15 @@ export function DrunkState({ intensity }: { intensity: Intensity }) {
     if (meters.acid.level !== acidHeard.current) {
       acidHeard.current = meters.acid.level;
       getSharedAudioBus().setAcidLevel(acidHeard.current);
+    }
+    // High audio lift: subtle reverb bloom / low-pass filter in music rooms when enabled (18+ only)
+    const effectiveHigh =
+      ADULT_OK && highAudio && room && isMusicRoom(room)
+        ? meters.high.level
+        : 0;
+    if (effectiveHigh !== highHeard.current) {
+      highHeard.current = effectiveHigh;
+      getSharedAudioBus().setHighLevel(highHeard.current);
     }
     const hint = dryMouthHint(weedPhase.current, meters);
     weedPhase.current = meters.high.phase;
