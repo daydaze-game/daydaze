@@ -64,7 +64,6 @@ type Bubble = { id: number; x: number; z: number; text: string };
 
 export function CarHits({ player }: { player: Player }) {
   const canvas = useThree((s) => s.gl.domElement);
-  const camera = useThree((s) => s.camera);
   const [bubbles, setBubbles] = useState<readonly Bubble[]>([]);
   const timers = useRef<number[]>([]);
   const recent = useRef<RecentLines>([]);
@@ -202,8 +201,7 @@ export function CarHits({ player }: { player: Player }) {
 
   // `?debug=1` puts `daydazeKnockWalker(speed)` on the page, for tests and
   // screenshots: the walker nearest you is hit as by your car at `speed` m/s,
-  // coming from the right of the view, where you then stand facing her, so
-  // the camera sees both (her index, or -1 with nobody near)
+  // coming from your side (her index, or -1 with nobody near)
   const hitRef = useRef(hitWalker);
   hitRef.current = hitWalker;
   useEffect(() => {
@@ -225,21 +223,16 @@ export function CarHits({ player }: { player: Player }) {
       });
       if (nearest < 0) return -1;
       streetPose(PEDESTRIANS[nearest], walkerState(nearest), now, pose);
-      // the car comes from the screen's right, where you then stand
-      const e = camera.matrixWorld.elements;
-      const across = Math.hypot(e[0], e[2]) || 1;
-      const fx = -e[0] / across;
-      const fz = -e[2] / across;
-      if (!hitRef.current(nearest, now, speed, fx, fz)) return -1;
-      placePlayer(player, pose.x - fx * 3, pose.z - fz * 3);
-      player.yaw = player.walk.yaw = player.before.yaw = Math.atan2(fx, fz);
-      return nearest;
+      const d = Math.max(best, 1e-6);
+      const fx = (pose.x - player.pos.x) / d;
+      const fz = (pose.z - player.pos.z) / d;
+      return hitRef.current(nearest, now, speed, fx, fz) ? nearest : -1;
     };
     Object.assign(window, { daydazeKnockWalker: knockNearest });
     return () => {
       Object.assign(window, { daydazeKnockWalker: undefined });
     };
-  }, [player, pose, camera]);
+  }, [player, pose]);
 
   useFrame((_, dt) => {
     const now = wallSeconds();

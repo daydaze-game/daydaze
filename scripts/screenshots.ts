@@ -32,8 +32,6 @@ declare global {
     daydazeReact: (id: string) => void;
     /** In the city (src/client/city/Traffic.tsx). */
     daydazeStepOut: (ahead: number) => boolean;
-    /** In the city (src/client/city/CarHits.tsx). */
-    daydazeKnockWalker: (speed: number) => number;
   }
 }
 
@@ -1078,27 +1076,6 @@ const SHOTS: {
       });
     },
     150,
-    60,
-  ),
-  // the walker nearest her knocked down as by her car: the fall, the get-up,
-  // her word for the driver and the street stopping to look
-  actionStrip(
-    "walker-hit",
-    "room=city&view=full&quality=low&debug=1&time=12:00",
-    async (page) => {
-      await page.waitForTimeout(40_000);
-    },
-    async (page) => {
-      await page.waitForFunction(
-        () => window.daydazeKnockWalker(9) >= 0,
-        null,
-        {
-          timeout: 120_000,
-          polling: 2_000,
-        },
-      );
-    },
-    40,
     60,
   ),
   // the player's own emotes, full body: a whisper and a laugh
