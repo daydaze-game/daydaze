@@ -85,13 +85,25 @@ const REWARD_TITLES: Record<number, string> = {
 function Celebration({ reward }: { reward: StreakReward }): JSX.Element {
   const reduced = usePrefersReducedMotion();
   const done = useRef<HTMLButtonElement>(null);
-  useEffect(() => done.current?.focus(), []);
+  // the card takes focus and gives it back when it goes
+  useEffect(() => {
+    const from = document.activeElement;
+    done.current?.focus();
+    return () => {
+      if (from instanceof HTMLElement && from.isConnected) from.focus();
+    };
+  }, []);
   useEffect(() => {
     playStreakMilestone(reward.day / 30);
   }, [reward]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") endCelebration();
+      // the button is the card's only control: Tab must not reach the game behind
+      else if (e.key === "Tab") {
+        e.preventDefault();
+        done.current?.focus();
+      }
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
@@ -141,6 +153,18 @@ const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
  * Always mounted so a check-in at load can celebrate with the panel shut. */
 export function StreakPanel({ streak }: { streak: StreakSave }): JSX.Element {
   const { open, celebrate, froze } = streakDesk.use();
+  const heading = useRef<HTMLHeadingElement>(null);
+  // The calendar opens from the menu, which closes and drops its focused
+  // button: move focus into the calendar, and on close hand it back to the
+  // Menu toggle if it fell to the page.
+  useEffect(() => {
+    if (!open) return;
+    heading.current?.focus();
+    return () => {
+      if (document.activeElement === document.body)
+        document.querySelector<HTMLElement>(".menu-open")?.focus();
+    };
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const key = (e: KeyboardEvent) => {
@@ -167,7 +191,9 @@ export function StreakPanel({ streak }: { streak: StreakSave }): JSX.Element {
           data-tier={tier}
         >
           <div className="collections-head">
-            <h2>Daily streak</h2>
+            <h2 ref={heading} tabIndex={-1}>
+              Daily streak
+            </h2>
             <button type="button" onClick={closeStreak}>
               Close
             </button>

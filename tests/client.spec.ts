@@ -4874,6 +4874,24 @@ test("a closet that fails to load shows the reload card and keeps the game", asy
   ).toBeVisible();
 });
 
+test("the daily streak calendar takes focus when it opens and hands it back to the Menu on close", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  await page.goto(VELVET);
+  await (await fromMenu(page, "Daily streak")).click();
+  await expect(
+    page.getByRole("heading", { name: "Daily streak" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Daily streak" })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("button", { name: "Menu", exact: true }),
+  ).toBeFocused();
+});
+
 test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({
   page,
 }) => {
