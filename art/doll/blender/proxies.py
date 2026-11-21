@@ -86,8 +86,9 @@ def read_obj(path):
 def fit(clo, P):
     """Proxy vertex positions on base mesh P (MakeHuman space)."""
     s = clo["scales"]
+    # a proxy without an axis's scale line keeps its offsets as authored
     scale = np.array(
-        [abs(P[s[a][0]][i] - P[s[a][1]][i]) / s[a][2] for i, a in enumerate("xyz")]
+        [abs(P[s[a][0]][i] - P[s[a][1]][i]) / s[a][2] if a in s else 1.0 for i, a in enumerate("xyz")]
     )
     return np.einsum("nk,nkd->nd", clo["w"], P[clo["refs"]]) + clo["d"] * scale
 
@@ -125,12 +126,13 @@ def snug_weights(ctx, verts, weights, reach):
     return out
 
 
-def build(ctx, name, rel_path, mat, snug=0.0):
+def build(ctx, name, rel_path, mat, snug=0.0, ratio=1.0):
     """One proxy as a skinned, shape-keyed Blender object.
 
     ctx carries the doll's P, W, BONES, KEYS (MakeHuman space) and its
     to_blender and new_object helpers. `snug` (metres) makes cloth within
     that reach of the skin follow it (snug_weights); 0 keeps the proxy's own.
+    `ratio` < 1 decimates a proxy denser than it needs to be.
     """
     clo = read_mhclo(os.path.join(ASSETS, rel_path))
     uvs, faces = read_obj(os.path.join(clo["dir"], clo["obj"]))
@@ -148,7 +150,22 @@ def build(ctx, name, rel_path, mat, snug=0.0):
     weights = mix(clo, ctx.W)
     if snug:
         weights = snug_weights(ctx, verts, weights, snug)
-    attach(ctx, ob, weights, {k: mix(clo, d) * (1.25 if k == "plus" else 1) for k, d in ctx.KEYS.items()})
+    keys = {k: mix(clo, d) * (1.25 if k == "plus" else 1) for k, d in ctx.KEYS.items()}
+    if ratio < 1.0:
+        mod = ob.modifiers.new("decimate", "DECIMATE")
+        mod.ratio = ratio
+        bpy.context.view_layer.objects.active = ob
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+        # each kept vertex takes the weights and key deltas of the fitted
+        # vertex it sits on (or nearest)
+        tree = KDTree(len(verts))
+        for i, v in enumerate(verts):
+            tree.insert(v, i)
+        tree.balance()
+        near = [tree.find(v.co)[1] for v in ob.data.vertices]
+        weights = weights[near]
+        keys = {k: d[near] for k, d in keys.items()}
+    attach(ctx, ob, weights, keys)
     ob["deleted"] = sorted(clo["deleted"])
     return ob
 
@@ -172,11 +189,13 @@ def attach(ctx, ob, weights, keys):
         sk.data.foreach_set("co", (base + ctx.to_blender(d, offset=False)).ravel())
 
 
-def detail_texture(rel_path, size=1024, keep_colour=False, blank=()):
+def detail_texture(rel_path, size=1024, keep_colour=False, blank=(), contrast=None):
     """Loads a proxy texture, shrinks it and (unless keep_colour) turns it
     into a light grey detail map the client tints with the chosen colour.
     `blank`: (u, v, radius) circles, v from the image's top, painted over
-    with the ring of colour around them (a printed logo, say)."""
+    with the ring of colour around them (a printed logo, say).
+    `contrast`: the most the grey may spread (standard deviation of its log),
+    so a near-black or two-tone texture doesn't tint into patches."""
     img = bpy.data.images.load(os.path.join(ASSETS, rel_path))
     if img.size[0] > size:
         img.scale(size, size)
@@ -201,6 +220,13 @@ def detail_texture(rel_path, size=1024, keep_colour=False, blank=()):
         mean = lum[solid].mean() if solid.any() else lum.mean()
         # centre the shading on 0.85 so the tint reads at its true colour
         g = np.clip(lum * (0.85 / max(mean, 1e-3)), 0, 1)
+        if contrast is not None:
+            # in log space, about the (geometric) mean: shading stays relative
+            log = np.log(np.maximum(lum, 1e-3))
+            centre = log[solid].mean() if solid.any() else log.mean()
+            spread = log[solid].std() if solid.any() else log.std()
+            k = min(1.0, contrast / max(spread, 1e-6))
+            g = np.clip(0.85 * np.exp(k * (log - centre)), 0, 1)
         px[:, 0] = px[:, 1] = px[:, 2] = g
         img.pixels.foreach_set(px.ravel())
     img.pack()
