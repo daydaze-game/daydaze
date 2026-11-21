@@ -2,6 +2,7 @@
 // ticket, build the order from the station's ingredients, hand it over.
 import type { JSX } from "react";
 import { score, shiftOver, ticket, TICKETS } from "../../../game/orders.ts";
+import { shiftDesk } from "../../ui/shiftDesk.ts";
 import type { OrderSession } from "./orderSession.ts";
 
 /** An order station's panel: read the ticket, build it from the station's
@@ -33,6 +34,7 @@ export function OrderPanel({
 }): JSX.Element {
   const { station } = session;
   const s = session.store.use();
+  const { slip } = shiftDesk.use();
   const label = (id: string) =>
     station.ingredients.find((i) => i.id === id)?.label ?? id;
   if (!s.on)
@@ -65,6 +67,13 @@ export function OrderPanel({
             ? `${s.last.right ? `${s.last.name}, perfect${s.last.tip ? `: +${s.last.tip} ${tipWord}` : ""}` : wrong(s.last.name)}. Next: ${order?.name}`
             : `Ticket: ${order?.name}`}
       </p>
+      {over && slip && slip.job === session.job && (
+        <p className="game-call" role="status">
+          Paid {slip.coins} coins and {slip.xp} Hustle XP
+          {slip.clean ? " (clean shift bonus)" : ""}
+          {slip.slow ? ". Slow hours: half pay until tomorrow" : ""}
+        </p>
+      )}
       {!over && (
         <>
           <p className="game-call">

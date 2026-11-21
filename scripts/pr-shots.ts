@@ -43,6 +43,10 @@ const AREA_SHOTS: readonly (readonly [RegExp, string])[] = [
   [/^src\/(client|game)\/(city|world)\//, "city-day"],
   [/^src\/client\/avatar\//, "plaza"],
   [/^src\/client\/ui\//, "hud-city"],
+  [
+    /^src\/(game\/shifts|client\/rooms\/shared\/(Order|order))/,
+    "barista-pay-slip",
+  ],
 ];
 
 /** Shot names defined in scripts/screenshots.ts (`name: "plaza"` entries). */
@@ -58,9 +62,10 @@ export function pickShots(
   const picked = new Set<string>();
   for (const file of files.map((f) => f.trim())) {
     const dir = /^src\/client\/rooms\/([^/]+)\//.exec(file)?.[1];
-    const shot = dir
-      ? (ROOM_SHOT_ALIASES[dir] ?? dir)
-      : AREA_SHOTS.find(([re]) => re.test(file))?.[1];
+    // area patterns first: rooms/shared holds code no single room owns
+    const shot =
+      AREA_SHOTS.find(([re]) => re.test(file))?.[1] ??
+      (dir ? (ROOM_SHOT_ALIASES[dir] ?? dir) : undefined);
     if (shot && known.includes(shot)) picked.add(shot);
   }
   return [...picked].slice(0, MAX_SHOTS);

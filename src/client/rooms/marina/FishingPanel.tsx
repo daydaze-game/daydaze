@@ -2,8 +2,9 @@
 // then struck when the bobber dips. Rules live in game/fishing.ts and the state
 // in ./session.ts; this only reads and presses.
 
-import type { JSX } from "react";
+import { useState, type JSX } from "react";
 import { CASTS, tripKg, type Catch } from "../../../game/fishing.ts";
+import { driving } from "../../world/driving.ts";
 import { useNow, usePressKeys } from "../shared/useNow.ts";
 import { fishing, leave, powerAt, press, start } from "./session.ts";
 
@@ -24,8 +25,13 @@ function call(c: Catch): string {
 
 /** Five casts off the dock: set the power, then strike the moment the
  * bobber dips. */
-export function FishingPanel(): JSX.Element {
+export function FishingPanel({
+  spot = "marina",
+}: {
+  spot?: "marina" | "boardwalk";
+}): JSX.Element {
   const s = fishing.use();
+  const [vehicleNotice, setVehicleNotice] = useState(false);
   const playing = s.phase !== "off";
   const now = useNow(s.phase === "power");
   usePressKeys(playing, press, leave);
@@ -35,10 +41,22 @@ export function FishingPanel(): JSX.Element {
         <p className="game-call">
           Five casts off the end of the dock. Strike when the bobber dips.
         </p>
+        {vehicleNotice && <p role="status">Leave the car before fishing.</p>}
+        {vehicleNotice && driving.session && (
+          <button
+            type="button"
+            onClick={() => {
+              driving.request = "leave";
+              setVehicleNotice(false);
+            }}
+          >
+            Leave the car
+          </button>
+        )}
         <button
           type="button"
           className="game-main"
-          onClick={() => start(performance.now())}
+          onClick={() => setVehicleNotice(!start(performance.now(), spot))}
         >
           Go fishing
         </button>
@@ -89,4 +107,9 @@ export function FishingPanel(): JSX.Element {
       </button>
     </section>
   );
+}
+
+/** Fishing from the city pier. */
+export function BoardwalkFishingPanel(): JSX.Element {
+  return <FishingPanel spot="boardwalk" />;
 }

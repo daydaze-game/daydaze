@@ -71,6 +71,7 @@ import { playSoundFile } from "../audio/soundFiles.ts";
 import { playFanfare } from "../audio/worldSounds.ts";
 import {
   applyPrize,
+  finishShift,
   scorePrize,
   rewardSteal,
   rewardVisit,
@@ -89,6 +90,7 @@ import { Collections } from "./ui/Collections.tsx";
 import { claimSet } from "../game/collections.ts";
 import { Onboarding } from "./ui/Onboarding.tsx";
 import { postPrize, prizeDesk } from "./ui/prizeDesk.ts";
+import { shiftDesk } from "./ui/shiftDesk.ts";
 import { petDesk } from "./rooms/zoo/petDesk.ts";
 import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
@@ -332,6 +334,8 @@ export function App() {
     setSave((s) => ({ ...s, settings: { ...s.settings, muted } }));
   const setEffects = (effects: Intensity) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, effects } }));
+  const setHighAudio = (highAudio: boolean) =>
+    setSave((s) => ({ ...s, settings: { ...s.settings, highAudio } }));
   const setGraphics = (graphics: Graphics) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, graphics } }));
   // signed in, every change goes up to the account a few seconds later.
@@ -515,6 +519,21 @@ export function App() {
         result.prize.grade === "S" ? 1 : result.prize.grade === "A" ? 0.6 : 0,
       );
   }, [pending]);
+  // a finished paid shift pays its wage and Hustle XP, and posts the slip
+  const shiftPending = shiftDesk.use().pending;
+  useEffect(() => {
+    if (!shiftPending) return;
+    const now = Date.now();
+    const { job, result } = shiftPending;
+    // the slip is read from the last render; the save itself is updated from
+    // its latest state, so a prize paid in the same tick is not overwritten
+    const r = finishShift(latest.current, job, result, now);
+    setSave((s) => finishShift(s, job, result, now).save);
+    shiftDesk.set({
+      pending: null,
+      slip: { job, coins: r.coins, xp: r.xp, clean: r.clean, slow: r.slow },
+    });
+  }, [shiftPending]);
   // opening the game on a new day counts toward the streak (and again if the
   // tab stays open past midnight); a milestone pays and celebrates
   useEffect(() => {
@@ -586,6 +605,7 @@ export function App() {
           dance={dance}
           holds={holds}
           effects={save.settings.effects}
+          highAudio={save.settings.highAudio}
           // walking ends a dance, so the Dance mood drops back to idle
           onMove={() => setMood((m) => (m === "dance" ? "idle" : m))}
           view={view}
@@ -693,6 +713,8 @@ export function App() {
           setHolds={setHolds}
           effects={save.settings.effects}
           setEffects={setEffects}
+          highAudio={save.settings.highAudio}
+          setHighAudio={setHighAudio}
           view={view}
           setView={setView}
           panelOpen={save.settings.panelOpen}

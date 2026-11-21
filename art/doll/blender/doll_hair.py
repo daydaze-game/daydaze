@@ -25,7 +25,40 @@ PROXY = {
     "textured": "hair/short01/short01.mhclo",
     "fringe": "hair/short03/short03.mhclo",
 }
-TEXTURE = {k: v.replace(".mhclo", "_diffuse.png") for k, v in PROXY.items()}
+# style id -> MakeHuman community hair (fetch_makehuman.sh), made for the
+# MakeHuman base mesh, so it sits on our head with a natural hairline where
+# our strand cards read as a skullcap (#312) and the ripped pack had to go (#314)
+COMMUNITY = {
+    # MargaretToigo, CC0
+    "bob": "toigo_blunt_bob_with_bangs",
+    "lob": "toigo_curled_under_bob",
+    "sidebob": "toigo_inverted_bob",
+    # Elvaerwyn, CC0
+    "pigtails": "elvs_double_mh_braid",
+    # RehmanPolanski, CC0
+    "messy-bun": "rehmanpolanski_hair_bun_brown",
+    # Elvaerwyn, CC-BY
+    "waves": "elvs_daisy_hair",
+    "long-straight": "elvs_katherine_hair",
+    "mid-wavy": "elvs_ashley_may_hair",
+    "mid-straight": "elvs_hazel_hair",
+    "puffs": "elvs_micky_afro",
+    "cornrows": "elvs_braided_rows",
+    "quiff": "elvs_maxwell_hair",
+}
+PROXY |= {style: f"hair/{name}/{name}.mhclo" for style, name in COMMUNITY.items()}
+# decimate ratios for proxies far denser than the rest: the beaded cornrows
+# are 41k triangles as authored, eight times the hair around them
+RATIO = {"cornrows": 0.25}
+
+
+def diffuse(path):
+    """The diffuse texture a proxy's .mhmat names, beside its .mhclo."""
+    folder = os.path.dirname(path)
+    with open(os.path.join(proxies.ASSETS, path)) as f:
+        mhmat = next(line.split()[1] for line in f if line.startswith("material "))
+    with open(os.path.join(proxies.ASSETS, folder, mhmat)) as f:
+        return os.path.join(folder, next(line.split()[1] for line in f if line.startswith("diffuseTexture ")))
 
 
 def swing(ctx, ob, start):
@@ -330,46 +363,6 @@ def _surface_z(scalp, x, y, window=0.014):
     return max(zs) if zs else None
 
 
-def cornrows(ctx, mat, rows=11):
-    """Cornrows: raised ridges combed from the front hairline to the crown's
-    back, converging toward the nape, then dropping as short plaits."""
-    head = ctx.JB["head"]
-
-    def extra(bm, ctx):
-        scalp = [v.co.copy() for v in bm.verts]
-        steps = 40
-        for k in range(rows):
-            side = -1 + 2 * k / (rows - 1)
-            ts = [i / (steps - 1) for i in range(steps)]
-            xs = [head[0] + side * 0.075 * (1 - 0.55 * t**1.5) for t in ts]
-            ys = [head[1] - 0.085 + t * 0.19 for t in ts]
-            zs = [_surface_z(scalp, x, y, 0.02) for x, y in zip(xs, ys)]
-            # fill gaps, then smooth: the shell's vertex spacing would make the
-            # ridge climb in steps
-            known = [z for z in zs if z is not None]
-            if not known:
-                continue
-            zs = [z if z is not None else known[-1] for z in zs]
-            for _ in range(6):
-                zs = [zs[0]] + [(zs[i - 1] + 2 * zs[i] + zs[i + 1]) / 4 for i in range(1, steps - 1)] + [zs[-1]]
-            prev = None
-            for t, x, y, z in zip(ts, xs, ys, zs):
-                # past the crown the row leaves the scalp and hangs as a plait
-                drop = max(0.0, t - 0.8) / 0.2
-                zz = z + 0.003 - drop * 0.16
-                yy = y + drop * 0.02
-                r = 0.0085 * (1 + 0.2 * abs(np.sin(t * np.pi * 22)))
-                c = Vector((x * (1 - 0.1 * drop), yy, zz))
-                ring = [
-                    bm.verts.new(c + Vector((np.cos(th) * r, np.sin(th) * r, 0)))
-                    for th in (2 * np.pi * j / 5 for j in range(5))
-                ]
-                if prev:
-                    for j in range(5):
-                        bm.faces.new((prev[j], prev[(j + 1) % 5], ring[(j + 1) % 5], ring[j]))
-                prev = ring
-
-    return scalp_hair(ctx, "Hair_cornrows", mat, extra)
 
 
 def bantu_knots(ctx, mat):
@@ -400,21 +393,6 @@ def bantu_knots(ctx, mat):
     return scalp_hair(ctx, "Hair_bantu-knots", mat, extra)
 
 
-def puffs(ctx, mat):
-    """Two high puffs, one each side of a centre part: fine-curled clouds."""
-    head = ctx.JB["head"]
-
-    def extra(bm, ctx):
-        top = _top(bm)
-        for side in (1, -1):
-            c = Vector((head[0] + side * 0.066, head[1] + 0.02, top - 0.008))
-            ret = bmesh.ops.create_uvsphere(bm, u_segments=36, v_segments=24, radius=1)
-            for v in ret["verts"]:
-                d = v.co.copy()
-                bump = 1 + 0.06 * np.sin(d.x * 53 + d.z * 17) * np.sin(d.y * 47 + d.z * 31)
-                v.co = Vector((d.x * 0.066, d.y * 0.064, d.z * 0.06)) * bump + c
-
-    return scalp_hair(ctx, "Hair_puffs", mat, extra)
 
 
 def _surface(bm, zs, n, point, skip=None):
@@ -639,35 +617,18 @@ def strand_style(ctx, name, strand_mat, cap_mat, **style):
     return doll_outfits.join(cards, cap)
 
 
-def pigtails(ctx, strand_mat, cap_mat):
-    """Two tails tied behind the ears, parted down the middle."""
-    import doll_outfits
 
-    halves = [
-        strands.build(
-            ctx,
-            f"Hair_pigtails_{side}",
-            strand_mat,
-            seed=13 + side,
-            length=0.32,
-            # half a head of hair each, so the pair costs one style
-            count=228,
-            wave=0.008,
-            tie=(side * 0.07, 0.035, -0.005),
-            side=side,
-        )
-        for side in (1, -1)
-    ]
-    # joining appends the others' vertices after the active object's, so the
-    # strands' layer shading runs on in the same order; the cap goes last
-    shade = list(halves[0]["layer_shade"]) + list(halves[1]["layer_shade"])
-    out = doll_outfits.join(halves[0], halves[1])
-    out["layer_shade"] = shade
-    cap = scalp_hair(ctx, "Hair_pigtails_cap", cap_mat, lambda bm, ctx: None, rise=0.008)
-    strands.comb_cap(ctx, cap)
-    out = doll_outfits.join(out, cap)
-    out.name = "Hair_pigtails"
-    return out
+
+def proxy_hair(ctx, style):
+    """A PROXY style fitted to the doll, its texture a tintable grey."""
+    path = PROXY[style]
+    # community textures range from near-black to two-tone: cap their
+    # contrast so a tint doesn't break into dark and bright patches (the
+    # braid's crown is painted in broad highlight bands: flatter still)
+    contrast = {"pigtails": 0.12}.get(style, 0.35) if style in COMMUNITY else None
+    img = proxies.detail_texture(diffuse(path), 1024, contrast=contrast)
+    mat = proxies.textured(f"hair_{style}", img, alpha=True)
+    return proxies.build(ctx, f"Hair_{style}", path, mat, ratio=RATIO.get(style, 1.0))
 
 
 def build(ctx):
@@ -681,25 +642,21 @@ def build(ctx):
             shade_strands(ctx, ob)
         return out
     if only:
-        # HAIR_ONLY=hijab,turban builds just those sculpted parts (fast)
+        # HAIR_ONLY=hijab,bob builds just those sculpted or proxy parts (fast)
         solid = bpy.data.materials.new("hair_solid")
         make = {"hijab": hijab, "head-wrap": head_wrap, "turban": turban}
-        return [make[n](ctx, solid) for n in only]
-    for style, path in PROXY.items():
-        img = proxies.detail_texture(TEXTURE[style], 1024)
-        mat = proxies.textured(f"hair_{style}", img, alpha=True)
-        ob = proxies.build(ctx, f"Hair_{style}", path, mat)
-        if style == "ponytail":
-            swing(ctx, ob, ctx.JB["head"] + np.array([0, 0.06, 0.02]))
-        out.append(ob)
+        out = [make[n](ctx, solid) if n in make else proxy_hair(ctx, n) for n in only]
+        # the same root-to-tip shading the full build gives every style
+        for ob in out:
+            shade_strands(ctx, ob)
+        return out
+    out += [proxy_hair(ctx, style) for style in PROXY]
     solid = bpy.data.materials.new("hair_solid")
     out += [buns(ctx, solid), afro(ctx, solid), braids(ctx, solid), top_knot(ctx, solid)]
     out += [
         box_braids(ctx, solid),
         locs(ctx, solid),
-        cornrows(ctx, solid),
         bantu_knots(ctx, solid),
-        puffs(ctx, solid),
     ]
     out += [hijab(ctx, solid), head_wrap(ctx, solid), turban(ctx, solid)]
     strand = strands.material("hair_strands")
@@ -707,13 +664,8 @@ def build(ctx):
     # strand-card styles: length (m), wave (slow S), curl (tight spirals),
     # volume (lift off the scalp); ids match HAIR_STYLES in src/game/look.ts
     for name, style in {
-        "waves": dict(length=0.56, count=456, wave=0.01),
-        "long-straight": dict(length=0.6, count=468, wave=0.002),
         "long-curly": dict(length=0.5, count=492, curl=0.022, volume=1.8),
-        "mid-straight": dict(length=0.36, count=420, wave=0.002),
-        "mid-wavy": dict(length=0.36, count=420, wave=0.012),
         "mid-curly": dict(length=0.3, count=456, curl=0.022, volume=1.9),
-        "bob": dict(length=0.24, count=390, wave=0.002, volume=1.2),
         "pixie": dict(length=0.11, count=360, wave=0.004, volume=1.1),
         # waist-skimming waves, a choppy layered shag, and short springy coils
         "mermaid": dict(length=0.76, count=480, wave=0.024),
@@ -736,7 +688,6 @@ def build(ctx):
     )
     swing(ctx, low, ctx.JB["head"] + np.array([0, 0.07, -0.05]))
     out.append(low)
-    out.append(pigtails(ctx, strand, combed))
     # close-cropped styles. bald has no model (the client wears none).
     # buzz: the combed cap alone, a few millimetres of fuzz
     buzz = ubc_hair(ctx, "Hair_buzz", "Hair_BuzzedFemale.gltf" if os.environ.get("DOLL_SEX", "female") == "female" else "Hair_Buzzed.gltf", solid)

@@ -289,6 +289,7 @@ elim
 eliphalet
 elote
 elspeed
+emelyarules
 emissivemap
 enkarra
 enredo
@@ -707,6 +708,8 @@ oscs
 outerspace
 outpiston
 overcorrecting
+overlined
+overlining
 pabitin
 padala
 pagdating
@@ -823,6 +826,7 @@ ruido
 rukh
 runabc
 runningman
+ryoce
 rÉserve
 safayan
 safd

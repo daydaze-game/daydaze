@@ -24,6 +24,7 @@ import { StreetDealer } from "./StreetDealer.tsx";
 import { CitySky } from "./CitySky.tsx";
 import { Fleet } from "./Fleet.tsx";
 import { Ocean } from "./Ocean.tsx";
+import { Fishing } from "../rooms/shared/Fishing.tsx";
 import { CITY_LAND, Outskirts } from "./Outskirts.tsx";
 import { Fireworks } from "./Fireworks.tsx";
 import { Parade } from "./Parade.tsx";
@@ -340,6 +341,7 @@ export function CityScene({
       </mesh>
       <Outskirts />
       <Ocean />
+      <Fishing player={player} spot="boardwalk" />
       {/* the horizon's ships, far twins, riding the swell past the surf */}
       <Suspense fallback={null}>
         <Fleet fleet={CITY_FLEET} waterY={-0.05} night={day.neon} far />
