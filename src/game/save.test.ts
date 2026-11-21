@@ -4,9 +4,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK, DEFAULT_SWIM, type Look } from "./look.ts";
 import { DEFAULT_BODY } from "./body.ts";
+import { freshProgression } from "./progression/progression.ts";
 import { STARTING_COINS } from "./wallet.ts";
 import { createDefaultFarm } from "./farm.ts";
 import { createDefaultGarden } from "./garden.ts";
+import { changeAdvanced, defaultGraphics, presetGraphics } from "./graphics.ts";
 import {
   SAVE_KEY,
   createDefaultSave,
@@ -38,17 +40,19 @@ test("createDefaultSave uses the default look and auto quality", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "auto",
+      graphics: defaultGraphics(),
       muted: false,
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -62,6 +66,15 @@ test("createDefaultSave uses the default look and auto quality", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -80,11 +93,12 @@ test("a save round-trips through serializeSave and loadSave", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "low",
+      graphics: presetGraphics("performance"),
       muted: true,
       effects: "off",
       panelOpen: true,
       strictChat: true,
+      highAudio: true,
     },
     home: {
       locked: false,
@@ -94,6 +108,7 @@ test("a save round-trips through serializeSave and loadSave", () => {
     crime: { offences: 3, bans: { bodega: 1_900_000_000_000 }, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: {
       id: "quill-lite",
       color: "#ff4fb3",
@@ -113,6 +128,15 @@ test("a save round-trips through serializeSave and loadSave", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
+    shifts: { day: 0, today: 0, worked: {} },
   };
   assert.deepEqual(loadSave(serializeSave(save), "Fallback"), save);
 });
@@ -163,17 +187,19 @@ test("a save from before the swimsuit slot still loads", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "low",
+      graphics: presetGraphics("performance"),
       muted: true,
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -187,6 +213,15 @@ test("a save from before the swimsuit slot still loads", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -220,6 +255,7 @@ test("loadSave keeps a valid name when the look is bad", () => {
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   });
   assert.deepEqual(loadSave(raw, "Fallback"), {
@@ -231,17 +267,19 @@ test("loadSave keeps a valid name when the look is bad", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "high",
+      graphics: presetGraphics("balanced"),
       muted: true,
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -255,6 +293,15 @@ test("loadSave keeps a valid name when the look is bad", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -273,17 +320,19 @@ test("loadSave keeps a valid look when the name is bad", () => {
     wardrobe: [],
     body: DEFAULT_BODY,
     settings: {
-      quality: "auto",
+      graphics: defaultGraphics(),
       muted: false,
       effects: "full",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     home: { locked: true, furniture: [] },
     jail: { endsAt: null },
     crime: { offences: 0, bans: {}, stolen: {} },
     bests: {},
     challenges: { day: 0, done: [] },
+    progression: freshProgression(),
     car: null,
     garage: ["quill-lite"],
     records: [],
@@ -297,6 +346,15 @@ test("loadSave keeps a valid look when the name is bad", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -308,11 +366,12 @@ test("loadSave repairs settings field by field", () => {
     settings: { quality: "ultra", muted: true },
   });
   assert.deepEqual(loadSave(raw, "Fallback").settings, {
-    quality: "auto",
+    graphics: defaultGraphics(),
     muted: true,
     effects: "full",
     panelOpen: false,
     strictChat: false,
+    highAudio: true,
   });
   const badMuted = JSON.stringify({
     version: 1,
@@ -321,11 +380,12 @@ test("loadSave repairs settings field by field", () => {
     settings: { quality: "low", muted: "yes" },
   });
   assert.deepEqual(loadSave(badMuted, "Fallback").settings, {
-    quality: "low",
+    graphics: presetGraphics("performance"),
     muted: false,
     effects: "full",
     panelOpen: false,
     strictChat: false,
+    highAudio: true,
   });
 });
 
@@ -350,14 +410,16 @@ test("loadSave repairs the effects setting without touching the rest", () => {
       effects: "loud",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   });
   assert.deepEqual(loadSave(raw, "Fallback").settings, {
-    quality: "low",
+    graphics: presetGraphics("performance"),
     muted: true,
     effects: "full",
     panelOpen: false,
     strictChat: false,
+    highAudio: true,
   });
   const low = JSON.stringify({
     version: 1,
@@ -481,6 +543,15 @@ test("loadSave salvages valid fields from a wrong version", () => {
     garden: createDefaultGarden(),
     inventory: {},
     giftDay: 0,
+    streak: {
+      count: 0,
+      best: 0,
+      last: 0,
+      days: [],
+      frozen: [],
+      freezeWeek: -1,
+    },
+    shifts: { day: 0, today: 0, worked: {} },
   });
 });
 
@@ -726,4 +797,65 @@ test("a teen save keeps its pouch: loading never strips it", () => {
     loadSave(serializeSave(save), "Fallback").inventory,
     save.inventory,
   );
+});
+
+test("a save from before highAudio loads with highAudio enabled", () => {
+  const old = JSON.stringify({
+    version: 1,
+    name: "Old Player",
+    settings: { quality: "low", muted: true, effects: "low" },
+  });
+  assert.equal(loadSave(old, "Fallback").settings.highAudio, true);
+});
+
+test("loadSave preserves highAudio setting when boolean and defaults when invalid", () => {
+  const off = JSON.stringify({
+    version: 1,
+    name: "Player",
+    settings: { highAudio: false },
+  });
+  assert.equal(loadSave(off, "Fallback").settings.highAudio, false);
+
+  const invalid = JSON.stringify({
+    version: 1,
+    name: "Player",
+    settings: { highAudio: "yes" },
+  });
+  assert.equal(loadSave(invalid, "Fallback").settings.highAudio, true);
+});
+
+test("a save from before the Graphics menu migrates its quality setting", () => {
+  for (const [quality, preset] of [
+    ["auto", "auto"],
+    ["high", "balanced"],
+    ["low", "performance"],
+  ] as const) {
+    const old = JSON.stringify({ version: 1, settings: { quality } });
+    assert.equal(loadSave(old, "Fallback").settings.graphics.preset, preset);
+  }
+});
+
+test("custom graphics settings survive a save and load", () => {
+  const save = createDefaultSave("Kept Name");
+  save.settings.graphics = changeAdvanced(presetGraphics("realistic"), {
+    ao: false,
+    fpsCap: 30,
+  });
+  const loaded = loadSave(JSON.stringify(save), "Fallback");
+  assert.deepEqual(loaded.settings.graphics, save.settings.graphics);
+});
+
+test("a saved shift record survives a reload and bad ones are cleaned", () => {
+  const save = createDefaultSave("Kai");
+  save.shifts = { day: 9, today: 2, worked: { barista: 4 } };
+  assert.deepEqual(
+    loadSave(serializeSave(save), "Fallback").shifts,
+    save.shifts,
+  );
+  const bad = JSON.stringify({ ...save, shifts: { day: -4, worked: 7 } });
+  assert.deepEqual(loadSave(bad, "Fallback").shifts, {
+    day: 0,
+    today: 0,
+    worked: {},
+  });
 });

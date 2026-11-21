@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { decodeAction, encodeAction } from "../peerAction.ts";
-import { danceMove, PICKER_DANCE_MOVES } from "./moves.ts";
+import { danceMove, eyesShut, PICKER_DANCE_MOVES } from "./moves.ts";
 import {
   followSpot,
   liftOf,
@@ -58,6 +58,13 @@ test("the follower faces the leader, gap meters in front", () => {
   assert.ok(close(spot.yaw, Math.PI));
 });
 
+test("dolls face to face never stand inside each other", () => {
+  // the doll's chest sits 0.21 m ahead of its origin (measured in the doll
+  // lab's together shot), so two chests touch at 0.42 m
+  for (const e of TOGETHER)
+    if (!e.side && !e.behind) assert.ok(e.gap >= 0.42, e.id);
+});
+
 test("holding hands puts the follower at the leader's side, facing the same way", () => {
   const e = must(TOGETHER.find((x) => x.id === "hold-hands"));
   const spot = followSpot("hold-hands", [0, 0], Math.PI / 2);
@@ -105,4 +112,36 @@ test("an emote together rides the action code, buzz and all", () => {
       assert.equal(got.buzz, 3);
     }
   assert.equal(decodeAction("pair:tango:l").pair, undefined);
+});
+
+test("the kisses face each other unmirrored, so heads tilt opposite ways", () => {
+  for (const id of ["cheek-kiss", "kiss", "forehead-kiss"] as const) {
+    const e = must(TOGETHER.find((x) => x.id === id));
+    // a mirrored follow tilts its head the same way the lead does, nose into nose
+    assert.equal(mirrored(id), false, id);
+    assert.equal(roleMove(id, "lead"), roleMove(id, "follow"), id);
+    assert.equal(liftOf(id), 0, id);
+    const spot = followSpot(id, [0, 0], 0);
+    assert.ok(close(spot.at[1], e.gap) && close(spot.yaw, Math.PI), id);
+    // close enough for lips to meet, never inside each other
+    assert.ok(e.gap > 0.6 && e.gap < 1, id);
+  }
+});
+
+test("a kiss runs on the pair clock, eyes closed while the lips meet", () => {
+  for (const id of ["cheek-kiss", "kiss", "forehead-kiss"] as const) {
+    const move = danceMove(roleMove(id, "lead"));
+    // both partners at the same moment of it, on any screen
+    assert.equal(move.synced, true, id);
+    const shut = must(move.shut);
+    assert.ok(shut[0] > 0 && shut[1] < move.period, id);
+    assert.equal(eyesShut(move, (shut[0] + shut[1]) / 2), true, id);
+    assert.equal(eyesShut(move, shut[1] + 0.2), false, id);
+    // a loop later: the same moment
+    assert.equal(eyesShut(move, move.period + shut[0] + 0.05), true, id);
+  }
+  // the lips kiss holds about a second and a half
+  const kiss = must(danceMove("kiss").shut);
+  assert.ok(kiss[1] - kiss[0] >= 1.4 && kiss[1] - kiss[0] <= 1.8);
+  assert.equal(eyesShut(danceMove("hug"), 1), false);
 });

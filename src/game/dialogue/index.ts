@@ -28,6 +28,8 @@ import { bandleaderBank } from "./bandleader.ts";
 import { guardBank } from "./guard.ts";
 import { policeBank } from "./police.ts";
 import { taxiDriverBank } from "./taxi-driver.ts";
+import { motoristBank } from "./motorist.ts";
+import { pedestrianBank } from "./pedestrian.ts";
 import { hikerBank } from "./hiker.ts";
 import { captainBank } from "./captain.ts";
 import { crewBank } from "./crew.ts";
@@ -72,4 +74,6 @@ export const LINE_BANKS: Record<DialogueRole, RoleBank> = {
   crew: crewBank,
   gardener: gardenerBank,
   dealer: dealerBank,
+  motorist: motoristBank,
+  pedestrian: pedestrianBank,
 };

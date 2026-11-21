@@ -73,7 +73,19 @@ const PANELS: Partial<Record<RoomId, ComponentType>> = {
     () => import("../rooms/backroom/CardsPanel.tsx"),
     "CardsPanel",
   ),
-  city: panel(() => import("../city/CityDrivePanel.tsx"), "CityDrivePanel"),
+  city: games(
+    [
+      "Driving",
+      panel(() => import("../city/CityDrivePanel.tsx"), "CityDrivePanel"),
+    ],
+    [
+      "Fishing",
+      panel(
+        () => import("../rooms/marina/FishingPanel.tsx"),
+        "BoardwalkFishingPanel",
+      ),
+    ],
+  ),
   bowling: panel(
     () => import("../rooms/bowling/BowlingPanel.tsx"),
     "BowlingPanel",

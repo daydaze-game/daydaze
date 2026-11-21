@@ -17,7 +17,10 @@
         "threejs-devtools-mcp",
         "--scope",
         "project"
-      ]
+      ],
+      "env": {
+        "BROWSER": "none"
+      }
     },
     "playwright": {
       "command": "npx",

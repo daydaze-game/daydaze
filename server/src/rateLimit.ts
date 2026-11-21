@@ -45,6 +45,16 @@ export const GUEST_LIMIT: RateLimit = { capacity: 10, refillPerSecond: 1 / 30 };
 export const REPORT_LIMIT: RateLimit = { capacity: 5, refillPerSecond: 1 / 60 };
 /** Blocks per player: 20, then one every 6 seconds. */
 export const BLOCK_LIMIT: RateLimit = { capacity: 20, refillPerSecond: 1 / 6 };
+/** Progress writes per player: a burst of 6 games, then one every 10 seconds. */
+export const PROGRESS_LIMIT: RateLimit = {
+  capacity: 6,
+  refillPerSecond: 1 / 10,
+};
+/** Progress writes per IP address, shared by everyone behind it. */
+export const PROGRESS_ADDRESS_LIMIT: RateLimit = {
+  capacity: 60,
+  refillPerSecond: 1 / 2,
+};
 /** Reports per IP address, shared by everyone behind it. */
 export const REPORT_ADDRESS_LIMIT: RateLimit = {
   capacity: 15,

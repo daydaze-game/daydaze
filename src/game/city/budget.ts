@@ -27,6 +27,7 @@ import { PEDESTRIANS } from "./pedestrians.ts";
 import { CHAT_GROUPS, nearestChatGroups } from "./chatGroups.ts";
 import { wildlifeFor, wildlifeNear } from "./parkWildlife.ts";
 import { PARK_FLOCKS, flockNear } from "../butterflies.ts";
+import { CROWD_TRIS } from "../crowd.ts";
 import { QUEUE_NEAR_LOW, QUEUE_PERSON_TRIS, QUEUE_SPOTS } from "./queues.ts";
 import {
   bats,
@@ -82,13 +83,13 @@ export const MODEL_COST: Readonly<
   Record<string, { tris: number; parts: number }>
 > = {
   "doll/body-lo": { tris: 3168, parts: 1 },
-  "doll/hair-bob-lo": { tris: 2053, parts: 2 },
+  "doll/hair-bob-lo": { tris: 992, parts: 1 },
   "doll/outfit-jeans-lo": { tris: 846, parts: 1 },
   "doll/shoes-platforms-lo": { tris: 1286, parts: 1 },
   "vendors/truck": { tris: 3360, parts: 1 },
   "vendors/cart": { tris: 1054, parts: 1 },
   "doll/body": { tris: 31056, parts: 4 },
-  "doll/hair-bob": { tris: 8572, parts: 2 },
+  "doll/hair-bob": { tris: 4976, parts: 1 },
   "doll/outfit-jeans": { tris: 4236, parts: 1 },
   "doll/shoes-platforms": { tris: 6436, parts: 1 },
   "nature/street-tree-1-lo": { tris: 493, parts: 2 },
@@ -422,8 +423,8 @@ export function seasonalCost(at: Vec2): {
  * draw calls a doll. */
 export const NPC_DOLL_TRIS = 8_300;
 const NPC_DOLL_CALLS = 6;
-/** A crowd figure: the dearest of Kenney's four walkers (street/walker-*). */
-export const CROWD_FIGURE_TRIS = 880;
+/** A crowd figure: a far-tier baked walker's ceiling (src/game/crowd.ts). */
+export const CROWD_FIGURE_TRIS = CROWD_TRIS.far;
 
 /** The share of a walker's strip within `radius` of `at`, sampled at nine
  * points: she paces it end to end, so it is how long she spends in range. */

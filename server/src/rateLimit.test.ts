@@ -1,3 +1,4 @@
+// Tests for server/src/rateLimit.ts: token-bucket rate limiter logic and storage.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

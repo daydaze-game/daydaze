@@ -17,10 +17,14 @@ import {
   highParams,
   isDose,
   isStrain,
+  jawClench,
   paceBoost,
   phaseOf,
   profileOf,
+  pupilDilation,
   readMeters,
+  RED_EYES_MAX,
+  redEyes,
   soberMeters,
   spent,
   STRAIN_BODY,
@@ -28,6 +32,7 @@ import {
   STRAINS,
   strongest,
   SUBSTANCES,
+  type Substance,
   type Taken,
 } from "./substances.ts";
 
@@ -491,6 +496,27 @@ test("weed lowers the lids: heavier with more, heavier for indica, sleepiest on 
   assert.equal(heavyLid(m), 0);
 });
 
+test("red eyes: the whites redden with the weed level, never for other substances", () => {
+  const red = (
+    level: number,
+    phase: "comeup" | "peak" | "comedown" | null = "peak",
+  ) => {
+    const m = soberMeters();
+    m.high = { level, phase, strain: "hybrid" };
+    return redEyes(m);
+  };
+  assert.equal(redEyes(soberMeters()), 0);
+  assert.equal(red(0.5, null), 0);
+  assert.ok(red(0.2) > 0 && red(0.6) > red(0.2));
+  for (const level of [0.5, 1, 5, -1, NaN]) {
+    const v = red(level);
+    assert.ok(v >= 0 && v <= RED_EYES_MAX, String(level));
+  }
+  const m = soberMeters();
+  m.molly = { level: 1, phase: "peak", strain: "hybrid" };
+  assert.equal(redEyes(m), 0);
+});
+
 test("dry mouth and the munchies: every weed style has a consume tic after the come-up", () => {
   for (const body of [BODY.high, ...Object.values(STRAIN_BODY)])
     assert.ok(
@@ -521,4 +547,38 @@ test("the dry-mouth hint shows once, as the weed peaks", () => {
   m.high = { level: 0.5, phase: "comedown", strain: "hybrid" };
   assert.equal(dryMouthHint("peak", m), null);
   assert.equal(dryMouthHint(null, soberMeters()), null);
+});
+
+test("pupils open and the jaw sets by the research's table: molly most, weed not at all", () => {
+  const on = (s: Substance, level: number) => {
+    const m = soberMeters();
+    m[s] = { level, phase: "peak", strain: "hybrid" };
+    return m;
+  };
+  assert.equal(pupilDilation(soberMeters()), 0);
+  assert.equal(jawClench(soberMeters()), 0);
+  // dilated: MDMA (marked), cocaine, LSD, psilocybin; weed leaves them be
+  assert.equal(pupilDilation(on("molly", 1)), 1);
+  for (const s of ["cocaine", "acid", "trip"] as const) {
+    assert.ok(pupilDilation(on(s, 1)) > 0, s);
+    assert.ok(pupilDilation(on(s, 1)) < 1, s);
+  }
+  assert.equal(pupilDilation(on("high", 1)), 0);
+  // jaw clench: MDMA (strong), cocaine, LSD (mild); not psilocybin or weed
+  assert.equal(jawClench(on("molly", 1)), 1);
+  assert.ok(jawClench(on("cocaine", 1)) > jawClench(on("acid", 1)));
+  assert.ok(jawClench(on("acid", 1)) > 0);
+  assert.equal(jawClench(on("trip", 1)), 0);
+  assert.equal(jawClench(on("high", 1)), 0);
+  // follows the meter, the strongest substance wins, and bad input is safe
+  assert.ok(pupilDilation(on("molly", 0.5)) < pupilDilation(on("molly", 1)));
+  const both = on("molly", 0.3);
+  both.cocaine = { level: 1, phase: "peak", strain: "hybrid" };
+  assert.equal(pupilDilation(both), pupilDilation(on("cocaine", 1)));
+  for (const level of [5, -1, NaN]) {
+    const v = pupilDilation(on("molly", level));
+    assert.ok(v >= 0 && v <= 1, String(level));
+    const j = jawClench(on("molly", level));
+    assert.ok(j >= 0 && j <= 1, String(level));
+  }
 });

@@ -30,6 +30,8 @@ import { waitForFrames } from "./wait-for-frames.ts";
 declare global {
   interface Window {
     daydazeReact: (id: string) => void;
+    /** In the city (src/client/city/Traffic.tsx). */
+    daydazeStepOut: (ahead: number, dry?: boolean) => boolean;
   }
 }
 
@@ -334,6 +336,22 @@ function walkStrip(
 }
 
 /**
+ * Clicks the debug panel's "Debug: a minute later" button from the DOM, so it
+ * still works while the panel is hidden for a recording (a display:none button
+ * fails Playwright's visibility check).
+ */
+async function debugLater(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find(
+      (el) => el.textContent?.trim() === "Debug: a minute later",
+    );
+    if (!(button instanceof HTMLButtonElement))
+      throw new Error("no 'Debug: a minute later' button on the page");
+    button.click();
+  });
+}
+
+/**
  * A frame strip of a room action (the ladder climb, the overhand throw): runs
  * `setup` (open the game), then records a CDP screencast while `go` fires the
  * move, saving docs/screenshots/<name>-<nn>.png.
@@ -358,6 +376,9 @@ function actionStrip(
         { timeout: 300_000 },
       );
       await setup(page);
+      // the strip shows the scene a player sees: the debug buttons go while
+      // recording, and `go` clicks "a minute later" through the DOM (debugLater)
+      await page.addStyleTag({ content: "nav.debug { display: none }" });
       const cdp = await page.context().newCDPSession(page);
       const frames: Buffer[] = [];
       cdp.on("Page.screencastFrame", (f) => {
@@ -875,7 +896,7 @@ const SHOTS: {
     },
     // a minute on in the peak
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -892,7 +913,7 @@ const SHOTS: {
       for (let i = 0; i < 4; i++) await later.click();
     },
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -910,7 +931,7 @@ const SHOTS: {
       for (let i = 0; i < 1; i++) await later.click();
     },
     async (page) => {
-      await page.getByRole("button", { name: "Debug: a minute later" }).click();
+      await debugLater(page);
     },
     12,
     8,
@@ -1035,6 +1056,34 @@ const SHOTS: {
       60,
     );
   }),
+  // stepping out too close in front of a moving car: the hit, the fall and the
+  // get-up (game/city/carHits.ts); the dolls at a twentieth of speed, the
+  // car at its own
+  actionStrip(
+    "car-hit",
+    "room=city&view=full&quality=low&debug=1&time=12:00&timescale=0.05",
+    async (page) => {
+      await page.waitForTimeout(40_000);
+      // warm the moves pack up, so the fall is not missed while it loads
+      await page.evaluate(() => window.daydazeReact("stumble"));
+      await page.waitForTimeout(110_000);
+      // before recording starts, a car near her to step out in front of,
+      // so the strip is not spent waiting
+      await page.waitForFunction(() => window.daydazeStepOut(5, true), null, {
+        timeout: 120_000,
+        polling: 2_000,
+      });
+    },
+    async (page) => {
+      // retried in case that car stopped or turned meanwhile
+      await page.waitForFunction(() => window.daydazeStepOut(5), null, {
+        timeout: 120_000,
+        polling: 2_000,
+      });
+    },
+    150,
+    60,
+  ),
   // the player's own emotes, full body: a whisper and a laugh
   ...(["Whisper", "Laughing"] as const).map((emote) =>
     actionStrip(
@@ -1478,6 +1527,21 @@ const SHOTS: {
   { name: "tiki-bar", query: "room=tiki-bar" },
   { name: "thrift-temple", query: "room=thrift-temple" },
   { name: "espresso-lab", query: "room=espresso-lab" },
+  // a finished barista shift: empty cups count as wrong orders, so the shift
+  // ends after eight and the panel shows the pay slip (game/shifts.ts)
+  {
+    name: "barista-pay-slip",
+    query: "room=espresso-lab",
+    act: async (page) => {
+      const panel = page.getByRole("region", { name: "Barista station" });
+      await panel
+        .getByRole("button", { name: "Start a shift" })
+        .click({ timeout: 150_000 });
+      for (let i = 0; i < 8; i++)
+        await panel.getByRole("button", { name: "Hand it over" }).click();
+      await expect(panel).toContainText(/Paid \d+ coins/);
+    },
+  },
   { name: "hotel-rooftop", query: "room=hotel-rooftop" },
   { name: "bookshop", query: "room=bookshop" },
   { name: "patisserie", query: "room=patisserie" },
@@ -2004,7 +2068,7 @@ const SHOTS: {
     query: "room=city&quality=high&time=21:00&at=100,8&cam=100,2.2,8,150,7,-2",
     act: furnitureReady,
   },
-  // the queue outside Pulse, Kenney people on the forecourt (QueueCrowd.tsx)
+  // the queue outside Pulse, baked doll people on the forecourt (QueueCrowd.tsx)
   {
     name: "crowd-queue",
     query: "room=city&quality=high&time=21:00&at=112,6&cam=96,2.4,4,113,1.6,17",
@@ -2668,6 +2732,11 @@ const SHOTS: {
       ).toBeVisible();
     },
   },
+  // the paired kisses mid-kiss, in profile, at three height pairings
+  lineupShot("together-kiss", "emote=kiss", "together"),
+  lineupShot("together-cheek-kiss", "emote=cheek-kiss", "together"),
+  lineupShot("together-hug", "emote=hug", "together"),
+  lineupShot("together-forehead-kiss", "emote=forehead-kiss", "together"),
   // hair style rows (women, then men), from the front and from behind
   lineupShot(
     "hair-women-1",
@@ -2693,6 +2762,20 @@ const SHOTS: {
     "hair-men-2",
     "men=1&styles=mop,pompadour,mohawk,spiky-crop,crew,quiff&colors=1b1014,3a6bff,ff4fb3,4a2a1c,b77a3e,7b4dff",
   ),
+  // the MakeHuman community styles (doll_hair.py COMMUNITY), front and back
+  ...[
+    "bob,lob,sidebob,pigtails,messy-bun,waves",
+    "long-straight,mid-wavy,mid-straight,puffs,cornrows,quiff",
+  ].flatMap((styles, i) => [
+    lineupShot(
+      `hair-community-${i + 1}`,
+      `styles=${styles}&colors=${HAIR_COLORS}`,
+    ),
+    lineupShot(
+      `hair-community-${i + 1}-back`,
+      `styles=${styles}&colors=${HAIR_COLORS}&${BEHIND}`,
+    ),
+  ]),
   // close-ups of the speckle cases: men's and women's dark hair from behind,
   // and the Quiff's forehead in several colors
   lineupShot(
@@ -2718,6 +2801,7 @@ const SHOTS: {
   lineupShot("doll-suit-track-back", "cam=-2.2,0.6,2.2", "trackwalk"),
   // the face shot's doll up close
   lineupShot("doll-face", "", "face"),
+  lineupShot("doll-lips", "", "lips"),
   lineupShot("doll-suit-women", "outfits=blouse,shorts,jeans", "body"),
 ];
 

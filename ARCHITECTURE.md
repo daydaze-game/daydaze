@@ -90,8 +90,15 @@ floors, looks, saves, chat effects) so both sides agree on the rules. `npm run l
   two, the toon doll) reach the skeleton through `BuiltPose`.
 - `net/` wires the online session into React (see Online below).
 
-Quality tiers (`world/quality.ts`, `?quality=low|high`) keep the low tier
-under 250 draw calls, 300k triangles and 4 real lights.
+Quality tiers (`world/quality.ts`, `?quality=low|high|ultra`) keep the low tier
+under 250 draw calls, 300k triangles and 4 real lights. The tiers are the
+presets of the Graphics menu (`ui/GraphicsPanel.tsx`): Performance is low,
+Balanced is high, Realistic is ultra, and Auto starts on Balanced and steps
+down by frame rate. The settings are one validated object in
+`save.settings.graphics` (`game/graphics.ts`: presets, advanced switches,
+migration of the old `quality` value). `World.tsx` applies them live and
+provides them through `GraphicsContext`; scenes branch on `tier !== "low"` for
+detail, or on a single switch (`reflections`, `shadows`) where it is one.
 
 Dev tools (`world/DevTools.tsx`, `world/dev/`): an in-game panel (press
 `` ` ``) for development only. `App.tsx` and `World.tsx` load its two
@@ -189,6 +196,14 @@ reached, the game is single-player and makes no network calls.
   relay. `Directory` tracks copies and who is where; `RateLimiter` keeps
   auth and report budgets in its SQLite storage.
 - `server/migrations/` is the D1 schema.
+- Progress is server-owned for accounts: `server/src/progressCore.ts` (pure)
+  grades a reported score with the game's own prize rules, pays XP to its
+  ladder under a daily cap, and pays a first visit once;
+  `server/src/progressStore.ts` stores it in D1 (`progress`, with
+  `weekly_scores` and `weekly_xp` for the Monday-to-Sunday boards) using
+  revision-checked writes. `GET/PUT /api/save` return the server's XP and
+  title, and `src/net/progress.ts` validates the replies on the client.
+  Guests keep progress on the device. Threat model: `docs/security.md`.
 - Apartments are one copy per owner: `/ws/home/<ownerId>` reaches the
   `apartment:home:<ownerId>` Durable Object, for the owner or a friend
   (checked in D1; never a blocked one). `RoomCore`'s home mode lets a visitor
@@ -213,6 +228,14 @@ it (and Quaternius' CC0 Universal Animation Library) into
 `public/models/doll/anims.glb` plus one on-demand `anims-<pack>.glb` per pack
 (clip tables in `art/doll/blender/mocap_clips.py`) and lists them in
 `src/game/dance/mocap.ts`. Sources and licenses: `docs/assets.md`.
+
+Crowds (club queues, the street's far walkers and cyclists, stands, the pit
+crew) are the same doll, baked: `src/game/crowd.ts` names nine looks and
+their poses, and `art/crowd/build-crowd.sh` paints their faces with the
+game's own painter, poses each from the doll's clips, rebuilds it as one
+closed low-poly surface (3,000 triangles near, 880 far) and Cycles-bakes its
+colors onto that, writing one single-mesh GLB per look and pose into
+`public/models/crowd/` for the client to instance.
 
 The sea: `art/ocean/fetch_ocean.py` downloads the reef and sea-life models
 (Poly Pizza), `art/ocean/build_ocean.py` joins and fits the reef props and

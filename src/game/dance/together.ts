@@ -1,6 +1,7 @@
 // Emotes for two players: one invites over the `game` relay, the other
 // accepts and steps to the spot by the inviter (the lead), and both play the
-// pose with mirrored roles (see couple.ts), except a piggyback: the lead
+// pose with mirrored roles (see couple.ts), except the kisses (one move,
+// unmirrored, on a shared clock) and a piggyback: the lead
 // carries, the follow rides on their back, each with a move of their own, and
 // the rider stays on wherever the lead walks. Pure.
 import { MAX_GAME_DATA } from "../../net/networkProtocol.ts";
@@ -11,7 +12,7 @@ import type { DanceMoveId } from "./moves.ts";
 const PAIRED = { follow: null, lift: 0, behind: false } as const;
 
 export const TOGETHER = [
-  { id: "hug", label: "Hug", move: "hug", gap: 0.32, side: false, ...PAIRED },
+  { id: "hug", label: "Hug", move: "hug", gap: 0.46, side: false, ...PAIRED },
   {
     id: "hold-hands",
     label: "Hold hands",
@@ -24,9 +25,34 @@ export const TOGETHER = [
     id: "forehead-kiss",
     label: "Forehead kiss",
     move: "forehead-kiss",
-    gap: 0.36,
+    follow: "forehead-kiss",
+    gap: 0.84,
     side: false,
-    ...PAIRED,
+    lift: 0,
+    behind: false,
+  },
+  // the kisses play one move on both sides, unmirrored (the forehead kiss too,
+  // so both lean in together): a mirror image would tilt both heads the same
+  // way, nose into nose
+  {
+    id: "cheek-kiss",
+    label: "Cheek kiss",
+    move: "cheek-kiss",
+    follow: "cheek-kiss",
+    gap: 0.8,
+    side: false,
+    lift: 0,
+    behind: false,
+  },
+  {
+    id: "kiss",
+    label: "Kiss",
+    move: "kiss",
+    follow: "kiss",
+    gap: 0.84,
+    side: false,
+    lift: 0,
+    behind: false,
   },
   {
     id: "slow-dance",

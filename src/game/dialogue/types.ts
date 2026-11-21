@@ -38,6 +38,8 @@ export const ROLE_IDS = [
   "crew",
   "gardener",
   "dealer",
+  "motorist",
+  "pedestrian",
 ] as const;
 
 /** One of ROLE_IDS. */
@@ -108,6 +110,9 @@ export const SITUATION_IDS = [
   "action-ordering",
   "action-tipping",
   "action-leaving-without-paying",
+  "action-hit-walker",
+  "action-knocked-down",
+  "action-saw-hit",
   "goodbye",
 ] as const;
 

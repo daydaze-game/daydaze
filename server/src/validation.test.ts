@@ -1,6 +1,8 @@
+// Tests for server/src/validation.ts: request body, attachment and parameter validation.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_LOOK } from "../../src/game/look.ts";
+import { presetGraphics } from "../../src/game/graphics.ts";
 import { createDefaultSave, serializeSave } from "../../src/game/save.ts";
 import {
   MAX_SAVE_BYTES,
@@ -9,6 +11,9 @@ import {
   parseBlock,
   parseCredentials,
   parseLookParam,
+  parseScoreSubmission,
+  parseTitleChoice,
+  parseVisit,
   parseReport,
   parseSave,
   parseTarget,
@@ -54,11 +59,12 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
   const save = {
     ...createDefaultSave("Kai"),
     settings: {
-      quality: "low",
+      graphics: presetGraphics("performance"),
       muted: true,
       effects: "low",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
   };
   const raw = JSON.stringify(save);
@@ -67,13 +73,15 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
   const reordered = JSON.stringify({
     settings: {
       muted: true,
-      quality: "low",
+      graphics: save.settings.graphics,
       effects: "low",
       panelOpen: false,
       strictChat: false,
+      highAudio: true,
     },
     bests: save.bests,
     challenges: save.challenges,
+    progression: save.progression,
     car: save.car,
     garage: save.garage,
     records: save.records,
@@ -87,6 +95,8 @@ test("saves are stored only when loadSave keeps every field as sent", () => {
     garden: save.garden,
     inventory: save.inventory,
     giftDay: save.giftDay,
+    streak: save.streak,
+    shifts: save.shifts,
     crime: save.crime,
     jail: save.jail,
     home: save.home,
@@ -221,4 +231,50 @@ test("a report or block from inside an apartment names its owner", () => {
       ?.owner,
     undefined,
   );
+});
+
+test("a score submission names a real game and a finite score", () => {
+  assert.deepEqual(parseScoreSubmission({ game: "bowling", score: 150 }), {
+    game: "bowling",
+    score: 150,
+  });
+  assert.deepEqual(parseScoreSubmission({ game: "mini-golf", score: -2 }), {
+    game: "mini-golf",
+    score: -2,
+  });
+  for (const bad of [
+    null,
+    {},
+    { game: "bowling" },
+    { game: "nope", score: 1 },
+    { game: "toString", score: 1 },
+    { game: "bowling", score: "150" },
+    { game: "bowling", score: NaN },
+    { game: "bowling", score: null },
+    { game: 7, score: 1 },
+  ])
+    assert.equal(parseScoreSubmission(bad), null, JSON.stringify(bad));
+});
+
+test("a visit names a known room", () => {
+  assert.deepEqual(parseVisit({ roomId: "plaza" }), { roomId: "plaza" });
+  for (const bad of [null, {}, { roomId: "nowhere" }, { roomId: 3 }])
+    assert.equal(parseVisit(bad), null);
+});
+
+test("a title choice is a ladder rank or null to clear", () => {
+  assert.deepEqual(parseTitleChoice({ title: "street:2" }), {
+    title: "street:2",
+  });
+  assert.deepEqual(parseTitleChoice({ title: null }), { title: null });
+  for (const bad of [
+    null,
+    {},
+    { title: "street:10" },
+    { title: "nope:1" },
+    { title: "street:-1" },
+    { title: 5 },
+    { title: "street:1 " },
+  ])
+    assert.equal(parseTitleChoice(bad), null, JSON.stringify(bad));
 });

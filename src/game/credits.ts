@@ -165,6 +165,30 @@ export const CREDITS: readonly {
           "The arrival avenue's unique clocktower landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
       },
       {
+        title: "Greenhouse Victorian",
+        author: "Ryoce",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/greenhouse-victorian-e00471c89eec45ae8ddb9b06e3f1966e",
+        usedFor:
+          "Petal & Stem florist shop landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
+        title: "Rotunda",
+        author: "emelyarules",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/rotunda-ac22270d58af43b8af4af61e39c9b6c0",
+        usedFor:
+          "Arcade Square domed rotunda landmark, normalized and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
+        title: "steampunk Shops",
+        author: "jacques_3D",
+        license: "CC-BY 4.0",
+        url: "https://sketchfab.com/3d-models/steampunk-shops-86445970625a4ce8a66905322576e7c8",
+        usedFor:
+          "Pawn & Gadgets oddities shopfront landmark, normalized, joined by material and simplified with near and far models; original PBR textures retained (art/city/convert_dream_landmarks.py).",
+      },
+      {
         title: "Classic Art Nouveau Window",
         author: "Davide Tirindelli",
         license: "CC0 1.0",
@@ -359,7 +383,7 @@ export const CREDITS: readonly {
         license: "CC-BY 4.0",
         url: "https://sketchfab.com/3d-models/none-41f1709e39e24a3fafdbcd2c2aac72a1",
         usedFor:
-          "Hair-card styles quiff, side part, tousled, mop, pompadour, mohawk, spiky crop and layered waves, refitted to our heads, the atlas greyed so hair color tints it (art/doll/blender/pack_hair.py).",
+          "Hair-card styles side part, tousled, mop, pompadour, mohawk, spiky crop and layered waves, refitted to our heads, the atlas greyed so hair color tints it (art/doll/blender/pack_hair.py).",
       },
       {
         title: "Hair Pack (part 2)",
@@ -367,7 +391,7 @@ export const CREDITS: readonly {
         license: "CC-BY 4.0",
         url: "https://sketchfab.com/3d-models/none-06a783e91c194e12a296402453476824",
         usedFor:
-          "Hair-card styles rapunzel, long waves, sleek side-swept, high ponytail, twin tails, lob, blunt bob, side-swept bob, side fringe, messy bun and messy shag, refitted to our heads (art/doll/blender/pack_hair.py).",
+          "Hair-card styles rapunzel, long waves, sleek side-swept, high ponytail, twin tails, blunt bob, side fringe and messy shag, refitted to our heads (art/doll/blender/pack_hair.py).",
       },
       {
         title: "Hair Pack (part 3)",
@@ -376,6 +400,38 @@ export const CREDITS: readonly {
         url: "https://sketchfab.com/3d-models/none-9dc99938fab341e29b34354004e230b6",
         usedFor:
           "Hair-card styles fishtail braid, crew cut and slick back, refitted to our heads (art/doll/blender/pack_hair.py).",
+      },
+      {
+        title: "Bob hair (three cuts)",
+        author: "MargaretToigo",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+        usedFor:
+          "The Bob with bangs, Curled-under bob and Inverted bob hairstyles, fitted to our heads as MakeHuman proxies, greyed so hair color tints them (art/doll/blender/doll_hair.py).",
+      },
+      {
+        title: "Double MH Braid",
+        author: "Elvaerwyn",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+        usedFor:
+          "The Braided pigtails hairstyle, fitted to our heads as a MakeHuman proxy (art/doll/blender/doll_hair.py).",
+      },
+      {
+        title: "Hair Bun Brown",
+        author: "RehmanPolanski",
+        license: "CC0 1.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+        usedFor:
+          "The Sleek bun hairstyle, fitted to our heads as a MakeHuman proxy (art/doll/blender/doll_hair.py).",
+      },
+      {
+        title: "Seven hairstyles (hair02 pack)",
+        author: "Elvaerwyn",
+        license: "CC-BY 4.0",
+        url: "https://static.makehumancommunity.org/assets/assetpacks/hair02.html",
+        usedFor:
+          "Daisy, Katherine, Ashley May, Hazel, Micky Afro, Braided Rows and Maxwell as the Glossy waves, Long and sleek, Shoulder waves, Shoulder-length, Puffs, Cornrows and Quiff hairstyles, fitted to our heads as MakeHuman proxies (art/doll/blender/doll_hair.py).",
       },
       {
         title: "Realistic Car Pack",
@@ -487,7 +543,7 @@ export const CREDITS: readonly {
         license: "CC0 1.0",
         url: "https://github.com/makehumancommunity/makehuman",
         usedFor:
-          "Avatar bodies, morph targets, hair and clothing, adapted for Daydaze.",
+          "Avatar bodies, morph targets, hair and clothing, adapted for Daydaze; baked (art/crowd/) into the club queues, the street's far crowd and cyclists, the arena and Speedway stands and the pit crew.",
       },
       {
         title: "MPFB2 Mixamo-named rig",
@@ -1156,14 +1212,6 @@ export const CREDITS: readonly {
         url: "https://poly.pizza/m/df8uCl1YpK",
         usedFor:
           "Hedges and climbing-rose backing at the community garden gate.",
-      },
-      {
-        title: "Mini Characters",
-        author: "Kenney",
-        license: "CC0 1.0",
-        url: "https://kenney.nl/assets/mini-characters",
-        usedFor:
-          "Instanced grandstand crowd and pit road pit crew for the Speedway oval; the boardwalk's far crowd (walking poses) and cyclists' riders.",
       },
       {
         title: "Racing Kit",
@@ -1846,7 +1894,7 @@ export const CREDITS: readonly {
         license: "Mixamo terms",
         url: "https://www.mixamo.com/",
         usedFor:
-          "Retargeted character walks, idles, dances, gestures, talking and sitting.",
+          "Retargeted character walks, idles, dances, gestures, talking and sitting; the crowd people's baked poses.",
       },
       {
         title: "Universal Animation Library 1 and 2 (Standard)",

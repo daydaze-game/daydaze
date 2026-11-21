@@ -121,6 +121,15 @@ message counts by type and the last few messages, without the constant
 For example, `__dd.scene.getObjectByName("floor")` or
 `__dd.gl.info.render`.
 
+With `?debug=1` (any build), test handles sit on `window`:
+`daydazeReact("trip-fall")` plays a reaction on your doll (`reaction.ts`). In
+the city, `daydazeStepOut(5)` puts you in the lane 5 m ahead of the fastest
+traffic car near you, too close for it to stop (`Traffic.tsx`; false when
+none is moving; `daydazeStepOut(5, true)` only asks), and `daydazeKnockWalker(9)` has the walker nearest you hit
+as by your car at 9 m/s (`CarHits.tsx`; her index, or -1). The canvas then
+shows `data-car-hit` (the outcome), `data-walker-hit` (her index) and
+`data-heat` (police heat, `world/heat.ts`).
+
 ## URL flags
 
 These work in any build, without the panel:
@@ -131,11 +140,11 @@ These work in any build, without the panel:
 | `?at=x,z&yaw=r`                                                                            | Start at a spot in that room.                                                                                                                                    |
 | `?spot=<building-id>`                                                                      | Start in the city in front of that building, back to its door so `view=full` frames it (ids in `src/game/city/layout.ts`; `spots.ts`). `&yaw=r` still turns you. |
 | `?view=room\|full\|face\|detail`                                                           | Start with that camera view.                                                                                                                                     |
-| `?time=HH:MM`                                                                              | Pin the city's hour (and the sky in indoor windows).                                                                                                             |
+| `?time=HH:MM`                                                                              | Pin the city's hour (and the sky in indoor windows). The city runs on New York time for every player, so `HH:MM` is New York time.                               |
 | `?night=<id>`                                                                              | Start an hour into a club night (ids in `src/game/events.ts`).                                                                                                   |
 | `?fireworks=<s>`, `?parade=<s>`, `?pride=<s>`, `?danceoff=<s>`, `?heist=<s>`, `?chase=<s>` | Hold that event's clock `s` seconds into a run.                                                                                                                  |
 | `?heistend=caught\|escape`                                                                 | Selects how a held preview heist ends (`eventClocks.ts`).                                                                                                        |
-| `?quality=low\|high`                                                                       | Force a quality tier.                                                                                                                                            |
+| `?quality=low\|high\|ultra`                                                                | Force a quality tier.                                                                                                                                            |
 | `?still=1`                                                                                 | Render a few frames and stop (for screenshots).                                                                                                                  |
 | `?timescale=0.1`                                                                           | Slow the player and every doll (for frame strips).                                                                                                               |
 | `?debug=1`                                                                                 | Room jump buttons (used by the Playwright tests).                                                                                                                |
@@ -168,22 +177,24 @@ Mostly for Playwright tests and screenshots; each holds something still or previ
 The doll lab is its own page, `/src/client/avatar/lineup.html` on the dev
 server (`lineup.tsx`), with its own flags:
 
-| Flag                                 | What it does                                                                                                       |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `?shot=face`                         | The shot: `lineup` (default), `face`, `body`, `far`, `men`, `hairs`, `pose`, `sit`, `lay`, `dance` or `piggyback`. |
-| `?human=1`                           | The Blender-built 3D doll instead of the toon doll.                                                                |
-| `?men=1`                             | Face, portrait and pose shots on the masculine body.                                                               |
-| `?outfit=suit`                       | With `?men=1`, dresses the pose, sit and dance dolls in that outfit.                                               |
-| `?outfits=a,b,c`                     | Dresses the body shot's three dolls.                                                                               |
-| `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot.                                                                       |
-| `?hair=waves`                        | Swaps the face shot's hair.                                                                                        |
-| `?beard=<id>`                        | Puts a beard (a `BEARDS` id) on the face shot.                                                                     |
-| `?face=<code>`                       | Puts an `encodeFace` code on the face shot's doll.                                                                 |
-| `?makeup=<code>`                     | Puts an `encodeMakeup` code on the face shot's doll.                                                               |
-| `?skin=2`                            | Picks a skin tone by its index in `SKINS`.                                                                         |
-| `?holds=a,b`                         | The held poses for the pose, sit and lay shots.                                                                    |
-| `?moves=a,b`                         | The dance shot's moves.                                                                                            |
-| `?clear=1`                           | A clear background.                                                                                                |
+| Flag                                 | What it does                                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `?shot=face`                         | The shot: `lineup` (default), `face`, `body`, `far`, `men`, `hairs`, `pose`, `sit`, `lay`, `dance`, `piggyback` or `together`.  |
+| `?emote=kiss&at=1.5`                 | The together shot's paired emote (a `TOGETHER` id, a kiss by default) and the pair clock's pinned second (mid-kiss by default). |
+| `?human=1`                           | The Blender-built 3D doll instead of the toon doll.                                                                             |
+| `?men=1`                             | Face, portrait and pose shots on the masculine body.                                                                            |
+| `?outfit=suit`                       | With `?men=1`, dresses the pose, sit and dance dolls in that outfit.                                                            |
+| `?outfits=a,b,c`                     | Dresses the body shot's three dolls.                                                                                            |
+| `?styles=a,b,c&colors=1b1014,f1d78f` | Hair styles and colors for the `hairs` shot.                                                                                    |
+| `?hair=waves`                        | Swaps the face shot's hair.                                                                                                     |
+| `?beard=<id>`                        | Puts a beard (a `BEARDS` id) on the face shot.                                                                                  |
+| `?face=<code>`                       | Puts an `encodeFace` code on the face shot's doll.                                                                              |
+| `?makeup=<code>`                     | Puts an `encodeMakeup` code on the face shot's doll.                                                                            |
+| `?skin=2`                            | Picks a skin tone by its index in `SKINS`.                                                                                      |
+| `?holds=a,b`                         | The held poses for the pose, sit and lay shots.                                                                                 |
+| `?moves=a,b`                         | The dance shot's moves.                                                                                                         |
+| `?cam=x,y,z&target=x,y,z`            | Moves the shot's camera and the point it looks at, for a close-up.                                                              |
+| `?clear=1`                           | A clear background.                                                                                                             |
 
 The minigame kit page, `/src/client/rooms/shared/game3d/kit.html`, takes
 `?freeze=1`: it stops drawing two frames after the ball first lands

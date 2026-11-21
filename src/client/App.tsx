@@ -14,7 +14,6 @@ import {
 } from "react";
 import { recordCaught } from "../game/crime/record.ts";
 import { penaltyFor, type Penalty } from "../game/crime/shoplift.ts";
-import { tagStolen } from "../game/crime/lift.ts";
 import type { BodyShape } from "../game/body.ts";
 import {
   DEFAULT_HOLDS,
@@ -22,21 +21,14 @@ import {
   type Holds,
 } from "../game/dance/moves.ts";
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
+import type { Graphics } from "../game/graphics.ts";
 import { getBuzz } from "./effects/drunk.ts";
+import { LazyPanel } from "./ui/ReloadBoundary.tsx";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
-import { DuelPanel } from "./net/DuelPanel.tsx";
-import { TogetherPanel } from "./net/TogetherPanel.tsx";
-import { CookOffInvite } from "./net/CookOffInvite.tsx";
-import { PartyPanel } from "./net/PartyPanel.tsx";
-import { RidePanel } from "./net/RidePanel.tsx";
-import { RacePanel } from "./net/RacePanel.tsx";
 import { leaveParty } from "./net/party.ts";
 import { endVisit, homeVisit, listenForHomes } from "./net/home.ts";
-import { ConnectionNote } from "./net/ConnectionNote.tsx";
 import { chatPrefs } from "./net/chatPrefs.ts";
 import { useCloudSave } from "./net/cloudSave.ts";
-import { FriendsPanel } from "./net/FriendsPanel.tsx";
-import { PeerCard } from "./net/PeerCard.tsx";
 import type { MinigameId } from "../game/hotspots.ts";
 import { isJailed } from "../game/jail/jail.ts";
 import { jailAfterArrest } from "../game/police/arrest.ts";
@@ -63,33 +55,43 @@ import {
   serializeSave,
   type SaveV1,
 } from "../game/save.ts";
-import { earn, spend, payoutFor, type PayGrade } from "../game/wallet.ts";
+import { spend, type PayGrade } from "../game/wallet.ts";
 import { buyItem } from "../game/shop.ts";
 import { CityJoystick } from "./city/CityJoystick.tsx";
 import { readFlags } from "./flags.ts";
 import { ReducedMotionContext, usePrefersReducedMotion } from "./motion.ts";
-import { ApartmentPanel } from "./ui/ApartmentPanel.tsx";
-import { ArrestSequence } from "./ui/ArrestSequence.tsx";
 import { ChatBar } from "./ui/ChatBar.tsx";
-import { DebugPanel } from "./ui/DebugPanel.tsx";
-import { JailHud } from "./ui/JailHud.tsx";
-import { GameOverlay } from "./ui/Minigames.tsx";
 import { Overlay } from "./ui/Overlay.tsx";
-import { type Caught, ShopliftPanel } from "./ui/ShopliftPanel.tsx";
+import { GameOverlay } from "./ui/Minigames.tsx";
+import type { Caught } from "./ui/ShopliftPanel.tsx";
 import type { View } from "./world/CameraRig.tsx";
 import { LoadingVeil } from "./ui/LoadingVeil.tsx";
 import { preloadLook } from "./avatar/human/HumanDoll.tsx";
 import { RoomAudio } from "./RoomAudio.tsx";
 import { playSoundFile } from "../audio/soundFiles.ts";
 import { playFanfare } from "../audio/worldSounds.ts";
-import { completeChallenge, dayOf } from "../game/challenges.ts";
-import { prizeFor } from "../game/prizes.ts";
+import {
+  applyPrize,
+  finishShift,
+  scorePrize,
+  rewardSteal,
+  rewardVisit,
+  rewardLegacy,
+} from "../game/progression/activities.ts";
+import {
+  levelOf,
+  totalXp,
+  titleLabel,
+  selectTitle,
+} from "../game/progression/progression.ts";
+import { RankMoment } from "./ui/Progression.tsx";
 import { PrizeCard } from "./ui/PrizeCard.tsx";
 import { UpdatePrompt } from "./ui/UpdatePrompt.tsx";
 import { Collections } from "./ui/Collections.tsx";
-import { claimSet, visit as visitPlace } from "../game/collections.ts";
+import { claimSet } from "../game/collections.ts";
 import { Onboarding } from "./ui/Onboarding.tsx";
 import { postPrize, prizeDesk } from "./ui/prizeDesk.ts";
+import { shiftDesk } from "./ui/shiftDesk.ts";
 import { petDesk } from "./rooms/zoo/petDesk.ts";
 import { pottery } from "./rooms/pottery/session.ts";
 import { farmDesk } from "./rooms/farm/farmSession.ts";
@@ -124,12 +126,68 @@ function visit(room: RoomId, spawn: Spawn): Visit {
   return { room, arrival: arrive(ROOMS[room], spawn) };
 }
 
+// Panels the first frame doesn't need (online invites, room and event
+// panels): each loads when first rendered, behind a Suspense that shows nothing.
+const DuelPanel = lazy(() =>
+  import("./net/DuelPanel.tsx").then((m) => ({ default: m.DuelPanel })),
+);
+const TogetherPanel = lazy(() =>
+  import("./net/TogetherPanel.tsx").then((m) => ({ default: m.TogetherPanel })),
+);
+const CookOffInvite = lazy(() =>
+  import("./net/CookOffInvite.tsx").then((m) => ({ default: m.CookOffInvite })),
+);
+const PartyPanel = lazy(() =>
+  import("./net/PartyPanel.tsx").then((m) => ({ default: m.PartyPanel })),
+);
+const RidePanel = lazy(() =>
+  import("./net/RidePanel.tsx").then((m) => ({ default: m.RidePanel })),
+);
+const RacePanel = lazy(() =>
+  import("./net/RacePanel.tsx").then((m) => ({ default: m.RacePanel })),
+);
+const ConnectionNote = lazy(() =>
+  import("./net/ConnectionNote.tsx").then((m) => ({
+    default: m.ConnectionNote,
+  })),
+);
+const FriendsPanel = lazy(() =>
+  import("./net/FriendsPanel.tsx").then((m) => ({ default: m.FriendsPanel })),
+);
+const PeerCard = lazy(() =>
+  import("./net/PeerCard.tsx").then((m) => ({ default: m.PeerCard })),
+);
+const ApartmentPanel = lazy(() =>
+  import("./ui/ApartmentPanel.tsx").then((m) => ({
+    default: m.ApartmentPanel,
+  })),
+);
+const ArrestSequence = lazy(() =>
+  import("./ui/ArrestSequence.tsx").then((m) => ({
+    default: m.ArrestSequence,
+  })),
+);
+const DebugPanel = lazy(() =>
+  import("./ui/DebugPanel.tsx").then((m) => ({ default: m.DebugPanel })),
+);
+const JailHud = lazy(() =>
+  import("./ui/JailHud.tsx").then((m) => ({ default: m.JailHud })),
+);
+const ShopliftPanel = lazy(() =>
+  import("./ui/ShopliftPanel.tsx").then((m) => ({ default: m.ShopliftPanel })),
+);
+
 /** The dev panel (press `), loaded only in development; production drops it. */
 const DevPanel = import.meta.env.DEV
   ? lazy(() =>
       import("./world/DevTools.tsx").then((m) => ({ default: m.DevPanel })),
     )
   : null;
+
+/** The streak calendar and celebration, loaded on first use. */
+const StreakPanel = lazy(() =>
+  import("./ui/StreakPanel.tsx").then((m) => ({ default: m.StreakPanel })),
+);
 
 /**
  * The whole game: the 3D World, the overlay UI and the panels around it. Travel
@@ -175,13 +233,15 @@ export function App() {
   // visiting a friend's place: theirs is the home you see, read-only
   const visiting = homeVisit.use();
   useEffect(() => (ONLINE ? listenForHomes() : undefined), []);
-  // the album remembers every place you've been
+  // Discovery and real event visits commit their saved claim with the XP.
   useEffect(() => {
-    setSave((s) =>
-      s.visited.includes(here.room)
-        ? s
-        : { ...s, visited: visitPlace(s.visited, here.room) },
-    );
+    const check = () => {
+      const now = Date.now();
+      setSave((s) => rewardVisit(s, here.room, now, ADULT_OK));
+    };
+    check();
+    const timer = window.setInterval(check, 30_000);
+    return () => window.clearInterval(timer);
   }, [here.room]);
   const [fading, setFading] = useState(false);
   const traveling = useRef(false);
@@ -275,8 +335,19 @@ export function App() {
     setSave((s) => ({ ...s, settings: { ...s.settings, muted } }));
   const setEffects = (effects: Intensity) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, effects } }));
-  // signed in, every change goes up to the account a few seconds later
-  useCloudSave(save, setSave);
+  const setHighAudio = (highAudio: boolean) =>
+    setSave((s) => ({ ...s, settings: { ...s.settings, highAudio } }));
+  const setGraphics = (graphics: Graphics) =>
+    setSave((s) => ({ ...s, settings: { ...s.settings, graphics } }));
+  // signed in, every change goes up to the account a few seconds later.
+  // A restored account save remounts the rank-up watcher, so ranks it brings
+  // back aren't celebrated as new ones.
+  const [restores, setRestores] = useState(0);
+  const restoreSave = useCallback((next: SaveV1) => {
+    setSave(next);
+    setRestores((n) => n + 1);
+  }, []);
+  useCloudSave(save, restoreSave);
   // the strict chat filter: set in the Friends panel, read by the chat
   const setStrictChat = (strictChat: boolean) =>
     setSave((s) => ({ ...s, settings: { ...s.settings, strictChat } }));
@@ -424,8 +495,7 @@ export function App() {
   // a finished game pays its grade; quitting early (null) pays nothing
   const endGame = (grade: PayGrade | null) => {
     setGame(null);
-    if (grade)
-      setSave((s) => ({ ...s, coins: earn(s.coins, payoutFor(grade)) }));
+    if (grade && game) setSave((s) => rewardLegacy(s, game, grade));
   };
   // a finished sports game pays its grade, and a bonus for a personal best
   const { pending } = prizeDesk.use();
@@ -437,31 +507,64 @@ export function App() {
   }, [save]);
   useEffect(() => {
     if (!pending) return;
-    const { bests, challenges } = latest.current;
-    const prize = prizeFor(pending.game, pending.score, bests[pending.game]);
-    const daily = completeChallenge(
-      challenges,
-      dayOf(Date.now()),
-      pending.game,
-      pending.score,
-    );
-    setSave((s) => ({
-      ...s,
-      coins: earn(s.coins, prize.coins + daily.coins),
-      bests: prize.best ? { ...s.bests, [prize.game]: prize.score } : s.bests,
-      challenges: daily.save,
-    }));
-    postPrize(prize, daily.coins);
-    playFanfare(prize.grade === "S" ? 1 : prize.grade === "A" ? 0.6 : 0);
+    const now = Date.now();
+    const result = scorePrize(latest.current, pending.game, pending.score, now);
+    if (!result) {
+      prizeDesk.set({ pending: null });
+      return;
+    }
+    setSave((s) => applyPrize(s, pending.game, result));
+    postPrize(result.prize, result.daily, result.xp);
+    if (!latest.current.settings.muted)
+      playFanfare(
+        result.prize.grade === "S" ? 1 : result.prize.grade === "A" ? 0.6 : 0,
+      );
   }, [pending]);
-  const saved = save.settings.quality;
-  const quality = flags.quality ?? (saved === "auto" ? null : saved);
+  // a finished paid shift pays its wage and Hustle XP, and posts the slip
+  const shiftPending = shiftDesk.use().pending;
+  useEffect(() => {
+    if (!shiftPending) return;
+    const now = Date.now();
+    const { job, result } = shiftPending;
+    // the slip is read from the last render; the save itself is updated from
+    // its latest state, so a prize paid in the same tick is not overwritten
+    const r = finishShift(latest.current, job, result, now);
+    setSave((s) => finishShift(s, job, result, now).save);
+    shiftDesk.set({
+      pending: null,
+      slip: { job, coins: r.coins, xp: r.xp, clean: r.clean, slow: r.slow },
+    });
+  }, [shiftPending]);
+  // opening the game on a new day counts toward the streak (and again if the
+  // tab stays open past midnight); a milestone pays and celebrates
+  useEffect(() => {
+    let live = true;
+    const count = () =>
+      // the rules load on demand, not with the first download
+      void import("./streakCheckIn.ts").then(
+        (m) => live && m.countToday(latest, setSave),
+      );
+    count();
+    const id = window.setInterval(count, 60_000);
+    return () => {
+      live = false;
+      window.clearInterval(id);
+    };
+  }, []);
 
   return (
     <ReducedMotionContext.Provider value={reducedMotion}>
       <main className="app">
         <LoadingVeil />
         <PrizeCard />
+        <RankMoment
+          key={restores}
+          progression={save.progression}
+          muted={save.settings.muted}
+        />
+        <LazyPanel>
+          <StreakPanel streak={save.streak} />
+        </LazyPanel>
         <UpdatePrompt />
         <Collections
           visited={save.visited}
@@ -503,11 +606,13 @@ export function App() {
           dance={dance}
           holds={holds}
           effects={save.settings.effects}
+          highAudio={save.settings.highAudio}
           // walking ends a dance, so the Dance mood drops back to idle
           onMove={() => setMood((m) => (m === "dance" ? "idle" : m))}
           view={view}
           tag={tag}
-          quality={quality}
+          quality={flags.quality}
+          graphics={save.settings.graphics}
           still={flags.still}
           onPortal={(portal) => travel(portal.target, portal.targetSpawn)}
           home={shownHome}
@@ -522,23 +627,52 @@ export function App() {
               {chat.text}
             </p>
           )}
-          <p className="nametag">{save.name}</p>
+          <p className="nametag">
+            {save.name} · Lv {levelOf(totalXp(save.progression))}
+            {titleLabel(save.progression) && (
+              <small className="player-title">
+                {titleLabel(save.progression)}
+              </small>
+            )}
+          </p>
         </div>
-        <PeerCard />
-        <FriendsPanel
-          onGo={(room) => travel(room, ROOMS[room].spawn)}
-          strictChat={save.settings.strictChat}
-          onStrictChat={setStrictChat}
-          save={save}
-          onSave={setSave}
-        />
-        {ONLINE && <DuelPanel />}
-        {ONLINE && <TogetherPanel />}
-        {ONLINE && <CookOffInvite />}
-        {ONLINE && <PartyPanel onGo={goWithParty} />}
-        {ONLINE && <RidePanel />}
-        {ONLINE && <RacePanel />}
-        {ONLINE && <ConnectionNote />}
+        <LazyPanel>
+          <PeerCard />
+        </LazyPanel>
+        {ONLINE && (
+          <>
+            <LazyPanel>
+              <FriendsPanel
+                onGo={(room) => travel(room, ROOMS[room].spawn)}
+                strictChat={save.settings.strictChat}
+                onStrictChat={setStrictChat}
+                save={save}
+                onSave={setSave}
+              />
+            </LazyPanel>
+            <LazyPanel>
+              <DuelPanel />
+            </LazyPanel>
+            <LazyPanel>
+              <TogetherPanel />
+            </LazyPanel>
+            <LazyPanel>
+              <CookOffInvite />
+            </LazyPanel>
+            <LazyPanel>
+              <PartyPanel onGo={goWithParty} />
+            </LazyPanel>
+            <LazyPanel>
+              <RidePanel />
+            </LazyPanel>
+            <LazyPanel>
+              <RacePanel />
+            </LazyPanel>
+            <LazyPanel>
+              <ConnectionNote />
+            </LazyPanel>
+          </>
+        )}
         <div className="fade" data-on={fading} aria-hidden="true" />
         {notice && (
           <p className="notice" role="status">
@@ -558,6 +692,13 @@ export function App() {
           setSwim={setSwim}
           body={save.body}
           setBody={setBody}
+          progression={save.progression}
+          onTitle={(title) =>
+            setSave((s) => ({
+              ...s,
+              progression: selectTitle(s.progression, title),
+            }))
+          }
           coins={save.coins}
           wardrobe={save.wardrobe}
           onBuy={(id, store, day) => {
@@ -576,21 +717,15 @@ export function App() {
             return r;
           }}
           crime={save.crime}
-          onSteal={(id, storeId) =>
-            setSave((s) => ({
-              ...s,
-              wardrobe: s.wardrobe.includes(id)
-                ? s.wardrobe
-                : [...s.wardrobe, id],
-              crime: tagStolen(s.crime, id, storeId),
-            }))
-          }
+          onSteal={(id, storeId) => setSave((s) => rewardSteal(s, id, storeId))}
           onCaught={caught}
           onRide={() => setRides((n) => n + 1)}
           onPlayGame={setGame}
           onCityTravel={(spawn) => travel("city", spawn)}
           muted={save.settings.muted}
           setMuted={setMuted}
+          graphics={save.settings.graphics}
+          setGraphics={setGraphics}
           mood={mood}
           setMood={setMood}
           dance={dance}
@@ -599,6 +734,8 @@ export function App() {
           setHolds={setHolds}
           effects={save.settings.effects}
           setEffects={setEffects}
+          highAudio={save.settings.highAudio}
+          setHighAudio={setHighAudio}
           view={view}
           setView={setView}
           panelOpen={save.settings.panelOpen}
@@ -640,32 +777,48 @@ export function App() {
             You&apos;re at {visiting.owner.name}&apos;s place.
           </p>
         )}
+        {/* a panel that fails to load shows the Reload card for itself only,
+            and an arrest still ends with its penalty saved */}
         {here.room === "apartment" && !visiting.owner && (
-          <ApartmentPanel
-            home={save.home}
-            onChange={setHome}
-            onShelf={() => setShopping(true)}
-          />
+          <LazyPanel>
+            <ApartmentPanel
+              home={save.home}
+              onChange={setHome}
+              onShelf={() => setShopping(true)}
+            />
+          </LazyPanel>
+        )}
+        {here.room === "jail" && (
+          <LazyPanel>
+            <JailHud
+              jail={save.jail}
+              coins={save.coins}
+              onChange={setJail}
+              onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
+              onRelease={release}
+            />
+          </LazyPanel>
+        )}
+        {game && (
+          <LazyPanel onContinue={() => endGame(null)}>
+            <GameOverlay game={game} onClose={endGame} />
+          </LazyPanel>
         )}
         {here.room === "apartment" && shopping && (
-          <ShopliftPanel
-            crime={save.crime}
-            now={now}
-            onCaught={caught}
-            onClose={() => setShopping(false)}
-          />
+          <LazyPanel onContinue={() => setShopping(false)}>
+            <ShopliftPanel
+              crime={save.crime}
+              now={now}
+              onCaught={caught}
+              onClose={() => setShopping(false)}
+            />
+          </LazyPanel>
         )}
-        {arrest && <ArrestSequence onDone={finishArrest} />}
-        {here.room === "jail" && (
-          <JailHud
-            jail={save.jail}
-            coins={save.coins}
-            onChange={setJail}
-            onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
-            onRelease={release}
-          />
+        {arrest && (
+          <LazyPanel onContinue={finishArrest}>
+            <ArrestSequence onDone={finishArrest} />
+          </LazyPanel>
         )}
-        {game && <GameOverlay game={game} onClose={endGame} />}
         {here.room === "city" && touch && <CityJoystick />}
         <ChatBar
           onSay={(text) => {
@@ -687,7 +840,9 @@ export function App() {
           </Suspense>
         )}
         {flags.debug && (
-          <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
+          <Suspense fallback={null}>
+            <DebugPanel onGo={(room) => travel(room, ROOMS[room].spawn)} />
+          </Suspense>
         )}
       </main>
     </ReducedMotionContext.Provider>

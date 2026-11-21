@@ -14,6 +14,7 @@ export const prizeDesk = createStore<{
   pending: { game: PrizeGame; score: number } | null;
   shown: Prize | null;
   challenge: number;
+  xp: number;
   bests: Bests;
   at: number;
 }>({
@@ -21,6 +22,8 @@ export const prizeDesk = createStore<{
   shown: null,
   /** Coins a daily challenge paid on top, 0 when none was reached. */
   challenge: 0,
+  /** XP the finished game added to its ladder. */
+  xp: 0,
   /** The saved personal bests, mirrored here for the scoreboards. */
   bests: NO_BESTS,
   /** performance.now() when `shown` was posted. */
@@ -31,11 +34,12 @@ export function award(game: PrizeGame, score: number) {
   prizeDesk.set({ pending: { game, score } });
 }
 
-export function postPrize(prize: Prize, challenge: number) {
+export function postPrize(prize: Prize, challenge: number, xp = 0) {
   prizeDesk.set({
     pending: null,
     shown: prize,
     challenge,
+    xp,
     at: performance.now(),
   });
 }

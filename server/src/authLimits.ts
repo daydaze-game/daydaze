@@ -1,3 +1,4 @@
+// Token-bucket rate limiter for auth endpoints and sensitive actions.
 import {
   BLOCK_ADDRESS_LIMIT,
   BLOCK_LIMIT,
@@ -5,6 +6,8 @@ import {
   type BucketStore,
   type RateLimit,
   GUEST_LIMIT,
+  PROGRESS_ADDRESS_LIMIT,
+  PROGRESS_LIMIT,
   LOGIN_ACCOUNT_LIMIT,
   LOGIN_ADDRESS_LIMIT,
   REPORT_ADDRESS_LIMIT,
@@ -16,7 +19,7 @@ import {
 export const BUCKET_PRUNE_AFTER_MS = 60 * 60 * 1000;
 
 export type AuthAction =
-  "login" | "signup" | "guest" | "report" | "block" | "friend";
+  "login" | "signup" | "guest" | "report" | "block" | "friend" | "progress";
 /** Which Durable Object is asking: one per IP address, or one per player. */
 export type LimitScope = "address" | "player";
 
@@ -41,11 +44,13 @@ export function createAuthLimiter(store: BucketStore = new Map()) {
     block: limiter("block-address", BLOCK_ADDRESS_LIMIT),
     // friend requests spend like blocks: a burst, then one every few seconds
     friend: limiter("friend-address", BLOCK_ADDRESS_LIMIT),
+    progress: limiter("progress-address", PROGRESS_ADDRESS_LIMIT),
   };
   const perPlayer = {
     report: limiter("report-player", REPORT_LIMIT),
     block: limiter("block-player", BLOCK_LIMIT),
     friend: limiter("friend-player", BLOCK_LIMIT),
+    progress: limiter("progress-player", PROGRESS_LIMIT),
   };
   const seconds = (ms: number) => Math.max(1, Math.ceil(ms / 1000));
   return {
@@ -65,7 +70,10 @@ export function createAuthLimiter(store: BucketStore = new Map()) {
       }
       const limiter =
         scope === "player" &&
-        (action === "report" || action === "block" || action === "friend")
+        (action === "report" ||
+          action === "block" ||
+          action === "friend" ||
+          action === "progress")
           ? perPlayer[action]
           : others[action];
       return limiter.take("", now) ? 0 : seconds(limiter.retryAfterMs("", now));

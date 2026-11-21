@@ -7,6 +7,7 @@ import {
   sentence,
   type JailSave,
 } from "../jail/jail.ts";
+import { isRecord } from "../typed.ts";
 
 export const MAX_STARS = 5;
 
@@ -14,13 +15,17 @@ export const MAX_STARS = 5;
 export const STAR_HEAT: readonly number[] = [0, 10, 30, 60, 100, 150];
 export const MAX_HEAT = STAR_HEAT[MAX_STARS];
 
-export type CrimeKind = "shoplift" | "streetFight" | "hitAndRun" | "heist";
+export type CrimeKind =
+  "shoplift" | "streetFight" | "pedestrianHit" | "hitAndRun" | "heist";
 
 /** Heat a crime adds and the Street-ladder XP it is worth. */
 export const CRIMES: Readonly<Record<CrimeKind, { heat: number; xp: number }>> =
   {
     shoplift: { heat: 10, xp: 5 },
     streetFight: { heat: 20, xp: 10 },
+    // knocking someone down with your car (game/city/carHits.ts); driving off
+    // after adds a hitAndRun on top
+    pedestrianHit: { heat: 12, xp: 0 },
     hitAndRun: { heat: 35, xp: 15 },
     heist: { heat: 110, xp: 50 },
   };
@@ -162,8 +167,8 @@ const clean = (value: unknown, max: number): number =>
 
 // Saved wanted state is untrusted: finite, non-negative and capped.
 export function validateWanted(value: unknown): WantedState {
-  if (typeof value !== "object" || value === null) return NOT_WANTED;
-  const { heat, unseenMs, hidingMs } = value as Record<string, unknown>;
+  if (!isRecord(value)) return NOT_WANTED;
+  const { heat, unseenMs, hidingMs } = value;
   const h = clean(heat, MAX_HEAT);
   if (h === 0) return NOT_WANTED;
   return {

@@ -10,9 +10,20 @@ import { playCachedSound } from "./soundFiles.ts";
 import { getSharedAudioBus } from "./audioBus.ts";
 
 export type Ambience = "city" | "beach" | "aquarium" | "rink" | "haunted";
-export type Surface = "hard" | "soft";
+export type Surface =
+  | "hard"
+  | "soft"
+  | "wood"
+  | "tile"
+  | "metal"
+  | "gravel"
+  | "puddle"
+  | "wet"
+  | "pavement"
+  | "grass"
+  | "sand";
 
-function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
+export function sfx(): { ctx: AudioContext; dest: AudioNode } | null {
   try {
     const bus = getSharedAudioBus();
     const ctx = bus.getContext();
@@ -39,37 +50,117 @@ function noiseBuffer(ctx: AudioContext): AudioBuffer {
   return buffer;
 }
 
-function burst(
+function rampDown(
+  source: AudioNode,
+  ctx: AudioContext,
+  dest: AudioNode,
+  level: number,
+  sec: number,
+  now = ctx.currentTime,
+) {
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(level, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + sec);
+  source.connect(gain).connect(dest);
+}
+
+export function burst(
   ctx: AudioContext,
   dest: AudioNode,
   type: BiquadFilterType,
   frequency: number,
   level: number,
   seconds: number,
+  offset = 0,
+  q = 1,
 ) {
-  const now = ctx.currentTime;
+  const now = ctx.currentTime + offset;
   const source = ctx.createBufferSource();
   source.buffer = noiseBuffer(ctx);
   const filter = ctx.createBiquadFilter();
   filter.type = type;
   filter.frequency.setValueAtTime(frequency, now);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(level, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
-  source.connect(filter).connect(gain).connect(dest);
+  filter.Q.setValueAtTime(q, now);
+  source.connect(filter);
+  rampDown(filter, ctx, dest, level, seconds, now);
   source.start(now, Math.random() * 1.5);
   source.stop(now + seconds + 0.02);
 }
 
-/** One footstep: a short low tap on floors, a softer scuff on sand or grass. */
+function tone(
+  ctx: AudioContext,
+  dest: AudioNode,
+  f0: number,
+  f1: number,
+  level: number,
+  sec: number,
+) {
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  osc.frequency.setValueAtTime(f0, now);
+  if (f1 !== f0)
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, f1), now + sec);
+  rampDown(osc, ctx, dest, level, sec, now);
+  osc.start(now);
+  osc.stop(now + sec + 0.02);
+}
+
+const TYPES: readonly BiquadFilterType[] = ["bandpass", "lowpass", "highpass"];
+type StepBurst = readonly [
+  type: number,
+  freq: number,
+  level: number,
+  sec: number,
+  offset?: number,
+  q?: number,
+];
+
+const STEP_BURSTS: Record<string, readonly StepBurst[]> = {
+  wood: [[0, 1500, 0.06, 0.035, 0, 1.8]],
+  tile: [
+    [0, 2700, 0.08, 0.035, 0, 3.2],
+    [1, 950, 0.04, 0.025],
+  ],
+  metal: [[0, 1800, 0.05, 0.025, 0, 2]],
+  gravel: [
+    [0, 2300, 0.06, 0.028, 0, 1.5],
+    [0, 3200, 0.05, 0.032, 0.012, 1.8],
+    [0, 1700, 0.04, 0.035, 0.024, 1.2],
+  ],
+  puddle: [
+    [0, 1100, 0.07, 0.055, 0, 2],
+    [2, 2600, 0.06, 0.08, 0.01],
+  ],
+  soft: [[0, 1500, 0.05, 0.11]],
+  hard: [
+    [1, 880, 0.09, 0.065],
+    [0, 2400, 0.03, 0.02],
+  ],
+};
+
+/** One footstep synthesized for the material underfoot. */
 export function playStep(surface: Surface = "hard"): boolean {
   const out = sfx();
   if (!out) return false;
-  const pitch = 0.85 + Math.random() * 0.3;
-  if (surface === "hard") {
-    burst(out.ctx, out.dest, "lowpass", 900 * pitch, 0.09, 0.07);
-  } else {
-    burst(out.ctx, out.dest, "bandpass", 1600 * pitch, 0.05, 0.12);
+  const { ctx, dest } = out;
+  const pitch = 0.88 + Math.random() * 0.24;
+
+  if (surface === "wood")
+    tone(ctx, dest, 340 * pitch, 140 * pitch, 0.11, 0.075);
+  else if (surface === "metal") {
+    tone(ctx, dest, 820 * pitch, 820 * pitch, 0.05, 0.08);
+    tone(ctx, dest, 2460 * pitch, 2460 * pitch, 0.03, 0.06);
+  }
+
+  const key =
+    surface === "wet"
+      ? "puddle"
+      : surface === "sand" || surface === "grass"
+        ? "soft"
+        : surface;
+  const bursts = STEP_BURSTS[key] ?? STEP_BURSTS.hard;
+  for (const b of bursts) {
+    burst(ctx, dest, TYPES[b[0]], b[1] * pitch, b[2], b[3], b[4], b[5]);
   }
   return true;
 }
@@ -129,6 +220,42 @@ export function playHorn(): boolean {
     osc.start(now);
     osc.stop(now + 0.42);
   }
+  return true;
+}
+
+/** Tires locking up: a narrow band of road noise sliding down in pitch over
+ * a thin squeal, `seconds` long (a hard stop for someone in the road). */
+export function playScreech(seconds = 0.9): boolean {
+  const out = sfx();
+  if (!out) return false;
+  const { ctx, dest } = out;
+  const now = ctx.currentTime;
+  const end = now + Math.min(2, Math.max(0.2, seconds));
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.09, now + 0.05);
+  gain.gain.setValueAtTime(0.09, end - 0.25);
+  gain.gain.exponentialRampToValueAtTime(0.0001, end);
+  gain.connect(dest);
+  const road = ctx.createBufferSource();
+  road.buffer = noiseBuffer(ctx);
+  const band = ctx.createBiquadFilter();
+  band.type = "bandpass";
+  band.Q.value = 14;
+  band.frequency.setValueAtTime(2700, now);
+  band.frequency.exponentialRampToValueAtTime(1800, end);
+  road.connect(band).connect(gain);
+  road.start(now, Math.random() * 0.5);
+  road.stop(end + 0.02);
+  const squeal = ctx.createOscillator();
+  squeal.type = "sawtooth";
+  squeal.frequency.setValueAtTime(1250, now);
+  squeal.frequency.exponentialRampToValueAtTime(980, end);
+  const thin = ctx.createGain();
+  thin.gain.value = 0.25;
+  squeal.connect(thin).connect(gain);
+  squeal.start(now);
+  squeal.stop(end + 0.02);
   return true;
 }
 

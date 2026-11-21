@@ -156,6 +156,88 @@ test("a car stops for the player standing in its lane", () => {
   assert.ok(gap > 3, `stopped ${gap.toFixed(1)} m away`);
 });
 
+/** One car cruising at the avenue's limit, 10 m into a long lane, and a
+ * point `ahead` meters in front of its center, in its lane. */
+function cruising(ahead: number): {
+  t: Traffic;
+  car: TrafficCar;
+  person: [number, number];
+} {
+  const t = createTraffic(1, 1);
+  const car = t.cars[0];
+  car.lane = { edge: 0, way: 1 };
+  car.s = 10;
+  car.speed = EDGES[0].speedLimit;
+  carPose(car, pose);
+  return {
+    t,
+    car,
+    person: [
+      pose.x + Math.cos(pose.yaw) * ahead,
+      pose.z - Math.sin(pose.yaw) * ahead,
+    ],
+  };
+}
+
+test("a driver who sees someone far ahead stops short of her", () => {
+  const { t, car, person } = cruising(40);
+  for (let i = 0; i < 10 / DT; i++)
+    assert.equal(stepTraffic(t, DT, person), null, `hit at step ${i}`);
+  assert.equal(car.speed, 0);
+  carPose(car, pose);
+  const gap = Math.hypot(person[0] - pose.x, person[1] - pose.z);
+  assert.ok(gap > VEHICLE_LENGTH.car / 2 + 0.5, `stopped ${gap.toFixed(1)} m`);
+});
+
+test("the driver keeps going for a reaction time before the brakes bite", () => {
+  const { t, car, person } = cruising(30);
+  const limit = car.speed;
+  for (let i = 0; i < 0.6 / DT; i++) stepTraffic(t, DT, person);
+  assert.ok(car.speed > limit - 0.2, `already ${car.speed.toFixed(1)} m/s`);
+  for (let i = 0; i < 1 / DT; i++) stepTraffic(t, DT, person);
+  assert.ok(car.speed < limit - 3, `still ${car.speed.toFixed(1)} m/s`);
+});
+
+test("someone stepping out inside the stopping distance gets hit", () => {
+  const { t, car, person } = cruising(8);
+  let hit = null;
+  for (let i = 0; i < 3 / DT && !hit; i++) hit = stepTraffic(t, DT, person);
+  assert.ok(hit, "no hit");
+  assert.equal(hit.car, car);
+  assert.ok(hit.speed > 8, `hit at ${hit.speed.toFixed(1)} m/s`);
+  // the hit and the stamp on the brakes take most of its speed at once, so
+  // it stops short of where she lands
+  assert.ok(car.speed < hit.speed * 0.4, `still ${car.speed.toFixed(1)} m/s`);
+  // the car keeps braking after the hit
+  for (let i = 0; i < 4 / DT; i++) stepTraffic(t, DT, null);
+  assert.ok(car.speed < 3);
+  // the driver stamped on the brakes all the same: one screech
+  assert.equal(t.alarms, 1);
+});
+
+test("one hit is reported once, though she is still in front of the car", () => {
+  const { t, person } = cruising(5);
+  let hits = 0;
+  // she stays where she was struck (no throw here): the car must not hit her
+  // again and again as it stops
+  for (let i = 0; i < 3 / DT; i++) if (stepTraffic(t, DT, person)) hits++;
+  assert.equal(hits, 1);
+});
+
+test("a hard stop for someone in the road counts as an alarm (screech and horn)", () => {
+  const { t, person } = cruising(25);
+  const before = t.alarms;
+  for (let i = 0; i < 3 / DT; i++) stepTraffic(t, DT, person);
+  assert.equal(t.alarms, before + 1);
+});
+
+test("traffic yields to the player's own car as before, and never knocks it down", () => {
+  const { t, car, person } = cruising(40);
+  for (let i = 0; i < 10 / DT; i++)
+    assert.equal(stepTraffic(t, DT, person, null, null, true), null);
+  assert.equal(car.speed, 0);
+});
+
 test("lanes run along real road edges", () => {
   assert.ok(EDGES.length > 0);
   for (const e of EDGES) assert.ok(e.laneOffset > 1 && e.length > 50);
