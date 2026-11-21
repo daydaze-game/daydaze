@@ -6,6 +6,7 @@
 // so every one is 13+. Pure; progression/activities.ts applies it to a save.
 import { TICKETS } from "./orders.ts";
 import type { PrizeGame } from "./prizes.ts";
+import { isRecord } from "./typed.ts";
 
 /** Workplace jobs: the order stations that are somebody's shift. */
 export const JOBS = [
@@ -99,14 +100,11 @@ export function settleShift(
 
 /** A saved record read from storage, cleaned field by field. */
 export function cleanShifts(value: unknown): ShiftsSave {
-  if (typeof value !== "object" || value === null) return NO_SHIFTS;
-  const data = new Map(Object.entries<unknown>(value));
-  const day = data.get("day");
-  const today = data.get("today");
+  if (!isRecord(value)) return NO_SHIFTS;
+  const { day, today, worked: saved } = value;
   const worked: ShiftsSave["worked"] = {};
-  const saved = data.get("worked");
-  if (typeof saved === "object" && saved !== null && !Array.isArray(saved))
-    for (const [k, n] of Object.entries<unknown>(saved))
+  if (isRecord(saved))
+    for (const [k, n] of Object.entries(saved))
       if (isJob(k) && whole(n, MAX_WORKED)) worked[k] = n;
   return {
     day: whole(day, Number.MAX_SAFE_INTEGER) ? day : 0,
