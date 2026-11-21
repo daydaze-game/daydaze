@@ -113,3 +113,52 @@ test("trialXp: finishing pays, a personal best pays more, a record most", () => 
     TRIAL_XP.finish + TRIAL_XP.personalBest + TRIAL_XP.routeRecord,
   );
 });
+
+test("a runner named like an Object.prototype member has no inherited best", () => {
+  const first = submitRun(newTrialBook(), "dock", "me", 60_000);
+  assert.ok(first.ok);
+  if (!first.ok) return;
+  assert.equal(personalBest(first.book, "dock", "toString"), undefined);
+  const r = submitRun(first.book, "dock", "toString", 70_000);
+  assert.ok(r.ok);
+  if (!r.ok) return;
+  assert.equal(r.personalBest, true);
+  assert.equal(personalBest(r.book, "dock", "toString")?.timeMs, 70_000);
+  assert.equal(personalBest(first.book, "toString", "me"), undefined);
+});
+
+test("the stored ghost is a copy: editing the caller's samples does not change it", () => {
+  for (const size of [3, MAX_GHOST_SAMPLES * 2]) {
+    const ghost: GhostSample[] = Array.from({ length: size }, (_, i) => ({
+      t: i * 100,
+      x: i,
+      z: 0,
+      yaw: 0,
+    }));
+    const r = submitRun(newTrialBook(), "dock", "me", 30_000, ghost);
+    assert.ok(r.ok);
+    if (!r.ok) return;
+    const x = personalBest(r.book, "dock", "me")?.ghost[0]?.x;
+    const first = ghost[0];
+    assert.ok(first);
+    first.x = 999;
+    assert.equal(personalBest(r.book, "dock", "me")?.ghost[0]?.x, x);
+  }
+});
+
+test("ghost samples submitted out of order are stored in time order", () => {
+  const ghost: GhostSample[] = [
+    { t: 0, x: 0, z: 0, yaw: 0 },
+    { t: 2000, x: 20, z: 0, yaw: 0 },
+    { t: 1000, x: 10, z: 0, yaw: 0 },
+  ];
+  const r = submitRun(newTrialBook(), "dock", "me", 30_000, ghost);
+  assert.ok(r.ok);
+  if (!r.ok) return;
+  const kept = personalBest(r.book, "dock", "me")?.ghost ?? [];
+  assert.deepEqual(
+    kept.map((s) => s.t),
+    [0, 1000, 2000],
+  );
+  assert.equal(ghostAt(kept, 1500)?.x, 15);
+});
