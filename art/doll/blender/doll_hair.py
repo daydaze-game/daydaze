@@ -645,7 +645,11 @@ def build(ctx):
         # HAIR_ONLY=hijab,bob builds just those sculpted or proxy parts (fast)
         solid = bpy.data.materials.new("hair_solid")
         make = {"hijab": hijab, "head-wrap": head_wrap, "turban": turban}
-        return [make[n](ctx, solid) if n in make else proxy_hair(ctx, n) for n in only]
+        out = [make[n](ctx, solid) if n in make else proxy_hair(ctx, n) for n in only]
+        # the same root-to-tip shading the full build gives every style
+        for ob in out:
+            shade_strands(ctx, ob)
+        return out
     out += [proxy_hair(ctx, style) for style in PROXY]
     solid = bpy.data.materials.new("hair_solid")
     out += [buns(ctx, solid), afro(ctx, solid), braids(ctx, solid), top_knot(ctx, solid)]
