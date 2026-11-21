@@ -937,6 +937,7 @@ export function World({
               editing={dressing}
               player={player}
               area={area}
+              room={room}
               look={look}
               swim={swimFor(def, swim)}
               body={body}
