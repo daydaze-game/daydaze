@@ -8,6 +8,7 @@
 
 import { getAudioContextClass } from "./audioContextClass.ts";
 import { createAcidFilter, type AcidFilter } from "./acidFilter.ts";
+import { createHighFilter, type HighFilter } from "./highFilter.ts";
 
 export interface AudioBus {
   /** Underlying AudioContext, or null if Web Audio is unavailable. */
@@ -19,6 +20,9 @@ export interface AudioBus {
 
   /** Tints everything with the acid sound (tinny, echoing) at the acid meter's level; 0 is clean. */
   setAcidLevel(level: number): void;
+
+  /** Lifts music with a subtle reverb bloom and low-pass filter at the high meter's level; 0 is clean. */
+  setHighLevel(level: number): void;
 
   setMasterVolume(vol: number): void;
   getMasterVolume(): number;
@@ -46,6 +50,7 @@ class AudioBusImpl implements AudioBus {
   private ctx: AudioContext | null;
   private master: GainNode | null = null;
   private acid: AcidFilter | null = null;
+  private high: HighFilter | null = null;
   private musicGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
   private masterVolume = 1;
@@ -61,7 +66,17 @@ class AudioBusImpl implements AudioBus {
       this.master = ctx.createGain();
       this.musicGain = ctx.createGain();
       this.sfxGain = ctx.createGain();
-      this.musicGain.connect(this.master);
+
+      try {
+        // musicGain → high filter → master (the filter is clean at level 0)
+        this.high = createHighFilter(ctx);
+        this.musicGain.connect(this.high.input);
+        this.high.output.connect(this.master);
+      } catch {
+        this.high = null;
+        this.musicGain.connect(this.master);
+      }
+
       this.sfxGain.connect(this.master);
       this.applyGains();
       try {
@@ -96,6 +111,14 @@ class AudioBusImpl implements AudioBus {
   setAcidLevel(level: number): void {
     try {
       this.acid?.setLevel(level);
+    } catch {
+      /* ignore: node may be disconnected in exotic test doubles */
+    }
+  }
+
+  setHighLevel(level: number): void {
+    try {
+      this.high?.setLevel(level);
     } catch {
       /* ignore: node may be disconnected in exotic test doubles */
     }
@@ -168,11 +191,13 @@ class AudioBusImpl implements AudioBus {
       this.sfxGain?.disconnect();
       this.master?.disconnect();
       this.acid?.output.disconnect();
+      this.high?.output.disconnect();
     } catch {
       /* ignore */
     }
     this.master = null;
     this.acid = null;
+    this.high = null;
     this.musicGain = null;
     this.sfxGain = null;
     this.disposed = true;
