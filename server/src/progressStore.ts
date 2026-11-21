@@ -242,7 +242,7 @@ export async function scoreBoard(
     .prepare(
       `SELECT u.username AS name, w.score AS value
        FROM weekly_scores w JOIN users u ON u.id = w.user_id
-      WHERE w.week = ?1 AND w.game = ?2
+      WHERE w.week = ? AND w.game = ?
         AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = w.user_id)
       ORDER BY w.score ${order}, w.at ASC, w.user_id ASC LIMIT ${BOARD_SIZE}`,
     )
@@ -258,7 +258,7 @@ export async function scoreBoard(
                          OR (o.score = m.score AND (o.at < m.at
                               OR (o.at = m.at AND o.user_id < m.user_id))))) AS rank
        FROM weekly_scores m
-      WHERE m.week = ?1 AND m.game = ?2 AND m.user_id = ?3`,
+      WHERE m.week = ? AND m.game = ? AND m.user_id = ?`,
     )
     .bind(week, game, userId)
     .first();
@@ -283,7 +283,7 @@ export async function ladderBoard(
     .prepare(
       `SELECT u.username AS name, w.xp AS value
        FROM weekly_xp w JOIN users u ON u.id = w.user_id
-      WHERE w.week = ?1 AND w.ladder = ?2
+      WHERE w.week = ? AND w.ladder = ?
         AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = w.user_id)
       ORDER BY w.xp DESC, w.at ASC, w.user_id ASC LIMIT ${BOARD_SIZE}`,
     )
@@ -299,7 +299,7 @@ export async function ladderBoard(
                          OR (o.xp = m.xp AND (o.at < m.at
                               OR (o.at = m.at AND o.user_id < m.user_id))))) AS rank
        FROM weekly_xp m
-      WHERE m.week = ?1 AND m.ladder = ?2 AND m.user_id = ?3`,
+      WHERE m.week = ? AND m.ladder = ? AND m.user_id = ?`,
     )
     .bind(week, ladder, userId)
     .first();
