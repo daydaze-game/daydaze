@@ -4725,6 +4725,28 @@ test("a part of the game that fails to load offers a reload, not a blank page", 
   await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
 });
 
+test("a closet that fails to load shows the reload card and keeps the game", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  await page.route("**/src/client/ui/MirrorPanel.tsx*", (route) =>
+    route.abort(),
+  );
+  await page.goto(VELVET);
+  const toggle = page.getByRole("button", {
+    name: "Dressing room",
+    exact: true,
+  });
+  await toggle.click();
+  await expect(page.getByRole("alert")).toContainText("didn't load");
+  await expect(page.getByRole("button", { name: "Reload" })).toBeVisible();
+  // the game is still there: the drawer closes and the rest of the HUD answers
+  await page.getByRole("button", { name: "Close dressing room" }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Chat message" }),
+  ).toBeVisible();
+});
+
 test("closet radio groups support arrow-key navigation and single-tab roving focus", async ({
   page,
 }) => {
