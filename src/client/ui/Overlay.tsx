@@ -8,6 +8,7 @@ import { byTier } from "../../game/age.ts";
 import type { Progression } from "../../game/progression/progression.ts";
 import { ProgressionHud, LadderPanel } from "./Progression.tsx";
 import { ActionDock, DockAction } from "./ActionDock.tsx";
+import { LazyPanel } from "./ReloadBoundary.tsx";
 import { ClubNightTicker } from "./EventCalendar.tsx";
 import { InviteButton } from "../net/InviteButton.tsx";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
@@ -442,15 +443,16 @@ export function Overlay({
       </header>
 
       {phone && (
-        <Suspense fallback={null}>
+        <LazyPanel onContinue={() => setPhone(false)}>
           <DeliveryApp onClose={() => setPhone(false)} />
-        </Suspense>
+        </LazyPanel>
       )}
       <FoodHud />
 
       <Dressing open={panelOpen} onOpenChange={setPanelOpen}>
         {closetOpened && (
-          <Suspense fallback={null}>
+          // a failed download shows the Reload card; the drawer stays closable
+          <LazyPanel>
             <Mirror
               tab={tab}
               setTab={setTab}
@@ -466,7 +468,7 @@ export function Overlay({
               highAudio={highAudio}
               setHighAudio={setHighAudio}
             />
-          </Suspense>
+          </LazyPanel>
         )}
       </Dressing>
 
@@ -483,13 +485,23 @@ export function Overlay({
       <RoomPanel room={room} />
       {room === "city" && <FuelStop coins={coins} onSpend={onSpend} />}
       {room === "city" && (
-        <Suspense fallback={null}>
-          <VolleyStop />
-          <ParkPanel />
-          <BandPanel />
-          <BusPanel />
-          <FoodVendorPanel coins={coins} onSpend={onSpend} />
-        </Suspense>
+        <>
+          <LazyPanel>
+            <VolleyStop />
+          </LazyPanel>
+          <LazyPanel>
+            <ParkPanel />
+          </LazyPanel>
+          <LazyPanel>
+            <BandPanel />
+          </LazyPanel>
+          <LazyPanel>
+            <BusPanel />
+          </LazyPanel>
+          <LazyPanel>
+            <FoodVendorPanel coins={coins} onSpend={onSpend} />
+          </LazyPanel>
+        </>
       )}
       <VendingPanel coins={coins} onSpend={onSpend} />
       <PouchPanel />
