@@ -106,7 +106,9 @@ export const ACTION_XP: Record<StatKey, ActionXp> = {
 /** XP and ladder for `amount` of `key`, for a caller to add to its totals. */
 export function xpFor(key: StatKey, amount = 1): ActionXp {
   const { xp, ladder } = ACTION_XP[key];
-  return { xp: xp * Math.max(0, Math.floor(amount)), ladder };
+  // NaN and Infinity would poison a caller's running total
+  const units = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  return { xp: xp * units, ladder };
 }
 
 /** XP for unlocking an achievement of each tier. */
