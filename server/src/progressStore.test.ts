@@ -63,7 +63,7 @@ function toSql(values: unknown[]) {
   return values.map((v) => {
     assert.ok(
       v === null || typeof v === "string" || typeof v === "number",
-      `unbindable ${String(v)}`,
+      `cannot bind ${String(v)}`,
     );
     return v;
   });
