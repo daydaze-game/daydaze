@@ -8,6 +8,8 @@ import {
   GUEST_LIMIT,
   LOGIN_ACCOUNT_LIMIT,
   LOGIN_ADDRESS_LIMIT,
+  PROGRESS_ADDRESS_LIMIT,
+  PROGRESS_LIMIT,
   REPORT_ADDRESS_LIMIT,
   REPORT_LIMIT,
   SIGNUP_LIMIT,
@@ -90,4 +92,20 @@ test("buckets idle for the prune age are full again, so pruning forgets nothing"
     assert.ok(
       (limit.capacity / limit.refillPerSecond) * 1000 <= BUCKET_PRUNE_AFTER_MS,
     );
+});
+
+test("progress writes: a burst per player, then one every ten seconds", () => {
+  const limiter = createAuthLimiter();
+  for (let i = 0; i < PROGRESS_LIMIT.capacity; i++)
+    assert.equal(limiter.take("progress", "", 0, "player"), 0);
+  const retry = limiter.take("progress", "", 0, "player");
+  assert.ok(retry >= 1 && retry <= 10, `${retry}`);
+  assert.equal(limiter.take("progress", "", retry * 1000, "player"), 0);
+});
+
+test("progress writes share a wider budget per address", () => {
+  const limiter = createAuthLimiter();
+  for (let i = 0; i < PROGRESS_ADDRESS_LIMIT.capacity; i++)
+    assert.equal(limiter.take("progress", "", 0, "address"), 0);
+  assert.ok(limiter.take("progress", "", 0, "address") >= 1);
 });
