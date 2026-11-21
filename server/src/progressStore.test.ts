@@ -44,10 +44,13 @@ function database() {
         const out = statements.map((s) => {
           const part = parts.get(s);
           assert.ok(part);
-          const { changes } = sqlite
-            .prepare(part.sql)
-            .run(...toSql(part.values));
-          return { meta: { changes: Number(changes) } };
+          const query = sqlite.prepare(part.sql);
+          const values = toSql(part.values);
+          // like D1, a batched SELECT returns its rows
+          if (query.columns().length > 0)
+            return { meta: { changes: 0 }, results: query.all(...values) };
+          const { changes } = query.run(...values);
+          return { meta: { changes: Number(changes) }, results: [] };
         });
         sqlite.exec("COMMIT");
         return out;

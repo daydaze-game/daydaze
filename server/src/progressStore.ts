@@ -25,7 +25,11 @@ export type Statement = {
 };
 export type Db = {
   prepare(sql: string): Statement;
-  batch(statements: Statement[]): Promise<{ meta: { changes: number } }[]>;
+  batch(
+    statements: Statement[],
+  ): Promise<
+    { meta: { changes: number }; results: Record<string, unknown>[] }[]
+  >;
 };
 
 /** Weeks of board history kept; older rows are deleted on each write. */
@@ -210,6 +214,19 @@ export async function updateProgress(
   return "busy";
 }
 
+/**
+ * The board's lines and the caller's own row, read in one batch (one
+ * transaction), so a write landing in between can't make the caller's rank
+ * disagree with the list.
+ */
+async function readTogether(db: Db, list: Statement, own: Statement) {
+  const [lines, mine] = await db.batch([list, own]);
+  return {
+    results: lines?.results ?? [],
+    mine: mine?.results[0] ?? null,
+  };
+}
+
 function entryFrom(row: Record<string, unknown>, rank: number) {
   const { name, value } = row;
   return typeof name === "string" && typeof value === "number"
@@ -238,7 +255,7 @@ export async function scoreBoard(
   // both operators are fixed strings, never request input
   const order = lower ? "ASC" : "DESC";
   const better = lower ? "<" : ">";
-  const { results } = await db
+  const list = db
     .prepare(
       `SELECT u.username AS name, w.score AS value
        FROM weekly_scores w JOIN users u ON u.id = w.user_id
@@ -246,9 +263,8 @@ export async function scoreBoard(
         AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = w.user_id)
       ORDER BY w.score ${order}, w.at ASC, w.user_id ASC LIMIT ${BOARD_SIZE}`,
     )
-    .bind(week, game)
-    .all();
-  const mine = await db
+    .bind(week, game);
+  const own = db
     .prepare(
       `SELECT m.score AS value,
             1 + (SELECT COUNT(*) FROM weekly_scores o
@@ -260,8 +276,8 @@ export async function scoreBoard(
        FROM weekly_scores m
       WHERE m.week = ? AND m.game = ? AND m.user_id = ?`,
     )
-    .bind(week, game, userId)
-    .first();
+    .bind(week, game, userId);
+  const { results, mine } = await readTogether(db, list, own);
   return {
     week,
     startsAt: weekStartMs(week),
@@ -279,7 +295,7 @@ export async function ladderBoard(
   now: number,
 ): Promise<Board> {
   const week = weekOf(now);
-  const { results } = await db
+  const list = db
     .prepare(
       `SELECT u.username AS name, w.xp AS value
        FROM weekly_xp w JOIN users u ON u.id = w.user_id
@@ -287,9 +303,8 @@ export async function ladderBoard(
         AND NOT EXISTS (SELECT 1 FROM bans b WHERE b.player_id = w.user_id)
       ORDER BY w.xp DESC, w.at ASC, w.user_id ASC LIMIT ${BOARD_SIZE}`,
     )
-    .bind(week, ladder)
-    .all();
-  const mine = await db
+    .bind(week, ladder);
+  const own = db
     .prepare(
       `SELECT m.xp AS value,
             1 + (SELECT COUNT(*) FROM weekly_xp o
@@ -301,8 +316,8 @@ export async function ladderBoard(
        FROM weekly_xp m
       WHERE m.week = ? AND m.ladder = ? AND m.user_id = ?`,
     )
-    .bind(week, ladder, userId)
-    .first();
+    .bind(week, ladder, userId);
+  const { results, mine } = await readTogether(db, list, own);
   return {
     week,
     startsAt: weekStartMs(week),
