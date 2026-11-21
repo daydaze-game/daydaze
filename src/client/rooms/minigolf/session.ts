@@ -33,6 +33,8 @@ export type Course = {
   aim: number;
   /** When the power swing started, or the putt was struck: performance.now(). */
   since: number;
+  /** Period of the current power meter, held constant for this stroke. */
+  sweepPeriod: number;
   putt: PuttResult | null;
 };
 
@@ -41,6 +43,7 @@ const OFF: Course = {
   round: NEW_ROUND,
   aim: 0,
   since: 0,
+  sweepPeriod: 1000 / 1.1,
   putt: null,
 };
 
@@ -69,8 +72,7 @@ export function useCourse(): Course {
 
 /** The power swing, 0..1, at `now`. */
 export function powerAt(now: number, since: number): number {
-  const duration = sweepDuration(1000 / 1.1, minigameAssist());
-  return 0.5 - Math.cos(((now - since) / duration) * Math.PI) * 0.5;
+  return 0.5 - Math.cos(((now - since) / course.sweepPeriod) * Math.PI) * 0.5;
 }
 
 /** Aim straight at the cup from where the ball lies: a fair first guess. */
@@ -96,7 +98,12 @@ export function turn(radians: number) {
 /** The one button: start the power swing, then strike; between holes, go
  * on to the next; after the last, play again. */
 export function press(now: number) {
-  if (course.phase === "aim") set({ phase: "power", since: now });
+  if (course.phase === "aim")
+    set({
+      phase: "power",
+      since: now,
+      sweepPeriod: sweepDuration(1000 / 1.1, minigameAssist()),
+    });
   else if (course.phase === "power") {
     const hole = HOLES[holeIndex(course.round)];
     const result = putt(hole, course.round.ball, {
