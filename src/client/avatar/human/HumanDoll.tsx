@@ -1047,15 +1047,15 @@ function Garments({
     for (const b of built) b.materials.forEach((m) => m.dispose());
     group.add(merged);
     const mat = merged.material;
-    if (images.length && mat instanceof THREE.MeshStandardMaterial)
-      mat.map = atlases.acquire(atlasKey, images);
     return {
       group,
       materials: Array.isArray(mat) ? mat : [mat],
       own: merged.geometry,
       // its own skeleton (the bones are the body's): the bone texture goes
       skeleton: merged.skeleton,
-      atlas: images.length ? atlasKey : null,
+      // taken from the shared atlas cache when committed (an effect), so
+      // a render React throws away never holds a reference
+      atlas: images.length ? { key: atlasKey, images } : null,
     };
   }, [gltfs, bones, tints]);
   useEffect(
@@ -1063,10 +1063,17 @@ function Garments({
       lo.materials.forEach((m) => m.dispose());
       lo.own?.dispose();
       lo.skeleton?.dispose();
-      if (lo.atlas !== null) atlases.release(lo.atlas);
     },
     [lo],
   );
+  useEffect(() => {
+    const { atlas } = lo;
+    const mat = lo.materials[0];
+    if (!atlas || !(mat instanceof THREE.MeshStandardMaterial)) return;
+    mat.map = atlases.acquire(atlas.key, atlas.images);
+    mat.needsUpdate = true;
+    return () => atlases.release(atlas.key);
+  }, [lo]);
   useEffect(() => {
     castShadows(lo.group, shadows);
   }, [lo, shadows]);
