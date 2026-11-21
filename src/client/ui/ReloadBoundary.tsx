@@ -6,10 +6,10 @@
 // download from taking the game down with it; the optional Continue button
 // lets that panel's caller finish what it was doing without the panel.
 
-import { Component, type ReactNode } from "react";
+import { Component, Suspense, type ReactNode } from "react";
 
 export class ReloadBoundary extends Component<
-  { children: ReactNode; onContinue?: () => void },
+  { children: ReactNode; onContinue?: (() => void) | undefined },
   { failed: boolean }
 > {
   override state = { failed: false };
@@ -35,4 +35,20 @@ export class ReloadBoundary extends Component<
       </aside>
     );
   }
+}
+
+/** One lazy panel behind its own boundary and Suspense: a failed download
+ * shows the card for this panel alone, and clears when the panel unmounts. */
+export function LazyPanel({
+  children,
+  onContinue,
+}: {
+  children: ReactNode;
+  onContinue?: () => void;
+}) {
+  return (
+    <ReloadBoundary onContinue={onContinue}>
+      <Suspense fallback={null}>{children}</Suspense>
+    </ReloadBoundary>
+  );
 }
