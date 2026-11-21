@@ -2670,6 +2670,36 @@ test("stepping out in front of a car too close to stop: she is knocked down and 
   expect(errors).toEqual([]);
 });
 
+test("knocking a walker down with your car raises police heat", async ({
+  page,
+}) => {
+  test.setTimeout(330_000);
+  const errors = collectErrors(page);
+  await page.goto(`${LOW}&room=city&time=12:00&debug=1`);
+  const canvas = canvasOf(page);
+  await expect(canvas).toHaveAttribute("data-frames", "10", {
+    timeout: 240_000,
+  });
+  await expect(canvas).toHaveAttribute("data-heat", "0");
+  // the walker nearest her, hit as by her car at city speed (retried until
+  // someone walks within reach)
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const knock: unknown = Reflect.get(window, "daydazeKnockWalker");
+          return typeof knock === "function"
+            ? Number(Reflect.apply(knock, window, [9]))
+            : -1;
+        }),
+      { timeout: 120_000, intervals: [2_000] },
+    )
+    .toBeGreaterThanOrEqual(0);
+  await expect(canvas).toHaveAttribute("data-walker-hit", /^\d+$/);
+  await expect(canvas).not.toHaveAttribute("data-heat", "0");
+  expect(errors).toEqual([]);
+});
+
 test("drinks in the Velvet Room raise the buzz, and three in the view sways", async ({
   page,
 }) => {

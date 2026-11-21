@@ -163,6 +163,77 @@ export function CarHits({ player }: { player: Player }) {
     bystanders(x0, z0, now, -1);
   };
 
+  /**
+   * Your car hits walker `i` at `speed` m/s heading (fx, fz): she goes down
+   * (unless she is already), the police heat rises, she has a word for you
+   * once she is up and the street stops to look. Says whether she went down.
+   */
+  const hitWalker = (
+    i: number,
+    now: number,
+    speed: number,
+    fx: number,
+    fz: number,
+  ): boolean => {
+    const p = PEDESTRIANS[i];
+    const st = walkerState(i);
+    streetPose(p, st, now, pose);
+    const x = pose.x;
+    const z = pose.z;
+    knock(st, now, speed, fx, fz);
+    // a knock that landed starts now; one on someone already down did not
+    const ev = st.ev;
+    if (!ev || ev.kind !== "knock" || ev.at !== now) return false;
+    playThump(speed < 3 ? 0.5 : 1);
+    crime("pedestrianHit");
+    scene.current = openHitScene([x, z]);
+    setData(canvas.dataset, "walkerHit", String(i));
+    say(
+      "pedestrian",
+      "action-knocked-down",
+      x + ev.push[0],
+      z + ev.push[1],
+      Math.max(0.5, ev.hold - 0.6),
+    );
+    bystanders(x, z, now, i);
+    return true;
+  };
+
+  // `?debug=1` puts `daydazeKnockWalker(speed)` on the page, for tests and
+  // screenshots: the walker nearest you is hit as by your car at `speed` m/s,
+  // coming from your side (her index, or -1 with nobody near)
+  const hitRef = useRef(hitWalker);
+  hitRef.current = hitWalker;
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("debug") !== "1") return;
+    const knockNearest = (speed: unknown) => {
+      if (typeof speed !== "number" || !Number.isFinite(speed)) return -1;
+      const now = wallSeconds();
+      const hour = cityHour();
+      let nearest = -1;
+      let best = 25;
+      PEDESTRIANS.forEach((p, i) => {
+        if (p.bike || !pedestrianOut(p, hour)) return;
+        streetPose(p, walkerState(i), now, pose);
+        const d = Math.hypot(pose.x - player.pos.x, pose.z - player.pos.z);
+        if (d < best) {
+          best = d;
+          nearest = i;
+        }
+      });
+      if (nearest < 0) return -1;
+      streetPose(PEDESTRIANS[nearest], walkerState(nearest), now, pose);
+      const d = Math.max(best, 1e-6);
+      const fx = (pose.x - player.pos.x) / d;
+      const fz = (pose.z - player.pos.z) / d;
+      return hitRef.current(nearest, now, speed, fx, fz) ? nearest : -1;
+    };
+    Object.assign(window, { daydazeKnockWalker: knockNearest });
+    return () => {
+      Object.assign(window, { daydazeKnockWalker: undefined });
+    };
+  }, [player, pose]);
+
   useFrame((_, dt) => {
     const now = wallSeconds();
     // a hard stop for the player in the road: tires lock and the horn goes
@@ -216,24 +287,8 @@ export function CarHits({ player }: { player: Player }) {
         startle(st, p, i, now, car);
         streetPose(p, st, now, pose);
         if (!touches(car, s.spec.length, s.spec.width, pose)) continue;
-        knock(st, now, car.speed, car.fx, car.fz);
-        // a knock that landed starts now; one on someone already down did not
-        const ev = st.ev;
-        if (!ev || ev.kind !== "knock" || ev.at !== now) continue;
-        c.speed = carSpeedAfterHit(c.speed);
-        playThump(car.speed < 3 ? 0.5 : 1);
-        crime("pedestrianHit");
-        scene.current = openHitScene([pose.x, pose.z]);
-        setData(canvas.dataset, "walkerHit", String(i));
-        const landed = ev.push;
-        say(
-          "pedestrian",
-          "action-knocked-down",
-          pose.x + landed[0],
-          pose.z + landed[1],
-          Math.max(0.5, ev.hold - 0.6),
-        );
-        bystanders(pose.x, pose.z, now, i);
+        if (hitWalker(i, now, car.speed, car.fx, car.fz))
+          c.speed = carSpeedAfterHit(c.speed);
       }
     }
 
