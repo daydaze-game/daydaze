@@ -38,7 +38,7 @@ does the heavy lifting. This folder is the playbook.
 | [`agent-rules.md`](agent-rules.md) | The brief every build agent gets: asset pipeline, budgets, CI commands, process safety |
 | [`workflow-log.md`](workflow-log.md) | The owner's workflow rules in the order they were learned, with the reason for each |
 | [`TOOLS.md`](TOOLS.md) | MCP servers, plugins, CLIs and API keys available to agents |
-| [`scripts/`](scripts/) | `land.sh` (merge on green), `keepboth.sh` and `union_assets.py` (additive conflict helpers) |
+| [`scripts/`](scripts/) | `setup-git.sh` (raise ref lock timeouts for parallel worktrees), `land.sh` (merge on green), `keepboth.sh` and `union_assets.py` (additive conflict helpers) |
 | [`investigations/opencode/`](investigations/opencode/) | A benchmark of free opencode models on small coding tasks |
 | [`../plans/`](../plans/) | Roadmap, dated plans, the running gotchas log and session handoffs |
 | [`../../.agents/skills/`](../../.agents/skills/) | Vendored third-party skills (sources in `NOTICE.md`) |
