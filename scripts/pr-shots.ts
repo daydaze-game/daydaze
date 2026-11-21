@@ -43,7 +43,10 @@ const AREA_SHOTS: readonly (readonly [RegExp, string])[] = [
   [/^src\/(client|game)\/(city|world)\//, "city-day"],
   [/^src\/client\/avatar\//, "plaza"],
   [/^src\/client\/ui\//, "hud-city"],
-  [/^src\/(game\/shifts|client\/rooms\/shared\/[Oo]rder)/, "barista-pay-slip"],
+  [
+    /^src\/(game\/shifts|client\/rooms\/shared\/(Order|order))/,
+    "barista-pay-slip",
+  ],
 ];
 
 /** Shot names defined in scripts/screenshots.ts (`name: "plaza"` entries). */
