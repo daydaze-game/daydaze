@@ -12,7 +12,7 @@ import type { DanceMoveId } from "./moves.ts";
 const PAIRED = { follow: null, lift: 0, behind: false } as const;
 
 export const TOGETHER = [
-  { id: "hug", label: "Hug", move: "hug", gap: 0.32, side: false, ...PAIRED },
+  { id: "hug", label: "Hug", move: "hug", gap: 0.46, side: false, ...PAIRED },
   {
     id: "hold-hands",
     label: "Hold hands",
@@ -25,12 +25,15 @@ export const TOGETHER = [
     id: "forehead-kiss",
     label: "Forehead kiss",
     move: "forehead-kiss",
-    gap: 0.36,
+    follow: "forehead-kiss",
+    gap: 0.84,
     side: false,
-    ...PAIRED,
+    lift: 0,
+    behind: false,
   },
-  // the kisses play one move on both sides, unmirrored: a mirror image would
-  // tilt both heads the same way, nose into nose
+  // the kisses play one move on both sides, unmirrored (the forehead kiss too,
+  // so both lean in together): a mirror image would tilt both heads the same
+  // way, nose into nose
   {
     id: "cheek-kiss",
     label: "Cheek kiss",
