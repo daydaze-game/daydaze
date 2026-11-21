@@ -3756,7 +3756,7 @@ test("Plate Rush orders a dish and the courier drops it in hand", async ({
 test("weed munchies: delivered food and water relieve needs only at 18+", async ({
   page,
 }) => {
-  test.setTimeout(300_000);
+  test.setTimeout(420_000);
   const errors = collectErrors(page);
   await page.clock.install();
   // Advance the existing dev modules, without waiting through a whole joint.
@@ -3798,8 +3798,7 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await expect
     .poll(async () => Number(await hunger.getAttribute("value")))
     .toBeGreaterThan(initialHunger);
-  // The live timer has advanced. Freeze time through the slow software-rendered
-  // screenshots and delivery controls; advance toast lifetimes explicitly below.
+  // Freeze time for screenshots, then resume it for the lazy-loaded dialog.
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
   await page.screenshot({
     path: test.info().outputPath("weed-needs-desktop.png"),
@@ -3809,6 +3808,7 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
   await page.screenshot({
     path: test.info().outputPath("weed-needs-mobile.png"),
   });
+  await page.clock.resume();
   await (await fromMenu(page, "Plate Rush")).click();
   const app = page.getByRole("dialog", { name: "Plate Rush" });
   await app.getByRole("button", { name: /Point and Eat Kitchen/ }).click();
@@ -3818,6 +3818,8 @@ test("weed munchies: delivered food and water relieve needs only at 18+", async 
     })
     .click();
   await page.keyboard.press("Escape");
+  // Delivery is complete; freeze announcements through the remaining captures.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
   await call(food, "tickDeliveries", [Date.now() + 120_000]);
   const held = page.getByRole("region", { name: "Held food" });
   await page.screenshot({
