@@ -63,3 +63,13 @@ test("the shared order panel and the shift rules map to the pay-slip shot", () =
   ])
     assert.deepEqual(pickShots([file], known), ["barista-pay-slip"], file);
 });
+
+test("the closet's wardrobe code maps to the closet shot", () => {
+  assert.deepEqual(
+    pickShots(
+      ["src/client/ui/WardrobePicker.tsx", "src/game/wardrobe.ts"],
+      [...KNOWN, "closet-wardrobe"],
+    ),
+    ["closet-wardrobe"],
+  );
+});
