@@ -132,6 +132,17 @@ test("merged garments skin, morph and tint like the pieces they came from", () =
   const color = merged.geometry.getAttribute("color");
   assert.equal(color.getX(0), 1);
   assert.equal(color.getZ(3), 1);
+  // a detail map darkens its piece's tint where it's dark
+  top.geometry.setAttribute(
+    "uv",
+    new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1], 2),
+  );
+  const shaded = mergeGarments([
+    { mesh: top, color: "#ff0000", shade: (u) => 1 - u / 2 },
+  ]);
+  const tint = shaded?.geometry.getAttribute("color");
+  assert.equal(tint?.getX(0), 1);
+  assert.equal(tint?.getX(1), 0.5);
 });
 
 test("pieces that disagree on a shared joint's frame are not merged", () => {

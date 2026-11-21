@@ -914,6 +914,47 @@ function NearPart({
   return <primitive object={part.group} />;
 }
 
+// a detail map's brightness, read once per image at this many pixels a side
+const SHADE_RES = 64;
+const shades = new WeakMap<object, (u: number, v: number) => number>();
+
+/**
+ * A garment detail map's linear brightness at a UV, for the merged far
+ * twin's vertex tint (mergeGarments): coarse, but denim reads as denim and
+ * a dark collar stays dark. Undefined without a map or a canvas to read it.
+ */
+function shadeOf(map: THREE.Texture | null) {
+  const image: unknown = map?.image;
+  if (
+    !map ||
+    typeof document === "undefined" ||
+    !(image instanceof ImageBitmap || image instanceof HTMLImageElement)
+  )
+    return undefined;
+  const known = shades.get(image);
+  if (known) return known;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = SHADE_RES;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return undefined;
+  ctx.drawImage(image, 0, 0, SHADE_RES, SHADE_RES);
+  const px = ctx.getImageData(0, 0, SHADE_RES, SHADE_RES).data;
+  const lum = new Float32Array(SHADE_RES * SHADE_RES);
+  for (let i = 0; i < lum.length; i++)
+    lum[i] = THREE.SRGBToLinear(
+      (0.3 * (px[i * 4] ?? 0) +
+        0.59 * (px[i * 4 + 1] ?? 0) +
+        0.11 * (px[i * 4 + 2] ?? 0)) /
+        255,
+    );
+  // glTF maps aren't flipped: v runs down the image
+  const at = (t: number) =>
+    Math.min(SHADE_RES - 1, Math.floor((t - Math.floor(t)) * SHADE_RES));
+  const shade = (u: number, v: number) => lum[at(v) * SHADE_RES + at(u)] ?? 1;
+  shades.set(image, shade);
+  return shade;
+}
+
 /** A worn garment: its model, tint and worn-part key (partsFor). */
 type Garment = { key: string; url: string; color: string };
 
@@ -951,9 +992,15 @@ function Garments({
     );
     const merged = mergeGarments(
       built.flatMap((b, i) =>
-        b.group.children
-          .filter(isSkinnedMesh)
-          .map((mesh) => ({ mesh, color: colors[i] ?? "#ffffff" })),
+        b.group.children.filter(isSkinnedMesh).map((mesh) => ({
+          mesh,
+          color: colors[i] ?? "#ffffff",
+          shade: shadeOf(
+            mesh.material instanceof THREE.MeshStandardMaterial
+              ? mesh.material.map
+              : null,
+          ),
+        })),
       ),
     );
     const group = new THREE.Group();
@@ -983,6 +1030,11 @@ function Garments({
   const [wantNear, setWantNear] = useState(false);
   const [nears, setNears] = useState<ReadonlyMap<string, Built>>(new Map());
   const ready = garments.every((g) => nears.has(g.url));
+  // a plain array for the frame loop, which allocates nothing
+  const nearGroups = useMemo(
+    () => [...nears.values()].map((n) => n.group),
+    [nears],
+  );
   // one stable hand-up per garment
   const onBuilt = useMemo(() => {
     const made = new Map<string, (part: Built | null) => void>();
@@ -1005,8 +1057,10 @@ function Garments({
     if (!wantNear && !far.current) setWantNear(true);
     const showLo = far.current || !ready;
     if (lo.group.visible !== showLo) lo.group.visible = showLo;
-    for (const near of nears.values())
-      if (near.group.visible === showLo) near.group.visible = !showLo;
+    for (let i = 0; i < nearGroups.length; i++) {
+      const group = nearGroups[i];
+      if (group && group.visible === showLo) group.visible = !showLo;
+    }
   });
   useEffect(() => {
     const loMeshes = morphMeshes(lo.group);

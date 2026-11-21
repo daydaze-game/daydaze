@@ -3,10 +3,12 @@
 // at a distance, like the single outfit model they replaced.
 import * as THREE from "three";
 
-/** A built garment mesh (bound to the body's bones) and its tint. */
+/** A built garment mesh (bound to the body's bones), its tint, and its
+ * detail map's linear brightness at a UV (denim, stripes), when it has one. */
 export type Piece = {
   mesh: THREE.SkinnedMesh;
   color: THREE.ColorRepresentation;
+  shade?: ((u: number, v: number) => number) | undefined;
 };
 
 const TOLERANCE = 1e-4;
@@ -35,7 +37,8 @@ const near = (a: THREE.Matrix4, b: THREE.Matrix4) =>
  * inverse bind matrices); a piece's vertices move into the first piece's
  * frame, found from a joint they share, and the frame must agree on every
  * joint the piece uses. Positions, normals, weights and every morph target
- * (zeros where a piece lacks one) come along; textures don't.
+ * (zeros where a piece lacks one) come along. Textures don't: each vertex
+ * takes its piece's tint times the detail map's brightness under it.
  */
 export function mergeGarments(
   pieces: readonly Piece[],
@@ -59,7 +62,7 @@ export function mergeGarments(
   );
   const geoms: THREE.BufferGeometry[] = [];
   const linear = new THREE.Color();
-  for (const { mesh, color } of pieces) {
+  for (const { mesh, color, shade } of pieces) {
     const src = mesh.geometry;
     const pos = src.getAttribute("position");
     const nrm = src.getAttribute("normal");
@@ -127,8 +130,14 @@ export function mergeGarments(
     g.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(joints, 4));
     g.setAttribute("skinWeight", new THREE.BufferAttribute(floats(weight), 4));
     linear.set(color);
+    const uv = src.getAttribute("uv");
     const tint = new Float32Array(pos.count * 3);
-    for (let i = 0; i < pos.count; i++) linear.toArray(tint, i * 3);
+    for (let i = 0; i < pos.count; i++) {
+      const k = shade && uv ? shade(uv.getX(i), uv.getY(i)) : 1;
+      tint[i * 3] = linear.r * k;
+      tint[i * 3 + 1] = linear.g * k;
+      tint[i * 3 + 2] = linear.b * k;
+    }
     g.setAttribute("color", new THREE.BufferAttribute(tint, 3));
     const order = src.index
       ? floats(src.index)
