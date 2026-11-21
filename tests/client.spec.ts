@@ -45,7 +45,8 @@ interface SavedGame {
       | "makeup"
       | "brows"
       | "gait"
-      | "limbs",
+      | "limbs"
+      | "wear",
       string
     >
   >;
@@ -268,6 +269,58 @@ test("dressing room isolates the character and saves unrestricted colors", async
     .getByRole("button", { name: "Close dressing room", exact: true })
     .click();
   await expect(canvasOf(page)).not.toHaveAttribute("data-studio");
+  expect(errors).toEqual([]);
+});
+
+test("the closet mixes garments slot by slot, and a one-piece replaces top and bottom", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  const errors = collectErrors(page);
+  await page.goto(VELVET);
+  await page
+    .getByRole("button", { name: "Dressing room", exact: true })
+    .click();
+  await expect(canvasOf(page)).toHaveAttribute("data-studio", "ready", {
+    timeout: 150_000,
+  });
+  await page.getByRole("tab", { name: "Outfit", exact: true }).click();
+  const pick = (slot: string, item: string) =>
+    page
+      .getByRole("radiogroup", { name: slot, exact: true })
+      .getByRole("radio", { name: item, exact: true })
+      .click();
+  await pick("Top", "Striped shirt");
+  await pick("Bottom", "Pencil skirt");
+  await pick("Outerwear", "Puffer jacket");
+  await page
+    .getByRole("textbox", { name: "Bottom color hex", exact: true })
+    .fill("#3a5a8a");
+  const wear = () => readSave(page).then(({ look }) => look?.wear);
+  const hex = "#[0-9a-f]{6}";
+  await expect
+    .poll(wear)
+    .toMatch(
+      new RegExp(`^pencil-skirt#3a5a8a\\+striped-shirt${hex}\\+puffer${hex}$`),
+    );
+  await expect(canvasOf(page)).toHaveAttribute("data-avatar", "ready", {
+    timeout: 120_000,
+  });
+  // a one-piece takes the top and bottom off; the jacket stays, then comes off
+  await pick("One-piece", "Overalls");
+  await expect
+    .poll(wear)
+    .toMatch(new RegExp(`^overalls${hex}\\+puffer${hex}$`));
+  await pick("Outerwear", "None");
+  await expect.poll(wear).toMatch(new RegExp(`^overalls${hex}$`));
+  // a top over the one-piece brings back separates
+  await pick("Top", "Striped shirt");
+  await expect
+    .poll(wear)
+    .toMatch(new RegExp(`^skinny-jeans${hex}\\+striped-shirt${hex}$`));
+  await expect(canvasOf(page)).toHaveAttribute("data-avatar", "ready", {
+    timeout: 120_000,
+  });
   expect(errors).toEqual([]);
 });
 

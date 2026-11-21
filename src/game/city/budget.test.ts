@@ -173,7 +173,8 @@ test("street-food downloads and nearby vendor costumes are included in the budge
     "vendors/cart",
     "doll/body",
     "doll/hair-bob",
-    "doll/outfit-jeans",
+    "doll/top-tee",
+    "doll/bottom-skinny-jeans",
     "doll/shoes-platforms",
   ]) {
     assert.ok(modelsInBudget().includes(model), model);

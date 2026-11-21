@@ -1,7 +1,7 @@
 """Dev-only: counts body vertices that poke through a garment in a baked clip.
 
     blender --background --factory-startup --python-exit-code 1 --python art/doll/blender/skin_check.py -- \
-        Outfit_suit [sex=male] [pack=social] [clips=idle,walk] [frames=6] [zmin=1.15] [zmax=1.45] [all=1] [faces=1] [lod=1] [pixels=1 pixels_z=0.5 pixels_dump=<dir>]
+        Top_suit-jacket [sex=male] [pack=social] [clips=idle,walk] [frames=6] [zmin=1.15] [zmax=1.45] [all=1] [faces=1] [lod=1] [pixels=1 pixels_z=0.5 pixels_dump=<dir>]
 
 Imports the raw build (.cache/out), wears the garment (its tuck key at 1) and,
 for frames spread over each clip, reports the body vertices the tuck sank that

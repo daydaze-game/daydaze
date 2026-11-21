@@ -12,6 +12,7 @@ import {
 } from "./crowd.ts";
 import { MOCAP_CLIPS } from "./dance/mocap.ts";
 import { modelSuffix, shoesOf, validateLook } from "./look.ts";
+import { wearOf } from "./wardrobe.ts";
 
 const shipped = (url: string) =>
   existsSync(new URL(`../../public${url}`, import.meta.url));
@@ -24,7 +25,7 @@ test("every crowd person wears a valid look whose parts ship", () => {
     const m = modelSuffix(look);
     for (const part of [
       `hair-${look.hairStyle}`,
-      `outfit-${look.outfit}`,
+      ...Object.entries(wearOf(look)).map(([slot, w]) => `${slot}-${w.id}`),
       `shoes-${shoesOf(look)}`,
     ])
       assert.ok(shipped(`/models/doll/${part}${m}.glb`), `${id}: ${part}${m}`);

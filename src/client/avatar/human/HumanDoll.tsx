@@ -45,9 +45,11 @@ import {
   makeupOf,
   type Look,
   shoesOf,
+  SHOES,
   type Mood,
   type SwimLook,
 } from "../../../game/look.ts";
+import { SLOTS, wearOf } from "../../../game/wardrobe.ts";
 import { getBuzz, getHangover, liveDrunk } from "../../effects/drunk.ts";
 import { getMeters } from "../../effects/high.ts";
 import { ADULT_OK } from "../../adult.ts";
@@ -113,6 +115,7 @@ import { HearingAids } from "./HearingAids.tsx";
 import { isBone, isMesh, isSkinnedMesh } from "../../world/guards.ts";
 import { setData } from "../../world/dataset.ts";
 import { isDollReady } from "./dollReady.ts";
+import { mergeGarments } from "./mergeGarments.ts";
 
 /**
  * The 3D doll: a skinned, shape-keyed body built in Blender from MakeHuman's
@@ -270,22 +273,45 @@ const HAIR: Partial<Record<Look["hairStyle"], string>> = {
 };
 
 export function partsFor(look: Look, swim: SwimLook | null) {
-  const cut = look.outfit;
   // a man wears the parts fitted to the man's body
   const m = modelSuffix(look);
+  const wear = wearOf(look);
+  // one model per worn garment (wardrobe.ts), each tracked under its slot;
+  // in swimwear rooms the swimsuit alone
+  const garments = swim
+    ? [
+        {
+          key: "swim",
+          url: `${MODELS}/swim-${swim.style}${m}.glb`,
+          color: swim.color,
+          tuck: `tuck_${swim.style}`,
+        },
+      ]
+    : SLOTS.flatMap((slot) => {
+        const worn = wear[slot];
+        return worn
+          ? [
+              {
+                key: slot,
+                url: `${MODELS}/${slot}-${worn.id}${m}.glb`,
+                color: worn.color,
+                tuck: `tuck_${worn.id}`,
+              },
+            ]
+          : [];
+      });
   return {
     // bald wears no hair model at all
     hair:
       look.hairStyle === "bald"
         ? null
         : `${MODELS}/hair-${HAIR[look.hairStyle] ?? look.hairStyle}${m}.glb`,
-    outfit: swim
-      ? `${MODELS}/swim-${swim.style}${m}.glb`
-      : `${MODELS}/outfit-${cut}${m}.glb`,
+    garments,
     shoes: swim ? null : `${MODELS}/shoes-${shoesOf(look)}${m}.glb`,
-    tucks: swim
-      ? [`tuck_${swim.style}`]
-      : [`tuck_${cut}`, `tuck_${shoesOf(look)}`],
+    tucks: [
+      ...garments.map((g) => g.tuck),
+      ...(swim ? [] : [`tuck_${shoesOf(look)}`]),
+    ],
   };
 }
 
@@ -888,6 +914,200 @@ function NearPart({
   return <primitive object={part.group} />;
 }
 
+/** An sRGB channel value (0..1) in linear light. */
+const srgbToLinear = (c: number) =>
+  c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+
+// a detail map's brightness, read once per image at this many pixels a side
+const SHADE_RES = 64;
+const shades = new WeakMap<object, (u: number, v: number) => number>();
+
+/**
+ * A garment detail map's linear brightness at a UV, for the merged far
+ * twin's vertex tint (mergeGarments): coarse, but denim reads as denim and
+ * a dark collar stays dark. Undefined without a map or a canvas to read it.
+ */
+function shadeOf(map: THREE.Texture | null) {
+  const image: unknown = map?.image;
+  if (
+    !map ||
+    typeof document === "undefined" ||
+    !(image instanceof ImageBitmap || image instanceof HTMLImageElement)
+  )
+    return undefined;
+  const known = shades.get(image);
+  if (known) return known;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = SHADE_RES;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return undefined;
+  ctx.drawImage(image, 0, 0, SHADE_RES, SHADE_RES);
+  const px = ctx.getImageData(0, 0, SHADE_RES, SHADE_RES).data;
+  const lum = new Float32Array(SHADE_RES * SHADE_RES);
+  for (let i = 0; i < lum.length; i++)
+    lum[i] = srgbToLinear(
+      (0.3 * (px[i * 4] ?? 0) +
+        0.59 * (px[i * 4 + 1] ?? 0) +
+        0.11 * (px[i * 4 + 2] ?? 0)) /
+        255,
+    );
+  // glTF maps aren't flipped: v runs down the image
+  const at = (t: number) =>
+    Math.min(SHADE_RES - 1, Math.floor((t - Math.floor(t)) * SHADE_RES));
+  const shade = (u: number, v: number) => lum[at(v) * SHADE_RES + at(u)] ?? 1;
+  shades.set(image, shade);
+  return shade;
+}
+
+/** A worn garment: its model, tint and worn-part key (partsFor). */
+type Garment = { key: string; url: string; color: string };
+
+/**
+ * A doll's garments, far and near. The low-poly twins merge into one mesh,
+ * one draw call however many layers she wears (mergeGarments; kept apart
+ * only if they can't share a skeleton). Each full model is fetched once she
+ * first comes within LOD range, as Part does for one part, and the twin
+ * stays on until all of them have arrived. Remount it (a key) when the
+ * garments change, so the doll hides until the new ones load.
+ */
+function Garments({
+  garments,
+  bones,
+  far,
+  track,
+}: {
+  garments: readonly Garment[];
+  bones: Map<string, THREE.Bone>;
+  far: { current: boolean };
+  track: (key: string) => (meshes: THREE.Mesh[] | null, lift: number) => void;
+}) {
+  const gltfs = useGLTF(garments.map((g) => lodOf(g.url)));
+  const { shadows } = useGraphics();
+  const tints = garments.map((g) => g.color).join(",");
+  const lo = useMemo(() => {
+    const colors = tints.split(",");
+    const built = gltfs.map((gltf, i) =>
+      buildPart(
+        gltf.scene,
+        bones,
+        { color: colors[i] ?? "#ffffff", kind: "cloth" },
+        false,
+      ),
+    );
+    const merged = mergeGarments(
+      built.flatMap((b, i) =>
+        b.group.children.filter(isSkinnedMesh).map((mesh) => ({
+          mesh,
+          color: colors[i] ?? "#ffffff",
+          shade: shadeOf(
+            mesh.material instanceof THREE.MeshStandardMaterial
+              ? mesh.material.map
+              : null,
+          ),
+        })),
+      ),
+    );
+    const group = new THREE.Group();
+    if (!merged) {
+      for (const b of built) group.add(b.group);
+      return {
+        group,
+        materials: built.flatMap((b) => b.materials),
+        own: null,
+        skeleton: null,
+      };
+    }
+    for (const b of built) b.materials.forEach((m) => m.dispose());
+    group.add(merged);
+    const mat = merged.material;
+    return {
+      group,
+      materials: Array.isArray(mat) ? mat : [mat],
+      own: merged.geometry,
+      // its own skeleton (the bones are the body's): the bone texture goes
+      skeleton: merged.skeleton,
+    };
+  }, [gltfs, bones, tints]);
+  useEffect(
+    () => () => {
+      lo.materials.forEach((m) => m.dispose());
+      lo.own?.dispose();
+      lo.skeleton?.dispose();
+    },
+    [lo],
+  );
+  useEffect(() => {
+    castShadows(lo.group, shadows);
+  }, [lo, shadows]);
+  const [wantNear, setWantNear] = useState(false);
+  const [nears, setNears] = useState<ReadonlyMap<string, Built>>(new Map());
+  const ready = garments.every((g) => nears.has(g.url));
+  // a plain array for the frame loop, which allocates nothing
+  const nearGroups = useMemo(
+    () => [...nears.values()].map((n) => n.group),
+    [nears],
+  );
+  // one stable hand-up per garment
+  const onBuilt = useMemo(() => {
+    const made = new Map<string, (part: Built | null) => void>();
+    return (url: string) => {
+      let fn = made.get(url);
+      if (!fn) {
+        fn = (part) =>
+          setNears((old) => {
+            const next = new Map(old);
+            if (part) next.set(url, part);
+            else next.delete(url);
+            return next;
+          });
+        made.set(url, fn);
+      }
+      return fn;
+    };
+  }, []);
+  useFrame(() => {
+    if (!wantNear && !far.current) setWantNear(true);
+    const showLo = far.current || !ready;
+    if (lo.group.visible !== showLo) lo.group.visible = showLo;
+    for (let i = 0; i < nearGroups.length; i++) {
+      const group = nearGroups[i];
+      if (group && group.visible === showLo) group.visible = !showLo;
+    }
+  });
+  useEffect(() => {
+    const loMeshes = morphMeshes(lo.group);
+    garments.forEach((g, i) => {
+      const near = nears.get(g.url);
+      track(g.key)(
+        [
+          ...(i === 0 ? loMeshes : []),
+          ...(near ? morphMeshes(near.group) : []),
+        ],
+        0,
+      );
+    });
+    return () => {
+      for (const g of garments) track(g.key)(null, 0);
+    };
+  }, [lo, nears, garments, track]);
+  return (
+    <>
+      <primitive object={lo.group} />
+      {wantNear &&
+        garments.map((g) => (
+          <Suspense key={g.url} fallback={null}>
+            <NearPart
+              url={g.url}
+              bones={bones}
+              tint={{ color: g.color, kind: "cloth" }}
+              onBuilt={onBuilt(g.url)}
+            />
+          </Suspense>
+        ))}
+    </>
+  );
+}
+
 /** Sets whether every mesh under `group` casts the key light's shadow. */
 function castShadows(group: THREE.Object3D, on: boolean) {
   group.traverse((o) => {
@@ -1053,8 +1273,11 @@ export function HumanDoll({
     () => piercingsOf({ piercings: piercingCode }),
     [piercingCode],
   );
-  const parts = partsFor(look, swim);
+  // stable while the look is, so the garments effect runs only on a change
+  const parts = useMemo(() => partsFor(look, swim), [look, swim]);
   const tuckKey = parts.tucks.join(",");
+  // the garments remount when what she wears changes, not when it's dyed
+  const garmentUrls = parts.garments.map((g) => g.url).join(",");
   const tucks = useMemo(() => tuckKey.split(","), [tuckKey]);
   const calm = useReducedMotion();
   const phase = useRef(0);
@@ -1097,7 +1320,16 @@ export function HumanDoll({
   const worn = useRef(new Map<string, THREE.Mesh[]>());
   const wornList = useRef<THREE.Mesh[]>([]);
   // every face and body key with its value (dollShapeKeys)
-  const shapeKeys = useMemo(() => dollShapeKeys(face, shape), [face, shape]);
+  // and the trouser legs and legwear tucked into the shoes worn (the
+  // garments' in_<shoe> keys, doll_outfits.py into_shoes)
+  const shod = swim ? null : shoesOf(look);
+  const shapeKeys = useMemo(
+    () => [
+      ...dollShapeKeys(face, shape),
+      ...SHOES.map(({ id }) => [`in_${id}`, id === shod ? 1 : 0] as const),
+    ],
+    [face, shape, shod],
+  );
   const shapedFor = useRef<THREE.Mesh[] | null>(null);
   const shapedWith = useRef<typeof shapeKeys | null>(null);
   const lift = useRef(0);
@@ -1121,15 +1353,29 @@ export function HumanDoll({
     };
   }, [own, gl]);
 
+  // one stable callback per worn-part key (hair, shoes, each garment slot)
   const track = useMemo(() => {
-    const make = (key: string) => (meshes: THREE.Mesh[] | null, up: number) => {
-      if (meshes) worn.current.set(key, meshes);
-      else worn.current.delete(key);
-      if (key === "shoes") lift.current = up;
-      wornList.current = [...bodyMeshes, ...[...worn.current.values()].flat()];
-      invalidate();
+    const made = new Map<
+      string,
+      (meshes: THREE.Mesh[] | null, up: number) => void
+    >();
+    return (key: string) => {
+      let fn = made.get(key);
+      if (!fn) {
+        fn = (meshes, up) => {
+          if (meshes) worn.current.set(key, meshes);
+          else worn.current.delete(key);
+          if (key === "shoes") lift.current = up;
+          wornList.current = [
+            ...bodyMeshes,
+            ...[...worn.current.values()].flat(),
+          ];
+          invalidate();
+        };
+        made.set(key, fn);
+      }
+      return fn;
     };
-    return { hair: make("hair"), outfit: make("outfit"), shoes: make("shoes") };
   }, [bodyMeshes, invalidate]);
 
   useEffect(() => {
@@ -1582,21 +1828,36 @@ export function HumanDoll({
             tint={{ color: look.hairColor, kind: "hair" }}
             far={farParts}
             full={own}
-            onMeshes={track.hair}
+            onMeshes={track("hair")}
           />
         </Suspense>
       )}
-      <Suspense fallback={null}>
-        <Part
-          key={parts.outfit}
-          url={parts.outfit}
-          bones={body.bones}
-          tint={{ color: swim?.color ?? look.outfitColor, kind: "cloth" }}
-          far={farParts}
-          full={own}
-          onMeshes={track.outfit}
-        />
-      </Suspense>
+      {own ? (
+        // her own doll is always near: the full garments, no twins
+        // keyed by model, so a swapped garment's old part unregisters
+        parts.garments.map((g) => (
+          <Suspense key={g.url} fallback={null}>
+            <Part
+              key={g.url}
+              url={g.url}
+              bones={body.bones}
+              tint={{ color: g.color, kind: "cloth" }}
+              far={farParts}
+              full
+              onMeshes={track(g.key)}
+            />
+          </Suspense>
+        ))
+      ) : (
+        <Suspense key={garmentUrls} fallback={null}>
+          <Garments
+            garments={parts.garments}
+            bones={body.bones}
+            far={farParts}
+            track={track}
+          />
+        </Suspense>
+      )}
       {parts.shoes && (
         <Suspense fallback={null}>
           <Part
@@ -1614,7 +1875,7 @@ export function HumanDoll({
             }
             far={farParts}
             full={own}
-            onMeshes={track.shoes}
+            onMeshes={track("shoes")}
           />
         </Suspense>
       )}
@@ -1626,11 +1887,15 @@ export function HumanDoll({
 useGLTF.preload(`${MODELS}/body.glb`);
 useGLTF.preload(`${MODELS}/body-lo.glb`);
 
-/** Starts fetching a look's hair, outfit and shoes before any doll mounts:
+/** Starts fetching a look's hair, garments and shoes before any doll mounts:
  * the player's own parts download alongside the body instead of after it. */
 export function preloadLook(look: Look, swim: SwimLook | null = null) {
   const parts = partsFor(look, swim);
   // the player's own doll wears the full parts only (Part's `full`)
-  for (const url of [parts.hair, parts.outfit, parts.shoes])
+  for (const url of [
+    parts.hair,
+    ...parts.garments.map((g) => g.url),
+    parts.shoes,
+  ])
     if (url) useGLTF.preload(url);
 }
