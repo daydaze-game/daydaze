@@ -72,10 +72,6 @@
 }
 
 .food-toast {
-  position: fixed;
-  left: 50%;
-  bottom: 5.5rem;
-  transform: translateX(-50%);
   margin: 0;
   padding: 0.5rem 0.9rem;
   border-radius: 999px;
@@ -89,10 +85,48 @@
   display: none;
 }
 
-.food-held {
+/* Stack needs and held items above the action dock; long dish names wrap. */
+.food-tray {
   position: fixed;
   left: 1rem;
-  bottom: 1rem;
+  bottom: 8rem;
+  z-index: 4;
+  width: min(18rem, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .food-tray {
+    bottom: 14rem;
+  }
+}
+
+/* Short landscape screens keep each tray section reachable by scrolling. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .food-tray {
+    top: 0.5rem;
+    bottom: 12rem;
+    max-height: calc(100dvh - 12.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+  }
+
+  .food-tray > * {
+    flex-shrink: 0;
+  }
+
+  .food-needs p {
+    display: none;
+  }
+}
+
+.food-held {
+  pointer-events: auto;
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -105,4 +139,33 @@
 
 .food-held p {
   margin: 0;
+}
+
+/* Gentle needs prompts share the tray stack. */
+.food-needs {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #b5d990;
+  border-radius: 12px;
+  background: rgba(26, 11, 46, 0.92);
+  color: #fff;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.food-needs label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+.food-needs meter {
+  width: 60%;
+}
+
+.food-needs p {
+  margin: 0.5rem 0 0;
+  line-height: 1.4;
+  color: #e5d8f1;
 }
