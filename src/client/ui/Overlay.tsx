@@ -8,6 +8,7 @@ import { byTier } from "../../game/age.ts";
 import type { Progression } from "../../game/progression/progression.ts";
 import { ProgressionHud, LadderPanel } from "./Progression.tsx";
 import { ActionDock, DockAction } from "./ActionDock.tsx";
+import { ReloadBoundary } from "./ReloadBoundary.tsx";
 import { ClubNightTicker } from "./EventCalendar.tsx";
 import { InviteButton } from "../net/InviteButton.tsx";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
@@ -442,31 +443,36 @@ export function Overlay({
       </header>
 
       {phone && (
-        <Suspense fallback={null}>
-          <DeliveryApp onClose={() => setPhone(false)} />
-        </Suspense>
+        <ReloadBoundary onContinue={() => setPhone(false)}>
+          <Suspense fallback={null}>
+            <DeliveryApp onClose={() => setPhone(false)} />
+          </Suspense>
+        </ReloadBoundary>
       )}
       <FoodHud />
 
       <Dressing open={panelOpen} onOpenChange={setPanelOpen}>
         {closetOpened && (
-          <Suspense fallback={null}>
-            <Mirror
-              tab={tab}
-              setTab={setTab}
-              look={look}
-              setLook={setLook}
-              swim={swim}
-              setSwim={setSwim}
-              wardrobe={wardrobe}
-              body={body}
-              setBody={setBody}
-              effects={effects}
-              setEffects={setEffects}
-              highAudio={highAudio}
-              setHighAudio={setHighAudio}
-            />
-          </Suspense>
+          // a failed download shows the Reload card; the drawer stays closable
+          <ReloadBoundary>
+            <Suspense fallback={null}>
+              <Mirror
+                tab={tab}
+                setTab={setTab}
+                look={look}
+                setLook={setLook}
+                swim={swim}
+                setSwim={setSwim}
+                wardrobe={wardrobe}
+                body={body}
+                setBody={setBody}
+                effects={effects}
+                setEffects={setEffects}
+                highAudio={highAudio}
+                setHighAudio={setHighAudio}
+              />
+            </Suspense>
+          </ReloadBoundary>
         )}
       </Dressing>
 
@@ -483,13 +489,15 @@ export function Overlay({
       <RoomPanel room={room} />
       {room === "city" && <FuelStop coins={coins} onSpend={onSpend} />}
       {room === "city" && (
-        <Suspense fallback={null}>
-          <VolleyStop />
-          <ParkPanel />
-          <BandPanel />
-          <BusPanel />
-          <FoodVendorPanel coins={coins} onSpend={onSpend} />
-        </Suspense>
+        <ReloadBoundary>
+          <Suspense fallback={null}>
+            <VolleyStop />
+            <ParkPanel />
+            <BandPanel />
+            <BusPanel />
+            <FoodVendorPanel coins={coins} onSpend={onSpend} />
+          </Suspense>
+        </ReloadBoundary>
       )}
       <VendingPanel coins={coins} onSpend={onSpend} />
       <PouchPanel />

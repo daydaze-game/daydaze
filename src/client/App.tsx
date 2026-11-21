@@ -23,6 +23,7 @@ import {
 import { chatDistort, type Intensity } from "../game/effects/buzz.ts";
 import type { Graphics } from "../game/graphics.ts";
 import { getBuzz } from "./effects/drunk.ts";
+import { ReloadBoundary } from "./ui/ReloadBoundary.tsx";
 import { ONLINE, onlineSession, useOnlineRoom } from "./net/online.ts";
 import { leaveParty } from "./net/party.ts";
 import { endVisit, homeVisit, listenForHomes } from "./net/home.ts";
@@ -544,9 +545,11 @@ export function App() {
           progression={save.progression}
           muted={save.settings.muted}
         />
-        <Suspense fallback={null}>
-          <StreakPanel streak={save.streak} />
-        </Suspense>
+        <ReloadBoundary>
+          <Suspense fallback={null}>
+            <StreakPanel streak={save.streak} />
+          </Suspense>
+        </ReloadBoundary>
         <UpdatePrompt />
         <Collections
           visited={save.visited}
@@ -618,23 +621,27 @@ export function App() {
             )}
           </p>
         </div>
-        <Suspense fallback={null}>
-          <PeerCard />
-          <FriendsPanel
-            onGo={(room) => travel(room, ROOMS[room].spawn)}
-            strictChat={save.settings.strictChat}
-            onStrictChat={setStrictChat}
-            save={save}
-            onSave={setSave}
-          />
-          {ONLINE && <DuelPanel />}
-          {ONLINE && <TogetherPanel />}
-          {ONLINE && <CookOffInvite />}
-          {ONLINE && <PartyPanel onGo={goWithParty} />}
-          {ONLINE && <RidePanel />}
-          {ONLINE && <RacePanel />}
-          {ONLINE && <ConnectionNote />}
-        </Suspense>
+        <ReloadBoundary>
+          <Suspense fallback={null}>
+            <PeerCard />
+            {ONLINE && (
+              <FriendsPanel
+                onGo={(room) => travel(room, ROOMS[room].spawn)}
+                strictChat={save.settings.strictChat}
+                onStrictChat={setStrictChat}
+                save={save}
+                onSave={setSave}
+              />
+            )}
+            {ONLINE && <DuelPanel />}
+            {ONLINE && <TogetherPanel />}
+            {ONLINE && <CookOffInvite />}
+            {ONLINE && <PartyPanel onGo={goWithParty} />}
+            {ONLINE && <RidePanel />}
+            {ONLINE && <RacePanel />}
+            {ONLINE && <ConnectionNote />}
+          </Suspense>
+        </ReloadBoundary>
         <div className="fade" data-on={fading} aria-hidden="true" />
         {notice && (
           <p className="notice" role="status">
@@ -739,34 +746,48 @@ export function App() {
             You&apos;re at {visiting.owner.name}&apos;s place.
           </p>
         )}
-        <Suspense fallback={null}>
-          {here.room === "apartment" && !visiting.owner && (
-            <ApartmentPanel
-              home={save.home}
-              onChange={setHome}
-              onShelf={() => setShopping(true)}
-            />
-          )}
-          {here.room === "apartment" && shopping && (
-            <ShopliftPanel
-              crime={save.crime}
-              now={now}
-              onCaught={caught}
-              onClose={() => setShopping(false)}
-            />
-          )}
-          {arrest && <ArrestSequence onDone={finishArrest} />}
-          {here.room === "jail" && (
-            <JailHud
-              jail={save.jail}
-              coins={save.coins}
-              onChange={setJail}
-              onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
-              onRelease={release}
-            />
-          )}
-          {game && <GameOverlay game={game} onClose={endGame} />}
-        </Suspense>
+        <ReloadBoundary>
+          <Suspense fallback={null}>
+            {here.room === "apartment" && !visiting.owner && (
+              <ApartmentPanel
+                home={save.home}
+                onChange={setHome}
+                onShelf={() => setShopping(true)}
+              />
+            )}
+            {here.room === "jail" && (
+              <JailHud
+                jail={save.jail}
+                coins={save.coins}
+                onChange={setJail}
+                onPayBail={(coins) => setSave((s) => ({ ...s, coins }))}
+                onRelease={release}
+              />
+            )}
+            {game && <GameOverlay game={game} onClose={endGame} />}
+          </Suspense>
+        </ReloadBoundary>
+        {/* each has its own boundary, so a failed download leaves the apartment
+            controls up, and an arrest still ends with its penalty saved */}
+        {here.room === "apartment" && shopping && (
+          <ReloadBoundary onContinue={() => setShopping(false)}>
+            <Suspense fallback={null}>
+              <ShopliftPanel
+                crime={save.crime}
+                now={now}
+                onCaught={caught}
+                onClose={() => setShopping(false)}
+              />
+            </Suspense>
+          </ReloadBoundary>
+        )}
+        {arrest && (
+          <ReloadBoundary onContinue={finishArrest}>
+            <Suspense fallback={null}>
+              <ArrestSequence onDone={finishArrest} />
+            </Suspense>
+          </ReloadBoundary>
+        )}
         {here.room === "city" && touch && <CityJoystick />}
         <ChatBar
           onSay={(text) => {
